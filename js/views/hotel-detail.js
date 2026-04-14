@@ -119,8 +119,22 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
 
                     <section style="border-bottom:1px solid var(--color-border); padding-bottom:2rem; margin-bottom:2rem;">
                         <h2 style="margin-bottom:1rem;">About this ${hotel.type || 'Property'}</h2>
-                        <p style="line-height:1.7; color:var(--color-text-dark); white-space:pre-wrap;">${hotel.description || 'Experience comfort and style in the heart of the city.'}</p>
+                        <p style="line-height:1.7; color:var(--color-text-dark); white-space:pre-wrap; margin-bottom: 2rem;">${hotel.description || 'Experience comfort and style in the heart of the city.'}</p>
+                        
+                        <!-- Mobile Quick Reserve Button -->
+                        <div class="mobile-only-reserve" style="display:none;">
+                            ${(hotel.availableRooms ?? hotel.totalRooms ?? 0) > 0
+                                ? `<button class="btn-primary" style="width:100%; padding:1.2rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:linear-gradient(135deg, var(--color-primary), #2a8146);" onclick="goToBooking()">Reserve Now</button>`
+                                : `<button disabled style="width:100%; padding:1.2rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:#ccc; color:white; border:none; cursor:not-allowed;">Fully Booked</button>`
+                            }
+                            <p style="text-align:center; font-size:0.85rem; color:#666; margin-top:0.8rem; font-weight:500;">✓ Instant confirmation & Secure payment</p>
+                        </div>
                     </section>
+                    <style>
+                        @media(max-width: 768px) {
+                            .mobile-only-reserve { display: block !important; }
+                        }
+                    </style>
 
                     <section style="margin-bottom:2rem;">
                         <h2 style="margin-bottom:1.5rem;">What this place offers</h2>
