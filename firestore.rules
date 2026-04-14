@@ -1,0 +1,65 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Known admin UIDs — add yours here if role-based check fails
+    // (Find your UID in Firebase Console → Authentication)
+    function isKnownAdmin() {
+      return request.auth.uid in [
+        '6NSK4deIAaZpkxeJHoVv22Ndoux2',  // bolaleempire@gmail.com
+        'uxIVdE1lqgZRAJ5dQ4ea9WLH7282'   // michustays@gmail.com
+      ];
+    }
+
+    // Role-based check (reads Firestore users doc)
+    function getRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    function isAdmin()    { return request.auth != null && (isKnownAdmin() || getRole() == 'admin'); }
+    function isManager()  { return request.auth != null && getRole() == 'manager'; }
+    function isSignedIn() { return request.auth != null; }
+
+    // ─── USERS ──────────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read:   if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow create: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isSignedIn() && isAdmin();
+    }
+
+    // ─── PROPERTIES (Hotels) ─────────────────────────────────────────────
+    match /properties/{propertyId} {
+      allow read:   if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() ||
+        (isManager() && resource.data.managerId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // ─── BOOKINGS ────────────────────────────────────────────────────────
+    match /bookings/{bookingId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isAdmin() ||
+        (isManager() && resource.data.managerId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // ─── REVIEWS ──────────────────────────────────────────────────────────
+    match /reviews/{reviewId} {
+      allow read:   if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ─── NOTIFICATIONS ────────────────────────────────────────────────────
+    match /notifications/{notifId} {
+      allow read:   if true;
+      allow create: if isSignedIn();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}

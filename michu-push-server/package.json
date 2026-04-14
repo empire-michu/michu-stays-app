@@ -1,0 +1,14 @@
+{
+  "name": "michu-push-server",
+  "version": "1.0.0",
+  "description": "Free custom server to dispatch Firebase Push Notifications for Michu Stays managers.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "firebase-admin": "^11.10.1"
+  }
+}

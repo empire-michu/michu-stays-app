@@ -1,0 +1,17 @@
+:root {
+  --color-primary: #0B6E4F;    /* Deep Green */
+  --color-secondary: #F4B400;  /* Gold */
+  --color-bg: #F7F9FC;         /* Softer Light Blue/Gray Background */
+  --color-neutral: #FFFFFF;    /* White for cards */
+  --color-text-dark: #1A1A1A;
+  --color-text-light: #5A606A;
+  --color-border: #E8ECEF;
+  
+  --shadow-sm: 0 4px 12px rgba(11, 110, 79, 0.05); /* Tinted subtle shadow */
+  --shadow-md: 0 8px 24px rgba(11, 110, 79, 0.08); /* Tinted medium shadow */
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.12);    /* Deeper shadow for focus points */
+  
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 28px;
+}
