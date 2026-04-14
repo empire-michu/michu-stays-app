@@ -102,7 +102,7 @@ window.router.addRoute('manager', async (container) => {
 
             const images = [];
             // Handle Photo Slots
-            for (let i = 1; i <= 5; i++) {
+            for (let i = 1; i <= 10; i++) {
                 const input = document.getElementById(`mg-file-${i}`);
                 const cancelBtn = document.getElementById(`mg-p-cancel-${i}`);
                 const isCleared = cancelBtn && cancelBtn.style.display === 'none';

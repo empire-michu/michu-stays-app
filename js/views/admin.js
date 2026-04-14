@@ -274,7 +274,11 @@ window.router.addRoute('admin', async (container) => {
             // Video Handling
             let videoUrl = existing?.videoTour || '';
             const vInput = document.getElementById('h-video');
-            if (vInput?.files[0] && !uploadSkipped) {
+            const vCancel = document.getElementById('h-video-cancel');
+            
+            if (vCancel && vCancel.style.display === 'none' && (!vInput || !vInput.files[0])) {
+                videoUrl = '';
+            } else if (vInput?.files[0] && !uploadSkipped) {
                 statusEl.innerText = "Processing Video...";
                 videoUrl = await window.db.uploadFile(vInput.files[0], 'properties/videos');
             }
