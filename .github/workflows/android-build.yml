@@ -38,8 +38,13 @@ jobs:
         cp firebase-messaging-sw.js www/
         cp capacitor.config.json www/
 
-    - name: Add Android Platform
-      run: npx cap add android
+    - name: Add Android Platform (if missing)
+      run: |
+        if [ ! -d "android" ]; then
+          npx cap add android
+        else
+          echo "Android platform already exists, skipping add step."
+        fi
 
     - name: Copy Firebase Config
       run: |
