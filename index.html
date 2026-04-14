@@ -25,12 +25,11 @@
         </div>
         
         <div class="header-actions">
-            <button class="btn-ask-ai" onclick="showAIModal()">
-                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m.5 11.5a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0v1h1a.5.5 0 0 1 0 1h-1z"/>
-                </svg>
+            <button onclick="showAIModal()" style="display:flex; align-items:center; gap:0.5rem; background:#f9f9f9; border:1px solid #eee; padding:0.5rem 1rem; border-radius:99px; font-weight:700; font-size:0.85rem; cursor:pointer;">
+                <span style="font-size:1rem;">🤖</span>
                 <span>Ask A.I</span>
             </button>
+
             <div style="cursor:pointer;position:relative;" onclick="showNotifModal()">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -39,19 +38,25 @@
                 <div id="notif-badge" style="display:none; position:absolute; top:-2px; right:-2px; width:10px; height:10px; background:#ff385c; border:2px solid white; border-radius:50%;"></div>
             </div>
 
-            <!-- AI Coming Soon Modal -->
-            <div id="ai-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-                <div style="background:white;border-radius:20px;padding:2.5rem 2rem;max-width:360px;width:90%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.2);animation:aiSlide 0.28s cubic-bezier(.34,1.56,.64,1);border-top:4px solid var(--color-primary);">
-                    <style>@keyframes aiSlide{from{transform:translateY(20px) scale(0.97);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}</style>
-                    <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--color-primary),#2d8a5e);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 1.2rem;">🤖</div>
-                    <h3 style="margin:0 0 0.5rem;color:#1a1a1a;font-size:1.2rem;font-weight:800;">AI Assistant</h3>
-                    <p style="color:#666;font-size:0.9rem;line-height:1.6;margin:0 0 0.5rem;">Our AI-powered hotel assistant is being trained to help you find the perfect stay in Ethiopia.</p>
-                    <div style="background:#e8f5e2;border-radius:10px;padding:0.8rem;margin-bottom:1.5rem;">
-                        <p style="margin:0;font-size:0.85rem;color:var(--color-primary);font-weight:600;">🚀 Launching Soon!</p>
+            <div id="ai-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;">
+                <div style="background:white;border-radius:24px;padding:2rem;max-width:400px;width:95%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.3);animation:aiSlide 0.25s cubic-bezier(.34,1.56,.64,1);">
+                    <div style="width:56px;height:56px;border-radius:50%;background:#e3f2fd;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                         <span style="font-size:2rem;">🤖</span>
                     </div>
-                    <button onclick="document.getElementById('ai-modal').style.display='none'" style="width:100%;padding:0.8rem;border-radius:99px;border:none;background:var(--color-primary);color:white;font-weight:700;font-size:0.95rem;cursor:pointer;">Got it!</button>
+                    <h3 style="margin:0 0 0.4rem;color:#1a1a1a;font-size:1.1rem;font-weight:800;">Ask Michu A.I</h3>
+                    <p style="color:#666;font-size:0.88rem;margin:0 0 1.5rem;line-height:1.5;">Our smart assistant is currently learning how to help you find the best stays. This feature is coming very soon!</p>
+                    <button onclick="document.getElementById('ai-modal').style.display='none'" style="width:100%;padding:0.9rem;border-radius:99px;border:none;background:var(--color-primary);color:white;font-weight:700;font-size:0.9rem;cursor:pointer;shadow:0 4px 12px rgba(26,96,50,0.2);">Got It!</button>
                 </div>
             </div>
+
+            <script>
+                function showAIModal() {
+                    document.getElementById('ai-modal').style.display = 'flex';
+                }
+                function showNotifModal() {
+                    document.getElementById('notif-modal').style.display = 'flex';
+                }
+            </script>
 
             <div id="notif-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;">
                 <div style="background:white;border-radius:24px;padding:2rem;max-width:400px;width:95%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.3);animation:aiSlide 0.25s cubic-bezier(.34,1.56,.64,1);">

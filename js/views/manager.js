@@ -89,7 +89,7 @@ window.router.addRoute('manager', async (container) => {
 
             const title = getVal('mg-h-title');
             const priceVal = getNum('mg-h-price');
-            const discountVal = myHotel.discountPercent || myHotel.discount || 0;
+            const discountVal = getNum('mg-h-discount');
             
             if (!title || !priceVal) {
                 window.showToast("⚠️ Property Title and Price are required.");
@@ -137,10 +137,9 @@ window.router.addRoute('manager', async (container) => {
                 type: getVal('mg-h-type'),
                 price: priceVal,
                 discountPercent: discountVal,
-                discount: discountVal, // Redundant for compatibility
+                discount: discountVal, 
                 originalPrice,
                 address: getVal('mg-h-address'),
-                totalRooms: getNum('mg-h-total-rooms'),
                 availableRooms: getNum('mg-h-avail-rooms'),
                 mapQuery: getVal('mg-h-map-query'),
                 description: getVal('mg-h-desc'),
@@ -499,11 +498,11 @@ window.router.addRoute('manager', async (container) => {
                             <h4 style="margin:0 0 1rem; font-size:0.9rem; color:var(--color-primary);">🏨 ROOM INVENTORY</h4>
                             <div class="mgr-inventory-col">
                                 <div>
-                                    <label style="display:block; font-weight:700; font-size:0.75rem; margin-bottom:0.4rem; color:#666;">TOTAL ROOMS</label>
-                                    <input id="mg-h-total-rooms" type="number" value="${myHotel.totalRooms || 1}" style="width:100%; padding:0.8rem; border:1px solid #ddd; border-radius:10px;">
+                                    <label style="display:block; font-weight:700; font-size:0.75rem; margin-bottom:0.4rem; color:#666;">DISCOUNT (%)</label>
+                                    <input id="mg-h-discount" type="number" min="0" max="90" value="${myHotel.discountPercent || 0}" style="width:100%; padding:0.8rem; border:1px solid #ddd; border-radius:10px; font-weight:700; color:#d9534f;">
                                 </div>
                                 <div>
-                                    <label style="display:block; font-weight:700; font-size:0.75rem; margin-bottom:0.4rem; color:#d9534f;">AVAILABLE NOW</label>
+                                    <label style="display:block; font-weight:700; font-size:0.75rem; margin-bottom:0.4rem; color:var(--color-primary);">AVAILABLE NOW</label>
                                     <input id="mg-h-avail-rooms" type="number" value="${myHotel.availableRooms || 1}" style="width:100%; padding:0.8rem; border:2px solid var(--color-primary); border-radius:10px; font-weight:800; text-align:center; font-size:1.1rem; color:var(--color-primary);">
                                 </div>
                             </div>
@@ -636,6 +635,7 @@ window.router.addRoute('manager', async (container) => {
                     <input type="file" id="mg-acc-pic-input" accept="image/*" style="display:none;" onchange="window.previewMgAccPic(this)">
                     <h3 style="margin:0; font-size:1.5rem;">Manager Profile</h3>
                     <p style="margin:0.3rem 0 0; color:#888; font-weight:500;">${userData.email}</p>
+                    <p style="margin:0.2rem 0 0; font-family:monospace; font-size:0.75rem; color:#aaa;">ID: ${userData.uid}</p>
                 </div>
 
                 <div style="display:grid; gap:1.5rem;">

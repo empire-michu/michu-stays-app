@@ -67,6 +67,13 @@ window.router.addRoute('add-property', (container) => {
                         </div>
                     </div>
 
+                    <h3 style="margin: 2rem 0 1rem; color: var(--color-primary);">Assignment</h3>
+                    <div class="form-group">
+                        <label>Assigned Manager User ID (Optional)</label>
+                        <input type="text" id="prop-manager-id" placeholder="Paste Manager's UID here (defaults to you)">
+                        <p style="font-size: 0.75rem; color: #888; margin-top: 0.3rem;">Link this property to a manager's account to give them dashboard access.</p>
+                    </div>
+
                     <h3 style="margin: 2rem 0 1rem; color: var(--color-primary);">Media Gallery (1 Video + 10 Photos)</h3>
                     <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem;">Upload high-quality visuals to attract more guests.</p>
                     
@@ -220,7 +227,7 @@ window.router.addRoute('add-property', (container) => {
                 image: imageUrls[0] || '',
                 images: imageUrls,
                 videoTour: videoUrl,
-                managerId: window.auth?.currentUser?.uid || ''
+                managerId: document.getElementById('prop-manager-id').value.trim() || window.auth?.currentUser?.uid || ''
             });
 
             clearInterval(skipTimer);

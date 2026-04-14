@@ -87,6 +87,9 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
                     <button class="btn-outline" style="padding:0.4rem 0.8rem;" onclick="window.print()">🖨 Print</button>
                     ${videoUrl ? `<button class="btn-primary" style="padding:0.4rem 1.2rem; border-radius:99px;" onclick="window.viewFullGallery(${allImages.length})">📽 Watch Tour</button>` : ''}
+                    ${(window.auth?.userData?.role === 'admin' || hotel.managerId === window.auth?.currentUser?.uid) ? `
+                        <button class="btn-outline" style="padding:0.4rem 1.2rem; border-radius:99px; border-color:var(--color-primary); color:var(--color-primary); font-weight:700;" onclick="router.navigate('manager')">⚙️ Manage Property</button>
+                    ` : ''}
                 </div>
             </div>
 
