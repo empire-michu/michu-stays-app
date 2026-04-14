@@ -305,14 +305,14 @@ window.router.addRoute('home', async (container, params) => {
     container.innerHTML = `
         <!-- Minimal Search Bar Just Below Header -->
         <div id="home-search-wrapper" style="display: flex; justify-content: center; background: white; padding: 0.8rem 1rem; border-bottom: 1px solid #f0f0f0; position: relative; z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-            <div class="search-container" style="max-width: 500px; width: 100%; height: 48px; border: 1.5px solid #eaeaea; padding: 0 0.5rem; display: flex; align-items: center; border-radius: 99px; background: #ffffff; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <div class="search-container" style="max-width: 500px; width: 100%; height: 52px; border: 1.5px solid #eaeaea; padding: 0 0.5rem; display: flex; align-items: center; border-radius: 99px; background: #ffffff; transition: all 0.3s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
                 <div style="padding: 0 0.8rem; display: flex; align-items: center; border-right: 1px solid #eee;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                 </div>
-                <div style="flex:1; padding-left: 0.5rem;">
-                    <input id="home-search-input" type="text" placeholder="Where are you going?" style="border:none; height: 100%; outline:none; background:transparent; width:100%; font-size:0.95rem; font-weight: 600; color: #333;" value="${filterState.searchQuery}" onkeydown="if(event.key==='Enter') window.updateHomeSearch(this.value)">
+                <div style="flex:1; padding-left: 0.5rem; display:flex; align-items:center;">
+                    <input id="home-search-input" type="text" placeholder="Where are you going?" style="border:none; height: 100%; outline:none; background:transparent; width:100%; font-size:1rem; font-weight: 600; color: #333;" value="${filterState.searchQuery}" onkeydown="if(event.key==='Enter') window.updateHomeSearch(this.value)">
                 </div>
-                <button class="btn-primary" style="margin-left: 0.5rem; border-radius:99px; padding: 0.6rem 1.4rem; height: 38px; font-size: 0.85rem; font-weight: 800; display: flex; align-items: center; justify-content: center;" onclick="window.updateHomeSearch(document.getElementById('home-search-input').value)">Search</button>
+                <button class="btn-primary" style="margin-left: 0.5rem; border-radius:99px; padding: 0 1.5rem; height: 40px; font-size: 0.9rem; font-weight: 800; display: flex; align-items: center; justify-content: center; border:0; box-shadow:0 4px 10px rgba(26,96,50,0.25);" onclick="window.updateHomeSearch(document.getElementById('home-search-input').value)">Search</button>
             </div>
         </div>
 
