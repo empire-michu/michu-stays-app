@@ -292,20 +292,43 @@ window.router.addRoute('manager', async (container) => {
                     .manager-table { width:100%; border-collapse:collapse; background:white; }
                     .manager-table th { background:#f9fafb; padding:1.2rem 1rem; text-align:left; font-size:0.75rem; font-weight:800; color:#666; text-transform:uppercase; border-bottom:2px solid #f0f0f0; }
                     .manager-table td { padding:1.2rem 1rem; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
-                    .manager-table tr:hover { background:#fcfcfc; }
-
-                    @media(max-width: 850px) {
-                        .mgr-header { flex-direction:column; align-items:flex-start; gap:1.2rem; }
-                        .manager-table thead { display:none; }
+                    .mgr-two-col { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+                    .mgr-three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.2rem; }
+                    .mgr-inventory-col { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+                    @media (max-width: 768px) {
+                        .mgr-two-col, .mgr-three-col, .mgr-inventory-col { grid-template-columns:1fr; gap:0.8rem; }
+                        .mgr-header { flex-direction:column; align-items:flex-start; gap:1.2rem; padding:1.5rem; }
                         .manager-table, .manager-table tbody, .manager-table tr, .manager-table td { display:block; width:100%; }
                         .manager-table tr { margin-bottom:1.5rem; border:1px solid #eee; border-radius:24px; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,0.04); background:#fff; }
-                        .manager-table td { padding:1.2rem 1rem; border-bottom:1px solid #f8f8f8; position:relative; padding-left:45% !important; text-align:right !important; font-size:0.95rem; }
-                        .manager-table td:before { content:attr(data-label); position:absolute; left:1.2rem; width:40%; text-align:left; font-weight:800; font-size:0.7rem; color:#999; text-transform:uppercase; top:50%; transform:translateY(-50%); }
-                        .manager-table td:last-child { border-bottom:none; background:#fcfcfc; text-align:center !important; padding-left:1rem !important; }
+                        .manager-table td { 
+                            padding:0.8rem 1rem; 
+                            border-bottom:1px solid #f8f8f8; 
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            text-align: right;
+                            font-size: 0.9rem;
+                        }
+                        .manager-table td:before { 
+                            content:attr(data-label); 
+                            font-weight:800; 
+                            font-size:0.7rem; 
+                            color:#999; 
+                            text-transform:uppercase;
+                            margin-right: 1rem;
+                            flex-shrink: 0;
+                            text-align: left;
+                        }
+                        .manager-table td:last-child { 
+                            background:#fcfcfc; 
+                            display: block;
+                            text-align:center !important; 
+                            padding: 1rem !important;
+                        }
                         .manager-table td:last-child:before { content:''; display:none; }
                         
-                        .mgr-tabs-scroller { width: 100%; border-radius:14px; }
-                        .mgr-tabs-scroller button { flex:1; padding:0.8rem 0.5rem !important; font-size:0.85rem !important; }
+                        .mgr-tabs-scroller { width: 100%; border-radius:14px; background: rgba(0,0,0,0.03); padding: 4px; }
+                        .mgr-tabs-scroller button { flex:1; padding:0.6rem 0.2rem !important; font-size:0.8rem !important; }
                     }
                 </style>
                 <div class="mgr-header">
@@ -549,10 +572,10 @@ window.router.addRoute('manager', async (container) => {
                         <!-- Media Gallery -->
                         <div>
                             <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:1rem; color:var(--color-primary);">📸 PHOTO GALLERY (SELECT TO UPDATE)</label>
-                            <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:0.8rem;">
+                            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:0.8rem;">
                                 ${(() => {
                                     const images = myHotel.images || [myHotel.image, ...(myHotel.extraImages || [])].filter(Boolean);
-                                    return [1, 2, 3, 4, 5].map(i => {
+                                    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => {
                                         const img = images[i-1] || '';
                                     return `
                                     <div style="text-align:center;">

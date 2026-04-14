@@ -112,19 +112,19 @@ window.router.addRoute('profile', async (container) => {
             };
             return `
             <tr>
-                <td style="font-family:monospace;font-size:0.8rem;font-weight:600;color:var(--color-primary);">${b.referenceCode}</td>
-                <td>
+                <td data-label="Ref" style="font-family:monospace;font-size:0.8rem;font-weight:600;color:var(--color-primary);">${b.referenceCode}</td>
+                <td data-label="Hotel">
                     <div style="font-weight:600;font-size:0.9rem;">${b.propertyTitle}</div>
                     <div style="font-size:0.75rem;color:var(--color-text-light);">${b.checkIn} → ${b.checkOut} <span style="font-weight:700;color:#d4af37;margin-left:4px;">(${nights} night${nights !== 1 ? 's' : ''})</span></div>
                 </td>
-                <td style="font-weight:600;">${b.totalAmount} Birr</td>
-                <td><span style="padding:0.25rem 0.7rem;border-radius:99px;font-size:0.75rem;font-weight:700;${statusStyle(b.status)}">
+                <td data-label="Total" style="font-weight:600;">${b.totalAmount} Birr</td>
+                <td data-label="Status"><span style="padding:0.25rem 0.7rem;border-radius:99px;font-size:0.75rem;font-weight:700;${statusStyle(b.status)}">
                     ${statusIcon(b.status)} ${b.status}
                 </span></td>
-                <td style="font-size:0.8rem;color:#555;font-weight:600;">
+                <td data-label="Date" style="font-size:0.8rem;color:#555;font-weight:600;">
                     ${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + '<br><small style="color:#aaa;">' + new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + '</small>' : '—'}
                 </td>
-                <td>
+                <td data-label="Rating">
                     ${b.status === 'Confirmed' ? (
                         review 
                         ? `<div style="display:flex;flex-direction:column;gap:0.2rem;">
@@ -134,7 +134,7 @@ window.router.addRoute('profile', async (container) => {
                         : `<button onclick="window.openRatingModal('${b.id}','${b.propertyId}','${b.propertyTitle.replace(/'/g, "\\\'")}')" style="padding:0.3rem 0.7rem;border-radius:8px;border:1.5px solid #f59e0b;background:#fffbeb;color:#b45309;font-weight:700;font-size:0.75rem;cursor:pointer;white-space:nowrap;">⭐ Rate Stay</button>`
                     ) : '—'}
                 </td>
-                <td>
+                <td data-label="Proof">
                     ${b.paymentProofUrl ? `<button onclick="showGuestProof('${b.id}')" class="btn-outline" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🖼 Proof</button>` : '—'}
                 </td>
             </tr>
@@ -170,8 +170,37 @@ window.router.addRoute('profile', async (container) => {
         <div class="container" style="padding-top:2.5rem;padding-bottom:4rem;max-width:1200px;">
             <div style="margin-bottom:1.5rem;"><button onclick="window.router.navigate('home')" class="btn-outline" style="border:none;padding:0;">← Back to Home</button></div>
 
-            <div style="background:var(--color-primary);border-radius:24px;padding:2.5rem;margin-bottom:2rem;display:flex;align-items:center;gap:2rem;color:white;">
-                <div style="position:relative;width:110px;height:110px;">
+            <style>
+                @media (max-width: 768px) {
+                    .profile-grid { grid-template-columns: 1fr !important; }
+                    .profile-header { flex-direction: column; text-align: center; padding: 1.5rem !important; gap: 1rem !important; }
+                    .booking-history-header { flex-direction: column; align-items: flex-start !important; }
+                    .manager-table thead { display: none; }
+                    .manager-table, .manager-table tbody, .manager-table tr, .manager-table td { display: block; width: 100%; }
+                    .manager-table tr { margin-bottom: 1.5rem; border: 1px solid #eee; border-radius: 16px; overflow: hidden; background: #fff; }
+                    .manager-table td { 
+                        padding: 0.8rem 1rem; 
+                        border-bottom: 1px solid #f8f8f8; 
+                        display: flex; 
+                        justify-content: space-between; 
+                        align-items: center; 
+                        text-align: right; 
+                        font-size: 0.9rem; 
+                    }
+                    .manager-table td:before { 
+                        content: attr(data-label); 
+                        font-weight: 800; 
+                        font-size: 0.7rem; 
+                        color: #999; 
+                        text-transform: uppercase; 
+                    }
+                    .manager-table td:last-child { background: #fcfcfc; text-align: center !important; display: block; }
+                    .manager-table td:last-child:before { display: none; }
+                }
+            </style>
+
+            <div class="profile-header" style="background:var(--color-primary);border-radius:24px;padding:2.5rem;margin-bottom:2rem;display:flex;align-items:center;gap:2rem;color:white;">
+                <div style="position:relative;width:110px;height:110px;flex-shrink:0;">
                     <div id="profile-pic-container" style="width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:2.5rem;overflow:hidden;border:4px solid white;cursor:pointer;" onclick="document.getElementById('input-profile-pic').click()">
                         ${userData.profilePic ? `<img src="${userData.profilePic}" style="width:100%;height:100%;object-fit:cover;">` : `<img src="images/logo.png" style="width:80%;height:80%;object-fit:contain;filter:brightness(0) invert(1);">`}
                     </div>
@@ -182,7 +211,7 @@ window.router.addRoute('profile', async (container) => {
                 </div>
             </div>
 
-            <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:2rem;margin-bottom:2rem;">
+            <div class="profile-grid" style="display:grid;grid-template-columns:1.5fr 1fr;gap:2rem;margin-bottom:2rem;">
                 <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);">
                     <h3 style="margin-bottom:1.5rem;">✏ Profile Details</h3>
                     <div style="display:grid;gap:1.2rem;">
@@ -218,7 +247,7 @@ window.router.addRoute('profile', async (container) => {
             </div>
 
             <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);margin-bottom:2rem;">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+                <div class="booking-history-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
                     <h3 style="margin:0;">📜 Booking History <span id="booking-count" style="font-size:0.8rem;font-weight:400;color:#888;"></span></h3>
                     <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
                          <select id="filter-hotel" style="padding:0.4rem 0.8rem;border:1px solid #ddd;border-radius:8px;font-size:0.85rem;font-family:inherit;background:white;" onchange="window.filterHotel=this.value; window.renderBookings()">
@@ -228,8 +257,8 @@ window.router.addRoute('profile', async (container) => {
                          <input id="filter-to" type="date" value="${window.filterTo}" style="padding:0.4rem;border:1px solid #ddd;border-radius:8px;" onchange="window.filterTo=this.value; window.renderBookings()">
                     </div>
                 </div>
-                <div style="overflow-x:auto;">
-                    <table class="manager-table">
+                <div>
+                    <table class="manager-table" style="width: 100%;">
                         <thead><tr><th>Ref</th><th>Hotel</th><th>Total</th><th>Status</th><th>Date</th><th>Rating</th><th>Proof</th></tr></thead>
                         <tbody id="booking-table-body"></tbody>
                     </table>
