@@ -28,8 +28,11 @@
       // Force status bar behavior on native
       document.addEventListener('deviceready', () => {
         if (window.Capacitor && window.Capacitor.Plugins.StatusBar) {
-          window.Capacitor.Plugins.StatusBar.setBackgroundColor({ color: '#1a6032' });
-          window.Capacitor.Plugins.StatusBar.setStyle({ style: 'DARK' }); // Dark background = White text
+          // Use white background to match header if needed, or keep green if we want contrast
+          // User said "white whiten the screen", so maybe they want it to match or just be visible.
+          // Let's set it to match the header (white) and use dark icons.
+          window.Capacitor.Plugins.StatusBar.setBackgroundColor({ color: '#ffffff' });
+          window.Capacitor.Plugins.StatusBar.setStyle({ style: 'LIGHT' }); // Light background = Dark text/icons
           window.Capacitor.Plugins.StatusBar.show();
         }
       });

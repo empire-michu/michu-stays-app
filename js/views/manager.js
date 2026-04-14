@@ -300,32 +300,28 @@ window.router.addRoute('manager', async (container) => {
                         .mgr-header { flex-direction:column; align-items:flex-start; gap:1.2rem; padding:1.5rem; }
                         .manager-table thead { display: none; }
                         .manager-table, .manager-table tbody, .manager-table tr, .manager-table td { display:block; width:100% !important; min-width:auto !important; }
-                        .manager-table tr { margin-bottom:1.5rem; border:1px solid #eee; border-radius:24px; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,0.04); background:#fff; }
+                        .manager-table tr { margin-bottom:1.5rem; border:1px solid #eee; border-radius:24px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.06); background:#fff; }
                         .manager-table td { 
-                            padding:0.8rem 1rem; 
-                            border-bottom:1px solid #f8f8f8; 
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            text-align: right;
-                            font-size: 0.9rem;
-                            overflow: hidden;
+                            padding:1rem; 
+                            border-bottom:1px solid #f9f9f9; 
+                            display: grid;
+                            grid-template-columns: 90px 1fr;
+                            gap: 1rem;
+                            align-items: flex-start;
                         }
                         .manager-table td:before { 
                             content:attr(data-label); 
-                            font-weight:800; 
-                            font-size:0.7rem; 
-                            color:#999; 
+                            font-weight:900; 
+                            font-size:0.65rem; 
+                            color:#bbb; 
                             text-transform:uppercase;
-                            margin-right: 1rem;
-                            flex-shrink: 0;
-                            text-align: left;
+                            padding-top: 0.2rem;
                         }
                         .manager-table td:last-child { 
                             background:#fcfcfc; 
                             display: block;
                             text-align:center !important; 
-                            padding: 1.2rem !important;
+                            padding: 1.5rem 1rem !important;
                         }
                         .manager-table td:last-child:before { content:''; display:none; }
                         
@@ -449,20 +445,35 @@ window.router.addRoute('manager', async (container) => {
                                     }
                                     return `
                                     <tr>
-                                        <td data-label="Reference" style="font-family:monospace; font-weight:800; color:var(--color-primary);">${b.referenceCode}</td>
+                                        <td data-label="Ref" style="font-family:monospace; font-weight:900; color:var(--color-primary); font-size:1.1rem;">${b.referenceCode}</td>
                                         <td data-label="Guest">
-                                            <div style="font-weight:700; color:#333; text-transform:uppercase; font-size:0.85rem;">${b.customerName || b.customerEmail}</div>
-                                            ${b.customerName ? `<div style="font-size:0.75rem; color:#08553d; margin-bottom:2px; font-weight:500;">${b.customerEmail}</div>` : ''}
-                                            ${b.customerPhone ? `<div style="font-size:0.75rem; color:#08553d; font-weight:700;"><span style="color:#d4af37; margin-right:4px;">📞</span>${b.customerPhone}</div>` : ''}
-                                            <div style="font-size:0.75rem; color:var(--color-primary); margin-top:0.3rem; font-weight:600;">
-                                                ${b.checkIn} → ${b.checkOut} <span style="background:#fff9e6; color:#d4af37; padding:0.1rem 0.4rem; border-radius:4px; margin-left:4px; border:1px solid #ffe4b3;">${nights} nt</span>
+                                            <div style="display:flex; flex-direction:column; gap:0.4rem;">
+                                                <div style="font-weight:900; color:#1a1a1a; font-size:1rem; line-height:1.2;">${b.customerName || 'Anonymous Guest'}</div>
+                                                <div style="display:flex; align-items:center; gap:0.4rem; color:#555; font-size:0.8rem;">
+                                                    <span style="opacity:0.6;">✉️</span> 
+                                                    <span style="word-break:break-all; font-weight:600;">${b.customerEmail}</span>
+                                                </div>
+                                                ${b.customerPhone ? `
+                                                <div style="display:flex; align-items:center; gap:0.4rem; color:var(--color-primary); font-size:0.85rem; font-weight:800;">
+                                                    <span>📞</span> ${b.customerPhone}
+                                                </div>` : ''}
+                                                
+                                                <div style="margin-top:0.5rem; padding-top:0.5rem; border-top:1px solid #eee; display:flex; gap:0.8rem; align-items:center;">
+                                                    <div style="font-size:0.75rem; color:#888;">Stay: <strong style="color:#333;">${b.checkIn} → ${b.checkOut}</strong></div>
+                                                    <div style="background:#fff8e1; color:#b05d22; padding:0.2rem 0.5rem; border-radius:6px; font-size:0.7rem; font-weight:900; border:1px solid #ffe082;">${nights} NIGHTS</div>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td data-label="Amount" style="font-weight:600;">${b.totalAmount} Birr</td>
-                                        <td data-label="Status"><span style="padding:0.4rem 0.8rem; border-radius:99px; font-size:0.75rem; font-weight:800; background:${b.status==='Confirmed'?'#e6f4ea':'#fff8e1'}; color:${b.status==='Confirmed'?'#1e7e34':'#b05d22'}; text-transform:uppercase;">${b.status}</span></td>
-                                        <td data-label="Date">${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' ' + new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '—'}</td>
-                                        <td data-label="Proof">${b.paymentProofUrl ? `<button class="btn-outline" style="padding:0.4rem 0.8rem; font-size:0.75rem; border-radius:8px;" onclick="window.viewProof('${b.paymentProofUrl}')">🖼 View</button>` : '—'}</td>
-                                        <td>${b.status === 'Awaiting Verification' ? `<button class="btn-primary" style="padding:0.6rem 1.2rem; font-size:0.8rem; border-radius:10px; width:100%;" onclick="window.mgrConfirmBooking('${b.id}')">✓ Confirm Booking</button>` : '<span style="color:#bbb; font-size:0.8rem; font-weight:700; text-transform:uppercase;">Processed</span>'}</td>
+                                        <td data-label="Amount"><div style="font-weight:900; font-size:1.1rem; color:#1a1a1a;">${b.totalAmount} <span style="font-size:0.7rem; color:#999;">BIRR</span></div></td>
+                                        <td data-label="Status">
+                                            <span style="display:inline-block; padding:0.4rem 1rem; border-radius:12px; font-size:0.7rem; font-weight:900; background:${b.status==='Confirmed'?'#e6f4ea':'#fff8e1'}; color:${b.status==='Confirmed'?'#1e7e34':'#b05d22'}; text-transform:uppercase; letter-spacing:0.05em;">${b.status}</span>
+                                        </td>
+                                        <td data-label="Date" style="font-size:0.85rem; color:#666; font-weight:600;">
+                                            <div>${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—'}</div>
+                                            <div style="font-size:0.7rem; color:#b0b0b0;">${b.createdAt ? new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : ''}</div>
+                                        </td>
+                                        <td data-label="Proof">${b.paymentProofUrl ? `<button class="btn-outline" style="padding:0.4rem 1rem; font-size:0.75rem; border-radius:10px; font-weight:700; background:white;" onclick="window.viewProof('${b.paymentProofUrl}')">🖼 Browse Proof</button>` : '<span style="color:#ddd; font-style:italic; font-size:0.8rem;">No file</span>'}</td>
+                                        <td>${b.status === 'Awaiting Verification' ? `<button class="btn-primary" style="padding:1rem; font-size:0.9rem; border-radius:14px; width:100%; box-shadow:0 4px 15px rgba(26,96,50,0.2);" onclick="window.mgrConfirmBooking('${b.id}')">Confirm Booking Now</button>` : '<div style="color:#bbb; font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.5rem;">✅ Processed</div>'}</td>
                                     </tr>
                                     `;
                                 }).join('');
@@ -505,30 +516,31 @@ window.router.addRoute('manager', async (container) => {
                 <div style="background:white; border-radius:24px; padding:2.5rem; box-shadow:var(--shadow-sm); border:1px solid #eee;">
                     <h3 style="margin-bottom:1.5rem; color:var(--color-primary);">Property Control Center</h3>
                     
-                    <div style="display:grid; gap:1.5rem;">
-                        <div>
-                            <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.5rem; color:#444;">PROPERTY NAME</label>
-                            <input id="mg-h-title" type="text" value="${myHotel.title}" style="width:100%; padding:0.9rem; border:1.5px solid #eee; border-radius:14px; font-weight:600;">
-                        </div>
-
-                        <div class="mgr-two-col">
-                            <div>
-                                <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.5rem; color:#444;">TYPE</label>
-                                <select id="mg-h-type" style="width:100%; padding:0.9rem; border:1.5px solid #eee; border-radius:14px; background:white;">
-                                    <option value="Hotel" ${myHotel.type==='Hotel'?'selected':''}>Hotel</option>
-                                    <option value="Guesthouse" ${myHotel.type==='Guesthouse'?'selected':''}>Guesthouse</option>
-                                    <option value="Apartment" ${myHotel.type==='Apartment'?'selected':''}>Apartment</option>
-                                    <option value="Traditional Home" ${myHotel.type==='Traditional Home'?'selected':''}>Traditional Home</option>
-                                </select>
+                    <div style="background:white; padding:1.5rem; border-radius:24px; border:1.5px solid #eee; margin-bottom:1.5rem;">
+                            <h4 style="margin:0 0 1.2rem; font-size:0.85rem; color:#888; text-transform:uppercase; letter-spacing:0.1em;">🏨 Basic Identity</h4>
+                            <div style="margin-bottom:1.5rem;">
+                                <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.5rem; color:#444;">PROPERTY NAME</label>
+                                <input id="mg-h-title" type="text" value="${myHotel.title}" style="width:100%; padding:1rem; border:1.5px solid #eee; border-radius:14px; font-weight:800; font-size:1.1rem; color:var(--color-primary);">
                             </div>
-                            <div>
-                                <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.5rem; color:#444;">PRICE PER NIGHT (BR)</label>
-                                <input id="mg-h-price" type="number" value="${myHotel.price}" style="width:100%; padding:0.9rem; border:1.5px solid #eee; border-radius:14px; font-weight:700; color:var(--color-primary);">
+                            <div class="mgr-two-col">
+                                <div>
+                                    <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.5rem; color:#444;">PROPERTY TYPE</label>
+                                    <select id="mg-h-type" style="width:100%; padding:1rem; border:1.5px solid #eee; border-radius:14px; background:white; font-weight:600;">
+                                        <option value="Hotel" ${myHotel.type==='Hotel'?'selected':''}>Hotel</option>
+                                        <option value="Guesthouse" ${myHotel.type==='Guesthouse'?'selected':''}>Guesthouse</option>
+                                        <option value="Apartment" ${myHotel.type==='Apartment'?'selected':''}>Apartment</option>
+                                        <option value="Traditional Home" ${myHotel.type==='Traditional Home'?'selected':''}>Traditional Home</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.5rem; color:#444;">BASE PRICE (BIRR)</label>
+                                    <input id="mg-h-price" type="number" value="${myHotel.price}" style="width:100%; padding:1rem; border:1.5px solid #eee; border-radius:14px; font-weight:800; color:var(--color-primary); font-size:1.1rem;">
+                                </div>
                             </div>
                         </div>
 
                         <!-- Inventory Control Section -->
-                        <div style="background:#f9f9f9; padding:1.5rem; border-radius:18px; border:2px solid #f0f0f0;">
+                        <div style="background:#f9f9f9; padding:1.5rem; border-radius:18px; border:2px solid #f0f0f0; margin-bottom:1.5rem;">
                             <h4 style="margin:0 0 1rem; font-size:0.9rem; color:var(--color-primary);">🏨 ROOM INVENTORY</h4>
                             <div class="mgr-inventory-col">
                                 <div>
@@ -581,20 +593,20 @@ window.router.addRoute('manager', async (container) => {
                         </div>
                         
                         <!-- Media Gallery -->
-                        <div>
-                            <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:1rem; color:var(--color-primary);">📸 PHOTO GALLERY (SELECT TO UPDATE)</label>
-                            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:0.8rem;">
+                        <div style="background:white; padding:1.5rem; border-radius:24px; border:1.5px solid #eee;">
+                            <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:1.2rem; color:var(--color-primary); text-transform:uppercase; letter-spacing:0.1em;">📸 Photo Showcase (1-10)</label>
+                            <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:0.6rem;">
                                 ${(() => {
                                     const images = myHotel.images || [myHotel.image, ...(myHotel.extraImages || [])].filter(Boolean);
                                     return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => {
                                         const img = images[i-1] || '';
                                     return `
                                     <div style="text-align:center;">
-                                        <div id="mg-box-${i}" style="width:100%; aspect-ratio:1/1; border:2px dashed #ddd; border-radius:14px; position:relative; overflow:hidden; background:${img?`url('${img}') center/cover`:'#f8f9fa'}; cursor:pointer;" onclick="document.getElementById('mg-file-${i}').click()">
-                                            ${!img ? `<span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:#ccc;">+</span>`:''}
+                                        <div id="mg-box-${i}" style="width:100%; aspect-ratio:1/1; border:2px dashed #ddd; border-radius:12px; position:relative; overflow:hidden; background:${img?`url('${img}') center/cover`:'#f8f9fa'}; cursor:pointer;" onclick="document.getElementById('mg-file-${i}').click()">
+                                            ${!img ? `<span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#ccc;">+</span>`:''}
                                             <input type="file" id="mg-file-${i}" accept="image/*" style="display:none;" onchange="window.previewMgrFile(${i}, this)">
-                                            <div id="mg-prev-overlay-${i}" style="position:absolute; inset:0; background:rgba(44,182,115,0.8); display:none; align-items:center; justify-content:center; color:white; font-size:0.7rem; font-weight:800; text-transform:uppercase;">NEW IMAGE</div>
-                                            <button id="mg-p-cancel-${i}" style="position:absolute; top:0.3rem; right:0.3rem; width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,0.6); color:white; display:${img?'flex':'none'}; align-items:center; justify-content:center; border:none; font-size:0.7rem; font-weight:800; cursor:pointer; z-index:10;" onclick="event.stopPropagation(); window.clearMgrPhoto(${i})">✕</button>
+                                            <div id="mg-prev-overlay-${i}" style="position:absolute; inset:0; background:rgba(44,182,115,0.8); display:none; align-items:center; justify-content:center; color:white; font-size:0.6rem; font-weight:800; text-transform:uppercase;">UPDATE</div>
+                                            <button id="mg-p-cancel-${i}" style="position:absolute; top:0.2rem; right:0.2rem; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,0.6); color:white; display:${img?'flex':'none'}; align-items:center; justify-content:center; border:none; font-size:0.6rem; font-weight:800; cursor:pointer; z-index:10;" onclick="event.stopPropagation(); window.clearMgrPhoto(${i})">✕</button>
                                         </div>
                                     </div>`;
                                 }).join('')})()}
