@@ -59,7 +59,7 @@ jobs:
       run: |
         # Use npx to run capacitor-assets without needing to install it globally
         # We use logo.png as the source for all icons and splash screens
-        npx -y @capacitor/assets generate --iconSource images/logo.png --android
+        npx -y @capacitor/assets generate --icon images/logo.png --splash images/logo.png --android
 
     - name: Sync Capacitor
       run: npx cap sync android
