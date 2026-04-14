@@ -298,7 +298,8 @@ window.router.addRoute('manager', async (container) => {
                     @media (max-width: 768px) {
                         .mgr-two-col, .mgr-three-col, .mgr-inventory-col { grid-template-columns:1fr; gap:0.8rem; }
                         .mgr-header { flex-direction:column; align-items:flex-start; gap:1.2rem; padding:1.5rem; }
-                        .manager-table, .manager-table tbody, .manager-table tr, .manager-table td { display:block; width:100%; }
+                        .manager-table thead { display: none; }
+                        .manager-table, .manager-table tbody, .manager-table tr, .manager-table td { display:block; width:100% !important; min-width:auto !important; }
                         .manager-table tr { margin-bottom:1.5rem; border:1px solid #eee; border-radius:24px; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,0.04); background:#fff; }
                         .manager-table td { 
                             padding:0.8rem 1rem; 
@@ -308,6 +309,7 @@ window.router.addRoute('manager', async (container) => {
                             align-items: center;
                             text-align: right;
                             font-size: 0.9rem;
+                            overflow: hidden;
                         }
                         .manager-table td:before { 
                             content:attr(data-label); 
@@ -323,12 +325,21 @@ window.router.addRoute('manager', async (container) => {
                             background:#fcfcfc; 
                             display: block;
                             text-align:center !important; 
-                            padding: 1rem !important;
+                            padding: 1.2rem !important;
                         }
                         .manager-table td:last-child:before { content:''; display:none; }
                         
                         .mgr-tabs-scroller { width: 100%; border-radius:14px; background: rgba(0,0,0,0.03); padding: 4px; }
                         .mgr-tabs-scroller button { flex:1; padding:0.6rem 0.2rem !important; font-size:0.8rem !important; }
+
+                        .mobile-sticky-save {
+                            position: fixed;
+                            bottom: 1rem;
+                            left: 1rem;
+                            right: 1rem;
+                            z-index: 1000;
+                            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                        }
                     }
                 </style>
                 <div class="mgr-header">
@@ -394,9 +405,9 @@ window.router.addRoute('manager', async (container) => {
                     <button class="btn-outline" style="padding:0.6rem 1rem; border-radius:8px; font-size:0.8rem;" onclick="filterFrom=''; filterTo=''; window.setMgrFilter()">✕ Reset</button>
                 </div>
 
-                <div style="background:white; border-radius:24px; box-shadow:var(--shadow-sm); overflow-x:auto; border:1px solid #eee;">
-                    <table class="manager-table" style="width:100%; min-width:1000px;">
-                        <thead>
+                <div style="background:white; border-radius:24px; box-shadow:var(--shadow-sm); overflow:hidden; border:1px solid #eee;">
+                    <table class="manager-table" style="width:100%;">
+                        <thead id="mgr-bookings-thead">
                             <tr>
                                 <th style="border-top-left-radius:20px;">Ref</th>
                                 <th>Guest</th>
@@ -613,7 +624,9 @@ window.router.addRoute('manager', async (container) => {
                         </div>
 
                         <div id="mg-save-status" style="text-align:center; font-weight:700; min-height:1.5rem; padding:0.5rem; border-radius:10px;"></div>
-                        <button id="mg-save-btn" class="btn-primary" style="padding:1.2rem; font-size:1.1rem; border-radius:16px; box-shadow:var(--shadow-md);" onclick="window.mgSaveHotel()">💾 Save All Property Changes</button>
+                        <div class="mobile-sticky-save">
+                            <button id="mg-save-btn" class="btn-primary" style="padding:1.2rem; font-size:1.1rem; border-radius:16px; box-shadow:var(--shadow-md); width:100%;" onclick="window.mgSaveHotel()">💾 Save All Property Changes</button>
+                        </div>
                     </div>
                 </div>
 

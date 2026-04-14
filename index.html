@@ -24,6 +24,16 @@
             padding-bottom: var(--safe-bottom);
         }
     </style>
+    <script>
+      // Force status bar behavior on native
+      document.addEventListener('deviceready', () => {
+        if (window.Capacitor && window.Capacitor.Plugins.StatusBar) {
+          window.Capacitor.Plugins.StatusBar.setBackgroundColor({ color: '#1a6032' });
+          window.Capacitor.Plugins.StatusBar.setStyle({ style: 'DARK' }); // Dark background = White text
+          window.Capacitor.Plugins.StatusBar.show();
+        }
+      });
+    </script>
     <!-- Leaflet Maps CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <!-- Leaflet Maps JS -->
