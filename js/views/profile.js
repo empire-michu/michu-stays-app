@@ -1,4 +1,4 @@
-window.router.addRoute('profile', async (container) => {
+window.router.addRoute('profile', async (container, params) => {
     if (!window.auth?.currentUser) {
         window.router.navigate('login'); return;
     }
@@ -500,4 +500,14 @@ window.router.addRoute('profile', async (container) => {
     window.renderBookings = renderBookings;
     renderBookings();
     loadReviewsInBackground();
+
+    // Scroll to bookings section if requested via params
+    if (params?.section === 'bookings') {
+        setTimeout(() => {
+            const bookingsHeader = document.querySelector('.booking-history-header');
+            if (bookingsHeader) {
+                bookingsHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 300); // Slight delay ensures DOM is fully painted
+    }
 });

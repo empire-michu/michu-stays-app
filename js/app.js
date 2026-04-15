@@ -99,7 +99,7 @@ window.mobileBookings = function() {
     } else if (role === 'manager') {
         router.navigate('manager', { tab: 'bookings' });
     } else if (window.auth?.currentUser) {
-        router.navigate('profile');
+        router.navigate('profile', { section: 'bookings' });
     } else {
         router.navigate('login');
     }
