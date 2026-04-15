@@ -126,10 +126,8 @@ class AuthEngine {
                     ${avatarImg} ${displayName}
                 </button>`;
             }
-            const roleLabel = role === 'admin' ? '👑 Admin' : role === 'manager' ? 'Hotel Manager' : 'Guest';
             container.innerHTML = `
-                <div style="display:flex;align-items:center;gap:1rem;">
-                    <span style="font-weight:600;font-size:0.9rem;color:var(--color-primary);">${roleLabel}</span>
+                <div style="display:flex;align-items:center;gap:0.6rem;">
                     ${dashBtn}
                     <button class="btn-outline" style="padding:0.4rem 0.8rem;font-size:0.8rem;" onclick="window.auth.logout()">Log out</button>
                 </div>

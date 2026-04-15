@@ -328,18 +328,3 @@ if ('serviceWorker' in navigator) {
 }
 
 
-// --- Dynamic Status Widget Logic ---
-const updateStatusWidget = () => {
-    const widget = document.getElementById('status-widget');
-    if (!widget) return;
-    const now = new Date();
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    widget.innerHTML = `
-        <div style="font-weight:900; color:var(--color-primary); font-size:0.8rem;">${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}</div>
-        <div style="font-weight:600; font-size:0.6rem; color:#999; text-transform:uppercase; letter-spacing:0.05em; text-align:right;">${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')} STATUS</div>
-    `;
-};
-setInterval(updateStatusWidget, 30000);
-document.addEventListener('DOMContentLoaded', updateStatusWidget);
-updateStatusWidget();
