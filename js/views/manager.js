@@ -298,11 +298,17 @@ window.router.addRoute('manager', async (container) => {
                     .manager-table th { background:#f9fafb; padding:1.2rem 1rem; text-align:left; font-size:0.75rem; font-weight:800; color:#666; text-transform:uppercase; border-bottom:2px solid #f0f0f0; }
                     .manager-table td { padding:1.2rem 1rem; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
 
+                    /* Property Editor Desktop Grid Defaults */
+                    .mgr-prop-layout { display: grid; grid-template-columns: 1fr 320px; gap: 2rem; }
+                    .mgr-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+                    .mgr-three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+                    .mgr-inventory-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
                     @media (max-width: 768px) {
                         .manager-layout { grid-template-columns: 1fr; }
                         .manager-sidebar { display: none; }
                         .mgr-mobile-tabs { display: flex; }
-                        .manager-container { padding-top: 1rem; }
+                        .manager-container { padding: 0.75rem 0.5rem !important; padding-top: 0.5rem; padding-bottom: 140px; }
                         
                         .manager-table thead { display: none; }
                         .manager-table, .manager-table tbody, .manager-table tr, .manager-table td { display:block; width:100% !important; }
@@ -312,30 +318,38 @@ window.router.addRoute('manager', async (container) => {
                         .manager-table td:last-child { display: block; text-align: center; background: #f9fafb; border-bottom: none; border-radius: 0 0 16px 16px; padding: 1.5rem 1rem !important; }
                         .manager-table td:last-child:before { display: none; }
 
-                        /* Property Editor Mobile Fixes */
-                        .mgr-main-card { padding: 1.25rem !important; border-radius: 20px !important; }
-                        .mgr-card-input { font-size: 16px !important; padding: 0.85rem !important; border-radius: 12px !important; }
-                        .mgr-card-label { font-size: 0.75rem !important; }
-                        .mgr-two-col, .mgr-three-col, .mgr-inventory-col { grid-template-columns: 1fr !important; gap: 1rem !important; }
+                        /* Property Editor Mobile Overhaul */
+                        .mgr-prop-layout { grid-template-columns: 1fr !important; gap: 0 !important; }
+                        .mgr-prop-preview { display: none !important; }
+                        .mgr-main-card { padding: 1rem !important; border-radius: 18px !important; margin: 0 !important; }
+                        .mgr-main-card h3 { font-size: 1.15rem !important; margin-bottom: 1rem !important; }
+                        .mgr-card-input, .mgr-main-card input, .mgr-main-card select, .mgr-main-card textarea {
+                            font-size: 16px !important; /* Prevents iOS zoom on focus */
+                            padding: 0.75rem !important;
+                            border-radius: 12px !important;
+                            width: 100% !important;
+                            box-sizing: border-box !important;
+                        }
+                        .mgr-card-label { font-size: 0.72rem !important; }
+                        .mgr-two-col, .mgr-three-col, .mgr-inventory-col { grid-template-columns: 1fr !important; gap: 0.8rem !important; }
                         .mgr-photo-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 0.5rem !important; }
-                        .mgr-photo-grid > div > div { border-radius: 12px !important; }
+                        .mgr-photo-grid > div > div { border-radius: 10px !important; }
 
                         .mobile-sticky-save {
                             position: fixed;
-                            bottom: calc(85px + env(safe-area-inset-bottom));
-                            left: 1rem; right: 1rem;
+                            bottom: calc(75px + env(safe-area-inset-bottom, 0px));
+                            left: 0.75rem; right: 0.75rem;
                             z-index: 1000;
-                            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+                            box-shadow: 0 -4px 30px rgba(0,0,0,0.25);
+                            border-radius: 16px;
                         }
                     }
                 </style>
 
-                <div class="mgr-header">
+                <div class="mgr-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
                     <div>
-                        <h2 style="color:var(--color-primary); margin:0; font-weight:900; font-size:1.8rem;">Manager Hub</h2>
-                        <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.3rem;">
-                            <p style="margin:0; color:#666; font-size:0.9rem; font-weight:600;">${myHotel ? myHotel.title : 'Welcome'}</p>
-                        </div>
+                        <h2 style="color:var(--color-primary); margin:0; font-weight:900; font-size:1.5rem;">Manager Dashboard</h2>
+                        <p style="margin:0.2rem 0 0; color:#666; font-size:0.85rem; font-weight:600;">${myHotel ? myHotel.title : 'Welcome'}</p>
                     </div>
                     <div id="mgr-push-status">
                         ${(userData.fcmTokens && userData.fcmTokens.length > 0)
@@ -642,8 +656,8 @@ window.router.addRoute('manager', async (container) => {
                     </div>
                 </div>
 
-                <!-- Preview Card -->
-                <div style="position:sticky; top:2rem;">
+                <!-- Preview Card (hidden on mobile) -->
+                <div class="mgr-prop-preview" style="position:sticky; top:2rem;">
                     <h4 style="margin-top:0; color:#666; font-size:0.9rem;">LIVE PREVIEW</h4>
                     <div style="background:white; border-radius:24px; overflow:hidden; box-shadow:var(--shadow-lg); border:1px solid #eee;">
                         <img src="${myHotel.image || ''}" style="width:100%; height:180px; object-fit:cover;">
