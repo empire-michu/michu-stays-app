@@ -1,10 +1,10 @@
-window.router.addRoute('manager', async (container) => {
+window.router.addRoute('manager', async (container, params) => {
     const role = window.auth?.role || window.auth?.userData?.role;
     if (!['manager','admin'].includes(role)) {
         window.router.navigate('login'); return;
     }
 
-    let activeTab = 'bookings'; // bookings, property, account
+    let activeTab = params?.tab || 'bookings'; // bookings, property, account
     let filterFrom = '';
     let filterTo = '';
     const uid = window.auth?.currentUser?.uid;

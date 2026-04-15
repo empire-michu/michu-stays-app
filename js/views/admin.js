@@ -1,4 +1,4 @@
-window.router.addRoute('admin', async (container) => {
+window.router.addRoute('admin', async (container, params) => {
     if (window.auth?.userData?.role !== 'admin') {
         window.router.navigate('home'); return;
     }
@@ -6,7 +6,7 @@ window.router.addRoute('admin', async (container) => {
     let cachedProperties = [];
     let cachedBookings = [];
     let cachedUsers = [];
-    let activeTab = 'analytics'; // analytics, hotels, bookings, managers, add-hotel, account
+    let activeTab = params?.tab || 'analytics'; // analytics, hotels, bookings, managers, add-hotel, account
     let filterFrom = '';
     let filterTo = '';
     let filterHotel = '';
