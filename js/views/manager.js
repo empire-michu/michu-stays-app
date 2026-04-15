@@ -283,81 +283,90 @@ window.router.addRoute('manager', async (container) => {
         container.innerHTML = `
             <div class="manager-container" style="max-width:1200px; margin:0 auto; padding:2rem 1rem;">
                 <style>
-                    .manager-container { animation: fadeIn 0.4s ease; }
-                    .mgr-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:2.5rem; flex-wrap:wrap; gap:1.5rem; }
-                    .mgr-tabs-scroller { display:flex; background:#f0f0f0; padding:0.4rem; border-radius:18px; gap:0.3rem; box-shadow:var(--shadow-inner); overflow-x:auto; -ms-overflow-style:none; scrollbar-width:none; max-width:100%; }
-                    .mgr-tabs-scroller::-webkit-scrollbar { display:none; }
-                    .mgr-tabs-scroller button { flex-shrink:0; white-space:nowrap; }
+                    .manager-container { animation: fadeIn 0.4s ease; padding-bottom: 120px; }
+                    .manager-layout { display: grid; grid-template-columns: 280px 1fr; gap: 2rem; }
+                    .manager-sidebar { background: white; border-radius: 24px; padding: 1.5rem; height: fit-content; position: sticky; top: 100px; box-shadow: var(--shadow-sm); z-index: 10; }
+                    .mgr-nav-btn { width: 100%; padding: 1rem; margin-bottom: 0.5rem; border: none; border-radius: 12px; background: transparent; color: #666; font-weight: 600; text-align: left; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.8rem; }
+                    .mgr-nav-btn.active { background: var(--color-primary-light); color: var(--color-primary); }
+                    
+                    /* Mobile Specific */
+                    .mgr-mobile-tabs { display: none; margin-bottom: 1.5rem; background: #eee; padding: 0.35rem; border-radius: 16px; gap: 0.3rem; }
+                    .mgr-mobile-tab-btn { flex: 1; padding: 0.7rem; border: none; border-radius: 12px; font-weight: 700; font-size: 0.85rem; background: transparent; color: #777; transition: all 0.2s; }
+                    .mgr-mobile-tab-btn.active { background: white; color: var(--color-primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
                     .manager-table { width:100%; border-collapse:collapse; background:white; }
                     .manager-table th { background:#f9fafb; padding:1.2rem 1rem; text-align:left; font-size:0.75rem; font-weight:800; color:#666; text-transform:uppercase; border-bottom:2px solid #f0f0f0; }
                     .manager-table td { padding:1.2rem 1rem; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
-                    .mgr-two-col { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
-                    .mgr-three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.2rem; }
-                    .mgr-inventory-col { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+
                     @media (max-width: 768px) {
-                        .mgr-two-col, .mgr-three-col, .mgr-inventory-col { grid-template-columns:1fr; gap:0.8rem; }
-                        .mgr-header { flex-direction:column; align-items:flex-start; gap:1.2rem; padding:1.5rem; }
-                        .manager-table thead { display: none; }
-                        .manager-table, .manager-table tbody, .manager-table tr, .manager-table td { display:block; width:100% !important; min-width:auto !important; }
-                        .manager-table tr { margin-bottom:1.5rem; border:1px solid #eee; border-radius:24px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.06); background:#fff; }
-                        .manager-table td { 
-                            padding:1rem; 
-                            border-bottom:1px solid #f9f9f9; 
-                            display: grid;
-                            grid-template-columns: 90px 1fr;
-                            gap: 1rem;
-                            align-items: flex-start;
-                        }
-                        .manager-table td:before { 
-                            content:attr(data-label); 
-                            font-weight:900; 
-                            font-size:0.65rem; 
-                            color:#bbb; 
-                            text-transform:uppercase;
-                            padding-top: 0.2rem;
-                        }
-                        .manager-table td:last-child { 
-                            background:#fcfcfc; 
-                            display: block;
-                            text-align:center !important; 
-                            padding: 1.5rem 1rem !important;
-                        }
-                        .manager-table td:last-child:before { content:''; display:none; }
+                        .manager-layout { grid-template-columns: 1fr; }
+                        .manager-sidebar { display: none; }
+                        .mgr-mobile-tabs { display: flex; }
+                        .manager-container { padding-top: 1rem; }
                         
-                        .mgr-tabs-scroller { width: 100%; border-radius:14px; background: rgba(0,0,0,0.03); padding: 4px; }
-                        .mgr-tabs-scroller button { flex:1; padding:0.6rem 0.2rem !important; font-size:0.8rem !important; }
+                        .manager-table thead { display: none; }
+                        .manager-table, .manager-table tbody, .manager-table tr, .manager-table td { display:block; width:100% !important; }
+                        .manager-table tr { margin-bottom: 1.5rem; border:1px solid #eee; border-radius:24px; box-shadow:0 8px 30px rgba(0,0,0,0.06); background:#fff; padding: 0.5rem; }
+                        .manager-table td { display: grid; grid-template-columns: 100px 1fr; gap: 1rem; padding: 0.8rem; border-bottom: 1px solid #f5f5f5; align-items: center; text-align: right; }
+                        .manager-table td:before { content: attr(data-label); font-weight:800; font-size:0.7rem; color:#aaa; text-transform:uppercase; text-align: left; }
+                        .manager-table td:last-child { display: block; text-align: center; background: #f9fafb; border-bottom: none; border-radius: 0 0 16px 16px; padding: 1.5rem 1rem !important; }
+                        .manager-table td:last-child:before { display: none; }
+
+                        /* Property Editor Mobile Fixes */
+                        .mgr-main-card { padding: 1.25rem !important; border-radius: 20px !important; }
+                        .mgr-card-input { font-size: 16px !important; padding: 0.85rem !important; border-radius: 12px !important; }
+                        .mgr-card-label { font-size: 0.75rem !important; }
+                        .mgr-two-col, .mgr-three-col, .mgr-inventory-col { grid-template-columns: 1fr !important; gap: 1rem !important; }
+                        .mgr-photo-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 0.5rem !important; }
+                        .mgr-photo-grid > div > div { border-radius: 12px !important; }
 
                         .mobile-sticky-save {
                             position: fixed;
-                            bottom: 1rem;
-                            left: 1rem;
-                            right: 1rem;
+                            bottom: calc(85px + env(safe-area-inset-bottom));
+                            left: 1rem; right: 1rem;
                             z-index: 1000;
-                            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
                         }
                     }
                 </style>
+
                 <div class="mgr-header">
                     <div>
-                        <h2 style="color:var(--color-primary); margin:0; font-weight:900; font-size:1.8rem;">Manager Dashboard</h2>
-                        <div style="display:flex; align-items:center; gap:1rem; margin-top:0.3rem;">
-                            <p style="margin:0; color:#666; font-size:0.95rem; font-weight:600;">${myHotel ? myHotel.title : 'Welcome'}</p>
-                            ${(userData.fcmTokens && userData.fcmTokens.length > 0)
-                                ? `<button class="btn-outline" style="padding:0.2rem 0.6rem; font-size:0.7rem; border-color:green; color:green; border-radius:6px; cursor:pointer;" onclick="window.enableManagerPush(this)">✅ Push Enabled</button>`
-                                : `<button class="btn-outline" style="padding:0.2rem 0.6rem; font-size:0.7rem; border-color:#f59e0b; color:#d97706; border-radius:6px; cursor:pointer;" onclick="window.enableManagerPush(this)">🔔 Enable Push Alerts</button>`
-                            }
+                        <h2 style="color:var(--color-primary); margin:0; font-weight:900; font-size:1.8rem;">Manager Hub</h2>
+                        <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.3rem;">
+                            <p style="margin:0; color:#666; font-size:0.9rem; font-weight:600;">${myHotel ? myHotel.title : 'Welcome'}</p>
                         </div>
                     </div>
-                    <div class="mgr-tabs-scroller">
-                        <button onclick="window.setMgrTab('bookings')" style="${tabStyle('bookings')}">Bookings</button>
-                        <button onclick="window.setMgrTab('property')" style="${tabStyle('property')}">Property</button>
-                        <button onclick="window.setMgrTab('account')" style="${tabStyle('account')}">Account</button>
+                    <div id="mgr-push-status">
+                        ${(userData.fcmTokens && userData.fcmTokens.length > 0)
+                            ? `<button class="btn-outline" style="padding:0.4rem 1rem; font-size:0.75rem; border-color:green; color:green; border-radius:8px; cursor:pointer;" onclick="window.enableManagerPush(this)">✅ Alerts On</button>`
+                            : `<button class="btn-outline" style="padding:0.4rem 1rem; font-size:0.75rem; border-color:#f59e0b; color:#d97706; border-radius:8px; cursor:pointer;" onclick="window.enableManagerPush(this)">🔔 Enable Alerts</button>`
+                        }
                     </div>
                 </div>
 
-                <div id="mgr-tab-content" style="min-height:500px;">
-                    ${renderActiveTab()}
+                <div class="manager-layout">
+                    <div class="manager-sidebar">
+                        <button class="mgr-nav-btn ${activeTab === 'bookings' ? 'active' : ''}" onclick="window.setMgrTab('bookings')">
+                            <span style="font-size:1.2rem;">📅</span> Bookings
+                        </button>
+                        <button class="mgr-nav-btn ${activeTab === 'property' ? 'active' : ''}" onclick="window.setMgrTab('property')">
+                            <span style="font-size:1.2rem;">🏨</span> My Property
+                        </button>
+                        <button class="mgr-nav-btn ${activeTab === 'account' ? 'active' : ''}" onclick="window.setMgrTab('account')">
+                            <span style="font-size:1.2rem;">👤</span> My Account
+                        </button>
+                    </div>
+
+                    <div class="manager-content">
+                        <!-- Mobile Tabs -->
+                        <div class="mgr-mobile-tabs">
+                            <button class="mgr-mobile-tab-btn ${activeTab === 'bookings' ? 'active' : ''}" onclick="window.setMgrTab('bookings')">Bookings</button>
+                            <button class="mgr-mobile-tab-btn ${activeTab === 'property' ? 'active' : ''}" onclick="window.setMgrTab('property')">Property</button>
+                            <button class="mgr-mobile-tab-btn ${activeTab === 'account' ? 'active' : ''}" onclick="window.setMgrTab('account')">Account</button>
+                        </div>
+                        ${renderActiveTab()}
+                    </div>
                 </div>
             </div>
 
@@ -502,25 +511,16 @@ window.router.addRoute('manager', async (container) => {
         if (!myHotel) return `<div style="text-align:center; padding:5rem; background:white; border-radius:24px;"><h3>No property assigned.</h3><p>Contact Admin to link your account to a hotel listing.</p></div>`;
         
         return `
-            <style>
-                .mgr-prop-layout { display: grid; grid-template-columns: 1fr 340px; gap: 2rem; align-items: start; }
-                .mgr-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
-                .mgr-three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem; }
-                .mgr-inventory-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-                @media(max-width: 900px) {
-                    .mgr-prop-layout, .mgr-two-col, .mgr-three-col, .mgr-inventory-col { grid-template-columns: 1fr !important; }
-                }
-            </style>
             <div class="mgr-prop-layout">
                 <!-- Main Form -->
-                <div style="background:white; border-radius:24px; padding:2.5rem; box-shadow:var(--shadow-sm); border:1px solid #eee;">
+                <div class="mgr-main-card" style="background:white; border-radius:24px; padding:2.5rem; box-shadow:var(--shadow-sm); border:1px solid #eee;">
                     <h3 style="margin-bottom:1.5rem; color:var(--color-primary);">Property Control Center</h3>
                     
                     <div style="background:white; padding:1.5rem; border-radius:24px; border:1.5px solid #eee; margin-bottom:1.5rem;">
                             <h4 style="margin:0 0 1.2rem; font-size:0.85rem; color:#888; text-transform:uppercase; letter-spacing:0.1em;">🏨 Basic Identity</h4>
                             <div style="margin-bottom:1.5rem;">
-                                <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.5rem; color:#444;">PROPERTY NAME</label>
-                                <input id="mg-h-title" type="text" value="${myHotel.title}" style="width:100%; padding:1rem; border:1.5px solid #eee; border-radius:14px; font-weight:800; font-size:1.1rem; color:var(--color-primary);">
+                                <label class="mgr-card-label" style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.5rem; color:#444;">PROPERTY NAME</label>
+                                <input id="mg-h-title" class="mgr-card-input" type="text" value="${myHotel.title}" style="width:100%; padding:1rem; border:1.5px solid #eee; border-radius:14px; font-weight:800; font-size:1.1rem; color:var(--color-primary);">
                             </div>
                             <div class="mgr-two-col">
                                 <div>
@@ -533,8 +533,8 @@ window.router.addRoute('manager', async (container) => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.5rem; color:#444;">BASE PRICE (BIRR)</label>
-                                    <input id="mg-h-price" type="number" value="${myHotel.price}" style="width:100%; padding:1rem; border:1.5px solid #eee; border-radius:14px; font-weight:800; color:var(--color-primary); font-size:1.1rem;">
+                                    <label class="mgr-card-label" style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.5rem; color:#444;">BASE PRICE (BIRR)</label>
+                                    <input id="mg-h-price" class="mgr-card-input" type="number" value="${myHotel.price}" style="width:100%; padding:1rem; border:1.5px solid #eee; border-radius:14px; font-weight:800; color:var(--color-primary); font-size:1.1rem;">
                                 </div>
                             </div>
                         </div>
@@ -595,7 +595,7 @@ window.router.addRoute('manager', async (container) => {
                         <!-- Media Gallery -->
                         <div style="background:white; padding:1.5rem; border-radius:24px; border:1.5px solid #eee;">
                             <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:1.2rem; color:var(--color-primary); text-transform:uppercase; letter-spacing:0.1em;">📸 Photo Showcase (1-10)</label>
-                            <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:0.6rem;">
+                            <div class="mgr-photo-grid" style="display:grid; grid-template-columns: repeat(5, 1fr); gap:0.6rem;">
                                 ${(() => {
                                     const images = myHotel.images || [myHotel.image, ...(myHotel.extraImages || [])].filter(Boolean);
                                     return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => {

@@ -48,10 +48,31 @@ class Router {
             this.appContainer.innerHTML = ''; // Clear current view
             this.routes[name](this.appContainer, params); // Render new view
             this.updateSEO(); // Initial reset to default SEO
+            this.updateMobileNav(name); // Highlight current menu item
             window.scrollTo(0,0);
         } else {
             console.error(`Route ${name} not found`);
         }
+    }
+
+    updateMobileNav(name) {
+        const nav = document.getElementById('mobile-nav');
+        if (!nav) return;
+
+        // Hide nav on login page for better clean look
+        if (name === 'login') {
+            nav.style.display = 'none';
+        } else {
+            nav.style.display = (window.innerWidth <= 768) ? 'flex' : 'none';
+        }
+
+        document.querySelectorAll('.mobile-nav-item').forEach(item => {
+            item.classList.remove('active');
+            const onclick = item.getAttribute('onclick');
+            if (onclick && onclick.includes(`'${name}'`)) {
+                item.classList.add('active');
+            }
+        });
     }
 }
 
@@ -118,7 +139,15 @@ window.showAlert = function(message, type) {
 
 // Header modal helpers
 window.showAIModal    = () => { document.getElementById('ai-modal').style.display    = 'flex'; };
-window.showNotifModal = () => { document.getElementById('notif-modal').style.display = 'flex'; };
+window.showNotifModal = () => { 
+    document.getElementById('notif-modal').style.display = 'flex';
+    const badge = document.getElementById('notif-badge');
+    if (badge) {
+        badge.style.display = 'none';
+        badge.classList.remove('notif-pulse');
+    }
+    unreadCount = 0;
+};
 
 // Close modals when clicking backdrop
 document.addEventListener('click', (e) => {
@@ -185,7 +214,10 @@ let notifUnsub = null;
 window.showPushNotification = ({ message, details, createdAt, link }) => {
     unreadCount++;
     const badge = document.getElementById('notif-badge');
-    if (badge) badge.style.display = 'block';
+    if (badge) {
+        badge.style.display = 'block';
+        badge.classList.add('notif-pulse');
+    }
 
     // Play notification sound
     try {
@@ -295,3 +327,19 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+
+// --- Dynamic Status Widget Logic ---
+const updateStatusWidget = () => {
+    const widget = document.getElementById('status-widget');
+    if (!widget) return;
+    const now = new Date();
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    widget.innerHTML = `
+        <div style="font-weight:900; color:var(--color-primary); font-size:0.8rem;">${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}</div>
+        <div style="font-weight:600; font-size:0.6rem; color:#999; text-transform:uppercase; letter-spacing:0.05em; text-align:right;">${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')} STATUS</div>
+    `;
+};
+setInterval(updateStatusWidget, 30000);
+document.addEventListener('DOMContentLoaded', updateStatusWidget);
+updateStatusWidget();
