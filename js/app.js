@@ -91,6 +91,20 @@ window.mobileSearch = function() {
     }, 400);
 };
 
+// Mobile Bookings: Route based on user role
+window.mobileBookings = function() {
+    const role = window.auth?.userData?.role;
+    if (role === 'admin') {
+        router.navigate('admin');
+    } else if (role === 'manager') {
+        router.navigate('manager');
+    } else if (window.auth?.currentUser) {
+        router.navigate('profile');
+    } else {
+        router.navigate('login');
+    }
+};
+
 // Global Toast logic for mimicking automations
 window.showToast = function(message) {
     const toast = document.createElement('div');
