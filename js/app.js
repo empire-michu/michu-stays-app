@@ -59,8 +59,8 @@ class Router {
         const nav = document.getElementById('mobile-nav');
         if (!nav) return;
 
-        // Hide nav on login page for better clean look
-        if (name === 'login') {
+        // Hide nav on login/signup pages for clean look
+        if (name === 'login' || name === 'signup') {
             nav.style.display = 'none';
         } else {
             nav.style.display = (window.innerWidth <= 768) ? 'flex' : 'none';
@@ -78,6 +78,18 @@ class Router {
 
 const router = new Router();
 window.router = router;
+
+// Mobile Search: Navigate to home and focus + scroll to the search bar
+window.mobileSearch = function() {
+    router.navigate('home');
+    setTimeout(() => {
+        const searchInput = document.getElementById('home-search-input');
+        if (searchInput) {
+            searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => searchInput.focus(), 300);
+        }
+    }, 400);
+};
 
 // Global Toast logic for mimicking automations
 window.showToast = function(message) {
