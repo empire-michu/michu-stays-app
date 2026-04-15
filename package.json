@@ -4,9 +4,10 @@
   "description": "Michu Stays - Ethiopian Booking Platform",
   "main": "index.html",
   "scripts": {
-    "build": "npx cap sync",
+    "prebuild": "node -e \"const fs=require('fs');const cp=require('child_process');['index.html','sw.js','manifest.json','firebase-messaging-sw.js','capacitor.config.json'].forEach(f=>{try{fs.copyFileSync(f,'www/'+f)}catch(e){}});['js','css','images'].forEach(d=>{cp.execSync('xcopy /s /y /i '+d+' www\\\\'+d,{stdio:'ignore'})})\"",
+    "build": "npm run prebuild && npx cap sync",
     "open:android": "npx cap open android",
-    "sync": "npx cap sync"
+    "sync": "npm run prebuild && npx cap sync"
   },
   "dependencies": {
     "@capacitor/android": "^6.0.0",
