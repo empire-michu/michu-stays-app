@@ -15,30 +15,36 @@ class AuthEngine {
                 }
                 // Always fetch fresh from Firestore to stay in sync
                 try {
-                    // Optimized for speed in Ethiopia: 10s timeout for user doc fetch
-                    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000));
-                    const fetchDoc = firestore.collection('users').doc(user.uid).get();
-                    
-                    const doc = await Promise.race([fetchDoc, timeout]).catch(e => {
-                        console.warn("User data fetch slow/failed, using cached data if available.");
-                        return null; 
-                    });
-
+                    const doc = await firestore.collection('users').doc(user.uid).get();
                     if (doc && doc.exists) {
+                        const newData = doc.data();
+                        const oldRole = this.userData?.role;
+                        
                         this.userData = { 
                             email: user.email, 
                             fullName: user.displayName || '',
-                            ...doc.data(), 
+                            ...newData, 
                             uid: user.uid 
                         };
-                        localStorage.setItem(`ms_role_${user.uid}`, doc.data().role || 'customer');
+                        
+                        localStorage.setItem(`ms_role_${user.uid}`, newData.role || 'customer');
+                        
+                        // If role officially changed from cache, re-route to correct dashboard
+                        if (oldRole && oldRole !== newData.role) {
+                            console.log("Role updated from cache:", oldRole, "->", newData.role);
+                            this._redirectByRole();
+                        }
+                        this.renderNav();
                     } else if (!this.userData) {
-                        // Fallback if doc fetch failed and no cached role is currently in memory
                         this.userData = { role: 'customer', uid: user.uid, email: user.email };
+                        this.renderNav();
                     }
                 } catch(e) {
-                    console.warn('Auth state fetch error:', e);
-                    if (!this.userData) this.userData = { role: 'customer', uid: user.uid };
+                    console.warn('Auth state sync error:', e);
+                    if (!this.userData) {
+                        this.userData = { role: 'customer', uid: user.uid };
+                        this.renderNav();
+                    }
                 }
             } else {
                 this.userData = null;
