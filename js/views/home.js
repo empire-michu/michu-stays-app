@@ -305,14 +305,14 @@ window.router.addRoute('home', async (container, params) => {
     container.innerHTML = `
         <!-- Minimal Search Bar Just Below Header -->
         <div id="home-search-wrapper" style="display:flex; justify-content:center; background:white; padding:0.6rem 0.75rem; border-bottom:1px solid #f0f0f0; position:relative; z-index:20; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
-            <div class="search-container" style="max-width:500px; width:100%; height:48px; border:1.5px solid #eaeaea; padding:0 0.4rem; display:flex; align-items:center; border-radius:99px; background:#ffffff; box-sizing:border-box; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+            <div class="home-search-bar-inline" style="max-width:500px; width:100%; height:48px; border:1.5px solid #eaeaea; padding:0 0.4rem; display:flex; align-items:center; border-radius:99px; background:#ffffff; box-sizing:border-box; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
                 <div style="padding:0 0.6rem; display:flex; align-items:center; flex-shrink:0;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                 </div>
                 <div style="flex:1; min-width:0; display:flex; align-items:center;">
                     <input id="home-search-input" type="text" placeholder="Where are you going?" style="border:none; height:100%; outline:none; background:transparent; width:100%; font-size:0.95rem; font-weight:600; color:#333;" value="${filterState.searchQuery}" onkeydown="if(event.key==='Enter') window.updateHomeSearch(this.value)">
                 </div>
-                <button class="btn-primary" style="flex-shrink:0; border-radius:99px; padding:0 1.2rem; height:36px; font-size:0.82rem; font-weight:800; display:flex; align-items:center; justify-content:center; border:0; box-shadow:0 2px 8px rgba(26,96,50,0.2); white-space:nowrap;" onclick="window.updateHomeSearch(document.getElementById('home-search-input').value)">Search</button>
+                <button class="btn-primary" style="flex-shrink:0; border-radius:99px; padding:0 1.2rem; height:36px; font-size:0.82rem; font-weight:800; display:flex; align-items:center; justify-content:center; border:0; box-shadow:0 2px 8px rgba(26,96,50,0.2); white-space:nowrap; width:auto;" onclick="window.updateHomeSearch(document.getElementById('home-search-input').value)">Search</button>
             </div>
         </div>
 

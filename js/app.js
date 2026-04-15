@@ -96,8 +96,10 @@ window.mobileBookings = function() {
     const role = window.auth?.userData?.role;
     if (role === 'admin') {
         router.navigate('admin');
+        setTimeout(() => { if (window.fastTab) window.fastTab('bookings'); }, 200);
     } else if (role === 'manager') {
         router.navigate('manager');
+        setTimeout(() => { if (window.setMgrTab) window.setMgrTab('bookings'); }, 200);
     } else if (window.auth?.currentUser) {
         router.navigate('profile');
     } else {
