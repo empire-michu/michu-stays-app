@@ -428,7 +428,8 @@ window.router.addRoute('manager', async (container, params) => {
                     <table class="manager-table" style="width:100%;">
                         <thead id="mgr-bookings-thead">
                             <tr>
-                                <th style="border-top-left-radius:20px;">Ref</th>
+                                <th style="border-top-left-radius:20px;">No.</th>
+                                <th>Ref</th>
                                 <th>Guest</th>
                                 <th>Amount</th>
                                 <th>Status</th>
@@ -460,7 +461,8 @@ window.router.addRoute('manager', async (container, params) => {
                                 
                                 const paginated = filtered.slice((bookingsPage - 1) * 20, bookingsPage * 20);
 
-                                return paginated.map(b => {
+                                return paginated.map((b, index) => {
+                                    let rowNum = (bookingsPage - 1) * 20 + index + 1;
                                     let nights = 0;
                                     if (b.checkIn && b.checkOut) {
                                         const diffTime = Math.abs(new Date(b.checkOut) - new Date(b.checkIn));
@@ -468,6 +470,7 @@ window.router.addRoute('manager', async (container, params) => {
                                     }
                                     return `
                                     <tr>
+                                        <td data-label="No." style="font-weight:800; color:#888;">${rowNum}</td>
                                         <td data-label="Ref" style="font-family:monospace; font-weight:900; color:var(--color-primary); font-size:1.1rem;">${b.referenceCode}</td>
                                         <td data-label="Guest">
                                             <div style="display:flex; flex-direction:column; gap:0.4rem;">

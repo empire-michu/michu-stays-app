@@ -575,7 +575,7 @@ window.router.addRoute('admin', async (container, params) => {
 
                     <div style="background:white; border-radius:20px; box-shadow:var(--shadow-sm); overflow-x:auto;">
                         <table class="manager-table" style="width:100%; min-width:1000px;">
-                            <thead><tr><th>Ref</th><th>Stay</th><th>Guest</th><th>Amount</th><th>Status</th><th>Date & Time</th><th>Proof</th></tr></thead>
+                            <thead><tr><th>No.</th><th>Ref</th><th>Stay</th><th>Guest</th><th>Amount</th><th>Status</th><th>Date & Time</th><th>Proof</th></tr></thead>
                             <tbody>
                                 ${(() => {
                                     const filtered = cachedBookings.filter(b => {
@@ -600,7 +600,8 @@ window.router.addRoute('admin', async (container, params) => {
                                     
                                     const paginated = filtered.slice((bookingsPage - 1) * 20, bookingsPage * 20);
 
-                                    return paginated.map(b => {
+                                    return paginated.map((b, index) => {
+                                        let rowNum = (bookingsPage - 1) * 20 + index + 1;
                                         let nights = 0;
                                         if (b.checkIn && b.checkOut) {
                                             const diffTime = Math.abs(new Date(b.checkOut) - new Date(b.checkIn));
@@ -608,6 +609,7 @@ window.router.addRoute('admin', async (container, params) => {
                                         }
                                         return `
                                         <tr>
+                                            <td style="font-weight:800; color:#888;">${rowNum}</td>
                                             <td style="font-family:monospace;font-weight:700;color:var(--color-primary);">${b.referenceCode}</td>
                                             <td>
                                                 <div style="font-weight:700">${b.propertyTitle}</div>

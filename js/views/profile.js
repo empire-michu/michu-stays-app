@@ -97,7 +97,8 @@ window.router.addRoute('profile', async (container, params) => {
             return;
         }
 
-        tbody.innerHTML = list.map(b => {
+        tbody.innerHTML = list.map((b, index) => {
+            let rowNum = (bookingsPage - 1) * 20 + index + 1;
             const review = bookingReviews[b.id];
             const stars = review ? review.rating : 0;
             let nights = 0;
@@ -112,6 +113,7 @@ window.router.addRoute('profile', async (container, params) => {
             };
             return `
             <tr>
+                <td data-label="No." style="font-weight:800; color:#888;">${rowNum}</td>
                 <td data-label="Ref" style="font-family:monospace;font-size:0.8rem;font-weight:600;color:var(--color-primary);">${b.referenceCode}</td>
                 <td data-label="Hotel">
                     <div style="font-weight:600;font-size:0.9rem;">${b.propertyTitle}</div>
@@ -260,7 +262,7 @@ window.router.addRoute('profile', async (container, params) => {
                 </div>
                 <div>
                     <table class="manager-table" style="width: 100%;">
-                        <thead><tr><th>Ref</th><th>Hotel</th><th>Total</th><th>Status</th><th>Date</th><th>Rating</th><th>Proof</th></tr></thead>
+                        <thead><tr><th>No.</th><th>Ref</th><th>Hotel</th><th>Total</th><th>Status</th><th>Date</th><th>Rating</th><th>Proof</th></tr></thead>
                         <tbody id="booking-table-body"></tbody>
                     </table>
                 </div>
