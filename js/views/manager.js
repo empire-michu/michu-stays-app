@@ -324,6 +324,7 @@ window.router.addRoute('manager', async (container, params) => {
                     .mgr-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
                     .mgr-three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
                     .mgr-inventory-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+                    .manager-content { min-width: 0; max-width: 100%; overflow-x: hidden; }
 
                     @media (max-width: 768px) {
                         .manager-layout { grid-template-columns: 1fr; }
@@ -350,7 +351,7 @@ window.router.addRoute('manager', async (container, params) => {
 
                         .mobile-sticky-save {
                             position: fixed;
-                            bottom: calc(75px + env(safe-area-inset-bottom, 0px));
+                            bottom: calc(90px + env(safe-area-inset-bottom, 0px));
                             left: 0.75rem; right: 0.75rem;
                             z-index: 1000;
                             box-shadow: 0 -4px 30px rgba(0,0,0,0.25);
