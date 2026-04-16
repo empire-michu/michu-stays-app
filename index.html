@@ -18,7 +18,7 @@
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
         .header {
-            padding-top: calc(1rem + var(--safe-top)) !important;
+            padding-top: max(2.2rem, calc(0.6rem + var(--safe-top))) !important;
         }
         body {
             padding-bottom: var(--safe-bottom);
@@ -32,7 +32,7 @@
             const StatusBar = window.Capacitor.Plugins.StatusBar;
             StatusBar.setOverlaysWebView({ overlay: false });
             StatusBar.setBackgroundColor({ color: '#F7F9FC' });
-            StatusBar.setStyle({ style: 'DARK' });
+            StatusBar.setStyle({ style: 'LIGHT' });
             StatusBar.show();
             console.log('StatusBar configured successfully');
           }

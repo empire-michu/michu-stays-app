@@ -177,28 +177,6 @@ window.router.addRoute('profile', async (container, params) => {
                     .profile-grid { grid-template-columns: 1fr !important; }
                     .profile-header { flex-direction: column; text-align: center; padding: 2rem 1.5rem !important; gap: 1rem !important; }
                     .booking-history-header { flex-direction: column; align-items: flex-start !important; gap: 1rem; }
-                    .manager-table thead { display: none; }
-                    .manager-table, .manager-table tbody, .manager-table tr, .manager-table td { display: block; width: 100%; }
-                    .manager-table tr { margin-bottom: 1.5rem; border: 1px solid #eee; border-radius: 20px; overflow: hidden; background: #fff; box-shadow:0 10px 30px rgba(0,0,0,0.05); }
-                    .manager-table td { 
-                        padding: 1rem; 
-                        border-bottom: 1px solid #f9f9f9; 
-                        display: grid; 
-                        grid-template-columns: 80px 1fr;
-                        gap: 1rem;
-                        align-items: flex-start;
-                        text-align: left; 
-                    }
-                    .manager-table td:before { 
-                        content: attr(data-label); 
-                        font-weight: 800; 
-                        font-size: 0.65rem; 
-                        color: #bbb; 
-                        text-transform: uppercase; 
-                        padding-top: 0.2rem;
-                    }
-                    .manager-table td:last-child { background: #fcfcfc; text-align: center !important; display: block; padding:1.5rem 1rem !important; }
-                    .manager-table td:last-child:before { display: none; }
                 }
             </style>
 
@@ -260,8 +238,8 @@ window.router.addRoute('profile', async (container, params) => {
                          <input id="filter-to" type="date" value="${window.filterTo}" style="padding:0.4rem;border:1px solid #ddd;border-radius:8px;" onchange="window.filterTo=this.value; window.renderBookings()">
                     </div>
                 </div>
-                <div>
-                    <table class="manager-table" style="width: 100%;">
+                <div style="overflow-x:auto;">
+                    <table class="manager-table" style="width: 100%; min-width: 900px;">
                         <thead><tr><th>No.</th><th>Ref</th><th>Hotel</th><th>Total</th><th>Status</th><th>Date</th><th>Rating</th><th>Proof</th></tr></thead>
                         <tbody id="booking-table-body"></tbody>
                     </table>

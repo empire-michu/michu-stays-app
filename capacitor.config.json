@@ -4,8 +4,8 @@
   "webDir": "www",
   "plugins": {
     "StatusBar": {
-      "style": "DARK",
-      "backgroundColor": "#ffffff",
+      "style": "LIGHT",
+      "backgroundColor": "#F7F9FC",
       "overlaysWebView": false
     }
   },

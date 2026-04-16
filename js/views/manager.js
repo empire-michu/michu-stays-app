@@ -221,6 +221,27 @@ window.router.addRoute('manager', async (container, params) => {
         }
     };
 
+    window.mgrCancelBooking = async (id) => {
+        try {
+            await window.db.updateBookingStatus(id, 'Denied');
+            
+            // Send global broadcast notification
+            const booking = allBookings.find(b => b.id === id);
+            await window.db.createNotification({
+                type: 'booking_denied',
+                message: `❌ Booking Denied at ${myHotel?.title || 'a property'}!`,
+                details: `Guest ${booking?.customerName || ''}'s stay request was denied.`,
+                hotelId: myHotel?.id
+            });
+
+            window.showAlert("❌ Booking Denied! The guest has been notified.");
+            syncManagerData(); 
+        } catch (e) {
+            console.error(e);
+            window.showToast("❌ Cancellation failed: " + e.message);
+        }
+    };
+
     window.enableManagerPush = async (btn) => {
         try {
             const userData = window.auth.userData || {};
@@ -309,14 +330,6 @@ window.router.addRoute('manager', async (container, params) => {
                         .manager-sidebar { display: none; }
                         .mgr-mobile-tabs { display: flex; }
                         .manager-container { padding: 0.75rem 0.5rem !important; padding-top: 0.5rem; padding-bottom: 140px; }
-                        
-                        .manager-table thead { display: none; }
-                        .manager-table, .manager-table tbody, .manager-table tr, .manager-table td { display:block; width:100% !important; }
-                        .manager-table tr { margin-bottom: 1.5rem; border:1px solid #eee; border-radius:24px; box-shadow:0 8px 30px rgba(0,0,0,0.06); background:#fff; padding: 0.5rem; }
-                        .manager-table td { display: grid; grid-template-columns: 100px 1fr; gap: 1rem; padding: 0.8rem; border-bottom: 1px solid #f5f5f5; align-items: center; text-align: right; }
-                        .manager-table td:before { content: attr(data-label); font-weight:800; font-size:0.7rem; color:#aaa; text-transform:uppercase; text-align: left; }
-                        .manager-table td:last-child { display: block; text-align: center; background: #f9fafb; border-bottom: none; border-radius: 0 0 16px 16px; padding: 1.5rem 1rem !important; }
-                        .manager-table td:last-child:before { display: none; }
 
                         /* Property Editor Mobile Overhaul */
                         .mgr-prop-layout { grid-template-columns: 1fr !important; gap: 0 !important; }
@@ -424,8 +437,8 @@ window.router.addRoute('manager', async (container, params) => {
                     <button class="btn-outline" style="padding:0.6rem 1rem; border-radius:8px; font-size:0.8rem;" onclick="filterFrom=''; filterTo=''; window.setMgrFilter()">✕ Reset</button>
                 </div>
 
-                <div style="background:white; border-radius:24px; box-shadow:var(--shadow-sm); overflow:hidden; border:1px solid #eee;">
-                    <table class="manager-table" style="width:100%;">
+                <div style="background:white; border-radius:24px; box-shadow:var(--shadow-sm); overflow-x:auto; border:1px solid #eee;">
+                    <table class="manager-table" style="width:100%; min-width:1000px;">
                         <thead id="mgr-bookings-thead">
                             <tr>
                                 <th style="border-top-left-radius:20px;">No.</th>
@@ -492,14 +505,14 @@ window.router.addRoute('manager', async (container, params) => {
                                         </td>
                                         <td data-label="Amount"><div style="font-weight:900; font-size:1.1rem; color:#1a1a1a;">${b.totalAmount} <span style="font-size:0.7rem; color:#999;">BIRR</span></div></td>
                                         <td data-label="Status">
-                                            <span style="display:inline-block; padding:0.4rem 1rem; border-radius:12px; font-size:0.7rem; font-weight:900; background:${b.status==='Confirmed'?'#e6f4ea':'#fff8e1'}; color:${b.status==='Confirmed'?'#1e7e34':'#b05d22'}; text-transform:uppercase; letter-spacing:0.05em;">${b.status}</span>
+                                            <span style="display:inline-block; padding:0.4rem 1rem; border-radius:12px; font-size:0.7rem; font-weight:900; background:${b.status==='Confirmed'?'#e6f4ea':(b.status==='Denied'?'#fce8e6':'#fff8e1')}; color:${b.status==='Confirmed'?'#1e7e34':(b.status==='Denied'?'#c5221f':'#b05d22')}; text-transform:uppercase; letter-spacing:0.05em;">${b.status}</span>
                                         </td>
                                         <td data-label="Date" style="font-size:0.85rem; color:#666; font-weight:600;">
                                             <div>${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—'}</div>
                                             <div style="font-size:0.7rem; color:#b0b0b0;">${b.createdAt ? new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : ''}</div>
                                         </td>
                                         <td data-label="Proof">${b.paymentProofUrl ? `<button class="btn-outline" style="padding:0.4rem 1rem; font-size:0.75rem; border-radius:10px; font-weight:700; background:white;" onclick="window.viewProof('${b.paymentProofUrl}')">🖼 Browse Proof</button>` : '<span style="color:#ddd; font-style:italic; font-size:0.8rem;">No file</span>'}</td>
-                                        <td>${b.status === 'Awaiting Verification' ? `<button class="btn-primary" style="padding:1rem; font-size:0.9rem; border-radius:14px; width:100%; box-shadow:0 4px 15px rgba(26,96,50,0.2);" onclick="window.mgrConfirmBooking('${b.id}')">Confirm Booking Now</button>` : '<div style="color:#bbb; font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.5rem;">✅ Processed</div>'}</td>
+                                        <td>${b.status === 'Awaiting Verification' ? `<div style="display:flex; gap:0.5rem; flex-direction:column;"><button class="btn-primary" style="padding:0.8rem; font-size:0.9rem; border-radius:14px; width:100%; box-shadow:0 4px 15px rgba(26,96,50,0.2);" onclick="window.mgrConfirmBooking('${b.id}')">Confirm Booking</button><button class="btn-outline" style="padding:0.8rem; font-size:0.9rem; border-radius:14px; width:100%; border-color:#e74c3c; color:#e74c3c;" onclick="window.mgrCancelBooking('${b.id}')">Cancel Booking</button></div>` : '<div style="color:#bbb; font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.5rem;">✅ Processed</div>'}</td>
                                     </tr>
                                     `;
                                 }).join('');
