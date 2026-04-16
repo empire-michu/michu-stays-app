@@ -725,7 +725,8 @@ window.router.addRoute('manager', async (container, params) => {
                         <label style="display:block; font-weight:700; font-size:0.85rem; margin-bottom:0.5rem; color:#555;">CONTACT PHONE</label>
                         <input id="mg-acc-phone" type="tel" value="${userData.phone||''}" placeholder="+251 91..." style="width:100%; padding:1rem; border:1.5px solid #eee; border-radius:14px; font-weight:600;">
                     </div>
-                    <button id="mg-acc-save-btn" class="btn-primary" style="padding:1.2rem; margin-top:1rem; border-radius:16px; font-size:1rem; box-shadow:var(--shadow-md);" onclick="window.mgSaveAccount()">💾 Update My Account</button>
+                    <button id="mg-acc-save-btn" class="btn-primary" style="padding:1.2rem; margin-top:1rem; border-radius:16px; font-size:1rem; font-weight:700; box-shadow:var(--shadow-md);" onclick="window.mgSaveAccount()">💾 Update My Account</button>
+                    <button class="btn-outline" style="padding:1.2rem; border-radius:16px; font-size:1rem; font-weight:700; border-color:#e74c3c; color:#e74c3c; margin-top:0.5rem;" onclick="window.auth.logout()">🚪 Log out</button>
                 </div>
             </div>
         `;

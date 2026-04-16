@@ -103,15 +103,18 @@ class AuthEngine {
 
     renderNav() {
         const container = document.getElementById('auth-nav-container');
+        const notifBtn = document.getElementById('header-notif-btn');
         if (!container) return;
         const role = this.userData?.role;
 
         if (this.currentUser) {
+            if (notifBtn) notifBtn.style.display = 'flex';
+            
             let dashBtn = '';
             if (role === 'admin') {
-                dashBtn = `<button class="btn-primary" style="padding:0.4rem 0.8rem;font-size:0.8rem;background:var(--color-secondary);" onclick="window.router.navigate('admin')">⚙ Admin Panel</button>`;
+                dashBtn = `<button class="btn-primary" style="padding:0.4rem 0.8rem;font-size:0.75rem;background:var(--color-secondary);border-radius:12px;" onclick="window.router.navigate('admin')">⚙ Admin Panel</button>`;
             } else if (role === 'manager') {
-                dashBtn = `<button class="btn-primary" style="padding:0.4rem 0.8rem;font-size:0.8rem;" onclick="window.router.navigate('manager')">Dashboard</button>`;
+                dashBtn = `<button class="btn-primary" style="padding:0.4rem 0.8rem;font-size:0.75rem;border-radius:12px;" onclick="window.router.navigate('manager')">Dashboard</button>`;
             } else {
                 // Guest: show profile picture and formatted name (e.g. ABEBE G.)
                 let displayName = 'GUEST';
@@ -128,21 +131,22 @@ class AuthEngine {
                     ? `<img src="${this.userData.profilePic}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.3);">`
                     : `<img src="images/logo.png" style="width:24px;height:24px;border-radius:50%;object-fit:contain;background:white;padding:2px;">`;
 
-                dashBtn = `<button class="btn-outline" style="padding:0.4rem 0.8rem;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;font-weight:700;" onclick="window.router.navigate('profile')">
+                dashBtn = `<button class="btn-outline" style="padding:0.3rem 0.7rem;font-size:0.75rem;display:flex;align-items:center;gap:0.4rem;font-weight:700;border-radius:12px;" onclick="window.router.navigate('profile')">
                     ${avatarImg} ${displayName}
                 </button>`;
             }
             container.innerHTML = `
-                <div style="display:flex;align-items:center;gap:0.6rem;">
+                <div style="display:flex;align-items:center;">
                     ${dashBtn}
-                    <button class="btn-outline" style="padding:0.4rem 0.8rem;font-size:0.8rem;" onclick="window.auth.logout()">Log out</button>
                 </div>
             `;
         } else {
+            if (notifBtn) notifBtn.style.display = 'none';
+            
             container.innerHTML = `
-                <div style="display:flex;align-items:center;gap:0.5rem;">
-                    <button class="btn-outline" style="padding:0.4rem 1rem;border:none;font-size:0.9rem;" onclick="window.router.navigate('login')">Log In</button>
-                    <button class="btn-primary" style="padding:0.4rem 1rem;font-size:0.9rem;" onclick="window.router.navigate('signup')">Sign Up</button>
+                <div style="display:flex;align-items:center;gap:0.4rem;">
+                    <button class="btn-outline" style="padding:0.35rem 0.6rem;border:none;font-size:0.8rem;font-weight:600;" onclick="window.router.navigate('login')">Log In</button>
+                    <button class="btn-primary" style="padding:0.35rem 0.8rem;font-size:0.8rem;border-radius:12px;" onclick="window.router.navigate('signup')">Sign Up</button>
                 </div>
             `;
         }

@@ -190,6 +190,9 @@ window.router.addRoute('profile', async (container, params) => {
                     <h2 style="margin:0 0 0.5rem;font-size:1.8rem;">${userData.fullName || 'Welcome Traveler'}</h2>
                     <p style="margin:0;opacity:0.9;">${userEmail}</p>
                 </div>
+                <div>
+                    <button class="btn-outline" style="border-color:white; color:white; padding:0.6rem 1.2rem; border-radius:12px; font-weight:700; font-size:0.85rem;" onclick="window.auth.logout()">Log out</button>
+                </div>
             </div>
 
             <div class="profile-grid" style="display:grid;grid-template-columns:1.5fr 1fr;gap:2rem;margin-bottom:2rem;">

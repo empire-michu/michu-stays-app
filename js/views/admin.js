@@ -820,7 +820,8 @@ window.router.addRoute('admin', async (container, params) => {
                         <div style="display:grid; gap:1.2rem;">
                             <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Full Name</label><input id="adm-name" type="text" value="${userData.fullName||''}" style="width:100%; padding:0.8rem; border:1.5px solid #eee; border-radius:12px;"></div>
                             <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Phone</label><input id="adm-phone" type="text" value="${userData.phone||''}" style="width:100%; padding:0.8rem; border:1.5px solid #eee; border-radius:12px;"></div>
-                            <button id="adm-save-acc-btn" class="btn-primary" style="padding:1rem;" onclick="window.admSaveProfile()">Update Profile</button>
+                            <button id="adm-save-acc-btn" class="btn-primary" style="padding:1rem; border-radius:12px; font-weight:700;" onclick="window.admSaveProfile()">Update Profile</button>
+                            <button class="btn-outline" style="padding:1rem; border-radius:12px; font-weight:700; border-color:#e74c3c; color:#e74c3c; margin-top:0.5rem;" onclick="window.auth.logout()">🚪 Log out</button>
                         </div>
                     </div>
                 </div>
