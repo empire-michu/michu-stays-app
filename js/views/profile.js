@@ -206,6 +206,7 @@ window.router.addRoute('profile', async (container, params) => {
                     </div>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:2rem;">
+                    ${userData.role !== 'manager' ? `
                     <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);">
                         <h3 style="margin-bottom:1.5rem;">📊 Account Status</h3>
                         <div style="display:grid;gap:0.8rem;">
@@ -217,6 +218,7 @@ window.router.addRoute('profile', async (container, params) => {
                             </div>
                         </div>
                     </div>
+                    ` : ''}
                     
                     <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);">
                         <h3 style="margin-bottom:1.5rem;">🔐 Change Password</h3>
@@ -230,6 +232,7 @@ window.router.addRoute('profile', async (container, params) => {
                 </div>
             </div>
 
+            ${userData.role !== 'manager' ? `
             <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);margin-bottom:2rem;">
                 <div class="booking-history-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
                     <h3 style="margin:0;">📜 Booking History <span id="booking-count" style="font-size:0.8rem;font-weight:400;color:#888;"></span></h3>
@@ -249,6 +252,7 @@ window.router.addRoute('profile', async (container, params) => {
                 </div>
                 <div id="bookings-pagination"></div>
             </div>
+            ` : ''}
 
             <!-- Danger Zone -->
             <div style="background:#fff5f5;border-radius:20px;padding:2rem;border:1px solid #ffcfcf;text-align:center;">
@@ -477,6 +481,23 @@ window.router.addRoute('profile', async (container, params) => {
             btn.style.opacity = '1';
             btn.innerText = 'Submit Review';
             status.innerText = '';
+        }
+    };
+
+    window.showGuestProof = (bookingId) => {
+        const b = allBookings.find(x => x.id === bookingId);
+        if (b && b.paymentProofUrl) {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:20000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px);`;
+            overlay.innerHTML = `
+                <div style="position:relative; width:90%; max-width:600px; animation: _alertPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                    <button style="position:absolute;top:-45px;right:0;background:none;border:none;color:white;font-size:2.5rem;line-height:1;cursor:pointer;padding:0;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                    <img src="${b.paymentProofUrl}" style="width:100%;border-radius:16px;max-height:85vh;object-fit:contain;box-shadow:0 20px 50px rgba(0,0,0,0.5);background:#111;">
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        } else {
+            window.showToast("Proof of payment not available.");
         }
     };
 

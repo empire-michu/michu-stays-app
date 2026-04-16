@@ -485,35 +485,24 @@ window.router.addRoute('manager', async (container, params) => {
                                     return `
                                     <tr>
                                         <td data-label="No." style="font-weight:800; color:#888;">${rowNum}</td>
-                                        <td data-label="Ref" style="font-family:monospace; font-weight:900; color:var(--color-primary); font-size:1.1rem;">${b.referenceCode}</td>
+                                        <td data-label="Ref" style="font-family:monospace;font-weight:700;color:var(--color-primary);">${b.referenceCode}</td>
                                         <td data-label="Guest">
-                                            <div style="display:flex; flex-direction:column; gap:0.4rem;">
-                                                <div style="font-weight:900; color:#1a1a1a; font-size:1rem; line-height:1.2;">${b.customerName || 'Anonymous Guest'}</div>
-                                                <div style="display:flex; align-items:center; gap:0.4rem; color:#555; font-size:0.8rem;">
-                                                    <span style="opacity:0.6;">✉️</span> 
-                                                    <span style="word-break:break-all; font-weight:600;">${b.customerEmail}</span>
-                                                </div>
-                                                ${b.customerPhone ? `
-                                                <div style="display:flex; align-items:center; gap:0.4rem; color:var(--color-primary); font-size:0.85rem; font-weight:800;">
-                                                    <span>📞</span> ${b.customerPhone}
-                                                </div>` : ''}
-                                                
-                                                <div style="margin-top:0.5rem; padding-top:0.5rem; border-top:1px solid #eee; display:flex; gap:0.8rem; align-items:center;">
-                                                    <div style="font-size:0.75rem; color:#888;">Stay: <strong style="color:#333;">${b.checkIn} → ${b.checkOut}</strong></div>
-                                                    <div style="background:#fff8e1; color:#b05d22; padding:0.2rem 0.5rem; border-radius:6px; font-size:0.7rem; font-weight:900; border:1px solid #ffe082;">${nights} NIGHTS</div>
-                                                </div>
+                                            <div style="font-weight:700; color:#333; text-transform:uppercase; font-size:0.85rem;">${b.customerName || 'Anonymous Guest'}</div>
+                                            <div style="font-size:0.75rem; color:#08553d; margin-bottom:2px; font-weight:500;">✉️ ${b.customerEmail}</div>
+                                            ${b.customerPhone ? `<div style="font-size:0.75rem; color:#08553d; font-weight:700;"><span style="color:#d4af37; margin-right:4px;">📞</span>${b.customerPhone}</div>` : ''}
+                                            <div style="font-size:0.75rem; color:var(--color-text-light); margin-top:0.3rem;">
+                                                Stay: <strong>${b.checkIn} &rarr; ${b.checkOut}</strong> <span style="font-weight:700;color:#d4af37;margin-left:4px;">(${nights} night${nights !== 1 ? 's' : ''})</span>
                                             </div>
                                         </td>
-                                        <td data-label="Amount"><div style="font-weight:900; font-size:1.1rem; color:#1a1a1a;">${b.totalAmount} <span style="font-size:0.7rem; color:#999;">BIRR</span></div></td>
+                                        <td data-label="Amount" style="font-weight:600; white-space:nowrap;">${b.totalAmount} Birr</td>
                                         <td data-label="Status">
-                                            <span style="display:inline-block; padding:0.4rem 1rem; border-radius:12px; font-size:0.7rem; font-weight:900; background:${b.status==='Confirmed'?'#e6f4ea':(b.status==='Denied'?'#fce8e6':'#fff8e1')}; color:${b.status==='Confirmed'?'#1e7e34':(b.status==='Denied'?'#c5221f':'#b05d22')}; text-transform:uppercase; letter-spacing:0.05em;">${b.status}</span>
+                                            <span style="padding:0.2rem 0.6rem; border-radius:99px; font-size:0.75rem; background:${b.status==='Confirmed'?'#e6f4ea':(b.status==='Denied'?'#fce8e6':'#fff8e1')}; color:${b.status==='Confirmed'?'#1e7e34':(b.status==='Denied'?'#c5221f':'#b05d22')}; font-weight:700; text-transform:uppercase;">${b.status}</span>
                                         </td>
-                                        <td data-label="Date" style="font-size:0.85rem; color:#666; font-weight:600;">
-                                            <div>${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—'}</div>
-                                            <div style="font-size:0.7rem; color:#b0b0b0;">${b.createdAt ? new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : ''}</div>
+                                        <td data-label="Date" style="font-size:0.8rem;color:#555;font-weight:600;">
+                                            ${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + '<br><small style="color:#aaa;">' + new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + '</small>' : '—'}
                                         </td>
-                                        <td data-label="Proof">${b.paymentProofUrl ? `<button class="btn-outline" style="padding:0.4rem 1rem; font-size:0.75rem; border-radius:10px; font-weight:700; background:white;" onclick="window.viewProof('${b.paymentProofUrl}')">🖼 Browse Proof</button>` : '<span style="color:#ddd; font-style:italic; font-size:0.8rem;">No file</span>'}</td>
-                                        <td>${b.status === 'Awaiting Verification' ? `<div style="display:flex; gap:0.5rem; flex-direction:column;"><button class="btn-primary" style="padding:0.8rem; font-size:0.9rem; border-radius:14px; width:100%; box-shadow:0 4px 15px rgba(26,96,50,0.2);" onclick="window.mgrConfirmBooking('${b.id}')">Confirm Booking</button><button class="btn-outline" style="padding:0.8rem; font-size:0.9rem; border-radius:14px; width:100%; border-color:#e74c3c; color:#e74c3c;" onclick="window.mgrCancelBooking('${b.id}')">Cancel Booking</button></div>` : '<div style="color:#bbb; font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.5rem;">✅ Processed</div>'}</td>
+                                        <td data-label="Proof">${b.paymentProofUrl ? `<button class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-radius:8px;" onclick="window.viewProof('${b.paymentProofUrl}')">🖼 Proof</button>` : '<span style="color:#ddd; font-style:italic; font-size:0.8rem;">No file</span>'}</td>
+                                        <td>${b.status === 'Awaiting Verification' ? `<div style="display:flex; gap:0.4rem; flex-direction:column;"><button class="btn-primary" style="padding:0.4rem 0.6rem; font-size:0.75rem; border-radius:8px; width:100%; box-shadow:0 4px 10px rgba(26,96,50,0.2);" onclick="window.mgrConfirmBooking('${b.id}')">Confirm</button><button class="btn-outline" style="padding:0.4rem 0.6rem; font-size:0.75rem; border-radius:8px; width:100%; border-color:#e74c3c; color:#e74c3c;" onclick="window.mgrCancelBooking('${b.id}')">Cancel</button></div>` : '<div style="color:#bbb; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.3rem;">✅ Done</div>'}</td>
                                     </tr>
                                     `;
                                 }).join('');

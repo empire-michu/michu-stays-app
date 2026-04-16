@@ -2,6 +2,14 @@ class Router {
     constructor() {
         this.routes = {};
         this.appContainer = document.getElementById('app-container');
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.name) {
+                this.navigate(e.state.name, e.state.params, false);
+            } else {
+                const hash = window.location.hash.replace('#', '') || 'home';
+                this.navigate(hash, {}, false);
+            }
+        });
     }
 
     addRoute(name, renderFunction) {
@@ -43,8 +51,15 @@ class Router {
         });
     }
 
-    navigate(name, params = {}) {
+    navigate(name, params = {}, updateHistory = true) {
         if (this.routes[name]) {
+            if (updateHistory) {
+                let hashPath = `#${name}`;
+                // Optional: Serialize params into URL if needed, but for now simple hash is enough.
+                if (window.location.hash !== hashPath) {
+                    window.history.pushState({ name, params }, '', hashPath);
+                }
+            }
             this.appContainer.innerHTML = ''; // Clear current view
             this.routes[name](this.appContainer, params); // Render new view
             this.updateSEO(); // Initial reset to default SEO
