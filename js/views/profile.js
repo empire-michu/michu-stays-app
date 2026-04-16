@@ -206,7 +206,7 @@ window.router.addRoute('profile', async (container, params) => {
                     </div>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:2rem;">
-                    ${userData.role !== 'manager' ? `
+                    ${!['manager', 'admin'].includes(userData.role) ? `
                     <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);">
                         <h3 style="margin-bottom:1.5rem;">📊 Account Status</h3>
                         <div style="display:grid;gap:0.8rem;">
@@ -232,7 +232,7 @@ window.router.addRoute('profile', async (container, params) => {
                 </div>
             </div>
 
-            ${userData.role !== 'manager' ? `
+            ${!['manager', 'admin'].includes(userData.role) ? `
             <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);margin-bottom:2rem;">
                 <div class="booking-history-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
                     <h3 style="margin:0;">📜 Booking History <span id="booking-count" style="font-size:0.8rem;font-weight:400;color:#888;"></span></h3>

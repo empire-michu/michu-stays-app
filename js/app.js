@@ -10,6 +10,34 @@ class Router {
                 this.navigate(hash, {}, false);
             }
         });
+
+        // Setup native mobile hardware back button handler
+        document.addEventListener('deviceready', () => {
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+                window.Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
+                    const currentHash = window.location.hash.replace('#', '');
+                    if (currentHash && currentHash !== 'home') {
+                        window.history.back();
+                    } else {
+                        window.Capacitor.Plugins.App.exitApp();
+                    }
+                });
+            }
+        });
+        
+        // Also fire manually in case deviceready is already passed or not fired on modern Capacitor
+        setTimeout(() => {
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+                window.Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
+                    const currentHash = window.location.hash.replace('#', '');
+                    if (currentHash && currentHash !== 'home' && currentHash !== 'login') {
+                        window.history.back();
+                    } else {
+                        window.Capacitor.Plugins.App.exitApp();
+                    }
+                });
+            }
+        }, 1500);
     }
 
     addRoute(name, renderFunction) {
