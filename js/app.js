@@ -363,7 +363,7 @@ window.showPushNotification = ({ message, details, createdAt, link }) => {
     };
 
     container.onclick = () => {
-        if (link) window.router.navigate(link);
+        if (link) window.router.navigate(link, params || {});
         close();
     };
     setTimeout(close, 8000);
@@ -377,7 +377,7 @@ const renderNotifList = () => {
     if (notifications.length > 0) {
         if (empty) empty.style.display = 'none';
         list.innerHTML = notifications.map(n => `
-            <div onclick="window.router.navigate('${n.link || 'home'}'); document.getElementById('notif-modal').style.display='none';" style="padding:1rem; background:#f8f9fa; border-radius:15px; border:1px solid #edf2f7; cursor:pointer; transition:all 0.2s;">
+            <div onclick="window.router.navigate('${n.link || 'home'}', ${n.params ? JSON.stringify(n.params).replace(/"/g, '&quot;') : '{}'}); document.getElementById('notif-modal').style.display='none';" style="padding:1rem; background:#f8f9fa; border-radius:15px; border:1px solid #edf2f7; cursor:pointer; transition:all 0.2s;">
                 <div style="font-weight:700; color:var(--color-primary); font-size:0.9rem; margin-bottom:0.2rem;">${n.message}</div>
                 <div style="font-size:0.8rem; color:#666; line-height:1.4;">${n.details}</div>
                 <div style="font-size:0.7rem; color:#bbb; margin-top:0.5rem;">${new Date(n.createdAt || Date.now()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>

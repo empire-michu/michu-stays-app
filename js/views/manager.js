@@ -320,18 +320,23 @@ window.router.addRoute('manager', async (container, params) => {
                     .manager-table th { background:#f9fafb; padding:1.2rem 1rem; text-align:left; font-size:0.75rem; font-weight:800; color:#666; text-transform:uppercase; border-bottom:2px solid #f0f0f0; }
                     .manager-table td { padding:1.2rem 1rem; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
 
-                    /* Property Editor Responsive Grid */
-                    .mgr-prop-layout { display: grid; grid-template-columns: 1fr 320px; gap: 2rem; }
-                    .mgr-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
-                    .mgr-three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
-                    .mgr-inventory-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+                    /* Property Editor Fluid Grid */
+                    .mgr-prop-layout { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; align-items: start; }
+                    .mgr-main-card { min-width: 0; }
+                    .mgr-two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+                    .mgr-three-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+                    .mgr-inventory-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+                    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 24px; border: 1px solid #eee; background: white; box-shadow: var(--shadow-sm); }
+
+                    @media (max-width: 1024px) {
+                        .mgr-prop-layout { grid-template-columns: 1fr; }
+                        .mgr-prop-preview { display: none; }
+                    }
 
                     @media (max-width: 768px) {
-                        .manager-container { padding: 0.75rem 0.5rem !important; }
-                        .mgr-prop-layout { grid-template-columns: 1fr !important; gap: 0 !important; }
-                        .mgr-prop-preview { display: none !important; }
-                        .mgr-main-card { padding: 1.25rem !important; border-radius: 20px !important; }
-                        .mgr-two-col, .mgr-three-col, .mgr-inventory-col { grid-template-columns: 1fr !important; gap: 0.8rem !important; }
+                        .manager-container { padding: 1rem 0.5rem !important; }
+                        .mgr-main-card { padding: 1.5rem !important; border-radius: 20px !important; }
+                        .mgr-tab-bar { width: 100%; justify-content: center; }
                     }
                 </style>
 
@@ -399,8 +404,8 @@ window.router.addRoute('manager', async (container, params) => {
                     <button class="btn-outline" style="padding:0.6rem 1rem; border-radius:8px; font-size:0.8rem;" onclick="filterFrom=''; filterTo=''; window.setMgrFilter()">✕ Reset</button>
                 </div>
 
-                <div style="background:white; border-radius:24px; box-shadow:var(--shadow-sm); overflow-x:auto; border:1px solid #eee;">
-                    <table class="manager-table" style="width:100%; min-width:1000px;">
+                <div class="table-responsive">
+                    <table class="manager-table" style="width:100%; border-collapse: collapse;">
                         <thead id="mgr-bookings-thead">
                             <tr>
                                 <th style="border-top-left-radius:20px;">No.</th>

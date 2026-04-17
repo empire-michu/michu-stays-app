@@ -185,7 +185,8 @@ class Database {
             targetUserId: property.managerId || 'admin', // target manager
             targetRole: 'admin', // also target all admins
             type: 'booking_new',
-            link: 'manager'
+            link: 'manager',
+            params: { tab: 'bookings' }
         });
 
         this.clearCache('bookings');
@@ -224,7 +225,8 @@ class Database {
             details: `Your booking for ${booking.propertyTitle} (${booking.referenceCode}) is now: ${status}`,
             targetUserId: booking.customerId,
             type: 'booking_update',
-            link: 'profile'
+            link: 'profile',
+            params: { tab: 'bookings' }
         });
     }
 
