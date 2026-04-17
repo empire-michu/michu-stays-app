@@ -162,7 +162,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                     <style>
                                         .pkg-card:hover { border-color:var(--color-primary); transform:translateY(-8px); box-shadow:0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
                                         .pkg-card:active { transform:scale(0.98); }
-                                        .pkg-discount-badge { position:absolute; top:0; right:0; background:linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); color:#911; font-weight:900; padding:0.4rem 1rem; border-bottom-left-radius:18px; font-size:0.85rem; box-shadow: -2px 2px 5px rgba(0,0,0,0.05); }
+                                        .pkg-discount-badge { position:absolute; top:0; right:0; background:linear-gradient(135deg, #f59e0b 0%, #d4af37 100%); color:white; font-weight:900; padding:0.4rem 1rem; border-bottom-left-radius:18px; font-size:0.85rem; box-shadow: -2px 2px 5px rgba(0,0,0,0.05); }
                                     </style>
                                     
                                     <div class="pkg-discount-badge">Save ${savings.toLocaleString()} Birr</div>
@@ -172,13 +172,13 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                     <h3 style="margin:0 0 0.5rem; font-size:1.25rem; font-weight:800; color:var(--color-text-dark);">${pkg.title}</h3>
                                     
                                     <div style="font-size:0.9rem; color:#64748b; line-height:1.6; margin-bottom:1.5rem; flex-grow:1;">
-                                        ${pkg.services ? pkg.services.split(',').map(s => `<div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.3rem;">✨ ${s.trim()}</div>`).join('') : 'Includes all standard amenities and exclusive stay perks.'}
+                                        ${pkg.services ? pkg.services.split(',').map(s => `<div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.3rem;"><span style="color:#f59e0b;">✨</span> ${s.trim()}</div>`).join('') : 'Includes all standard amenities and exclusive stay perks.'}
                                     </div>
                                     
                                     <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1.2rem; border-top:1.5px dashed #f1f5f9;">
                                         <div>
-                                            <div style="color:#ef4444; font-weight:950; font-size:1.3rem; letter-spacing:-1px;">${pkg.discount}% OFF</div>
-                                            <div style="font-size:0.7rem; color:#94a3b8; font-weight:700; text-transform:uppercase;">Limited Time Offer</div>
+                                            <div style="color:#d97706; font-weight:950; font-size:1.35rem; letter-spacing:-1.05px;">${pkg.discount}% OFF</div>
+                                            <div style="font-size:0.7rem; color:#b45309; font-weight:800; text-transform:uppercase; letter-spacing:0.02em;">Limited Time Offer</div>
                                         </div>
                                         <div class="btn-primary" style="padding:0.6rem 1.2rem; border-radius:14px; font-size:0.85rem; font-weight:800; background:linear-gradient(135deg, var(--color-primary), #1e7e34); box-shadow:0 10px 15px -3px rgba(11, 102, 70, 0.3);">Select Deal</div>
                                     </div>
@@ -451,9 +451,11 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         summary.innerHTML = `
             <div style="display:grid; gap:0.6rem; font-size:0.95rem;">
                 ${isPkg ? `
-                    <div style="background:#f0f7ff; padding:0.8rem; border-radius:12px; border:1px solid #c9e2ff; margin-bottom:0.5rem; animation: slideIn 0.3s ease;">
-                        <div style="font-weight:800; color:#0056b3; font-size:0.75rem; text-transform:uppercase; margin-bottom:0.2rem;">🎁 Package Applied</div>
-                        <div style="font-weight:700; color:var(--color-primary);">${pkgInfo.title}</div>
+                    <div style="background:#fff8e1; padding:0.8rem; border-radius:12px; border:1px solid #ffecb3; margin-bottom:0.5rem; animation: slideIn 0.3s ease;">
+                        <div style="font-weight:900; color:#d97706; font-size:0.75rem; text-transform:uppercase; margin-bottom:0.2rem; display:flex; align-items:center; gap:0.3rem;">
+                            <span>🎁</span> PACKAGE APPLIED
+                        </div>
+                        <div style="font-weight:700; color:#444;">${pkgInfo.title}</div>
                         <div style="font-size:0.7rem; color:#666;">${pkgInfo.services || ''}</div>
                     </div>
                 ` : ''}
@@ -462,7 +464,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     <span style="font-weight:600;">${baseTotal} Birr</span>
                 </div>
                 ${discountToUse > 0 ? `
-                <div style="display:flex; justify-content:space-between; color:#d9534f; font-weight:700;">
+                <div style="display:flex; justify-content:space-between; color:#d97706; font-weight:800;">
                     <span>Discount (${discountToUse}%)</span>
                     <span>-${discAmt} Birr</span>
                 </div>` : ''}
