@@ -451,6 +451,9 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     <span>Total</span>
                     <span>${finalTotal} Birr</span>
                 </div>
+                ${(hotel.eventMode && isPkg) ? `
+                    <button class="btn-primary" style="width:100%; padding:1rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:linear-gradient(135deg, var(--color-primary), #2a8146); margin-top:1rem;" onclick="goToBooking()">Reserve Package</button>
+                ` : ''}
                 <p style="text-align:center; font-size:0.7rem; color:#999; margin-top:0.5rem;">Prices include 15% VAT & Service Fees</p>
             </div>
         `;
