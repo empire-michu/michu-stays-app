@@ -330,7 +330,7 @@ window.router.addRoute('manager', async (container, params) => {
                         .manager-layout { grid-template-columns: 1fr; }
                         .manager-sidebar { display: none; }
                         .mgr-mobile-tabs { display: flex; }
-                        .manager-container { padding: 0.75rem 0.5rem !important; padding-top: 0.5rem; padding-bottom: 140px; }
+                        .manager-container { padding: 0.75rem 0.5rem !important; padding-top: 0.5rem; padding-bottom: 80px; }
 
                         /* Property Editor Mobile Overhaul */
                         .mgr-prop-layout { grid-template-columns: 1fr !important; gap: 0 !important; }
