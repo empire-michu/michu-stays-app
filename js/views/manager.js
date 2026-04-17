@@ -88,11 +88,11 @@ window.router.addRoute('manager', async (container, params) => {
             <input type="text" placeholder="Package Title (e.g. Weekend Special)" class="mg-pkg-title" style="padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem;">
             <div style="position:relative;">
                 <input type="number" placeholder="Nights" class="mg-pkg-nights" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem; padding-right:2.5rem;">
-                <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700;">NIGHTS</span>
+                <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700; pointer-events:none;">NIGHTS</span>
             </div>
             <div style="position:relative;">
                 <input type="number" placeholder="Disc" class="mg-pkg-discount" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem; padding-right:1.5rem;">
-                <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700;">%</span>
+                <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700; pointer-events:none;">%</span>
             </div>
             <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800;">✕</button>
             <div style="grid-column: 1 / -1;">
@@ -365,8 +365,8 @@ window.router.addRoute('manager', async (container, params) => {
 
                     .mg-package-row { display: grid; grid-template-columns: 1fr 100px 100px 40px; gap: 0.8rem; align-items: center; }
                     @media (max-width: 600px) {
-                        .mg-package-row { grid-template-columns: 1fr 1fr 40px !important; }
-                        .mg-package-row > input:first-child { grid-column: 1 / span 2; }
+                        .mg-package-row { grid-template-columns: 1fr 1fr 45px !important; gap: 0.6rem !important; }
+                        .mg-package-row > *:first-child { grid-column: 1 / span 3; }
                     }
 
                     @media (max-width: 1024px) {
@@ -675,11 +675,11 @@ window.router.addRoute('manager', async (container, params) => {
                                         <input type="text" placeholder="Package Title (e.g. Weekend Special)" value="${pkg.title||''}" class="mg-pkg-title" style="padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem;">
                                         <div style="position:relative;">
                                             <input type="number" placeholder="Nights" value="${pkg.nights||''}" class="mg-pkg-nights" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem; padding-right:2.5rem;">
-                                            <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700;">NIGHTS</span>
+                                            <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700; pointer-events:none;">NIGHTS</span>
                                         </div>
                                         <div style="position:relative;">
                                             <input type="number" placeholder="Disc" value="${pkg.discount||''}" class="mg-pkg-discount" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem; padding-right:1.5rem;">
-                                            <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700;">%</span>
+                                            <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700; pointer-events:none;">%</span>
                                         </div>
                                         <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800;">✕</button>
                                         <div style="grid-column: 1 / -1;">
