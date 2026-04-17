@@ -356,17 +356,9 @@ window.router.addRoute('home', async (container, params) => {
             </div>
         </div>
 
-        <section class="hero-section">
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-                <h1 class="hero-title">Experience the Spirit of <br><span style="color:var(--color-secondary); font-weight: 800; border-bottom: 3px solid var(--color-secondary);">Dire Dawa</span></h1>
-                <p class="hero-subtitle">Premium stays in Ethiopia's iconic railway gateway.</p>
-            </div>
-        </section>
-
-        <div class="container" style="position:relative; z-index:10; margin-top:-2rem;">
+        <div class="container" style="position:relative; z-index:10; margin-top:1.5rem;">
             <!-- Categories -->
-            <div class="category-filters" style="margin-top:3rem; padding-bottom:1.5rem; border:none; gap:1.2rem;">
+            <div class="category-filters" style="margin-top:0.5rem; padding-bottom:1.5rem; border:none; gap:1.2rem;">
                 <div class="category-item active" id="cat-all" onclick="setCat('all')">
                     <svg class="category-icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
