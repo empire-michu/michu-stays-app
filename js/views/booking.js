@@ -129,11 +129,17 @@ window.router.addRoute('booking', async (container, params) => {
 
     window.selectPay = (method) => {
         currentMethod = method === 'CBE' ? 'CBE Mobile Banking' : 'telebirr';
-        document.getElementById('card-cbe').className = method === 'CBE' ? 'pay-card active' : 'pay-card';
-        document.getElementById('card-tele').className = method === 'telebirr' ? 'pay-card active' : 'pay-card';
-        document.getElementById('details-cbe').style.display = method === 'CBE' ? 'block' : 'none';
-        document.getElementById('details-tele').style.display = method === 'telebirr' ? 'block' : 'none';
-        document.getElementById('upload-text').innerText = `Click to upload your ${method} screenshot`;
+        const cardCbe = document.getElementById('card-cbe');
+        const cardTele = document.getElementById('card-tele');
+        const detCbe = document.getElementById('details-cbe');
+        const detTele = document.getElementById('details-tele');
+        const uploadText = document.getElementById('upload-text');
+
+        if (cardCbe) cardCbe.className = method === 'CBE' ? 'pay-card active' : 'pay-card';
+        if (cardTele) cardTele.className = method === 'telebirr' ? 'pay-card active' : 'pay-card';
+        if (detCbe) detCbe.style.display = method === 'CBE' ? 'block' : 'none';
+        if (detTele) detTele.style.display = method === 'telebirr' ? 'block' : 'none';
+        if (uploadText) uploadText.innerText = `Click to upload your ${method} screenshot`;
     };
 
     document.getElementById('proof-file').addEventListener('change', (e) => {
@@ -153,22 +159,27 @@ window.router.addRoute('booking', async (container, params) => {
         btn.setAttribute('disabled', true);
 
         try {
-            document.getElementById('upload-progress').style.display = 'block';
-            document.getElementById('upload-bar').style.width = '20%';
+            const progress = document.getElementById('upload-progress');
+            const bar = document.getElementById('upload-bar');
+
+            if (progress) progress.style.display = 'block';
+            if (bar) bar.style.width = '20%';
 
             let proofUrl = '';
             try {
                 proofUrl = await window.db.uploadPaymentProof(selectedFile, code);
-                document.getElementById('upload-bar').style.width = '70%';
+                if (bar) bar.style.width = '70%';
             } catch (uploadErr) {
-                btn.innerText = 'Submit Proof & Confirm Booking';
-                btn.removeAttribute('disabled');
-                document.getElementById('upload-progress').style.display = 'none';
+                if (btn) {
+                    btn.innerText = 'Submit Proof & Confirm Booking';
+                    btn.removeAttribute('disabled');
+                }
+                if (progress) progress.style.display = 'none';
                 showAlert(uploadErr.message);
                 return;
             }
 
-            document.getElementById('upload-bar').style.width = '90%';
+            if (bar) bar.style.width = '90%';
 
             const user = window.auth?.currentUser;
             const userData = window.auth?.userData;
@@ -184,7 +195,7 @@ window.router.addRoute('booking', async (container, params) => {
                 totalAmount: amount
             }, code, proofUrl, currentMethod);
 
-            document.getElementById('upload-bar').style.width = '100%';
+            if (bar) bar.style.width = '100%';
             window.showToast(`📤 Proof uploaded! Manager notified.`);
             
             // FIRE THE PUSH NOTIFICATION
@@ -195,10 +206,15 @@ window.router.addRoute('booking', async (container, params) => {
                 `${guestName} has submitted a booking and payment proof for ${property.title}. Please review it.`
             );
 
-            document.getElementById('step-A').classList.add('hidden');
-            document.getElementById('step-C').classList.remove('hidden');
-            document.getElementById('ref-code').innerText = code;
-            document.getElementById('method-receipt').innerText = currentMethod;
+            const stepA = document.getElementById('step-A');
+            const stepC = document.getElementById('step-C');
+            const refCode = document.getElementById('ref-code');
+            const methodReceipt = document.getElementById('method-receipt');
+
+            if (stepA) stepA.classList.add('hidden');
+            if (stepC) stepC.classList.remove('hidden');
+            if (refCode) refCode.innerText = code;
+            if (methodReceipt) methodReceipt.innerText = currentMethod;
 
         } catch (err) {
             btn.innerText = 'Submit Proof & Confirm Booking';
