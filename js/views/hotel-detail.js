@@ -2,14 +2,15 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     const id = params.id;
     container.innerHTML = `<div class="container" style="text-align:center;padding-top:4rem;">Loading...</div>`;
     
-    // --- 1. THE TRIPLE-REDUNDANT NAVIGATOR ---
+    // --- 1. THE TRIPLE-REDUNDANT NAVIGATOR (FIXED NAMES) ---
     window.michuFinalNav = (pId, binVal, boutVal) => {
         if (!binVal || !boutVal) {
             window.showToast("Please select stay dates!");
             return;
         }
 
-        const target = `booking_payment?propertyId=${pId}&checkIn=${binVal}&checkOut=${boutVal}`;
+        // CORRECT ROUTE NAME IS 'booking', NOT 'booking_payment'
+        const navParams = { id: pId, checkIn: binVal, checkOut: boutVal };
         const reserveBtn = document.getElementById('final-reserve-trigger');
         
         if (reserveBtn) {
@@ -17,14 +18,15 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
             reserveBtn.style.opacity = "0.7";
         }
 
-        console.log("CRITICAL NAV:", target);
+        console.log("CRITICAL NAV TO 'booking' WITH ID:", pId);
         
-        // Strategy A: Standard Router
+        // Strategy A: Standard Router (Targeting 'booking')
         try {
-            window.router.navigate('booking_payment', { propertyId: pId, checkIn: binVal, checkOut: boutVal });
+            window.router.navigate('booking', navParams);
         } catch(e) {
             // Strategy B: Native Hash Change
-            window.location.hash = "#" + target;
+            const hash = `#booking?id=${pId}&checkIn=${binVal}&checkOut=${boutVal}`;
+            window.location.hash = hash;
         }
     };
 
@@ -97,7 +99,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                          <p style="line-height:1.7; color:#334155; white-space:pre-wrap; font-size:1.05rem;">${hotel.description}</p>
                     </section>
 
-                    <!-- SPECIAL PACKAGES (Restored) -->
+                    <!-- SPECIAL PACKAGES (Stable) -->
                     ${hotel.packages && hotel.packages.length > 0 ? `
                     <section style="margin-bottom:3rem; background:#f8fafc; padding:2rem; border-radius:28px; border:1.5px solid #e2e8f0;">
                         <h2 style="margin-bottom:1.5rem; display:flex; align-items:center; gap:0.6rem; color:#d97706; font-size:1.4rem;">🎁 Special Stay Packages</h2>
