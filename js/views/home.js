@@ -125,8 +125,14 @@ window.router.addRoute('home', async (container, params) => {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
                     ${distance} km from centre
                 </div>` : ''}
+                ${p.packages && p.packages.length > 0 ? `
+                <div style="margin:0.5rem 0; display:flex;">
+                    <div style="background:linear-gradient(135deg, #0f3d2e 0%, #082b20 100%); color:#e0b246; font-size:0.65rem; font-weight:900; padding:0.3rem 0.7rem; border-radius:8px; border:1px solid #c59d3f; display:inline-flex; align-items:center; gap:0.4rem; box-shadow:0 0 12px rgba(197,157,63,0.35); text-transform:uppercase; letter-spacing:0.05em; animation: pulse-glow 2.5s infinite alternate;">
+                        <span style="font-size:0.8rem;">🎁</span> SPECIAL OFFERS INSIDE
+                    </div>
+                </div>` : ''}
                 <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-                    <div class="property-price" style="margin-top:0.5rem;">
+                    <div class="property-price" style="margin-top:0.3rem;">
                         ${hasDiscount ? `
                             <div style="display:flex; flex-direction:column;">
                                 <span style="text-decoration:line-through;color:#999;font-weight:500;font-size:0.85rem;margin-bottom:-0.2rem;">${originalPrice} Birr</span>
@@ -143,7 +149,6 @@ window.router.addRoute('home', async (container, params) => {
                         `}
                     </div>
                     <div style="text-align:right;">
-                        ${p.packages && p.packages.length > 0 ? `<div style="margin-bottom:0.4rem; background:#fff9e6; color:#856404; font-size:0.65rem; font-weight:800; padding:0.15rem 0.4rem; border-radius:4px; border:1px solid #ffecb3; display:inline-block;">🎁 DEALS AVAILABLE</div>` : ''}
                         ${roomBadge}
                     </div>
                 </div>
@@ -443,6 +448,11 @@ window.router.addRoute('home', async (container, params) => {
                         .leaflet-popup-content-wrapper { border-radius: 16px; padding: 0; overflow: hidden; box-shadow: 0 12px 32px rgba(0,0,0,0.15); }
                         .leaflet-popup-content { margin: 0; }
                         .leaflet-popup-tip-container { display: none; }
+
+                        @keyframes pulse-glow {
+                            from { box-shadow: 0 0 8px rgba(197,157,63,0.3); transform: scale(1); }
+                            to { box-shadow: 0 0 16px rgba(197,157,63,0.6); transform: scale(1.02); }
+                        }
                     </style>
 
                     <!-- DYNAMIC DISCOVERY SECTIONS (Below main grid) -->
