@@ -325,6 +325,7 @@ window.router.addRoute('admin', async (container, params) => {
                 videoTour: videoUrl,
                 amenities,
                 badgeText: getVal('h-badge-text'),
+                eventMode: document.getElementById('h-event-mode')?.checked || false,
                 packages: packagesArr,
                 updatedAt: Date.now(),
                 managerId: existing?.managerId || '',
@@ -887,6 +888,17 @@ window.router.addRoute('admin', async (container, params) => {
                                     <div style="margin-bottom:1rem; background:white; padding:1rem; border-radius:12px; border:1px solid #c9e2ff;">
                                         <label style="display:block; font-weight:800; font-size:0.7rem; color:#888; margin-bottom:0.5rem; text-transform:uppercase;">Custom Badge Text</label>
                                         <input id="h-badge-text" type="text" value="${p.badgeText || ''}" placeholder="e.g. SPECIAL OFFERS INSIDE" style="width:100%; padding:0.8rem; border:1px solid #eee; border-radius:10px; font-weight:700; color:#0b6646;">
+                                    </div>
+
+                                    <div style="margin-bottom:1.5rem; background:#fff4e5; padding:1.2rem; border-radius:18px; border:1px solid #ffe0b2; display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+                                        <div>
+                                            <h5 style="margin:0; font-size:0.85rem; color:#e65100;">🎉 Event Mode (Packages Only)</h5>
+                                            <p style="margin:0.3rem 0 0; font-size:0.7rem; color:#666; line-height:1.4;">Force guests to book from stay packages. Use for festivals/holidays.</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="h-event-mode" ${p.eventMode ? 'checked' : ''}>
+                                            <span class="slider round"></span>
+                                        </label>
                                     </div>
 
                                     <div id="adm-packages-container" style="display:grid; gap:0.8rem;">

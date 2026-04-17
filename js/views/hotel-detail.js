@@ -268,10 +268,18 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                             </div>
                         </div>
 
-                        ${(hotel.availableRooms ?? hotel.totalRooms ?? 0) > 0
-                            ? `<button class="btn-primary" style="width:100%; padding:1.2rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:linear-gradient(135deg, var(--color-primary), #2a8146);" onclick="goToBooking()">Reserve Now</button>`
-                            : `<button disabled style="width:100%; padding:1.2rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:#ccc; color:white; border:none; cursor:not-allowed;">Fully Booked</button>`
-                        }
+                        ${hotel.eventMode ? `
+                            <div style="background:#fffcf5; padding:1.2rem; border-radius:18px; border:1.5px dashed #ffe0b2; margin-bottom:1.5rem; text-align:center;">
+                                <div style="font-size:1.4rem; margin-bottom:0.5rem;">🎉</div>
+                                <div style="font-weight:900; font-size:0.85rem; color:#e65100; text-transform:uppercase; margin-bottom:0.4rem;">Event Booking Only</div>
+                                <div style="font-size:0.75rem; color:#666; line-height:1.5;">This property is currently in <b>Event Mode</b>. Please choose one of the special packages below to confirm your stay.</div>
+                            </div>
+                        ` : `
+                            ${(hotel.availableRooms ?? hotel.totalRooms ?? 0) > 0
+                                ? `<button class="btn-primary" style="width:100%; padding:1.2rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:linear-gradient(135deg, var(--color-primary), #2a8146);" onclick="goToBooking()">Reserve Now</button>`
+                                : `<button disabled style="width:100%; padding:1.2rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:#ccc; color:white; border:none; cursor:not-allowed;">Fully Booked</button>`
+                            }
+                        `}
                         
                         <div id="price-summary" style="margin-top:2rem; padding-top:1.5rem; border-top:1.5px solid #f4f4f4;">
                             <!-- Dynamic Content -->

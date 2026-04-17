@@ -101,6 +101,17 @@ window.router.addRoute('home', async (container, params) => {
             }
         }
 
+        const minPkgPrice = p.packages && p.packages.length > 0
+            ? Math.min(...p.packages.map(pkg => {
+                const pkgNights = parseInt(pkg.nights) || 1;
+                const pkgDisc = parseInt(pkg.discount) || 0;
+                const base = currentPrice * pkgNights;
+                return base - Math.round(base * (pkgDisc / 100));
+            }))
+            : 0;
+            
+        const isEvent = !!p.eventMode;
+
         const hasDiscount = discountPercentage > 0 && originalPrice > currentPrice;
         const distance = p.distanceFromCenter ? parseFloat(p.distanceFromCenter) : 0;
 
@@ -130,10 +141,19 @@ window.router.addRoute('home', async (container, params) => {
                     <div style="background:#0b6646; color:#e0b246; font-size:0.65rem; font-weight:900; padding:0.3rem 0.7rem; border-radius:8px; border:1px solid #c59d3f; display:inline-flex; align-items:center; gap:0.4rem; box-shadow:0 0 12px rgba(197,157,63,0.35); text-transform:uppercase; letter-spacing:0.05em; animation: pulse-glow 2.5s infinite alternate;">
                         <span style="font-size:0.8rem;">🎁</span> ${p.badgeText || 'SPECIAL OFFERS INSIDE'}
                     </div>
-                </div>` : ''}
-                <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                </div>                 <div style="display:flex; justify-content:space-between; align-items:flex-end;">
                     <div class="property-price" style="margin-top:0.3rem;">
-                        ${hasDiscount ? `
+                        ${isEvent ? `
+                            <div style="display:flex; flex-direction:column;">
+                                <div style="display:flex; align-items:center; gap:0.3rem; margin-bottom:0.1rem;">
+                                    <span style="font-size:0.6rem; background:#fff4e5; color:#d97706; padding:0.1rem 0.4rem; border-radius:4px; font-weight:900; text-transform:uppercase;">🎉 Event active</span>
+                                </div>
+                                <div style="display:flex; align-items:baseline; gap:0.2rem;">
+                                    <span style="font-size:0.75rem; color:#666; font-weight:700;">From</span>
+                                    <span style="font-weight:900; font-size:1.45rem; color: #0b6646; letter-spacing:-0.03em;">${minPkgPrice.toLocaleString()} Birr</span>
+                                </div>
+                            </div>
+                        ` : (hasDiscount ? `
                             <div style="display:flex; flex-direction:column;">
                                 <span style="text-decoration:line-through;color:#999;font-weight:500;font-size:0.85rem;margin-bottom:-0.2rem;">${originalPrice} Birr</span>
                                 <div style="display:flex; align-items:baseline; gap:0.3rem;">
@@ -146,8 +166,8 @@ window.router.addRoute('home', async (container, params) => {
                                 <span style="font-weight:900; font-size:1.35rem; color: var(--color-primary); letter-spacing:-0.02em;">${currentPrice} Birr</span>
                                 <span style="color:var(--color-text-light);font-size:0.8rem;font-weight:normal">/ night</span>
                             </div>
-                        `}
-                    </div>
+                        `)}
+                    </div>  </div>
                     <div style="text-align:right;">
                         ${roomBadge}
                     </div>

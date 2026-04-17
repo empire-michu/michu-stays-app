@@ -37,7 +37,6 @@ window.router.addRoute('booking', async (container, params) => {
     }
 
     let pkgInfo = params.packageInfo || null;
-    console.log("Checking package for nights:", nights, "Current pkgInfo:", pkgInfo);
 
     // Auto-detect package match if not passed explicitly (e.g. page refresh)
     if (!pkgInfo && property && property.packages) {
@@ -48,6 +47,19 @@ window.router.addRoute('booking', async (container, params) => {
             const base = (property.price || 0) * nights;
             amount = base - Math.round(base * (matching.discount / 100));
         }
+    }
+
+    // CHECK FOR EVENT MODE ENFORCEMENT
+    if (property.eventMode && !pkgInfo) {
+        container.innerHTML = `
+            <div class="container" style="padding-top:6rem; text-align:center;">
+                <div style="font-size:4rem;">🎉</div>
+                <h2 style="color:var(--color-primary); margin-top:1rem;">Event Package Required</h2>
+                <p style="color:#666; margin-bottom:2rem; max-width:500px; margin-left:auto; margin-right:auto;">This property is currently in <b>Event Mode</b>. To book during this period, you must select one of the hotel's stay packages.</p>
+                <button class="btn-primary" onclick="window.history.back()" style="padding:1rem 2rem;">‹ Go Back to Packages</button>
+            </div>
+        `;
+        return;
     }
 
     container.innerHTML = `

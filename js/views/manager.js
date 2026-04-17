@@ -182,6 +182,7 @@ window.router.addRoute('manager', async (container, params) => {
                 phone: getVal('mg-h-phone'),
                 distanceFromCenter: getNum('mg-h-distance'),
                 badgeText: getVal('mg-badge-text'),
+                eventMode: document.getElementById('mg-event-mode')?.checked || false,
                 amenities: Array.from(document.querySelectorAll('.mg-amenity:checked')).map(el => el.value),
                 images: filteredImages,
                 image: filteredImages[0] || '',
@@ -655,6 +656,17 @@ window.router.addRoute('manager', async (container, params) => {
                                 <label style="display:block; font-weight:800; font-size:0.7rem; color:#888; margin-bottom:0.5rem; text-transform:uppercase;">Custom Badge Text</label>
                                 <input id="mg-badge-text" type="text" value="${myHotel.badgeText || ''}" placeholder="e.g. SPECIAL OFFERS INSIDE" style="width:100%; padding:0.8rem; border:1px solid #eee; border-radius:10px; font-weight:700; color:#0b6646;">
                                 <p style="font-size:0.65rem; color:#999; margin-top:0.4rem;">This text appears on the emerald green badge in the search results. Leave empty for default.</p>
+                            </div>
+
+                            <div style="margin-bottom:1.5rem; background:#fff4e5; padding:1.2rem; border-radius:18px; border:1px solid #ffe0b2; display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+                                <div>
+                                    <h5 style="margin:0; font-size:0.85rem; color:#e65100;">🎉 Event Mode (Packages Only)</h5>
+                                    <p style="margin:0.3rem 0 0; font-size:0.7rem; color:#666; line-height:1.4;">Enable this during festivals or events to hide normal nightly rates and <b>only</b> allow guests to book your special stay packages.</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="mg-event-mode" ${myHotel.eventMode ? 'checked' : ''}>
+                                    <span class="slider round"></span>
+                                </label>
                             </div>
 
                             <div id="mg-packages-container" style="display:grid; gap:0.8rem;">
