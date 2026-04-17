@@ -8,18 +8,37 @@ window.router.addRoute('booking', async (container, params) => {
 
     const propertyId = params.id;
     container.innerHTML = `<div class="container" style="text-align:center;padding-top:4rem;">Loading from Firebase...</div>`;
-    const property = await window.db.getPropertyById(propertyId);
+    const property = await window.db.getPropertyById(propertyId, true);
 
     if (!property) {
         container.innerHTML = `<div class="container">Property not found. <button onclick="router.navigate('home')">Back</button></div>`;
         return;
     }
 
-    const amount = params.totalAmount || (property.price * 2);
+    let amount = params.totalAmount || (property.price * 2);
     const checkIn = params.checkIn || 'Not set';
     const checkOut = params.checkOut || 'Not set';
     const guests = params.guests || 2;
-    const pkgInfo = params.packageInfo || null;
+
+    // Calculate nights to auto-detect package if missing from params
+    let nights = 0;
+    if (checkIn !== 'Not set' && checkOut !== 'Not set') {
+        const diff = new Date(checkOut) - new Date(checkIn);
+        nights = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    }
+
+    let pkgInfo = params.packageInfo || null;
+
+    // Auto-detect package match if not passed explicitly (e.g. page refresh)
+    if (!pkgInfo && property && property.packages) {
+        const matching = property.packages.find(p => parseInt(p.nights) === nights);
+        if (matching) {
+            pkgInfo = { title: matching.title, services: matching.services };
+            // Recalculate if it looks like the default price was used
+            const base = (property.price || 0) * nights;
+            amount = base - Math.round(base * (matching.discount / 100));
+        }
+    }
 
     container.innerHTML = `
         <div class="container" style="padding-top:4rem; padding-bottom:2rem;">
