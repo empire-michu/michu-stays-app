@@ -445,9 +445,14 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     bout.value = window.searchState?.checkOut || tomorrowStr;
     
     [bin, bout].forEach(el => el.addEventListener('change', () => {
+        // Robust Date calculation for mobile
+        const parseD = (s) => new Date(s.replace(/-/g, '/'));
+        const d_in = parseD(bin.value);
+        const d_out = parseD(bout.value);
+        const nights = Math.ceil((d_out - d_in) / (1000 * 60 * 60 * 24)) || 0;
+
         // If nights changed, reset package if it doesn't match
         if (window.activePackage) {
-            const nights = Math.ceil((new Date(bout.value) - new Date(bin.value)) / (1000 * 60 * 60 * 24));
             if (nights !== window.activePackage.nights) window.activePackage = null;
         }
         updatePrice();
@@ -455,7 +460,10 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     updatePrice();
 
     window.goToBooking = () => {
-        const nights = Math.ceil((new Date(bout.value) - new Date(bin.value)) / (1000 * 60 * 60 * 24)) || 0;
+        const d_in = new Date(bin.value.replace(/-/g, '/'));
+        const d_out = new Date(bout.value.replace(/-/g, '/'));
+        const nights = Math.ceil((d_out - d_in) / (1000 * 60 * 60 * 24)) || 0;
+
         if (nights <= 0) return window.showToast("📅 Please select valid dates.");
 
         let discountToUse = discountPercentage;

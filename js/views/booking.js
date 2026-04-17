@@ -20,14 +20,24 @@ window.router.addRoute('booking', async (container, params) => {
     const checkOut = params.checkOut || 'Not set';
     const guests = params.guests || 2;
 
+    // Robust Date calculation for mobile
+    const parseDate = (dStr) => {
+        if (!dStr || dStr === 'Not set') return null;
+        return new Date(dStr.replace(/-/g, '/')); // Use / for better Safari/Mobile support
+    };
+
+    const dIn = parseDate(checkIn);
+    const dOut = parseDate(checkOut);
+    
     // Calculate nights to auto-detect package if missing from params
     let nights = 0;
-    if (checkIn !== 'Not set' && checkOut !== 'Not set') {
-        const diff = new Date(checkOut) - new Date(checkIn);
+    if (dIn && dOut && !isNaN(dIn) && !isNaN(dOut)) {
+        const diff = dOut - dIn;
         nights = Math.ceil(diff / (1000 * 60 * 60 * 24));
     }
 
     let pkgInfo = params.packageInfo || null;
+    console.log("Checking package for nights:", nights, "Current pkgInfo:", pkgInfo);
 
     // Auto-detect package match if not passed explicitly (e.g. page refresh)
     if (!pkgInfo && property && property.packages) {
