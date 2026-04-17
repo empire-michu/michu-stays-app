@@ -141,7 +141,9 @@ window.router.addRoute('home', async (container, params) => {
                     <div style="background:#0b6646; color:#e0b246; font-size:0.65rem; font-weight:900; padding:0.3rem 0.7rem; border-radius:8px; border:1px solid #c59d3f; display:inline-flex; align-items:center; gap:0.4rem; box-shadow:0 0 12px rgba(197,157,63,0.35); text-transform:uppercase; letter-spacing:0.05em; animation: pulse-glow 2.5s infinite alternate;">
                         <span style="font-size:0.8rem;">🎁</span> ${p.badgeText || 'SPECIAL OFFERS INSIDE'}
                     </div>
-                </div>                 <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                </div>` : ''}
+                
+                <div style="display:flex; justify-content:space-between; align-items:flex-end;">
                     <div class="property-price" style="margin-top:0.3rem;">
                         ${isEvent ? `
                             <div style="display:flex; flex-direction:column;">
@@ -167,7 +169,7 @@ window.router.addRoute('home', async (container, params) => {
                                 <span style="color:var(--color-text-light);font-size:0.8rem;font-weight:normal">/ night</span>
                             </div>
                         `)}
-                    </div>  </div>
+                    </div>
                     <div style="text-align:right;">
                         ${roomBadge}
                     </div>
