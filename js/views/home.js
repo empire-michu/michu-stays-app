@@ -107,7 +107,7 @@ window.router.addRoute('home', async (container, params) => {
             p.packages.forEach(pkg => {
                 const n = parseInt(pkg.nights) || 1;
                 const d = parseInt(pkg.discount) || 0;
-                const base = currentPrice * n;
+                const base = (originalPrice || currentPrice) * n;
                 const total = base - Math.round(base * (d / 100));
                 if (minPkgPrice === 0 || total < minPkgPrice) {
                     minPkgPrice = total;

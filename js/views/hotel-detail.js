@@ -52,6 +52,21 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     const hasDiscount = discountPercentage > 0 && originalPrice > currentPrice;
     const distance = hotel.distanceFromCenter ? parseFloat(hotel.distanceFromCenter) : 0;
 
+    // Calculate effective rate for Event Mode consistency
+    let minEffectiveRate = currentPrice;
+    if (hotel.packages && hotel.packages.length > 0) {
+        const calcBase = originalPrice || currentPrice;
+        hotel.packages.forEach(pkg => {
+            const n = parseInt(pkg.nights) || 1;
+            const d = parseInt(pkg.discount) || 0;
+            const total = (calcBase * n) - Math.round((calcBase * n) * (d / 100));
+            const eff = Math.round(total / n);
+            if (minEffectiveRate === currentPrice || eff < minEffectiveRate) {
+                minEffectiveRate = eff;
+            }
+        });
+    }
+
     const amenitiesIcons = { 'WiFi': '📶', 'Pool': '🏊', 'Spa': '🧖', 'Breakfast': '🍳', 'Parking': '🚗', 'Gym': '💪', 'AC': '❄️', 'Bar': '🍸' };
 
     container.innerHTML = `
@@ -247,7 +262,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     <div style="position:sticky; top:2rem; background:white; padding:2rem; border:1px solid var(--color-border); border-radius:24px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                             <div>
-                                <span style="font-size:1.75rem; font-weight:900; color: ${hasDiscount ? 'var(--color-secondary)' : 'var(--color-primary)'}; letter-spacing: -0.02em;">${currentPrice} Birr</span>
+                                <span style="font-size:1.75rem; font-weight:900; color: ${hasDiscount ? 'var(--color-secondary)' : 'var(--color-primary)'}; letter-spacing: -0.02em;">${hotel.eventMode ? minEffectiveRate.toLocaleString() : currentPrice.toLocaleString()} Birr</span>
                                 <span style="color:var(--color-text-light); font-size:0.9rem;"> / night</span>
                                 ${hotel.eventMode ? `<div style="font-size:0.65rem; color:#d97706; font-weight:800; text-transform:uppercase; margin-top:0.2rem; letter-spacing:0.02em;">✨ Event Special Rate</div>` : ''}
                             </div>
