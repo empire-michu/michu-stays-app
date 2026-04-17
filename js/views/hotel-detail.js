@@ -63,6 +63,10 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 .detail-gallery-grid > div:nth-child(2), .detail-gallery-grid > div:nth-child(3) { display: none; /* Hide extra photos on mobile */ }
                 .detail-content-grid { grid-template-columns: 1fr; gap: 2rem; }
             }
+            @keyframes pulse-glow {
+                from { box-shadow: 0 0 10px rgba(11,102,70,0.3); transform: scale(1); }
+                to { box-shadow: 0 0 20px rgba(197,157,63,0.5); transform: scale(1.02); }
+            }
         </style>
         <div class="container" style="padding-top:2rem; padding-bottom:2rem;">
             <div style="margin-bottom:1.5rem; color:var(--color-text-light); font-size:0.9rem;">
@@ -83,6 +87,12 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                             ${distance} km from centre
                         </span>` : ''}
                     </p>
+                    ${hotel.packages && hotel.packages.length > 0 ? `
+                    <div style="margin-top:1rem; display:flex;">
+                        <div style="background:#0b6646; color:#e0b246; font-size:0.65rem; font-weight:900; padding:0.4rem 1rem; border-radius:10px; border:1.5px solid #c59d3f; display:inline-flex; align-items:center; gap:0.5rem; box-shadow:0 0 15px rgba(11,102,70,0.25); text-transform:uppercase; letter-spacing:0.08em; animation: pulse-glow 2.5s infinite alternate;">
+                            <span style="font-size:0.9rem;">🎁</span> ${hotel.badgeText || 'SPECIAL OFFERS INSIDE'}
+                        </div>
+                    </div>` : ''}
                 </div>
                 <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
                     <button class="btn-outline" style="padding:0.4rem 0.8rem;" onclick="window.print()">🖨 Print</button>

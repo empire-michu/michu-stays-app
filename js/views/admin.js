@@ -294,6 +294,13 @@ window.router.addRoute('admin', async (container, params) => {
             const filteredImages = urls.filter(Boolean);
             const originalPrice = discountP > 0 ? Math.round(price / (1 - (discountP / 100))) : 0;
 
+            const packagesArr = Array.from(document.querySelectorAll('.adm-package-row')).map(row => ({
+                title: row.querySelector('.adm-pkg-title')?.value || '',
+                nights: parseInt(row.querySelector('.adm-pkg-nights')?.value) || 0,
+                discount: parseInt(row.querySelector('.adm-pkg-discount')?.value) || 0,
+                services: row.querySelector('.adm-pkg-services')?.value || ''
+            })).filter(p => p.nights > 0);
+
             const payload = {
                 title,
                 type: getVal('h-type'),
@@ -317,6 +324,8 @@ window.router.addRoute('admin', async (container, params) => {
                 images: filteredImages,
                 videoTour: videoUrl,
                 amenities,
+                badgeText: getVal('h-badge-text'),
+                packages: packagesArr,
                 updatedAt: Date.now(),
                 managerId: existing?.managerId || '',
                 isActive: true
@@ -374,6 +383,30 @@ window.router.addRoute('admin', async (container, params) => {
         window.showToast("✅ Manager account created!"); window.syncData();
     };
 
+    window.addAdmPackage = () => {
+        const container = document.getElementById('adm-packages-container');
+        if (!container) return;
+        const div = document.createElement('div');
+        div.className = 'adm-package-row';
+        div.style.cssText = `background:white; padding:1rem; border-radius:14px; border:1px solid #e0eaff; margin-bottom:0.5rem;`;
+        div.innerHTML = `
+            <input type="text" placeholder="Package Title (e.g. Weekend Special)" class="adm-pkg-title" style="padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem;">
+            <div style="position:relative;">
+                <input type="number" placeholder="Nights" class="adm-pkg-nights" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem; padding-right:2.5rem;">
+                <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700;">NIGHTS</span>
+            </div>
+            <div style="position:relative;">
+                <input type="number" placeholder="Disc" class="adm-pkg-discount" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem; padding-right:1.5rem;">
+                <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700;">%</span>
+            </div>
+            <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800;">✕</button>
+            <div style="grid-column: 1 / -1;">
+                <input type="text" placeholder="Included Services (e.g. Free Massage, Airport Shuttle)" class="adm-pkg-services" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.8rem; background:#fcfcfc;">
+            </div>
+        `;
+        container.appendChild(div);
+    };
+
     window.enableAdminPush = async (btn) => {
         try {
             const userData = window.auth.userData || {};
@@ -419,9 +452,17 @@ window.router.addRoute('admin', async (container, params) => {
             background:${activeTab===tab?'var(--color-primary)':'transparent'};
             color:${activeTab===tab?'white':'#666'};
             transition: 0.2s;
+            box-shadow:${activeTab==='account'?'0 4px 12px rgba(0,0,0,0.05)':'none'};
         `;
 
         return `
+                <style>
+                    .adm-package-row { display: grid; grid-template-columns: 1fr 100px 100px 40px; gap: 0.8rem; align-items: center; }
+                    @media (max-width: 600px) {
+                        .adm-package-row { grid-template-columns: 1fr 1fr 40px !important; }
+                        .adm-package-row > input:first-child { grid-column: 1 / span 2; }
+                    }
+                </style>
                 <div style="padding-top:1rem;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
                     <h2 style="color:var(--color-primary);margin:0;font-weight:800;">Admin Console</h2>
@@ -836,6 +877,40 @@ window.router.addRoute('admin', async (container, params) => {
                                 </div>
                                 
                                 <textarea id="h-desc" placeholder="Stay description..." style="width:100%; padding:1rem; border:1.5px solid #eee; border-radius:12px; min-height:100px;">${p.description||''}</textarea>
+
+                                 <!-- Stay Packages Section for Admin -->
+                                 <div style="background:#f0f7ff; padding:1.5rem; border-radius:24px; border:1px solid #c9e2ff; margin-bottom:1.5rem;">
+                                    <h4 style="margin:0 0 1rem; font-size:0.9rem; color:#0056b3; display:flex; align-items:center; gap:0.5rem;">
+                                        <span style="font-size:1.4rem;">🎁</span> STAY PACKAGES & DEALS
+                                    </h4>
+                                    
+                                    <div style="margin-bottom:1rem; background:white; padding:1rem; border-radius:12px; border:1px solid #c9e2ff;">
+                                        <label style="display:block; font-weight:800; font-size:0.7rem; color:#888; margin-bottom:0.5rem; text-transform:uppercase;">Custom Badge Text</label>
+                                        <input id="h-badge-text" type="text" value="${p.badgeText || ''}" placeholder="e.g. SPECIAL OFFERS INSIDE" style="width:100%; padding:0.8rem; border:1px solid #eee; border-radius:10px; font-weight:700; color:#0b6646;">
+                                    </div>
+
+                                    <div id="adm-packages-container" style="display:grid; gap:0.8rem;">
+                                        ${(p.packages || []).map((pkg, idx) => `
+                                            <div class="adm-package-row" style="background:white; padding:1rem; border-radius:14px; border:1px solid #e0eaff;">
+                                                <input type="text" placeholder="Package Title" value="${pkg.title||''}" class="adm-pkg-title" style="padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem;">
+                                                <div style="position:relative;">
+                                                    <input type="number" placeholder="Nights" value="${pkg.nights||''}" class="adm-pkg-nights" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem; padding-right:2.5rem;">
+                                                    <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700;">NIGHTS</span>
+                                                </div>
+                                                <div style="position:relative;">
+                                                    <input type="number" placeholder="Disc" value="${pkg.discount||''}" class="adm-pkg-discount" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem; padding-right:1.5rem;">
+                                                    <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700;">%</span>
+                                                </div>
+                                                <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800;">✕</button>
+                                                <div style="grid-column: 1 / -1;">
+                                                    <input type="text" placeholder="Included Services" value="${pkg.services||''}" class="adm-pkg-services" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.8rem; background:#fcfcfc;">
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <button onclick="window.addAdmPackage()" style="width:100%; margin-top:1rem; padding:0.8rem; border-radius:12px; border:1.5px dashed #0056b3; background:none; color:#0056b3; font-weight:700; cursor:pointer;">+ Add Package Option</button>
+                                 </div>
+
                                 <p id="adm-up-status" style="text-align:center; font-weight:700; color:var(--color-primary);"></p>
                                 <button id="adm-publish-btn" class="btn-primary" onclick="window.adminSaveProperty()" style="padding:1rem;">${editPropertyId ? '💾 Save Changes' : '🚀 Publish Property'}</button>
                             </div>

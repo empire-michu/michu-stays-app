@@ -181,6 +181,7 @@ window.router.addRoute('manager', async (container, params) => {
                 telebirrName: getVal('mg-h-tele-name'),
                 phone: getVal('mg-h-phone'),
                 distanceFromCenter: getNum('mg-h-distance'),
+                badgeText: getVal('mg-badge-text'),
                 amenities: Array.from(document.querySelectorAll('.mg-amenity:checked')).map(el => el.value),
                 images: filteredImages,
                 image: filteredImages[0] || '',
@@ -650,6 +651,12 @@ window.router.addRoute('manager', async (container, params) => {
                             </h4>
                             <p style="font-size:0.8rem; color:#666; margin-bottom:1.2rem;">Create special offers for longer stays (e.g., 3 nights for 15% off). Guests see these prominentely on your listing.</p>
                             
+                            <div style="margin-bottom:1rem; background:white; padding:1rem; border-radius:12px; border:1px solid #c9e2ff;">
+                                <label style="display:block; font-weight:800; font-size:0.7rem; color:#888; margin-bottom:0.5rem; text-transform:uppercase;">Custom Badge Text</label>
+                                <input id="mg-badge-text" type="text" value="${myHotel.badgeText || ''}" placeholder="e.g. SPECIAL OFFERS INSIDE" style="width:100%; padding:0.8rem; border:1px solid #eee; border-radius:10px; font-weight:700; color:#0b6646;">
+                                <p style="font-size:0.65rem; color:#999; margin-top:0.4rem;">This text appears on the emerald green badge in the search results. Leave empty for default.</p>
+                            </div>
+
                             <div id="mg-packages-container" style="display:grid; gap:0.8rem;">
                                 ${(myHotel.packages || []).map((pkg, idx) => `
                                     <div class="mg-package-row" style="background:white; padding:1rem; border-radius:14px; border:1px solid #e0eaff;">
