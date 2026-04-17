@@ -463,7 +463,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         const totalAmount = (currentPrice * nights) - Math.round((currentPrice * nights) * (discountToUse / 100));
 
         router.navigate('booking', { 
-            hotelId: id, 
+            id: id, 
             checkIn: bin.value, 
             checkOut: bout.value, 
             guests: 1, 
