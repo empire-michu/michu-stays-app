@@ -14,6 +14,8 @@ window.router.addRoute('admin', async (container, params) => {
     let totalBookingsPages = 1;
     let hotelsPage = 1;
     let totalHotelsPages = 1;
+    let managersPage = 1;
+    let totalManagersPages = 1;
     let isSyncing = false;
     let analyticsStart = '';
     let analyticsEnd = '';
@@ -42,6 +44,12 @@ window.router.addRoute('admin', async (container, params) => {
         hotelsPage = page;
         renderAdmin();
         document.getElementById('adm-tab-hotels')?.scrollIntoView({ behavior: 'smooth' });
+    };
+    window.setManagerPage = (page) => {
+        if (page < 1 || page > totalManagersPages) return;
+        managersPage = page;
+        renderAdmin();
+        document.getElementById('adm-tab-managers')?.scrollIntoView({ behavior: 'smooth' });
     };
     let propsUnsub = null, booksUnsub = null, usersUnsub = null;
     window.testEmailSystem = async (templateId = 'temp_welcome') => {
@@ -505,19 +513,21 @@ window.router.addRoute('admin', async (container, params) => {
                 <div id="adm-tab-hotels" style="display:${activeTab==='hotels'?'block':'none'}">
                     <div style="background:white; border-radius:20px; box-shadow:var(--shadow-sm); overflow-x:auto;">
                         <table class="manager-table">
-                            <thead><tr><th>Name</th><th>Type</th><th>Price</th><th>Action</th></tr></thead>
+                            <thead><tr><th>No.</th><th>Name</th><th>Type</th><th>Price</th><th>Action</th></tr></thead>
                             <tbody>
                                 ${(() => {
                                     totalHotelsPages = Math.max(1, Math.ceil(cachedProperties.length / 15));
                                     if (hotelsPage > totalHotelsPages) hotelsPage = totalHotelsPages;
                                     const paginated = cachedProperties.slice((hotelsPage - 1) * 15, hotelsPage * 15);
                                     
-                                    return paginated.map(p => {
+                                    return paginated.map((p, index) => {
+                                        const rowNum = (hotelsPage - 1) * 15 + index + 1;
                                         const avail = p.availableRooms ?? 0;
                                         const total = p.totalRooms ?? 0;
                                         const color = avail > 0 ? '#1e7e34' : '#c5221f';
                                         return `
                                         <tr>
+                                            <td style="font-weight:800; color:#888;">${rowNum}</td>
                                             <td style="font-weight:700;">
                                                 ${p.title}
                                                 ${p.displaySequence > 0 ? `<span style="background:#fff8e1; color:#f57f17; border:1px solid #ffe082; padding:0.1rem 0.4rem; border-radius:6px; font-size:0.65rem; margin-left:8px; vertical-align:middle; font-weight:800; box-shadow:0 2px 4px rgba(245,127,23,0.1);">📍 #${p.displaySequence}</span>` : ''}
@@ -656,21 +666,42 @@ window.router.addRoute('admin', async (container, params) => {
                 <div id="adm-tab-managers" style="display:${activeTab==='managers'?'block':'none'}">
                     <div style="background:white; border-radius:20px; box-shadow:var(--shadow-sm); padding:1rem; margin-bottom:2rem; overflow-x:auto;">
                         <table class="manager-table" style="width:100%; min-width:600px;">
-                            <thead><tr><th>Email</th><th>Assigned Stay / Hotel</th><th>Action</th></tr></thead>
-                            <tbody>${managers.map(m => {
-                                const hotel = cachedProperties.find(p => p.id === m.hotelId);
-                                return `
-                                <tr>
-                                    <td>${m.email}</td>
-                                    <td>
-                                        <div style="font-weight:700; color:var(--color-primary);">${hotel ? hotel.title : '—'}</div>
-                                        <div style="font-size:0.65rem; color:#aaa; font-family:monospace;">${m.hotelId || ''}</div>
-                                    </td>
-                                    <td><button class="btn-outline" style="font-size:0.7rem; color:red; border-color:#ffcccc;" onclick="window.admRemoveUser('${m.id}')">Remove</button></td>
-                                </tr>`;
-                            }).join('')}</tbody>
+                            <thead><tr><th>No.</th><th>Email</th><th>Assigned Stay / Hotel</th><th>Action</th></tr></thead>
+                            <tbody>${(() => {
+                                totalManagersPages = Math.max(1, Math.ceil(managers.length / 15));
+                                if (managersPage > totalManagersPages) managersPage = totalManagersPages;
+                                const paginated = managers.slice((managersPage - 1) * 15, managersPage * 15);
+
+                                return paginated.map((m, index) => {
+                                    const rowNum = (managersPage - 1) * 15 + index + 1;
+                                    const hotel = cachedProperties.find(p => p.id === m.hotelId);
+                                    return `
+                                    <tr>
+                                        <td style="font-weight:800; color:#888;">${rowNum}</td>
+                                        <td>${m.email}</td>
+                                        <td>
+                                            <div style="font-weight:700; color:var(--color-primary);">${hotel ? hotel.title : '—'}</div>
+                                            <div style="font-size:0.65rem; color:#aaa; font-family:monospace;">${m.hotelId || ''}</div>
+                                        </td>
+                                        <td><button class="btn-outline" style="font-size:0.7rem; color:red; border-color:#ffcccc;" onclick="window.admRemoveUser('${m.id}')">Remove</button></td>
+                                    </tr>`;
+                                }).join('');
+                            })()}</tbody>
                         </table>
                     </div>
+                    ${(() => {
+                        if (totalManagersPages <= 1) return '';
+                        let btns = '';
+                        for (let i = 1; i <= totalManagersPages; i++) {
+                            btns += `<button onclick="window.setManagerPage(${i})" style="width:36px; height:36px; border-radius:10px; border:1px solid ${managersPage===i?'var(--color-primary)':'#ddd'}; background:${managersPage===i?'var(--color-primary)':'white'}; color:${managersPage===i?'white':'#666'}; font-weight:700; cursor:pointer; transition:all 0.2s;">${i}</button>`;
+                        }
+                        return `
+                        <div style="display:flex; justify-content:center; gap:0.5rem; margin-top:2rem; margin-bottom:2rem;">
+                            <button onclick="window.setManagerPage(${managersPage - 1})" ${managersPage === 1 ? 'disabled' : ''} style="padding:0 0.8rem; height:36px; border-radius:10px; border:1px solid #ddd; background:white; color:#666; font-weight:700; cursor:pointer; opacity:${managersPage===1?0.5:1}">‹ Previous</button>
+                            ${btns}
+                            <button onclick="window.setManagerPage(${managersPage + 1})" ${managersPage === totalManagersPages ? 'disabled' : ''} style="padding:0 0.8rem; height:36px; border-radius:10px; border:1px solid #ddd; background:white; color:#666; font-weight:700; cursor:pointer; opacity:${managersPage===totalManagersPages?0.5:1}">Next ›</button>
+                        </div>`;
+                    })()}
                     <div style="background:white; padding:2rem; border-radius:20px; border:2px dashed #eee;">
                         <h4 style="margin-top:0;">Create Manager</h4>
                         <div class="responsive-grid-2" style="margin-bottom:1rem;">
