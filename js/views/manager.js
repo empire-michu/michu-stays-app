@@ -83,7 +83,7 @@ window.router.addRoute('manager', async (container, params) => {
         if (!container) return;
         const div = document.createElement('div');
         div.className = 'mg-package-row';
-        div.style.cssText = `background:white; padding:1rem; border-radius:14px; border:1px solid #e0eaff; display:grid; grid-template-columns: 1fr 100px 100px 40px; gap:0.6rem; align-items:center;`;
+        div.style.cssText = `background:white; padding:1rem; border-radius:14px; border:1px solid #e0eaff; margin-bottom:0.5rem;`;
         div.innerHTML = `
             <input type="text" placeholder="Package Title (e.g. Weekend Special)" class="mg-pkg-title" style="padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem;">
             <div style="position:relative;">
@@ -360,6 +360,12 @@ window.router.addRoute('manager', async (container, params) => {
                     .mgr-three-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
                     .mgr-inventory-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
                     .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 24px; border: 1px solid #eee; background: white; box-shadow: var(--shadow-sm); }
+
+                    .mg-package-row { display: grid; grid-template-columns: 1fr 100px 100px 40px; gap: 0.8rem; align-items: center; }
+                    @media (max-width: 600px) {
+                        .mg-package-row { grid-template-columns: 1fr 1fr 40px !important; }
+                        .mg-package-row > input:first-child { grid-column: 1 / span 2; }
+                    }
 
                     @media (max-width: 1024px) {
                         .mgr-prop-layout { grid-template-columns: 1fr; }
@@ -646,7 +652,7 @@ window.router.addRoute('manager', async (container, params) => {
                             
                             <div id="mg-packages-container" style="display:grid; gap:0.8rem;">
                                 ${(myHotel.packages || []).map((pkg, idx) => `
-                                    <div class="mg-package-row" style="background:white; padding:1rem; border-radius:14px; border:1px solid #e0eaff; display:grid; grid-template-columns: 1fr 100px 100px 40px; gap:0.6rem; align-items:center;">
+                                    <div class="mg-package-row" style="background:white; padding:1rem; border-radius:14px; border:1px solid #e0eaff;">
                                         <input type="text" placeholder="Package Title (e.g. Weekend Special)" value="${pkg.title||''}" class="mg-pkg-title" style="padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem;">
                                         <div style="position:relative;">
                                             <input type="number" placeholder="Nights" value="${pkg.nights||''}" class="mg-pkg-nights" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem; padding-right:2.5rem;">
