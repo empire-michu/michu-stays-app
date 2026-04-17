@@ -21,7 +21,7 @@ window.router.addRoute('booking', async (container, params) => {
     const guests = params.guests || 2;
 
     container.innerHTML = `
-        <div class="container" style="padding-top:4rem; padding-bottom:4rem;">
+        <div class="container" style="padding-top:4rem; padding-bottom:2rem;">
             <div class="stepper-container">
                 <div class="stepper-header">Secure Your Booking</div>
                 <div style="text-align:center;margin-bottom:2rem;">

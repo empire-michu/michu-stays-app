@@ -922,7 +922,7 @@ window.router.addRoute('admin', async (container, params) => {
 
     const renderAdmin = () => {
         container.innerHTML = `
-            <div class="container" style="padding-top:2rem; padding-bottom:4rem;">
+            <div class="container" style="padding-top:2rem; padding-bottom:2rem;">
                 ${renderAdminUI()}
             </div>
             <!-- Admin Proof Modal -->

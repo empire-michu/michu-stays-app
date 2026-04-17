@@ -64,7 +64,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 .detail-content-grid { grid-template-columns: 1fr; gap: 2rem; }
             }
         </style>
-        <div class="container" style="padding-top:2rem; padding-bottom:4rem;">
+        <div class="container" style="padding-top:2rem; padding-bottom:2rem;">
             <div style="margin-bottom:1.5rem; color:var(--color-text-light); font-size:0.9rem;">
                 <span style="cursor:pointer;" onclick="router.navigate('home')">Home</span> / 
                 <span style="color:var(--color-text-dark); font-weight:600;">${hotel.title}</span>

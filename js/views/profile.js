@@ -169,7 +169,7 @@ window.router.addRoute('profile', async (container, params) => {
     };
 
     container.innerHTML = `
-        <div class="container" style="padding-top:2.5rem;padding-bottom:4rem;max-width:1200px;">
+        <div class="container" style="padding-top:2.5rem;padding-bottom:2rem;max-width:1200px;">
             <div style="margin-bottom:1.5rem;"><button onclick="window.router.navigate('home')" class="btn-outline" style="border:none;padding:0;">← Back to Home</button></div>
 
             <style>

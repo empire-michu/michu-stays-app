@@ -304,7 +304,7 @@ window.router.addRoute('manager', async (container, params) => {
         container.innerHTML = `
             <div class="manager-container" style="max-width:1200px; margin:0 auto; padding:2rem 1rem;">
                 <style>
-                    .manager-container { animation: fadeIn 0.4s ease; padding-bottom: 120px; }
+                    .manager-container { animation: fadeIn 0.4s ease; padding-bottom: 20px; }
                     .manager-layout { display: grid; grid-template-columns: 280px 1fr; gap: 2rem; }
                     .manager-sidebar { background: white; border-radius: 24px; padding: 1.5rem; height: fit-content; position: sticky; top: 100px; box-shadow: var(--shadow-sm); z-index: 10; }
                     .mgr-nav-btn { width: 100%; padding: 1rem; margin-bottom: 0.5rem; border: none; border-radius: 12px; background: transparent; color: #666; font-weight: 600; text-align: left; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.8rem; }
@@ -330,7 +330,7 @@ window.router.addRoute('manager', async (container, params) => {
                         .manager-layout { grid-template-columns: 1fr; }
                         .manager-sidebar { display: none; }
                         .mgr-mobile-tabs { display: flex; }
-                        .manager-container { padding: 0.75rem 0.5rem !important; padding-top: 0.5rem; padding-bottom: 80px; }
+                        .manager-container { padding: 0.75rem 0.5rem !important; padding-top: 0.5rem; padding-bottom: 20px; }
 
                         /* Property Editor Mobile Overhaul */
                         .mgr-prop-layout { grid-template-columns: 1fr !important; gap: 0 !important; }
