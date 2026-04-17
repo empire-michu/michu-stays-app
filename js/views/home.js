@@ -101,14 +101,21 @@ window.router.addRoute('home', async (container, params) => {
             }
         }
 
-        const minPkgPrice = p.packages && p.packages.length > 0
-            ? Math.min(...p.packages.map(pkg => {
-                const pkgNights = parseInt(pkg.nights) || 1;
-                const pkgDisc = parseInt(pkg.discount) || 0;
-                const base = currentPrice * pkgNights;
-                return base - Math.round(base * (pkgDisc / 100));
-            }))
-            : 0;
+        let minPkgPrice = 0;
+        let minPkgNights = 0;
+        if (p.packages && p.packages.length > 0) {
+            p.packages.forEach(pkg => {
+                const n = parseInt(pkg.nights) || 1;
+                const d = parseInt(pkg.discount) || 0;
+                const base = currentPrice * n;
+                const total = base - Math.round(base * (d / 100));
+                if (minPkgPrice === 0 || total < minPkgPrice) {
+                    minPkgPrice = total;
+                    minPkgNights = n;
+                }
+            });
+        }
+        const effectiveRate = minPkgNights > 0 ? Math.round(minPkgPrice / minPkgNights) : 0;
             
         const isEvent = !!p.eventMode;
 
@@ -150,9 +157,12 @@ window.router.addRoute('home', async (container, params) => {
                                 <div style="display:flex; align-items:center; gap:0.3rem; margin-bottom:0.1rem;">
                                     <span style="font-size:0.6rem; background:#fff4e5; color:#d97706; padding:0.1rem 0.4rem; border-radius:4px; font-weight:900; text-transform:uppercase;">🎉 Event active</span>
                                 </div>
-                                <div style="display:flex; align-items:baseline; gap:0.2rem;">
-                                    <span style="font-size:0.75rem; color:#666; font-weight:700;">From</span>
-                                    <span style="font-weight:900; font-size:1.45rem; color: #0b6646; letter-spacing:-0.03em;">${minPkgPrice.toLocaleString()} Birr</span>
+                                <div style="display:flex; align-items:baseline; gap:0.25rem;">
+                                    <span style="font-weight:900; font-size:1.45rem; color: #0b6646; letter-spacing:-0.03em;">${effectiveRate.toLocaleString()} Birr</span>
+                                    <span style="color:#666; font-size:0.85rem; font-weight:700;">/ night</span>
+                                </div>
+                                <div style="font-size:0.65rem; color:#999; font-weight:600; margin-top:0.1rem;">
+                                    (Total ${minPkgPrice.toLocaleString()} Birr for ${minPkgNights}-Night Package)
                                 </div>
                             </div>
                         ` : (hasDiscount ? `
