@@ -536,7 +536,8 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
             pkgData = { title: window.activePackage.title, services: window.activePackage.services };
         }
 
-        const totalAmount = (currentPrice * nights) - Math.round((currentPrice * nights) * (discountToUse / 100));
+        const calcBase = originalPrice || currentPrice;
+        const totalAmount = (calcBase * nights) - Math.round((calcBase * nights) * (discountToUse / 100));
 
         router.navigate('booking', { 
             id: id, 

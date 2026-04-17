@@ -15,7 +15,16 @@ window.router.addRoute('booking', async (container, params) => {
         return;
     }
 
-    let amount = params.totalAmount || (property.price * 2);
+    const currentPrice = Number(String(property.price || 0).replace(/[^\d.-]/g, ''));
+    let discountPercent = Number(property.discountPercent || property.discount || 0);
+    let originalPrice = property.originalPrice ? Number(String(property.originalPrice).replace(/[^\d.-]/g, '')) : 0;
+    
+    if (discountPercent > 0 && (!originalPrice || originalPrice <= currentPrice)) {
+        originalPrice = Math.round(currentPrice / (1 - (discountPercent / 100)));
+    }
+
+    const calcBase = originalPrice || currentPrice;
+    let amount = params.totalAmount || (calcBase * (params.nights || 2));
     const checkIn = params.checkIn || 'Not set';
     const checkOut = params.checkOut || 'Not set';
     const guests = params.guests || 2;
@@ -43,8 +52,8 @@ window.router.addRoute('booking', async (container, params) => {
         const matching = property.packages.find(p => parseInt(p.nights) === nights);
         if (matching) {
             pkgInfo = { title: matching.title, services: matching.services };
-            // Recalculate if it looks like the default price was used
-            const base = (property.price || 0) * nights;
+            // Recalculate using calcBase if fallback needed
+            const base = calcBase * nights;
             amount = base - Math.round(base * (matching.discount / 100));
         }
     }
