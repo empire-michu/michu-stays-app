@@ -393,10 +393,18 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
 
         let discountToUse = discountPercentage;
         let isPkg = false;
-        
-        if (window.activePackage && window.activePackage.nights === nights) {
+        let pkgInfo = null;
+
+        // Auto-detect package if nights match
+        const matchingPkg = (hotel.packages || []).find(p => parseInt(p.nights) === nights);
+        if (matchingPkg) {
+            discountToUse = matchingPkg.discount;
+            isPkg = true;
+            pkgInfo = matchingPkg;
+        } else if (window.activePackage && window.activePackage.nights === nights) {
             discountToUse = window.activePackage.discount;
             isPkg = true;
+            pkgInfo = window.activePackage;
         }
 
         const baseTotal = currentPrice * nights;
@@ -408,8 +416,8 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 ${isPkg ? `
                     <div style="background:#f0f7ff; padding:0.8rem; border-radius:12px; border:1px solid #c9e2ff; margin-bottom:0.5rem; animation: slideIn 0.3s ease;">
                         <div style="font-weight:800; color:#0056b3; font-size:0.75rem; text-transform:uppercase; margin-bottom:0.2rem;">🎁 Package Applied</div>
-                        <div style="font-weight:700; color:var(--color-primary);">${window.activePackage.title}</div>
-                        <div style="font-size:0.7rem; color:#666;">${window.activePackage.services || ''}</div>
+                        <div style="font-weight:700; color:var(--color-primary);">${pkgInfo.title}</div>
+                        <div style="font-size:0.7rem; color:#666;">${pkgInfo.services || ''}</div>
                     </div>
                 ` : ''}
                 <div style="display:flex; justify-content:space-between; color:#444;">
@@ -452,12 +460,15 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
 
         let discountToUse = discountPercentage;
         let pkgData = null;
-        if (window.activePackage && window.activePackage.nights === nights) {
+
+        // Auto-detect package match
+        const matchingPkg = (hotel.packages || []).find(p => parseInt(p.nights) === nights);
+        if (matchingPkg) {
+            discountToUse = matchingPkg.discount;
+            pkgData = { title: matchingPkg.title, services: matchingPkg.services };
+        } else if (window.activePackage && window.activePackage.nights === nights) {
             discountToUse = window.activePackage.discount;
-            pkgData = {
-                title: window.activePackage.title,
-                services: window.activePackage.services
-            };
+            pkgData = { title: window.activePackage.title, services: window.activePackage.services };
         }
 
         const totalAmount = (currentPrice * nights) - Math.round((currentPrice * nights) * (discountToUse / 100));

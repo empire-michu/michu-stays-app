@@ -621,6 +621,11 @@ window.router.addRoute('admin', async (container, params) => {
                                                 <div style="font-weight:700; color:#333; text-transform:uppercase; font-size:0.85rem;">${b.customerName || b.customerEmail}</div>
                                                 ${b.customerName ? `<div style="font-size:0.75rem; color:#08553d; margin-bottom:2px; font-weight:500;">${b.customerEmail}</div>` : ''}
                                                 ${b.customerPhone ? `<div style="font-size:0.75rem; color:#08553d; font-weight:700;"><span style="color:#d4af37; margin-right:4px;">📞</span>${b.customerPhone}</div>` : ''}
+                                                ${b.packageInfo ? `
+                                                    <div style="margin-top:0.3rem; background:#fff9e6; color:#856404; font-size:0.6rem; font-weight:800; padding:0.15rem 0.4rem; border-radius:4px; border:1px solid #ffecb3; display:inline-block; text-transform:uppercase;">
+                                                        🎁 PKG: ${b.packageInfo.title}
+                                                    </div>
+                                                ` : ''}
                                             </td>
                                             <td style="font-weight:600; white-space:nowrap;">${b.totalAmount} Birr</td>
                                             <td><span style="padding:0.2rem 0.6rem; border-radius:99px; font-size:0.75rem; background:${b.status==='Confirmed'?'#e6f4ea':'#fff8e1'}; color:${b.status==='Confirmed'?'#1e7e34':'#b05d22'}; font-weight:700; text-transform:uppercase;">${b.status}</span></td>
