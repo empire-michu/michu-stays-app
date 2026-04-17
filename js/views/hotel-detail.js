@@ -425,7 +425,8 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
             pkgInfo = window.activePackage;
         }
 
-        const baseTotal = currentPrice * nights;
+        const calculationBase = originalPrice || currentPrice;
+        const baseTotal = calculationBase * nights;
         const discAmt = Math.round(baseTotal * (discountToUse / 100));
         const finalTotal = baseTotal - discAmt;
 
@@ -439,7 +440,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     </div>
                 ` : ''}
                 <div style="display:flex; justify-content:space-between; color:#444;">
-                    <span>${currentPrice} Birr x ${nights} night${nights>1?'s':''}</span>
+                    <span>${calculationBase} Birr x ${nights} night${nights>1?'s':''}</span>
                     <span style="font-weight:600;">${baseTotal} Birr</span>
                 </div>
                 ${discountToUse > 0 ? `
