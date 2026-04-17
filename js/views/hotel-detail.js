@@ -2,19 +2,20 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     const id = params.id;
     container.innerHTML = `<div class="container" style="text-align:center;padding-top:4rem;">Loading Hotel Details...</div>`;
     
-    // 1. Definition move to top for immediate availability
+    // --- 1. ROBUST BOOKING HANDLER (Global Scope) ---
     window.goToBooking = () => {
         const bin = document.getElementById('book-in');
         const bout = document.getElementById('book-out');
-        if (!bin || !bout || !bin.value || !bout.value) { 
-            window.showToast('Please select check-in and check-out dates'); 
-            return; 
+        if (!bin || !bout || !bin.value || !bout.value) {
+            window.showToast('Please select check-in and check-out dates');
+            return;
         }
         const nights = Math.ceil((new Date(bout.value) - new Date(bin.value)) / (1000 * 60 * 60 * 24));
-        if (nights <= 0) { 
-            window.showToast('Check-out date must be after check-in date'); 
-            return; 
+        if (nights <= 0) {
+            window.showToast('Check-out date must be after check-in date');
+            return;
         }
+        window.showToast('⏳ Initiating your booking...', 2000);
         window.router.navigate('booking_payment', { propertyId: id, checkIn: bin.value, checkOut: bout.value });
     };
 
@@ -27,7 +28,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     // Dynamic SEO
     window.router.updateSEO({
         title: `${hotel.title} - Hotel in ${hotel.address || 'Dire Dawa'}`,
-        description: hotel.description ? hotel.description.substring(0, 160).replace(/\n/g, ' ') + '...' : `Book your stay at ${hotel.title} in Dire Dawa on Michu Stays. Best prices for hotels in Ethiopia.`,
+        description: hotel.description ? hotel.description.substring(0, 160).replace(/\n/g, ' ') + '...' : `Book your stay at ${hotel.title} in Dire Dawa on Michu Stays.`,
         image: hotel.image
     });
 
@@ -89,7 +90,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 to { box-shadow: 0 0 20px rgba(197,157,63,0.5); transform: scale(1.02); }
             }
         </style>
-        <div class="container" style="padding-top:1rem; padding-bottom:2rem;">
+        <div class="container" style="padding-top:1.5rem; padding-bottom:3rem;">
             <div style="margin-bottom:1.5rem; color:var(--color-text-light); font-size:0.9rem;">
                 <span style="cursor:pointer;" onclick="router.navigate('home')">Home</span> / 
                 <span style="color:var(--color-text-dark); font-weight:600;">${hotel.title}</span>
@@ -97,18 +98,11 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
 
             <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
                 <div>
-                    <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap; margin-bottom:0.4rem;">
-                        <h1 style="margin:0; font-size:1.8rem; color:var(--color-primary);">${hotel.title}</h1>
-                        ${hasDiscount ? `<span style="background:linear-gradient(135deg, #f59e0b 0%, #d4af37 100%);color:white;padding:0.3rem 0.8rem;border-radius:8px;font-size:0.8rem;font-weight:800;animation: pulse 2s infinite;">-${discountPercentage}% OFF</span>` : ''}
-                    </div>
-                    <p style="margin:0.3rem 0 0; color:var(--color-text-light); display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-                        <span style="font-weight:600;">📍 ${hotel.address}</span>
-                        ${distance > 0 ? `<span style="background:#f0f0f0;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.8rem;color:#555;font-weight:600;">${distance} km from centre</span>` : ''}
-                    </p>
+                    <h1 style="margin:0; font-size:1.8rem; color:var(--color-primary);">${hotel.title}</h1>
+                    <p style="margin:0.3rem 0 0; color:var(--color-text-light); font-weight:600;">📍 ${hotel.address} ${distance > 0 ? `· ${distance} km from centre` : ''}</p>
                 </div>
-                <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
-                    <button class="btn-outline" style="padding:0.4rem 0.8rem;" onclick="window.print()">🖨 Print</button>
-                    ${videoUrl ? `<button class="btn-primary" style="padding:0.4rem 1.2rem; border-radius:99px;" onclick="window.viewFullGallery(${allImages.length})">📽 Watch Tour</button>` : ''}
+                <div style="display:flex; gap:0.8rem;">
+                    <button class="btn-outline" style="padding:0.4rem 1rem;" onclick="window.print()">🖨 Print</button>
                 </div>
             </div>
 
@@ -121,42 +115,45 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 <div style="display:grid; grid-template-rows: 1fr 1fr; gap:0.8rem;">
                     <div style="background:url('${allImages[3] || allImages[0]}') center/cover; border-radius:0 16px 0 0; cursor:pointer;" onclick="viewFullGallery(3)"></div>
                     <div style="position:relative; background:url('${allImages[4] || allImages[0]}') center/cover; border-radius:0 0 16px 0; cursor:pointer;" onclick="viewFullGallery(4)">
-                        ${(allImages.length + (videoUrl ? 1 : 0)) > 5 ? `<div style="position:absolute; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; color:white; font-weight:800; border-radius:0 0 16px 0; backdrop-filter:blur(3px);">+${(allImages.length + (videoUrl ? 1 : 0)) - 5} Media</div>` : ''}
+                        ${allImages.length > 5 ? `<div style="position:absolute; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; color:white; font-size:1.2rem; font-weight:800; border-radius:0 0 16px 0;">+${allImages.length - 5} More</div>` : ''}
                     </div>
                 </div>
             </div>
 
             <div class="detail-content-grid">
-                <div style="min-width: 0; overflow-wrap: break-word;">
-                    ${videoUrl ? `<div style="margin-bottom:2rem; width:100%; max-width:450px; border-radius:18px; overflow:hidden; border:1px solid #f0f0f0; background:#000;"><video controls style="width:100%; display:block; aspect-ratio:16/9;"><source src="${videoUrl}" type="video/mp4"></video></div>` : ''}
+                <div>
+                     ${videoUrl ? `
+                    <div style="margin-bottom:2rem; width:100%; border-radius:18px; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.1); background:#000;">
+                        <video controls style="width:100%; display:block; aspect-ratio:16/9;"><source src="${videoUrl}" type="video/mp4"></video>
+                    </div>` : ''}
 
-                    <section style="border-bottom:1px solid var(--color-border); padding-bottom:1.5rem; margin-bottom:1.5rem;">
+                    <section style="margin-bottom:2rem; padding-bottom:2rem; border-bottom:1px solid #eee;">
                         <h2 style="margin-bottom:1rem;">About this ${hotel.type || 'Property'}</h2>
-                        <p style="line-height:1.7; color:var(--color-text-dark); white-space:pre-wrap; margin-bottom: 1.5rem;">${hotel.description || 'Experience comfort and style in the heart of the city.'}</p>
+                        <p style="line-height:1.7; color:var(--color-text-dark); white-space:pre-wrap;">${hotel.description || 'Experience comfort and style in the heart of the city.'}</p>
                     </section>
 
                     ${hotel.packages && hotel.packages.length > 0 ? `
                     <section style="margin-bottom:2rem; background:#f8fafc; padding:1.2rem; border-radius:20px; border:1px solid #e2e8f0;">
-                        <h2 style="margin-bottom:1rem; display:flex; align-items:center; gap:0.6rem; color:var(--color-primary); font-size:1.2rem;">🎁 Special Stay Packages</h2>
-                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:1rem;">
+                         <h2 style="margin-bottom:1rem; display:flex; align-items:center; gap:0.6rem; color:var(--color-primary); font-size:1.2rem;">🎁 Special Stay Packages</h2>
+                         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:1rem;">
                             ${hotel.packages.map((pkg, idx) => `
-                                <div class="pkg-card" onclick="window.selectPkg(${idx})" style="background:white; border:2px solid #edf2f7; border-radius:20px; padding:1.2rem; cursor:pointer; position:relative; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+                                <div class="pkg-card" onclick="window.selectPkg(${idx})" style="background:white; border:2.2px solid #edf2f7; border-radius:20px; padding:1.2rem; cursor:pointer; position:relative; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 4px 6px rgba(0,0,0,0.02); transition:all 0.3s ease;">
                                     <div style="position:absolute; top:0; right:0; background:linear-gradient(135deg, #f59e0b 0%, #d4af37 100%); color:white; font-weight:900; padding:0.3rem 0.8rem; border-bottom-left-radius:15px; font-size:0.75rem;">Save Deal</div>
                                     <div style="background:#e0f2fe; color:#0369a1; font-weight:900; font-size:0.65rem; padding:0.3rem 0.6rem; border-radius:99px; display:inline-block; align-self:flex-start; margin-bottom:0.8rem; text-transform:uppercase;">🌙 ${pkg.nights} Nights Bundle</div>
                                     <h3 style="margin:0 0 0.4rem; font-size:1.1rem; font-weight:800; color:var(--color-text-dark);">${pkg.title}</h3>
-                                    <div style="font-size:0.85rem; color:#64748b; line-height:1.5; margin-bottom:1rem; flex-grow:1;">${pkg.services || 'Premium stay inclusives.'}</div>
+                                    <div style="font-size:0.85rem; color:#64748b; margin-bottom:1rem; flex-grow:1;">${pkg.services || 'Premium inclusives.'}</div>
                                     <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1rem; border-top:1.5px dashed #f1f5f9;">
                                         <div style="color:#d97706; font-weight:950; font-size:1.1rem;">${pkg.discount}% OFF</div>
-                                        <div class="btn-primary" style="padding:0.5rem 1rem; border-radius:12px; font-size:0.8rem; font-weight:800; background:linear-gradient(135deg, var(--color-primary), #1e7e34);">Select</div>
+                                        <div class="btn-primary" style="padding:0.5rem 1rem; border-radius:12px; font-size:0.8rem; font-weight:800;">Select</div>
                                     </div>
                                 </div>`).join('')}
-                        </div>
+                         </div>
                     </section>` : ''}
 
-                    <section style="margin-bottom:2rem;">
+                    <section>
                         <h2 style="margin-bottom:1.5rem;">What this place offers</h2>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;">
-                            ${amenities.length > 0 ? amenities.map(a => `<div style="display:flex; align-items:center; gap:0.8rem; font-size:1.1rem;"><span style="font-size:1.4rem;">${amenitiesIcons[a] || '✨'}</span><span>${a}</span></div>`).join('') : '<p>All standard amenities included.</p>'}
+                            ${amenities.length > 0 ? amenities.map(a => `<div style="display:flex; align-items:center; gap:0.8rem; font-size:1.1rem;"><span>${amenitiesIcons[a] || '✨'}</span><span>${a}</span></div>`).join('') : '<p>All standard amenities included.</p>'}
                         </div>
                     </section>
                 </div>
@@ -165,73 +162,90 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     <div id="booking-widget-main" style="background:white; padding:2rem; border:1.5px solid #eee; border-radius:28px; box-shadow:0 15px 35px rgba(0,0,0,0.06);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
                             <div>
-                                <span id="headline-price-val" style="font-size:1.85rem; font-weight:950; color:#d97706; letter-spacing: -0.04em;">${hotel.eventMode ? minEffectiveRate.toLocaleString() : currentPrice.toLocaleString()} Birr</span>
+                                <span style="font-size:1.85rem; font-weight:950; color:#d97706; letter-spacing: -0.04em;">${hotel.eventMode ? minEffectiveRate.toLocaleString() : currentPrice.toLocaleString()} Birr</span>
                                 <span style="color:var(--color-text-light); font-size:0.95rem; font-weight:600;"> / night</span>
-                                <div id="headline-price-label" style="font-size:0.7rem; color:#d97706; font-weight:900; text-transform:uppercase; margin-top:0.3rem;">${hotel.eventMode ? '✨ Event Special Rate' : ''}</div>
                             </div>
                             <div style="font-size:1rem; font-weight:800; background:#fff8e1; color:#e37400; padding:0.4rem 0.8rem; border-radius:12px; display:flex; align-items:center; gap:0.4rem; border:1px solid #ffecb3;">
                                 <span style="color:#f59e0b; font-size:1.2rem;">★</span> ${avgRating > 0 ? avgRating : 'New'}
-                                ${reviewCount > 0 ? `<span style="font-size:0.8rem;font-weight:600;color:#999;">(${reviewCount})</span>` : ''}
                             </div>
                         </div>
 
                         ${(() => {
                             const avail = hotel.availableRooms ?? hotel.totalRooms ?? 0;
-                            return `<div style="background:${avail > 0 ? '#e6f4ea' : '#fce8e6'}; padding:0.8rem 1.2rem; border-radius:12px; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.6rem; border:1px solid ${avail > 0 ? '#cce8d5' : '#f8d7da'};">
-                                <span style="font-size:1.2rem;">${avail > 0 ? '🏨' : '🚫'}</span>
-                                <span style="font-weight:800; color:${avail > 0 ? '#1e7e34' : '#c5221f'}; font-size:0.95rem;">${avail > 0 ? `${avail} rooms available` : 'Fully booked'}</span>
+                            return `<div style="background:${avail > 0 ? '#e6f4ea' : '#fce8e6'}; padding:1rem; border-radius:16px; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.8rem; color:${avail > 0 ? '#1e7e34' : '#c5221f'}; font-weight:800;">
+                                <span>${avail > 0 ? '🏨' : '🚫'}</span> ${avail > 0 ? `${avail} rooms available` : 'Fully booked'}
                             </div>`;
                         })()}
 
-                        <div style="border:1.8px solid #f1f5f9; border-radius:16px; overflow:hidden; margin-bottom:1.5rem; background:#f8fafc;">
+                        <div style="border:1.8px solid #f1f5f9; border-radius:16px; overflow:hidden; margin-bottom:1.5rem;">
                             <div style="display:grid; grid-template-columns:1fr 1fr;">
                                 <div style="padding:1rem; border-right:1.8px solid #f1f5f9;">
-                                    <div style="font-weight:900; font-size:0.75rem; text-transform:uppercase; color:#64748b; margin-bottom:0.4rem;">Check-in</div>
-                                    <input type="date" id="book-in" style="border:none; width:100%; font-size:1rem; font-weight:700; outline:none; background:transparent;">
+                                    <div style="font-weight:900; font-size:0.65rem; text-transform:uppercase; color:#64748b; margin-bottom:0.3rem;">Check-in</div>
+                                    <input type="date" id="book-in" style="border:none; width:100%; font-size:0.95rem; font-weight:700; outline:none;">
                                 </div>
                                 <div style="padding:1rem;">
-                                    <div style="font-weight:900; font-size:0.75rem; text-transform:uppercase; color:#64748b; margin-bottom:0.4rem;">Check-out</div>
-                                    <input type="date" id="book-out" style="border:none; width:100%; font-size:1rem; font-weight:700; outline:none; background:transparent;">
+                                    <div style="font-weight:900; font-size:0.65rem; text-transform:uppercase; color:#64748b; margin-bottom:0.3rem;">Check-out</div>
+                                    <input type="date" id="book-out" style="border:none; width:100%; font-size:0.95rem; font-weight:700; outline:none;">
                                 </div>
                             </div>
                         </div>
 
-                        <div id="standard-reserve-btn-box">
-                            ${(hotel.availableRooms ?? hotel.totalRooms ?? 0) > 0 
-                                ? `<button id="standard-reserve-btn" class="btn-primary" style="width:100%; padding:1.4rem; font-size:1.2rem; border-radius:18px; font-weight:800; background:linear-gradient(135deg, var(--color-primary), #1e7e34); box-shadow:0 10px 20px rgba(11,102,70,0.2);">Reserve Now</button>`
-                                : `<button disabled style="width:100%; padding:1.4rem; font-size:1.2rem; border-radius:18px; font-weight:800; background:#cbd5e1; color:white; border:none; cursor:not-allowed;">Fully Booked</button>`}
-                        </div>
+                        <button id="standard-reserve-btn" class="btn-primary" style="width:100%; padding:1.4rem; font-size:1.25rem; border-radius:18px; font-weight:800; background:linear-gradient(135deg, var(--color-primary), #1e7e34);" onclick="window.goToBooking()">Reserve Now</button>
                         
-                        <div id="price-summary" style="margin-top:2rem;"></div>
+                        <div id="price-summary" style="margin-top:1.5rem;"></div>
                     </div>
                 </div>
             </div>
+
+            <!-- Restored Sections -->
+            <section style="margin-top:3rem; padding-top:2rem; border-top:1px solid #eee;">
+                <h2 style="margin-bottom:1.2rem;">Where you'll be</h2>
+                <div style="width:100%; height:380px; border-radius:24px; overflow:hidden; border:1px solid #eee;">
+                    <iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=${encodeURIComponent(hotel.mapQuery || hotel.address)}&t=&z=14&ie=UTF8&iwloc=&output=embed" allowfullscreen></iframe>
+                </div>
+            </section>
+
+            <section style="margin-top:3rem; padding-top:2rem; border-top:1px solid #eee;">
+                <h2 style="margin-bottom:1.5rem;">Guest Reviews (${reviewCount})</h2>
+                <div style="display:grid; gap:1.2rem;">
+                    ${reviews.length > 0 ? reviews.map(r => `
+                        <div style="background:#f9fafb; padding:1.5rem; border-radius:20px; border:1px solid #f0f0f0;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                                <strong>${r.userName || 'Guest'}</strong>
+                                <div style="color:#f59e0b;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+                            </div>
+                            <p style="font-style:italic; margin:0;">"${r.text || 'No comments'}"</p>
+                        </div>`).join('') : '<p>No reviews yet.</p>'}
+                </div>
+            </section>
         </div>
-        <!-- Gallery etc ... -->
+
+        <!-- Fullscreen Gallery Modal -->
+        <div id="gallery-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.98); z-index:10000; align-items:center; justify-content:center; flex-direction:column;">
+             <button style="position:absolute; top:2rem; right:2rem; background:white; border:none; border-radius:50%; width:44px; height:44px; font-size:1.5rem; cursor:pointer;" onclick="document.getElementById('gallery-modal').style.display='none'">✕</button>
+             <div id="gallery-container" style="max-width:90%; max-height:80vh; display:flex; align-items:center; justify-content:center;">
+                <img id="gallery-main-img" src="" style="max-width:100%; max-height:80vh; border-radius:12px; object-fit:contain; display:none;">
+                <video id="gallery-main-video" controls style="max-width:100%; max-height:80vh; border-radius:12px; object-fit:contain; display:none;"><source src="" type="video/mp4"></video>
+             </div>
+             <div id="gallery-thumbnails" style="margin-top:2rem; display:flex; gap:0.8rem; overflow-x:auto; padding-bottom:1rem; width:80%;"></div>
+        </div>
     `;
 
-    // 3. Robust Event Listeners
-    const btn = document.getElementById('standard-reserve-btn');
-    if (btn) {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.goToBooking();
-        });
-    }
-
+    // --- 2. LOGIC BINDING ---
     const bin = document.getElementById('book-in');
     const bout = document.getElementById('book-out');
     const summary = document.getElementById('price-summary');
+    const reserveBtn = document.getElementById('standard-reserve-btn');
 
     window.updatePrice = () => {
         const nights = Math.ceil((new Date(bout.value) - new Date(bin.value)) / (1000 * 60 * 60 * 24)) || 0;
-        if (nights <= 0) { 
-            if (summary) summary.innerHTML = '<p style="color:#d9534f;font-size:0.8rem;text-align:center;">Select stay dates</p>';
-            return; 
+        if (nights <= 0) {
+            if (summary) summary.innerHTML = '<p style="color:#d9534f; font-size:0.8rem; text-align:center;">Select stay dates</p>';
+            return;
         }
 
         let disc = discountPercentage;
-        let pTitle = '', isPkg = false;
+        let isPkg = false, pTitle = '';
         const matchingPkg = (hotel.packages || []).find(p => parseInt(p.nights) === nights);
         if (matchingPkg) { disc = matchingPkg.discount; isPkg = true; pTitle = matchingPkg.title; }
 
@@ -239,33 +253,51 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         const dAmt = Math.round(sub * (disc / 100));
         const total = sub - dAmt;
 
-        if (btn) btn.innerText = isPkg ? 'Reserve Package' : 'Reserve Now';
+        if (reserveBtn) reserveBtn.innerText = isPkg ? 'Reserve Package' : 'Reserve Now';
 
         summary.innerHTML = `
             <div style="display:flex; flex-direction:column; gap:0.8rem;">
-                ${isPkg ? `<div style="background:#fff9eb; border:1px solid #ffeeba; border-radius:12px; padding:0.8rem; border-left:4px solid #f59e0b;"><div style="font-weight:900; color:#b45309; font-size:0.75rem; text-transform:uppercase;">🎁 Package Active</div><div style="font-weight:700;">${pTitle}</div></div>` : ''}
-                <div style="display:flex; justify-content:space-between; color:#64748b; font-size:0.9rem;"><span>${(originalPrice || currentPrice).toLocaleString()} Birr x ${nights} nights</span><span>${sub.toLocaleString()} Birr</span></div>
-                ${disc > 0 ? `<div style="display:flex; justify-content:space-between; color:#d97706; font-weight:800;"><span>Discount (${disc}%)</span><span>-${dAmt.toLocaleString()} Birr</span></div>` : ''}
+                ${isPkg ? `<div style="background:#fff9eb; border:1px solid #ffeeba; border-radius:12px; padding:0.8rem; border-left:4px solid #f59e0b;"><div style="font-weight:900; color:#b45309; font-size:0.7rem; text-transform:uppercase;">🎁 Package Active</div><div style="font-weight:700;">${pTitle}</div></div>` : ''}
+                <div style="display:flex; justify-content:space-between; color:#64748b; font-size:0.9rem;"><span>${(originalPrice || currentPrice).toLocaleString()} x ${nights} nights</span><span>${sub.toLocaleString()}</span></div>
+                ${disc > 0 ? `<div style="display:flex; justify-content:space-between; color:#d97706; font-weight:800;"><span>Discount (${disc}%)</span><span>-${dAmt.toLocaleString()}</span></div>` : ''}
                 <div style="display:flex; justify-content:space-between; font-weight:950; font-size:1.4rem; border-top:1.5px solid #f1f5f9; padding-top:1rem; color:var(--color-primary);"><span>Total</span><span>${total.toLocaleString()} Birr</span></div>
-                <p style="text-align:center; font-size:0.8rem; color:#64748b; margin-top:1rem;">✓ Instant confirmation & Secure payment</p>
+                <p style="text-align:right; font-size:0.65rem; color:#94a3b8; margin:0;">Prices include 15% VAT & Service Fees</p>
             </div>`;
     };
 
     bin.onchange = window.updatePrice;
     bout.onchange = window.updatePrice;
-    
-    // Initial dates
+
+    // Initial Dates
     const d1 = new Date(); const d2 = new Date(); d2.setDate(d1.getDate() + 1);
-    bin.value = d1.toISOString().split('T')[0]; bout.value = d2.toISOString().split('T')[0];
+    bin.value = d1.toISOString().split('T')[0];
+    bout.value = d2.toISOString().split('T')[0];
     window.updatePrice();
+
+    // Gallery Logic
+    const galleryItems = [...allImages.map(url => ({ type: 'image', url })), ...(videoUrl ? [{ type: 'video', url: videoUrl }] : [])];
+    window.viewFullGallery = (idx) => {
+        const modal = document.getElementById('gallery-modal');
+        const thumbs = document.getElementById('gallery-thumbnails');
+        modal.style.display = 'flex';
+        thumbs.innerHTML = galleryItems.map((item, i) => `<div onclick="updateGallerySelection(${i})" style="flex:0 0 80px; height:60px; border-radius:8px; overflow:hidden; cursor:pointer;">${item.type==='image'?`<img src='${item.url}' style='width:100%;height:100%;object-fit:cover;'>`:'📽️'}</div>`).join('');
+        updateGallerySelection(idx);
+    };
+    window.updateGallerySelection = (idx) => {
+        const img = document.getElementById('gallery-main-img');
+        const vid = document.getElementById('gallery-main-video');
+        const item = galleryItems[idx];
+        img.style.display = 'none'; vid.style.display = 'none';
+        if (item.type === 'image') { img.src = item.url; img.style.display = 'block'; }
+        else { vid.querySelector('source').src = item.url; vid.load(); vid.style.display = 'block'; vid.play(); }
+    };
 
     window.selectPkg = (idx) => {
         const pkg = hotel.packages[idx];
-        const start = new Date(bin.value || new Date());
+        const start = new Date(bin.value);
         const end = new Date(start); end.setDate(start.getDate() + parseInt(pkg.nights));
-        bin.value = start.toISOString().split('T')[0];
         bout.value = end.toISOString().split('T')[0];
         window.updatePrice();
-        window.showToast(`✅ ${pkg.title} Applied!`);
+        window.showToast(`✅ ${pkg.title} Package Selected!`);
     };
 });
