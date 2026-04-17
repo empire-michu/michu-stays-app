@@ -38,6 +38,27 @@ class Router {
                 });
             }
         }, 1500);
+
+        // --- MOBILE CHROME: Ensure mobile nav shows on initial page load ---
+        const showMobileNavIfNeeded = () => {
+            const nav = document.getElementById('mobile-nav');
+            if (!nav) return;
+            const hash = window.location.hash.replace('#', '');
+            if (hash === 'login' || hash === 'signup') {
+                nav.classList.add('nav-hidden');
+            } else {
+                nav.classList.remove('nav-hidden');
+                if (window.innerWidth <= 768) {
+                    nav.style.display = 'flex';
+                } else {
+                    nav.style.display = 'none';
+                }
+            }
+        };
+        document.addEventListener('DOMContentLoaded', showMobileNavIfNeeded);
+        window.addEventListener('resize', showMobileNavIfNeeded);
+        // Fallback for when DOMContentLoaded already fired
+        setTimeout(showMobileNavIfNeeded, 500);
     }
 
     addRoute(name, renderFunction) {
@@ -104,9 +125,14 @@ class Router {
 
         // Hide nav on login/signup pages for clean look
         if (name === 'login' || name === 'signup') {
-            nav.style.display = 'none';
+            nav.classList.add('nav-hidden');
         } else {
-            nav.style.display = (window.innerWidth <= 768) ? 'flex' : 'none';
+            nav.classList.remove('nav-hidden');
+            if (window.innerWidth <= 768) {
+                nav.style.display = 'flex';
+            } else {
+                nav.style.display = 'none';
+            }
         }
 
         document.querySelectorAll('.mobile-nav-item').forEach(item => {
@@ -153,6 +179,14 @@ window.showToast = function(message) {
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.innerText = message;
+    // Mobile Chrome: position above mobile nav bar
+    if (window.innerWidth <= 768) {
+        toast.style.bottom = 'calc(85px + env(safe-area-inset-bottom, 0px))';
+        toast.style.right = '1rem';
+        toast.style.left = '1rem';
+        toast.style.textAlign = 'center';
+        toast.style.borderRadius = '14px';
+    }
     document.body.appendChild(toast);
     
     setTimeout(() => {
@@ -307,6 +341,7 @@ window.showPushNotification = ({ message, details, createdAt, link }) => {
         padding: 1.25rem; z-index: 20000; display: flex; gap: 1rem;
         animation: _pushIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         cursor: pointer;
+        max-width: calc(100vw - 2rem);
     `;
     container.innerHTML = `
         <style>

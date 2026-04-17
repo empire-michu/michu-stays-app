@@ -1179,3 +1179,203 @@ input:focus, select:focus, textarea:focus {
   100% { transform: scale(1); opacity: 1; }
 }
 
+/* ═══════════════════════════════════════════
+   MOBILE CHROME BROWSER FIXES
+   All fixes for responsive tables, toasts,
+   safe areas & push notifications on mobile
+   Chrome browser (non-Capacitor)
+   ═══════════════════════════════════════════ */
+
+/* --- Responsive Card Layout for Booking/Manager Tables on Mobile --- */
+@media (max-width: 768px) {
+  /* Hide the scrollable table container on mobile Chrome */
+  .manager-table {
+    min-width: unset !important;
+    width: 100% !important;
+  }
+
+  .manager-table thead {
+    display: none !important;
+  }
+
+  .manager-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .manager-table tbody tr {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 1.5px solid #f0f0f0;
+    border-radius: 16px;
+    padding: 1rem 1.2rem;
+    gap: 0.6rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    position: relative;
+  }
+
+  .manager-table tbody tr:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+
+  .manager-table td {
+    display: flex !important;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.35rem 0 !important;
+    border-bottom: none !important;
+    font-size: 0.88rem;
+  }
+
+  .manager-table td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-weight: 800;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #999;
+    min-width: 60px;
+    padding-top: 0.15rem;
+  }
+
+  /* Hide the No. column on mobile — not useful */
+  .manager-table td[data-label="No."] {
+    position: absolute;
+    top: 0.8rem;
+    right: 1rem;
+    min-width: unset;
+    background: var(--color-primary);
+    color: white;
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem !important;
+    border-radius: 99px;
+    font-weight: 800;
+  }
+  .manager-table td[data-label="No."]::before {
+    content: '#';
+    min-width: unset;
+    color: white;
+  }
+
+  /* Status badge styling on card */
+  .manager-table td[data-label="Status"] {
+    margin-top: 0.3rem;
+  }
+
+  /* Action buttons full width */
+  .manager-table td:last-child {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem !important;
+    border-top: 1px solid #f5f5f5 !important;
+  }
+}
+
+/* --- Toast: Reposition above mobile nav --- */
+@media (max-width: 768px) {
+  .toast {
+    bottom: calc(85px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 1rem !important;
+    left: 1rem !important;
+    width: auto !important;
+    max-width: unset !important;
+    text-align: center;
+    border-radius: 14px !important;
+    font-size: 0.9rem;
+  }
+}
+
+/* --- Safe area inset fallbacks (for Chrome without env() support) --- */
+@supports not (padding-bottom: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: 0;
+  }
+  @media (max-width: 768px) {
+    body {
+      padding-bottom: 85px;
+    }
+    .mobile-nav {
+      padding-bottom: 16px;
+    }
+    .mobile-sticky-save {
+      bottom: 90px !important;
+    }
+  }
+}
+
+/* --- Mobile Chrome: Ensure mobile nav renders on first load --- */
+@media (max-width: 768px) {
+  .mobile-nav:not(.nav-hidden) {
+    display: flex !important;
+  }
+  .mobile-nav.nav-hidden {
+    display: none !important;
+  }
+}
+
+/* --- Push notification popups: keep clear of mobile nav --- */
+@media (max-width: 768px) {
+  /* Handled via JS positioning, but provide CSS anchor */
+  .push-notification-container {
+    bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* --- Ensure overflow scrollable tables work in Chrome --- */
+@media (max-width: 768px) {
+  [style*="overflow-x: auto"],
+  [style*="overflow-x:auto"] {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* --- Fix header actions overflow on small screens --- */
+@media (max-width: 400px) {
+  .header-actions {
+    gap: 0.3rem !important;
+    max-width: 65%;
+    justify-content: flex-end;
+    overflow: hidden;
+  }
+  .header-actions button {
+    font-size: 0.65rem !important;
+    padding: 0.25rem 0.5rem !important;
+    white-space: nowrap;
+  }
+}
+
+/* --- Profile view mobile-friendly booking history cards --- */
+@media (max-width: 768px) {
+  .booking-history-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .booking-history-header > div {
+    width: 100%;
+  }
+  .booking-history-header input[type="date"],
+  .booking-history-header select {
+    width: 100% !important;
+    font-size: 16px !important; /* Prevent iOS/Android zoom */
+  }
+}
+
+/* --- Footer clearance for mobile nav --- */
+@media (max-width: 768px) {
+  .site-footer {
+    margin-bottom: 0;
+    padding-bottom: calc(1rem + 60px) !important;
+  }
+}
+
+/* --- Responsive hero section for very small screens --- */
+@media (max-width: 380px) {
+  .hero-title {
+    font-size: 1.8rem !important;
+  }
+  .hero-subtitle {
+    font-size: 0.9rem !important;
+  }
+}
