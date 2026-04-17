@@ -181,6 +181,7 @@ class Database {
             checkIn: userDetails.checkIn || '',
             checkOut: userDetails.checkOut || '',
             guests: userDetails.guests || 1,
+            packageInfo: userDetails.packageInfo || null,
             createdAt: new Date().toISOString()
         };
         const ref = await firestore.collection('bookings').add(newBooking);
@@ -188,7 +189,7 @@ class Database {
         // CREATE NOTIFICATION FOR MANAGER & ADMIN
         await this.createNotification({
             message: '🛎️ New Booking!',
-            details: `${newBooking.customerName} booked ${property.title}. Amount: ${newBooking.totalAmount} Birr. Reference: ${referenceCode}`,
+            details: `${newBooking.customerName} booked ${property.title}${newBooking.packageInfo ? ' (Package: ' + newBooking.packageInfo.title + ')' : ''}. Amount: ${newBooking.totalAmount} Birr. Reference: ${referenceCode}`,
             targetUserId: property.managerId || 'admin', // target manager
             targetRole: 'admin', // also target all admins
             type: 'booking_new',
