@@ -262,9 +262,9 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     <div style="position:sticky; top:2rem; background:white; padding:2rem; border:1px solid var(--color-border); border-radius:24px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                             <div>
-                                <span style="font-size:1.75rem; font-weight:900; color: ${hasDiscount ? 'var(--color-secondary)' : 'var(--color-primary)'}; letter-spacing: -0.02em;">${hotel.eventMode ? minEffectiveRate.toLocaleString() : currentPrice.toLocaleString()} Birr</span>
+                                <span id="headline-price-val" style="font-size:1.75rem; font-weight:900; color: ${hasDiscount ? 'var(--color-secondary)' : 'var(--color-primary)'}; letter-spacing: -0.02em;">${hotel.eventMode ? minEffectiveRate.toLocaleString() : currentPrice.toLocaleString()} Birr</span>
                                 <span style="color:var(--color-text-light); font-size:0.9rem;"> / night</span>
-                                ${hotel.eventMode ? `<div style="font-size:0.65rem; color:#d97706; font-weight:800; text-transform:uppercase; margin-top:0.2rem; letter-spacing:0.02em;">✨ Event Special Rate</div>` : ''}
+                                <div id="headline-price-label" style="font-size:0.65rem; color:#d97706; font-weight:800; text-transform:uppercase; margin-top:0.2rem; letter-spacing:0.02em;">${hotel.eventMode ? '✨ Event Special Rate' : ''}</div>
                             </div>
                             <div style="font-size:0.95rem; font-weight:700; background:#fff8e1; color:#e37400; padding:0.2rem 0.6rem; border-radius:8px; display:flex; align-items:center; gap:0.3rem;">
                                 <span style="color:#f59e0b;">★</span> ${avgRating > 0 ? avgRating : 'New'}
@@ -301,12 +301,14 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                             </div>
                         </div>
 
-                        ${hotel.eventMode ? '' : `
-                            ${(hotel.availableRooms ?? hotel.totalRooms ?? 0) > 0
-                                ? `<button class="btn-primary" style="width:100%; padding:1.2rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:linear-gradient(135deg, var(--color-primary), #2a8146);" onclick="goToBooking()">Reserve Now</button>`
-                                : `<button disabled style="width:100%; padding:1.2rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:#ccc; color:white; border:none; cursor:not-allowed;">Fully Booked</button>`
-                            }
-                        `}
+                        <div id="standard-reserve-btn-box">
+                            ${hotel.eventMode ? '' : `
+                                ${(hotel.availableRooms ?? hotel.totalRooms ?? 0) > 0
+                                    ? `<button id="standard-reserve-btn" class="btn-primary" style="width:100%; padding:1.2rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:linear-gradient(135deg, var(--color-primary), #2a8146);" onclick="goToBooking()">Reserve Now</button>`
+                                    : `<button disabled style="width:100%; padding:1.2rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:#ccc; color:white; border:none; cursor:not-allowed;">Fully Booked</button>`
+                                }
+                            `}
+                        </div>
                         
                         <div id="price-summary" style="margin-top:2rem; padding-top:1.5rem; border-top:1.5px solid #f4f4f4;">
                             <!-- Dynamic Content -->
@@ -450,6 +452,22 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
             discountToUse = window.activePackage.discount;
             isPkg = true;
             pkgInfo = window.activePackage;
+        }
+        
+        // Dynamic headline update
+        const headVal = document.getElementById('headline-price-val');
+        const headLabel = document.getElementById('headline-price-label');
+        const stdBtnBox = document.getElementById('standard-reserve-btn-box');
+
+        if (isPkg) {
+            const effRate = Math.round(( (originalPrice || currentPrice) * nights - Math.round((originalPrice || currentPrice) * nights * (discountToUse / 100)) ) / nights);
+            if (headVal) headVal.innerText = effRate.toLocaleString() + ' Birr';
+            if (headLabel) headLabel.innerText = '✨ Special Offer Applied';
+            if (stdBtnBox) stdBtnBox.style.display = 'none'; // Only show special reserve button in summary
+        } else {
+            if (headVal) headVal.innerText = (currentPrice).toLocaleString() + ' Birr';
+            if (headLabel) headLabel.innerText = hotel.eventMode ? '✨ Event Special Rate' : '';
+            if (stdBtnBox) stdBtnBox.style.display = 'block';
         }
 
         const calculationBase = originalPrice || currentPrice;
