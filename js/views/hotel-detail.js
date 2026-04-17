@@ -492,8 +492,15 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
 
     const todayStr = new Date().toISOString().split('T')[0];
     const tomorrowStr = new Date(new Date().getTime() + 86400000).toISOString().split('T')[0];
-    bin.value = window.searchState?.checkIn || todayStr;
-    bout.value = window.searchState?.checkOut || tomorrowStr;
+    
+    // Default to 1 night for standard hotels, use search state for Event Mode
+    if (!hotel.eventMode) {
+        bin.value = todayStr;
+        bout.value = tomorrowStr;
+    } else {
+        bin.value = window.searchState?.checkIn || todayStr;
+        bout.value = window.searchState?.checkOut || tomorrowStr;
+    }
     
     [bin, bout].forEach(el => el.addEventListener('change', () => {
         // Robust Date calculation for mobile
