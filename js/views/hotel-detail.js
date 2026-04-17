@@ -146,18 +146,68 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         <h2 style="margin-bottom:1rem;">About this ${hotel.type || 'Property'}</h2>
                         <p style="line-height:1.7; color:var(--color-text-dark); white-space:pre-wrap; margin-bottom: 2rem;">${hotel.description || 'Experience comfort and style in the heart of the city.'}</p>
                         
-                        <!-- Mobile Quick Reserve Button -->
-                        <div class="mobile-only-reserve" style="display:none;">
-                            ${(hotel.availableRooms ?? hotel.totalRooms ?? 0) > 0
-                                ? `<button class="btn-primary" style="width:100%; padding:1.2rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:linear-gradient(135deg, var(--color-primary), #2a8146);" onclick="goToBooking()">Reserve Now</button>`
-                                : `<button disabled style="width:100%; padding:1.2rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:#ccc; color:white; border:none; cursor:not-allowed;">Fully Booked</button>`
-                            }
-                            <p style="text-align:center; font-size:0.85rem; color:#666; margin-top:0.8rem; font-weight:500;">✓ Instant confirmation & Secure payment</p>
+                    <section style="margin-bottom:2.5rem;">
+                        <div id="booking-widget-main" style="background:white; padding:2rem; border:1.5px solid #eee; border-radius:28px; box-shadow:0 15px 35px rgba(0,0,0,0.06); margin-top:2rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                                <div>
+                                    <span id="headline-price-val" style="font-size:1.85rem; font-weight:950; color: ${hasDiscount ? 'var(--color-secondary)' : 'var(--color-primary)'}; letter-spacing: -0.04em; color:#d97706;">${hotel.eventMode ? minEffectiveRate.toLocaleString() : currentPrice.toLocaleString()} Birr</span>
+                                    <span style="color:var(--color-text-light); font-size:0.95rem; font-weight:600;"> / night</span>
+                                    <div id="headline-price-label" style="font-size:0.7rem; color:#d97706; font-weight:900; text-transform:uppercase; margin-top:0.3rem; letter-spacing:0.04em;">${hotel.eventMode ? '✨ Event Special Rate' : ''}</div>
+                                </div>
+                                <div style="font-size:1rem; font-weight:800; background:#fff8e1; color:#e37400; padding:0.4rem 0.8rem; border-radius:12px; display:flex; align-items:center; gap:0.4rem; border:1px solid #ffecb3;">
+                                    <span style="color:#f59e0b; font-size:1.2rem;">★</span> ${avgRating > 0 ? avgRating : 'New'}
+                                    ${reviewCount > 0 ? `<span style="font-size:0.8rem;font-weight:600;color:#999;">(${reviewCount})</span>` : ''}
+                                </div>
+                            </div>
+
+                            ${(() => {
+                                const avail = hotel.availableRooms ?? hotel.totalRooms ?? 0;
+                                if (avail > 0) {
+                                    return `<div style="background:#e6f4ea; padding:0.8rem 1.2rem; border-radius:12px; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.6rem; border:1px solid #cce8d5;">
+                                        <span style="font-size:1.2rem;">🏨</span>
+                                        <span style="font-weight:800; color:#1e7e34; font-size:0.95rem;">${avail} room${avail>1?'s':''} available</span>
+                                    </div>`;
+                                } else {
+                                    return `<div style="background:#fce8e6; padding:0.8rem 1.2rem; border-radius:12px; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.6rem; border:1px solid #f8d7da;">
+                                        <span style="font-size:1.2rem;">🚫</span>
+                                        <span style="font-weight:800; color:#c5221f; font-size:0.95rem;">Fully booked — check back soon</span>
+                                    </div>`;
+                                }
+                            })()}
+
+                            <div style="border:1.8px solid #f1f5f9; border-radius:16px; overflow:hidden; margin-bottom:2rem; background:#f8fafc;">
+                                <div style="display:grid; grid-template-columns:1fr 1fr;">
+                                    <div style="padding:1rem; border-right:1.8px solid #f1f5f9;">
+                                        <div style="font-weight:900; font-size:0.75rem; text-transform:uppercase; color:#64748b; margin-bottom:0.4rem; letter-spacing:0.02em;">Check-in</div>
+                                        <input type="date" id="book-in" style="border:none; width:100%; font-size:1rem; font-weight:700; outline:none; background:transparent; color:#1e293b;">
+                                    </div>
+                                    <div style="padding:1rem;">
+                                        <div style="font-weight:900; font-size:0.75rem; text-transform:uppercase; color:#64748b; margin-bottom:0.4rem; letter-spacing:0.02em;">Check-out</div>
+                                        <input type="date" id="book-out" style="border:none; width:100%; font-size:1rem; font-weight:700; outline:none; background:transparent; color:#1e293b;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="standard-reserve-btn-box">
+                                ${hotel.eventMode ? '' : `
+                                    ${(hotel.availableRooms ?? hotel.totalRooms ?? 0) > 0
+                                        ? `<button id="standard-reserve-btn" class="btn-primary" style="width:100%; padding:1.4rem; font-size:1.2rem; border-radius:18px; font-weight:800; background:linear-gradient(135deg, var(--color-primary), #1e7e34); box-shadow:0 10px 20px rgba(11,102,70,0.2);" onclick="goToBooking()">Reserve Now</button>`
+                                        : `<button disabled style="width:100%; padding:1.4rem; font-size:1.2rem; border-radius:18px; font-weight:800; background:#cbd5e1; color:white; border:none; cursor:not-allowed;">Fully Booked</button>`
+                                    }
+                                `}
+                            </div>
+                            
+                            <div id="price-summary" style="margin-top:2.5rem; padding-top:2rem; border-top:2px dashed #f1f5f9;">
+                                <!-- Dynamic Price Calculation Content -->
+                            </div>
+                            <p style="text-align:center; font-size:0.85rem; color:#64748b; margin-top:1.2rem; font-weight:500;">✓ Instant confirmation & Secure payment</p>
                         </div>
                     </section>
+                    
                     <style>
                         @media(max-width: 768px) {
-                            .mobile-only-reserve { display: block !important; }
+                            .detail-content-grid { display: block !important; }
+                            .desktop-sidebar { display: none !important; }
                         }
                     </style>
 
@@ -257,63 +307,9 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     </section>
                 </div>
 
-                <!-- Right Sidebar: Booking Card -->
-                <div>
-                    <div style="position:sticky; top:2rem; background:white; padding:2rem; border:1px solid var(--color-border); border-radius:24px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                            <div>
-                                <span id="headline-price-val" style="font-size:1.75rem; font-weight:900; color: ${hasDiscount ? 'var(--color-secondary)' : 'var(--color-primary)'}; letter-spacing: -0.02em;">${hotel.eventMode ? minEffectiveRate.toLocaleString() : currentPrice.toLocaleString()} Birr</span>
-                                <span style="color:var(--color-text-light); font-size:0.9rem;"> / night</span>
-                                <div id="headline-price-label" style="font-size:0.65rem; color:#d97706; font-weight:800; text-transform:uppercase; margin-top:0.2rem; letter-spacing:0.02em;">${hotel.eventMode ? '✨ Event Special Rate' : ''}</div>
-                            </div>
-                            <div style="font-size:0.95rem; font-weight:700; background:#fff8e1; color:#e37400; padding:0.2rem 0.6rem; border-radius:8px; display:flex; align-items:center; gap:0.3rem;">
-                                <span style="color:#f59e0b;">★</span> ${avgRating > 0 ? avgRating : 'New'}
-                                ${reviewCount > 0 ? `<span style="font-size:0.75rem;font-weight:500;color:#999;">(${reviewCount})</span>` : ''}
-                            </div>
-                        </div>
-
-                        <!-- Room Availability -->
-                        ${(() => {
-                            const avail = hotel.availableRooms ?? hotel.totalRooms ?? 0;
-                            if (avail > 0) {
-                                return `<div style="background:#e6f4ea; padding:0.6rem 1rem; border-radius:10px; margin-bottom:1.2rem; display:flex; align-items:center; gap:0.5rem;">
-                                    <span style="font-size:1.1rem;">🏨</span>
-                                    <span style="font-weight:700; color:#1e7e34; font-size:0.9rem;">${avail} room${avail>1?'s':''} available</span>
-                                </div>`;
-                            } else {
-                                return `<div style="background:#fce8e6; padding:0.6rem 1rem; border-radius:10px; margin-bottom:1.2rem; display:flex; align-items:center; gap:0.5rem;">
-                                    <span style="font-size:1.1rem;">🚫</span>
-                                    <span style="font-weight:700; color:#c5221f; font-size:0.9rem;">Fully booked — check back soon</span>
-                                </div>`;
-                            }
-                        })()}
-
-                        <div style="border:1.5px solid #eee; border-radius:12px; overflow:hidden; margin-bottom:1.5rem;">
-                            <div style="display:grid; grid-template-columns:1fr 1fr;">
-                                <div style="padding:0.8rem; border-right:1.5px solid #eee;">
-                                    <div style="font-weight:800; font-size:0.65rem; text-transform:uppercase; color:#888;">Check-in</div>
-                                    <input type="date" id="book-in" style="border:none; width:100%; font-size:0.9rem; padding-top:0.2rem; outline:none; background:transparent;">
-                                </div>
-                                <div style="padding:0.8rem;">
-                                    <div style="font-weight:800; font-size:0.65rem; text-transform:uppercase; color:#888;">Check-out</div>
-                                    <input type="date" id="book-out" style="border:none; width:100%; font-size:0.9rem; padding-top:0.2rem; outline:none; background:transparent;">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="standard-reserve-btn-box">
-                            ${hotel.eventMode ? '' : `
-                                ${(hotel.availableRooms ?? hotel.totalRooms ?? 0) > 0
-                                    ? `<button id="standard-reserve-btn" class="btn-primary" style="width:100%; padding:1.2rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:linear-gradient(135deg, var(--color-primary), #2a8146);" onclick="goToBooking()">Reserve Now</button>`
-                                    : `<button disabled style="width:100%; padding:1.2rem; font-size:1.1rem; border-radius:14px; font-weight:700; background:#ccc; color:white; border:none; cursor:not-allowed;">Fully Booked</button>`
-                                }
-                            `}
-                        </div>
-                        
-                        <div id="price-summary" style="margin-top:2rem; padding-top:1.5rem; border-top:1.5px solid #f4f4f4;">
-                            <!-- Dynamic Content -->
-                        </div>
-                    </div>
+                <!-- Right Sidebar: Keep empty or remove depending on preference, but we'll mark it to hide on mobile -->
+                <div class="desktop-sidebar">
+                    <!-- We moved the content to the main flow to improve conversion -->
                 </div>
             </div>
         </div>
