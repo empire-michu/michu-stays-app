@@ -95,9 +95,16 @@ class Database {
         }
     }
 
-    async getPropertyById(id) {
-        const doc = await firestore.collection('properties').doc(id).get();
-        return doc.exists ? { id: doc.id, ...doc.data() } : null;
+    async getPropertyById(id, forceRefresh = false) {
+        try {
+            const options = forceRefresh ? { source: 'server' } : {};
+            const doc = await firestore.collection('properties').doc(id).get(options);
+            return doc.exists ? { id: doc.id, ...doc.data() } : null;
+        } catch (e) {
+            // Fallback to cache if server fetch fails
+            const doc = await firestore.collection('properties').doc(id).get();
+            return doc.exists ? { id: doc.id, ...doc.data() } : null;
+        }
     }
 
     // Admin creates a new hotel/property

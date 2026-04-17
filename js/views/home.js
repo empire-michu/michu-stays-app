@@ -142,7 +142,10 @@ window.router.addRoute('home', async (container, params) => {
                             </div>
                         `}
                     </div>
-                    ${roomBadge}
+                    <div style="text-align:right;">
+                        ${p.packages && p.packages.length > 0 ? `<div style="margin-bottom:0.4rem; background:#fff9e6; color:#856404; font-size:0.65rem; font-weight:800; padding:0.15rem 0.4rem; border-radius:4px; border:1px solid #ffecb3; display:inline-block;">🎁 DEALS AVAILABLE</div>` : ''}
+                        ${roomBadge}
+                    </div>
                 </div>
             </div>
         </div>
