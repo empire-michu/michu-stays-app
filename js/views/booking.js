@@ -19,6 +19,7 @@ window.router.addRoute('booking', async (container, params) => {
     const checkIn = params.checkIn || 'Not set';
     const checkOut = params.checkOut || 'Not set';
     const guests = params.guests || 2;
+    const pkgInfo = params.packageInfo || null;
 
     container.innerHTML = `
         <div class="container" style="padding-top:4rem; padding-bottom:2rem;">
@@ -27,12 +28,20 @@ window.router.addRoute('booking', async (container, params) => {
                 <div style="text-align:center;margin-bottom:2rem;">
                     <h3>${property.title}</h3>
                     <p style="color:var(--color-text-light)">${property.address}</p>
-                    <div style="margin-top:0.5rem; font-size:0.9rem; color:var(--color-primary); font-weight:600;">
+                    <div style="margin-top:0.8rem; font-size:0.95rem; color:var(--color-primary); font-weight:700; background:#f0f7ff; display:inline-block; padding:0.6rem 1.2rem; border-radius:12px; border:1px solid #c9e2ff;">
                         📅 ${checkIn} to ${checkOut}
                     </div>
+                    ${pkgInfo ? `
+                        <div style="margin-top:1rem; background:#fff9e6; border:1px solid #ffecb3; padding:0.8rem; border-radius:12px; max-width:400px; margin-left:auto; margin-right:auto;">
+                            <div style="font-weight:800; color:#856404; font-size:0.7rem; text-transform:uppercase;">Selected Offer</div>
+                            <div style="font-weight:700; color:#333;">🎁 ${pkgInfo.title}</div>
+                            <div style="font-size:0.75rem; color:#666; margin-top:0.2rem;">Includes: ${pkgInfo.services}</div>
+                        </div>
+                    ` : ''}
                 </div>
 
                 <div id="step-A">
+                    <!-- ... payment selector ... -->
                     <!-- Payment Method Selector -->
                     <div style="margin-bottom:2rem;">
                         <p style="font-weight:700; margin-bottom:1rem; color:var(--color-text-dark);">Choose your preferred payment method:</p>
@@ -192,7 +201,8 @@ window.router.addRoute('booking', async (container, params) => {
                 checkIn: checkIn,
                 checkOut: checkOut,
                 guests: guests,
-                totalAmount: amount
+                totalAmount: amount,
+                packageInfo: pkgInfo
             }, code, proofUrl, currentMethod);
 
             if (bar) bar.style.width = '100%';

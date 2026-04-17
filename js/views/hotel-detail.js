@@ -136,6 +136,30 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         }
                     </style>
 
+                    ${hotel.packages && hotel.packages.length > 0 ? `
+                    <section style="margin-bottom:2.5rem;">
+                        <h2 style="margin-bottom:1.2rem; display:flex; align-items:center; gap:0.6rem;">
+                            <span style="font-size:1.4rem;">🎁</span> Special Stay Packages
+                        </h2>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:1.2rem;">
+                            ${hotel.packages.map((pkg, idx) => `
+                                <div class="pkg-card" onclick="window.selectPkg(${idx})" style="background:white; border:2px solid #e0eaff; border-radius:18px; padding:1.2rem; cursor:pointer; transition:0.3s; position:relative; overflow:hidden;">
+                                    <style>
+                                        .pkg-card:hover { border-color:var(--color-primary); transform:translateY(-5px); box-shadow:0 10px 20px rgba(0,0,0,0.05); }
+                                    </style>
+                                    <div style="background:#f0f7ff; color:#0056b3; font-weight:800; font-size:0.7rem; padding:0.3rem 0.6rem; border-radius:6px; display:inline-block; margin-bottom:0.8rem; text-transform:uppercase;">${pkg.nights} NIGHTS BUNDLE</div>
+                                    <h3 style="margin:0 0 0.4rem; font-size:1.1rem; color:var(--color-primary);">${pkg.title}</h3>
+                                    <div style="font-size:0.85rem; color:#666; line-height:1.4; margin-bottom:1rem;">${pkg.services || 'Included amenities and full stay services.'}</div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
+                                        <div style="color:#d9534f; font-weight:900; font-size:1.1rem;">${pkg.discount}% OFF</div>
+                                        <div style="background:var(--color-primary); color:white; padding:0.4rem 1rem; border-radius:99px; font-size:0.8rem; font-weight:700;">Select Deal</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </section>
+                    ` : ''}
+
                     <section style="margin-bottom:2rem;">
                         <h2 style="margin-bottom:1.5rem;">What this place offers</h2>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;">
@@ -334,34 +358,117 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     const bout = document.getElementById('book-out');
     const summary = document.getElementById('price-summary');
 
+    window.activePackage = null;
+
+    window.selectPkg = (idx) => {
+        const pkg = hotel.packages[idx];
+        if (!pkg) return;
+        
+        if (!bin.value) {
+            const todayDate = new Date();
+            bin.value = todayDate.toISOString().split('T')[0];
+        }
+        
+        const startDate = new Date(bin.value);
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + parseInt(pkg.nights));
+        
+        bout.value = endDate.toISOString().split('T')[0];
+        window.activePackage = pkg;
+        updatePrice();
+        
+        window.showToast(`✅ ${pkg.title} Selected! ${pkg.nights} nights with ${pkg.discount}% discount.`);
+        summary.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
     const updatePrice = () => {
         const checkInDate = new Date(bin.value);
         const checkOutDate = new Date(bout.value);
-        const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)) || 1;
-        const total = hotel.price * nights;
+        const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)) || 0;
+        
+        if (nights <= 0) {
+            summary.innerHTML = `<p style="color:#d9534f; font-size:0.85rem; text-align:center;">Check-out must be after check-in</p>`;
+            return;
+        }
+
+        let discountToUse = discountPercentage;
+        let isPkg = false;
+        
+        if (window.activePackage && window.activePackage.nights === nights) {
+            discountToUse = window.activePackage.discount;
+            isPkg = true;
+        }
+
+        const baseTotal = currentPrice * nights;
+        const discAmt = Math.round(baseTotal * (discountToUse / 100));
+        const finalTotal = baseTotal - discAmt;
 
         summary.innerHTML = `
-            <div style="display:flex; justify-content:space-between; margin-bottom:0.8rem; font-size:1rem; color:#444;">
-                <span>${hotel.price} Birr x ${nights} night${nights>1?'s':''}</span>
-                <span style="font-weight:700;">${total} Birr</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; padding-top:1rem; border-top:1.5px solid #f4f4f4; font-size:1.2rem; font-weight:800; color:var(--color-text-dark);">
-                <span>Total</span>
-                <span>${total} Birr</span>
+            <div style="display:grid; gap:0.6rem; font-size:0.95rem;">
+                ${isPkg ? `
+                    <div style="background:#f0f7ff; padding:0.8rem; border-radius:12px; border:1px solid #c9e2ff; margin-bottom:0.5rem; animation: slideIn 0.3s ease;">
+                        <div style="font-weight:800; color:#0056b3; font-size:0.75rem; text-transform:uppercase; margin-bottom:0.2rem;">🎁 Package Applied</div>
+                        <div style="font-weight:700; color:var(--color-primary);">${window.activePackage.title}</div>
+                        <div style="font-size:0.7rem; color:#666;">${window.activePackage.services || ''}</div>
+                    </div>
+                ` : ''}
+                <div style="display:flex; justify-content:space-between; color:#444;">
+                    <span>${currentPrice} Birr x ${nights} night${nights>1?'s':''}</span>
+                    <span style="font-weight:600;">${baseTotal} Birr</span>
+                </div>
+                ${discountToUse > 0 ? `
+                <div style="display:flex; justify-content:space-between; color:#d9534f; font-weight:700;">
+                    <span>Discount (${discountToUse}%)</span>
+                    <span>-${discAmt} Birr</span>
+                </div>` : ''}
+                <div style="display:flex; justify-content:space-between; margin-top:0.8rem; padding-top:0.8rem; border-top:1.5px solid #f4f4f4; font-size:1.3rem; font-weight:900; color:var(--color-primary);">
+                    <span>Total</span>
+                    <span>${finalTotal} Birr</span>
+                </div>
+                <p style="text-align:center; font-size:0.7rem; color:#999; margin-top:0.5rem;">Prices include 15% VAT & Service Fees</p>
             </div>
         `;
         window.searchState = { checkIn: bin.value, checkOut: bout.value };
     };
 
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(new Date().getTime() + 86400000).toISOString().split('T')[0];
-    bin.value = window.searchState?.checkIn || today;
-    bout.value = window.searchState?.checkOut || tomorrow;
-    [bin, bout].forEach(el => el.addEventListener('change', updatePrice));
+    const todayStr = new Date().toISOString().split('T')[0];
+    const tomorrowStr = new Date(new Date().getTime() + 86400000).toISOString().split('T')[0];
+    bin.value = window.searchState?.checkIn || todayStr;
+    bout.value = window.searchState?.checkOut || tomorrowStr;
+    
+    [bin, bout].forEach(el => el.addEventListener('change', () => {
+        // If nights changed, reset package if it doesn't match
+        if (window.activePackage) {
+            const nights = Math.ceil((new Date(bout.value) - new Date(bin.value)) / (1000 * 60 * 60 * 24));
+            if (nights !== window.activePackage.nights) window.activePackage = null;
+        }
+        updatePrice();
+    }));
     updatePrice();
 
     window.goToBooking = () => {
-        const nights = Math.ceil((new Date(bout.value) - new Date(bin.value)) / (1000 * 60 * 60 * 24)) || 1;
-        router.navigate('booking', { id: hotel.id, checkIn: bin.value, checkOut: bout.value, guests: 2, totalAmount: hotel.price * nights });
+        const nights = Math.ceil((new Date(bout.value) - new Date(bin.value)) / (1000 * 60 * 60 * 24)) || 0;
+        if (nights <= 0) return window.showToast("📅 Please select valid dates.");
+
+        let discountToUse = discountPercentage;
+        let pkgData = null;
+        if (window.activePackage && window.activePackage.nights === nights) {
+            discountToUse = window.activePackage.discount;
+            pkgData = {
+                title: window.activePackage.title,
+                services: window.activePackage.services
+            };
+        }
+
+        const totalAmount = (currentPrice * nights) - Math.round((currentPrice * nights) * (discountToUse / 100));
+
+        router.navigate('booking', { 
+            hotelId: id, 
+            checkIn: bin.value, 
+            checkOut: bout.value, 
+            guests: 1, 
+            totalAmount,
+            packageInfo: pkgData 
+        });
     };
 });

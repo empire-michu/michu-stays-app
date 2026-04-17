@@ -78,6 +78,30 @@ window.router.addRoute('manager', async (container, params) => {
         }
     };
 
+    window.addMgPackage = () => {
+        const container = document.getElementById('mg-packages-container');
+        if (!container) return;
+        const div = document.createElement('div');
+        div.className = 'mg-package-row';
+        div.style.cssText = `background:white; padding:1rem; border-radius:14px; border:1px solid #e0eaff; display:grid; grid-template-columns: 1fr 100px 100px 40px; gap:0.6rem; align-items:center;`;
+        div.innerHTML = `
+            <input type="text" placeholder="Package Title (e.g. Weekend Special)" class="mg-pkg-title" style="padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem;">
+            <div style="position:relative;">
+                <input type="number" placeholder="Nights" class="mg-pkg-nights" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem; padding-right:2.5rem;">
+                <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700;">NIGHTS</span>
+            </div>
+            <div style="position:relative;">
+                <input type="number" placeholder="Disc" class="mg-pkg-discount" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem; padding-right:1.5rem;">
+                <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700;">%</span>
+            </div>
+            <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800;">✕</button>
+            <div style="grid-column: 1 / -1;">
+                <input type="text" placeholder="Included Services (e.g. Free Massage, Airport Shuttle)" class="mg-pkg-services" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.8rem; background:#fcfcfc;">
+            </div>
+        `;
+        container.appendChild(div);
+    };
+
     window.mgSaveHotel = async () => {
         const btn = document.getElementById('mg-save-btn');
         const status = document.getElementById('mg-save-status');
@@ -132,6 +156,14 @@ window.router.addRoute('manager', async (container, params) => {
             const filteredImages = images.filter(Boolean);
             const originalPrice = discountVal > 0 ? Math.round(priceVal / (1 - (discountVal / 100))) : 0;
 
+            // Extract Packages
+            const packagesArr = Array.from(document.querySelectorAll('.mg-package-row')).map(row => ({
+                title: row.querySelector('.mg-pkg-title').value.trim(),
+                nights: parseInt(row.querySelector('.mg-pkg-nights').value) || 0,
+                discount: parseInt(row.querySelector('.mg-pkg-discount').value) || 0,
+                services: row.querySelector('.mg-pkg-services').value.trim()
+            })).filter(p => p.title && p.nights);
+
             const updatedData = {
                 title,
                 type: getVal('mg-h-type'),
@@ -154,6 +186,7 @@ window.router.addRoute('manager', async (container, params) => {
                 image: filteredImages[0] || '',
                 extraImages: filteredImages.slice(1),
                 videoTour: videoUrl,
+                packages: packagesArr,
                 updatedAt: Date.now()
             };
 
@@ -456,6 +489,11 @@ window.router.addRoute('manager', async (container, params) => {
                                             <div style="font-weight:700; color:#333; text-transform:uppercase; font-size:0.85rem;">${b.customerName || 'Anonymous Guest'}</div>
                                             <div style="font-size:0.75rem; color:#08553d; margin-bottom:2px; font-weight:500;">✉️ ${b.customerEmail}</div>
                                             ${b.customerPhone ? `<div style="font-size:0.75rem; color:#08553d; font-weight:700;"><span style="color:#d4af37; margin-right:4px;">📞</span>${b.customerPhone}</div>` : ''}
+                                            ${b.packageInfo ? `
+                                                <div style="margin-top:0.3rem; background:#fff9e6; color:#856404; font-size:0.65rem; font-weight:800; padding:0.2rem 0.5rem; border-radius:6px; border:1px solid #ffecb3; display:inline-block; text-transform:uppercase;">
+                                                    🎁 PACKAGE: ${b.packageInfo.title}
+                                                </div>
+                                            ` : ''}
                                             <div style="font-size:0.75rem; color:var(--color-text-light); margin-top:0.3rem;">
                                                 Stay: <strong>${b.checkIn} &rarr; ${b.checkOut}</strong> <span style="font-weight:700;color:#d4af37;margin-left:4px;">(${nights} night${nights !== 1 ? 's' : ''})</span>
                                             </div>
@@ -597,6 +635,36 @@ window.router.addRoute('manager', async (container, params) => {
                                     </div>`;
                                 }).join('')})()}
                             </div>
+                        </div>
+
+                        <!-- Stay Packages Section -->
+                        <div style="background:#f0f7ff; padding:1.5rem; border-radius:24px; border:1px solid #c9e2ff; margin-bottom:1.5rem;">
+                            <h4 style="margin:0 0 1rem; font-size:0.9rem; color:#0056b3; display:flex; align-items:center; gap:0.5rem;">
+                                <span style="font-size:1.4rem;">🎁</span> STAY PACKAGES & DEALS
+                            </h4>
+                            <p style="font-size:0.8rem; color:#666; margin-bottom:1.2rem;">Create special offers for longer stays (e.g., 3 nights for 15% off). Guests see these prominentely on your listing.</p>
+                            
+                            <div id="mg-packages-container" style="display:grid; gap:0.8rem;">
+                                ${(myHotel.packages || []).map((pkg, idx) => `
+                                    <div class="mg-package-row" style="background:white; padding:1rem; border-radius:14px; border:1px solid #e0eaff; display:grid; grid-template-columns: 1fr 100px 100px 40px; gap:0.6rem; align-items:center;">
+                                        <input type="text" placeholder="Package Title (e.g. Weekend Special)" value="${pkg.title||''}" class="mg-pkg-title" style="padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem;">
+                                        <div style="position:relative;">
+                                            <input type="number" placeholder="Nights" value="${pkg.nights||''}" class="mg-pkg-nights" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem; padding-right:2.5rem;">
+                                            <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700;">NIGHTS</span>
+                                        </div>
+                                        <div style="position:relative;">
+                                            <input type="number" placeholder="Disc" value="${pkg.discount||''}" class="mg-pkg-discount" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem; padding-right:1.5rem;">
+                                            <span style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); font-size:0.7rem; color:#999; font-weight:700;">%</span>
+                                        </div>
+                                        <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800;">✕</button>
+                                        <div style="grid-column: 1 / -1;">
+                                            <input type="text" placeholder="Included Services (e.g. Free Massage, Airport Shuttle)" value="${pkg.services||''}" class="mg-pkg-services" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.8rem; background:#fcfcfc;">
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <button onclick="window.addMgPackage()" style="width:100%; margin-top:1rem; padding:0.8rem; border-radius:12px; border:1.5px dashed #0056b3; background:none; color:#0056b3; font-weight:700; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#e3efff'">+ Add New Special Offer</button>
                         </div>
 
                         <!-- Amenities -->
