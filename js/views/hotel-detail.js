@@ -147,25 +147,43 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     </style>
 
                     ${hotel.packages && hotel.packages.length > 0 ? `
-                    <section style="margin-bottom:2.5rem;">
-                        <h2 style="margin-bottom:1.2rem; display:flex; align-items:center; gap:0.6rem;">
-                            <span style="font-size:1.4rem;">🎁</span> Special Stay Packages
+                    <section style="margin-bottom:3.5rem; background:#f8fafc; padding:2rem; border-radius:24px; border:1px solid #e2e8f0;">
+                        <h2 style="margin-bottom:1.5rem; display:flex; align-items:center; gap:0.8rem; color:var(--color-primary); font-size:1.6rem; letter-spacing:-0.5px;">
+                            <span style="font-size:1.8rem;">🎁</span> Special Stay Packages
                         </h2>
-                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:1.2rem;">
-                            ${hotel.packages.map((pkg, idx) => `
-                                <div class="pkg-card" onclick="window.selectPkg(${idx})" style="background:white; border:2px solid #e0eaff; border-radius:18px; padding:1.2rem; cursor:pointer; transition:0.3s; position:relative; overflow:hidden;">
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
+                            ${hotel.packages.map((pkg, idx) => {
+                                const pkgNights = parseInt(pkg.nights) || 1;
+                                const base = (originalPrice || currentPrice) * pkgNights;
+                                const savings = Math.round(base * (parseInt(pkg.discount) / 100));
+                                
+                                return `
+                                <div class="pkg-card" onclick="window.selectPkg(${idx})" style="background:white; border:2px solid #edf2f7; border-radius:24px; padding:1.5rem; cursor:pointer; transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position:relative; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
                                     <style>
-                                        .pkg-card:hover { border-color:var(--color-primary); transform:translateY(-5px); box-shadow:0 10px 20px rgba(0,0,0,0.05); }
+                                        .pkg-card:hover { border-color:var(--color-primary); transform:translateY(-8px); box-shadow:0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+                                        .pkg-card:active { transform:scale(0.98); }
+                                        .pkg-discount-badge { position:absolute; top:0; right:0; background:linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); color:#911; font-weight:900; padding:0.4rem 1rem; border-bottom-left-radius:18px; font-size:0.85rem; box-shadow: -2px 2px 5px rgba(0,0,0,0.05); }
                                     </style>
-                                    <div style="background:#f0f7ff; color:#0056b3; font-weight:800; font-size:0.7rem; padding:0.3rem 0.6rem; border-radius:6px; display:inline-block; margin-bottom:0.8rem; text-transform:uppercase;">${pkg.nights} NIGHTS BUNDLE</div>
-                                    <h3 style="margin:0 0 0.4rem; font-size:1.1rem; color:var(--color-primary);">${pkg.title}</h3>
-                                    <div style="font-size:0.85rem; color:#666; line-height:1.4; margin-bottom:1rem;">${pkg.services || 'Included amenities and full stay services.'}</div>
-                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
-                                        <div style="color:#d9534f; font-weight:900; font-size:1.1rem;">${pkg.discount}% OFF</div>
-                                        <div style="background:var(--color-primary); color:white; padding:0.4rem 1rem; border-radius:99px; font-size:0.8rem; font-weight:700;">Select Deal</div>
+                                    
+                                    <div class="pkg-discount-badge">Save ${savings.toLocaleString()} Birr</div>
+                                    
+                                    <div style="background:#e0f2fe; color:#0369a1; font-weight:900; font-size:0.75rem; padding:0.4rem 0.8rem; border-radius:99px; display:inline-block; align-self:flex-start; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.05em;">🌙 ${pkgNights} Nights Bundle</div>
+                                    
+                                    <h3 style="margin:0 0 0.5rem; font-size:1.25rem; font-weight:800; color:var(--color-text-dark);">${pkg.title}</h3>
+                                    
+                                    <div style="font-size:0.9rem; color:#64748b; line-height:1.6; margin-bottom:1.5rem; flex-grow:1;">
+                                        ${pkg.services ? pkg.services.split(',').map(s => `<div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.3rem;">✨ ${s.trim()}</div>`).join('') : 'Includes all standard amenities and exclusive stay perks.'}
                                     </div>
-                                </div>
-                            `).join('')}
+                                    
+                                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1.2rem; border-top:1.5px dashed #f1f5f9;">
+                                        <div>
+                                            <div style="color:#ef4444; font-weight:950; font-size:1.3rem; letter-spacing:-1px;">${pkg.discount}% OFF</div>
+                                            <div style="font-size:0.7rem; color:#94a3b8; font-weight:700; text-transform:uppercase;">Limited Time Offer</div>
+                                        </div>
+                                        <div class="btn-primary" style="padding:0.6rem 1.2rem; border-radius:14px; font-size:0.85rem; font-weight:800; background:linear-gradient(135deg, var(--color-primary), #1e7e34); box-shadow:0 10px 15px -3px rgba(11, 102, 70, 0.3);">Select Deal</div>
+                                    </div>
+                                </div>`;
+                            }).join('')}
                         </div>
                     </section>
                     ` : ''}
