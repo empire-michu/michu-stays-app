@@ -8,7 +8,7 @@ window.router.addRoute('home', async (container, params) => {
         // Only fetch properties — reviews load in background, bookings not needed
         const timeout = new Promise((resolve) => setTimeout(() => resolve([]), 12000));
         allProperties = await Promise.race([
-            window.db.getProperties().catch(() => []),
+            window.db.getProperties(null, true).catch(() => []),
             timeout
         ]);
     } catch(e) { 

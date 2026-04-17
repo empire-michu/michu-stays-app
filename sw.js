@@ -1,5 +1,5 @@
 // Michu Stays Service Worker
-const CACHE_NAME = 'michu-stays-v1';
+const CACHE_NAME = 'michu-stays-v1.1';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
