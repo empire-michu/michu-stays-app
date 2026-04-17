@@ -2,14 +2,29 @@ class Router {
     constructor() {
         this.routes = {};
         this.appContainer = document.getElementById('app-container');
+        const handleInitialOrPop = () => {
+            const fullHash = window.location.hash.replace('#', '') || 'home';
+            const [name, queryStr] = fullHash.split('?');
+            const params = {};
+            if (queryStr) {
+                queryStr.split('&').forEach(pair => {
+                    const [k, v] = pair.split('=');
+                    if (k) params[k] = decodeURIComponent(v || '');
+                });
+            }
+            this.navigate(name, params, false);
+        };
+
         window.addEventListener('popstate', (e) => {
             if (e.state && e.state.name) {
                 this.navigate(e.state.name, e.state.params, false);
             } else {
-                const hash = window.location.hash.replace('#', '') || 'home';
-                this.navigate(hash, {}, false);
+                handleInitialOrPop();
             }
         });
+
+        // Parse initial URL on load
+        window.addEventListener('load', handleInitialOrPop);
 
         // Setup native mobile hardware back button handler
         document.addEventListener('deviceready', () => {
@@ -104,7 +119,14 @@ class Router {
         if (this.routes[name]) {
             if (updateHistory) {
                 let hashPath = `#${name}`;
-                // Optional: Serialize params into URL if needed, but for now simple hash is enough.
+                const queryParts = [];
+                for (const k in params) {
+                    if (params[k] !== undefined && params[k] !== null) {
+                        queryParts.push(`${k}=${encodeURIComponent(params[k])}`);
+                    }
+                }
+                if (queryParts.length > 0) hashPath += `?${queryParts.join('&')}`;
+
                 if (window.location.hash !== hashPath) {
                     window.history.pushState({ name, params }, '', hashPath);
                 }
