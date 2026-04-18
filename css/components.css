@@ -219,15 +219,17 @@
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
+  border: 1.5px solid rgba(244, 180, 0, 0.08);
+  box-shadow: 0 10px 25px rgba(244, 180, 0, 0.12), 0 4px 10px rgba(0,0,0,0.03);
 }
 
 .property-card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-4px);
-  border-color: transparent;
+  box-shadow: 0 15px 35px rgba(244, 180, 0, 0.28), 0 5px 15px rgba(0,0,0,0.05);
+  transform: translateY(-8px) scale(1.01);
+  border-color: rgba(244, 180, 0, 0.3);
 }
 
 .property-image-container {
