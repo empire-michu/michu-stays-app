@@ -231,7 +231,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 <div style="background:#f8fafc; padding:1.5rem; border-radius:22px; border:1px solid #f1f5f9;">
                     ${packageActive ? `<div style="color:#d97706; font-weight:950; font-size:0.7rem; margin-bottom:0.8rem; text-transform:uppercase;">✨ ${pName} APPLIED</div>` : ''}
                     <div style="display:flex; justify-content:space-between; color:#64748b; margin-bottom:0.6rem;">
-                        <span>${currentPrice.toLocaleString()} x ${nights} nights</span>
+                        <span>${(origPrice || currentPrice).toLocaleString()} x ${nights} nights</span>
                         <span>${sub.toLocaleString()} Birr</span>
                     </div>
                     ${disc > 0 ? `<div style="display:flex; justify-content:space-between; color:#d97706; font-weight:800; margin-bottom:1rem;"><span>Discount (${disc}%)</span><span>-${savings.toLocaleString()} Birr</span></div>` : ''}
