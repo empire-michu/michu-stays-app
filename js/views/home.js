@@ -169,7 +169,7 @@ window.router.addRoute('home', async (container, params) => {
                             <div style="display:flex; flex-direction:column;">
                                 <span style="text-decoration:line-through;color:#999;font-weight:500;font-size:0.85rem;margin-bottom:-0.2rem;">${originalPrice} Birr</span>
                                 <div style="display:flex; align-items:baseline; gap:0.3rem;">
-                                    <span style="font-weight:900; font-size:1.35rem; color: var(--color-secondary); letter-spacing:-0.02em;">${currentPrice} Birr</span>
+                                    <span style="font-weight:900; font-size:1.35rem; color: #f2a100; letter-spacing:-0.02em;">${currentPrice} Birr</span>
                                     <span style="color:var(--color-text-light);font-size:0.8rem;font-weight:normal">/ night</span>
                                 </div>
                             </div>
