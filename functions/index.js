@@ -1,11 +1,14 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const cors = require("cors")({ origin: true });
-const { Resend } = require("resend");
+const brevo = require("@getbrevo/brevo");
 
 // INITIALIZE
 admin.initializeApp();
-const resend = new Resend("re_Placeholder_Key"); // Replaced with actual key later
+
+// Setup Brevo
+const apiInstance = new brevo.TransactionalEmailsApi();
+apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY || "YOUR_BREVO_API_KEY");
 
 exports.sendPush = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
@@ -28,7 +31,7 @@ exports.sendPush = functions.https.onRequest((req, res) => {
   });
 });
 
-// PASSWORD RESET BRIDGE (The Fix)
+// PASSWORD RESET BRIDGE (Brevo Edition - 9,000 free/month)
 exports.requestPasswordReset = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
@@ -42,12 +45,10 @@ exports.requestPasswordReset = functions.https.onRequest((req, res) => {
           url: 'https://michustays.pro.et/#login',
       });
 
-      // 2. Send the BRANDED email via Resend
-      const { data, error } = await resend.emails.send({
-        from: "Michu Stays <management@michustays.pro.et>",
-        to: [email],
-        subject: "Reset Your Michu Stays Password 🔐",
-        html: `
+      // 2. Wrap the reset link in your beautiful HTML template
+      const sendSmtpEmail = new brevo.SendSmtpEmail();
+      sendSmtpEmail.subject = "Reset Your Michu Stays Password 🔐";
+      sendSmtpEmail.htmlContent = `
           <div style="font-family: 'Outfit', sans-serif; max-width: 600px; margin: auto; padding: 40px; border: 1px solid #f0f0f0; border-radius: 24px; color: #1a1a1a;">
             <div style="text-align: center; margin-bottom: 30px;">
               <img src="https://michu-stays.web.app/images/logo.png" width="80" style="border-radius: 20px;">
@@ -65,19 +66,15 @@ exports.requestPasswordReset = functions.https.onRequest((req, res) => {
               &copy; 2026 Michu Stays. All rights reserved.<br>
               Addis Ababa, Ethiopia
             </div>
-          </div>
-        `
-      });
+          </div>`;
+      sendSmtpEmail.sender = { "name": "Michu Stays", "email": "management@michustays.pro.et" };
+      sendSmtpEmail.to = [{ "email": email }];
 
-      if (error) {
-          console.error("Resend Error:", error);
-          return res.status(500).send({ error: "Email delivery failed" });
-      }
+      await apiInstance.sendTransacEmail(sendSmtpEmail);
 
       res.status(200).send({ success: true });
     } catch (error) {
-      console.error("Reset Bridge Error:", error);
-      // Don't leak if the email exists or not for security, just return generic success or specific auth error
+      console.error("Reset Bridge (Brevo) Error:", error);
       if (error.code === 'auth/user-not-found') {
           return res.status(200).send({ success: true, note: 'User not found' });
       }

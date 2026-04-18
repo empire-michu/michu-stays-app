@@ -181,8 +181,8 @@ class AuthEngine {
         try {
             window.showToast("⏳ Sending secure recovery email...");
             
-            // Call our new professional Cloud Function Bridge
-            const response = await fetch('https://us-central1-michu-stays.cloudfunctions.net/requestPasswordReset', {
+            // Call our new professional Bridge (hosted on Render to stay on Free plan)
+            const response = await fetch('https://michu-push-server.onrender.com/request-password-reset', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
