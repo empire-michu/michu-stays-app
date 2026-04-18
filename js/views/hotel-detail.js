@@ -107,20 +107,32 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                          <p style="line-height:1.7; color:#334155; white-space:pre-wrap; font-size:1.05rem;">${hotel.description}</p>
                     </section>
 
-                    <!-- SPECIAL PACKAGES (Stable) -->
+                    <!-- SPECIAL PACKAGES (Premium Revamp) -->
                     ${hotel.packages && hotel.packages.length > 0 ? `
-                    <section class="mobile-order-4" style="margin-bottom:3rem; background:#f8fafc; padding:2rem; border-radius:28px; border:1.5px solid #e2e8f0;">
-                        <h2 style="margin-bottom:1.5rem; display:flex; align-items:center; gap:0.6rem; color:#d97706; font-size:1.4rem;">🎁 Special Stay Packages</h2>
-                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:1.5rem;">
+                    <section class="mobile-order-4" style="margin-bottom:3.5rem; background: linear-gradient(135deg, #ffffff 0%, #fffbf2 100%); padding:2.5rem; border-radius:32px; border:2px solid rgba(217,119,6,0.15); box-shadow: 0 20px 50px rgba(217,119,6,0.08); position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:-50px; right:-50px; width:150px; height:150px; background:rgba(217,119,6,0.03); border-radius:50%;"></div>
+                        <h2 style="margin-bottom:2rem; display:flex; align-items:center; gap:0.8rem; color:#d97706; font-size:1.6rem; font-weight:950; text-transform:uppercase; letter-spacing:0.5px;">
+                            <span style="background:#d97706; color:white; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(217,119,6,0.3);">🎁</span> 
+                            Special Stay Packages
+                        </h2>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:2rem;">
                             ${hotel.packages.map((pkg, idx) => `
-                                <div class="pkg-card" onclick="window.applyMichuPkg(${idx})" style="background:white; border:2px solid #fff; border-radius:24px; padding:1.5rem; cursor:pointer; box-shadow:0 8px 12px rgba(0,0,0,0.02);">
-                                    <div style="background:#fff7ed; color:#ea580c; font-weight:900; font-size:0.65rem; padding:0.4rem 0.8rem; border-radius:99px; display:inline-block; margin-bottom:1rem; text-transform:uppercase;">🌙 ${pkg.nights} Night Bundle</div>
-                                    <h3 style="margin:0 0 0.4rem; font-size:1.2rem; font-weight:800;">${pkg.title}</h3>
-                                    <p style="font-size:0.85rem; color:#64748b; margin-bottom:1.5rem;">${pkg.services || 'Inclusive amenities.'}</p>
-                                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1.2rem; border-top:1.5px dashed #f1f5f9;">
-                                        <span style="color:#d97706; font-weight:950; font-size:1.3rem;">${pkg.discount}% OFF</span>
-                                        <span class="btn-primary" style="padding:0.6rem 1.2rem; border-radius:12px; font-size:0.8rem;">Select</span>
+                                <div class="pkg-card" onclick="window.applyMichuPkg(${idx})" 
+                                     style="background:white; border:1px solid rgba(217,119,6,0.1); border-radius:26px; padding:1.8rem; cursor:pointer; position:relative; transition:all 0.4s ease; box-shadow:0 10px 20px rgba(0,0,0,0.03);">
+                                    <div style="background:linear-gradient(90deg, #fff7ed 0%, #ffedd5 100%); color:#ea580c; font-weight:950; font-size:0.7rem; padding:0.5rem 1rem; border-radius:99px; display:inline-flex; align-items:center; gap:0.4rem; margin-bottom:1.2rem; text-transform:uppercase; border:1px solid rgba(234,88,12,0.1); box-shadow:0 2px 8px rgba(234,88,12,0.05);">
+                                        <span style="font-size:0.9rem;">🌙</span> ${pkg.nights} Night Bundle
                                     </div>
+                                    <h3 style="margin:0 0 0.6rem; font-size:1.35rem; font-weight:900; color:#1e293b;">${pkg.title}</h3>
+                                    <p style="font-size:0.95rem; line-height:1.6; color:#64748b; margin-bottom:1.8rem; height:45px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${pkg.services || 'Inclusive premium amenities.'}</p>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1.5rem; border-top:1.5px solid #f1f5f9;">
+                                        <div style="display:flex; flex-direction:column;">
+                                            <span style="color:#d97706; font-weight:950; font-size:1.6rem; line-height:1;">${pkg.discount}% OFF</span>
+                                            <span style="font-size:0.65rem; color:#94a3b8; font-weight:700; margin-top:0.3rem;">LIMITED TIME DEAL</span>
+                                        </div>
+                                        <span class="btn-primary" style="padding:0.8rem 1.8rem; border-radius:16px; font-size:0.9rem; font-weight:800; background:linear-gradient(135deg, #0b6646 0%, #15803d 100%); box-shadow:0 6px 15px rgba(11,102,70,0.25);">Select Bundle</span>
+                                    </div>
+                                    <!-- Decorative glow -->
+                                    <div style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:60%; height:2px; background:linear-gradient(90deg, transparent, rgba(217,119,6,0.3), transparent); opacity:0.5;"></div>
                                 </div>`).join('')}
                         </div>
                     </section>` : ''}
