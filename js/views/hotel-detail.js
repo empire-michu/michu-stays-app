@@ -1,35 +1,34 @@
+// --- GLOBAL NAVIGATION HELPER (STABLE) ---
+window.michuFinalNav = (pId, binVal, boutVal) => {
+    if (!binVal || !boutVal) {
+        window.showToast("Please select stay dates!");
+        return;
+    }
+
+    const reserveBtn = document.getElementById('final-reserve-trigger');
+    if (reserveBtn) {
+        reserveBtn.innerText = "⏳ Redirecting...";
+        reserveBtn.style.opacity = "0.7";
+    }
+
+    console.log("NAVIGATING TO BOOKING:", pId);
+    
+    // Strategy: Native Hash Change (Captured by the new hashchange listener in app.js)
+    const query = `id=${pId}&checkIn=${binVal}&checkOut=${boutVal}`;
+    window.location.hash = `#booking?${query}`;
+    
+    // Safety Fallback: if nothing happens in 800ms, try direct navigate
+    setTimeout(() => {
+        if (document.getElementById('final-reserve-trigger')) {
+            window.router.navigate('booking', { id: pId, checkIn: binVal, checkOut: boutVal });
+        }
+    }, 800);
+};
+
 window.router.addRoute('hotel_detail_view', async (container, params) => {
     const id = params.id;
     container.innerHTML = `<div class="container" style="text-align:center;padding-top:4rem;">Loading...</div>`;
     
-    // --- 1. THE TRIPLE-REDUNDANT NAVIGATOR (FIXED NAMES) ---
-    window.michuFinalNav = (pId, binVal, boutVal) => {
-        if (!binVal || !boutVal) {
-            window.showToast("Please select stay dates!");
-            return;
-        }
-
-        // CORRECT ROUTE NAME IS 'booking', NOT 'booking_payment'
-        const navParams = { id: pId, checkIn: binVal, checkOut: boutVal };
-        const reserveBtn = document.getElementById('final-reserve-trigger');
-        
-        if (reserveBtn) {
-            reserveBtn.innerText = "⏳ Redirecting...";
-            reserveBtn.style.opacity = "0.7";
-        }
-
-        console.log("CRITICAL NAV TO 'booking' WITH ID:", pId);
-        
-        // Strategy A: Standard Router (Targeting 'booking')
-        try {
-            window.router.navigate('booking', navParams);
-        } catch(e) {
-            // Strategy B: Native Hash Change
-            const hash = `#booking?id=${pId}&checkIn=${binVal}&checkOut=${boutVal}`;
-            window.location.hash = hash;
-        }
-    };
-
     const hotel = await window.db.getPropertyById(id, true);
     if (!hotel) {
         container.innerHTML = `<div class="container" style="padding:4rem;text-align:center;">Property not found.</div>`;

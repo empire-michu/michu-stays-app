@@ -25,6 +25,7 @@ class Router {
 
         // Parse initial URL on load
         window.addEventListener('load', handleInitialOrPop);
+        window.addEventListener('hashchange', handleInitialOrPop);
 
         // Setup native mobile hardware back button handler
         document.addEventListener('deviceready', () => {
