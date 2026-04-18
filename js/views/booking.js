@@ -45,18 +45,24 @@ window.router.addRoute('booking', async (container, params) => {
     }
     if (nights <= 0) nights = 1;
 
-    let amount = params.totalAmount ? Number(params.totalAmount) : (calcBase * nights);
+    let amount = 0;
+    if (params.totalAmount) {
+        amount = Number(params.totalAmount);
+    } else {
+        const base = calcBase * nights;
+        const discountToApply = discountPercent || 0;
+        amount = base - Math.round(base * (discountToApply / 100));
+    }
 
     let pkgInfo = params.packageInfo || null;
 
     // Auto-detect package match if not passed explicitly (e.g. page refresh)
-    if (!pkgInfo && property && property.packages) {
+    if (property && property.packages) {
         const matching = property.packages.find(p => parseInt(p.nights) === nights);
         if (matching) {
             pkgInfo = { title: matching.title, services: matching.services };
-            // Recalculate using calcBase if fallback needed
-            const base = calcBase * nights;
-            amount = base - Math.round(base * (matching.discount / 100));
+            const pBase = calcBase * nights;
+            amount = pBase - Math.round(pBase * (matching.discount / 100));
         }
     }
 
@@ -117,7 +123,7 @@ window.router.addRoute('booking', async (container, params) => {
 
                     <!-- CBE Details (Conditional) -->
                     <div id="details-cbe" class="bank-details-box">
-                        <p style="font-size:1.1rem;margin-bottom:1rem;">Transfer <strong>${amount} Birr</strong> via CBE Mobile Banking to:</p>
+                        <p style="font-size:1.1rem;margin-bottom:1rem;">Transfer <strong>${amount.toLocaleString()} Birr</strong> via CBE Mobile Banking to:</p>
                         <div style="background:white;padding:1rem;border-radius:4px;margin-bottom:1rem;border:1px solid var(--color-border)">
                             <strong>CBE Account:</strong> ${property.cbeAccount || 'Contact Admin'}<br>
                             <strong>Account Name:</strong> ${property.cbeName || 'Michu Stays Partner'}
@@ -127,7 +133,7 @@ window.router.addRoute('booking', async (container, params) => {
 
                     <!-- Telebirr Details (Conditional) -->
                     <div id="details-tele" class="bank-details-box" style="display:none; border-color:#005bb7; background:#f0f7ff;">
-                        <p style="font-size:1.1rem;margin-bottom:1rem;">Send <strong>${amount} Birr</strong> via telebirr to:</p>
+                        <p style="font-size:1.1rem;margin-bottom:1rem;">Send <strong>${amount.toLocaleString()} Birr</strong> via telebirr to:</p>
                         <div style="background:white;padding:1rem;border-radius:4px;margin-bottom:1rem;border:1px solid #005bb7">
                             <strong>telebirr Phone:</strong> ${property.telebirrNumber || property.phone}<br>
                             <strong>Account Name:</strong> ${property.telebirrName || property.title}

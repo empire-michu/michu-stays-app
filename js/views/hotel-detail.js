@@ -1,5 +1,5 @@
 // --- GLOBAL NAVIGATION HELPER (STABLE) ---
-window.michuFinalNav = (pId, binVal, boutVal) => {
+window.michuFinalNav = (pId, binVal, boutVal, totalStr) => {
     if (!binVal || !boutVal) {
         window.showToast("Please select stay dates!");
         return;
@@ -13,14 +13,17 @@ window.michuFinalNav = (pId, binVal, boutVal) => {
 
     console.log("NAVIGATING TO BOOKING:", pId);
     
+    // Clean total string (remove ' Birr' and commas)
+    const tAmt = totalStr ? totalStr.replace(/[^0-9]/g, '') : '';
+    
     // Strategy: Native Hash Change (Captured by the new hashchange listener in app.js)
-    const query = `id=${pId}&checkIn=${binVal}&checkOut=${boutVal}`;
+    const query = `id=${pId}&checkIn=${binVal}&checkOut=${boutVal}${tAmt ? `&totalAmount=${tAmt}` : ''}`;
     window.location.hash = `#booking?${query}`;
     
     // Safety Fallback: if nothing happens in 800ms, try direct navigate
     setTimeout(() => {
         if (document.getElementById('final-reserve-trigger')) {
-            window.router.navigate('booking', { id: pId, checkIn: binVal, checkOut: boutVal });
+            window.router.navigate('booking', { id: pId, checkIn: binVal, checkOut: boutVal, totalAmount: tAmt });
         }
     }, 800);
 };
@@ -158,7 +161,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
 
                         <button id="final-reserve-trigger" class="btn-primary" 
                                 style="width:100%; padding:1.5rem; font-size:1.3rem; border-radius:20px; font-weight:950; background:linear-gradient(135deg, var(--color-primary), #1e7e34); box-shadow:0 12px 24px rgba(11,102,70,0.25);"
-                                onclick="window.michuFinalNav('${id}', document.getElementById('book-in').value, document.getElementById('book-out').value)">
+                                onclick="const tEl=document.getElementById('final-total-val'); window.michuFinalNav('${id}', document.getElementById('book-in').value, document.getElementById('book-out').value, tEl?tEl.innerText:'')">
                            Reserve Now
                         </button>
                         
@@ -232,7 +235,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         <span>${sub.toLocaleString()} Birr</span>
                     </div>
                     ${disc > 0 ? `<div style="display:flex; justify-content:space-between; color:#d97706; font-weight:800; margin-bottom:1rem;"><span>Discount (${disc}%)</span><span>-${savings.toLocaleString()} Birr</span></div>` : ''}
-                    <div style="display:flex; justify-content:space-between; font-weight:950; font-size:1.5rem; border-top:1.5px solid #e2e8f0; padding-top:1rem; color:var(--color-primary);"><span>Total</span><span>${total.toLocaleString()} Birr</span></div>
+                    <div style="display:flex; justify-content:space-between; font-weight:950; font-size:1.5rem; border-top:1.5px solid #e2e8f0; padding-top:1rem; color:var(--color-primary);"><span>Total</span><span><span id="final-total-val">${total.toLocaleString()}</span> Birr</span></div>
                     <p style="text-align:right; font-size:0.65rem; color:#94a3b8; font-weight:700; margin-top:0.8rem;">Price includes all taxes & fees</p>
                 </div>`;
         } else {
