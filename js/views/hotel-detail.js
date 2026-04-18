@@ -77,8 +77,14 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 @media(max-width: 768px) {
                     .detail-gallery-grid { grid-template-columns: 1fr; height: 260px; }
                     .detail-gallery-grid > div:not(:first-child) { display: none; }
-                    .detail-content-grid { grid-template-columns: 1fr; gap: 2rem; }
-                    .desktop-sidebar { position: static !important; }
+                    .detail-content-grid { display: flex; flex-direction: column; gap: 2rem; }
+                    #main-side { display: contents; }
+                    .desktop-sidebar { position: static !important; width: 100%; box-sizing: border-box; }
+                    .mobile-order-1 { order: 1; }
+                    .mobile-order-2 { order: 2; }
+                    .mobile-order-3 { order: 3; } /* Sidebar comes 3rd, right after the description */
+                    .mobile-order-4 { order: 4; }
+                    .mobile-order-5 { order: 5; }
                 }
             </style>
 
@@ -92,16 +98,16 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
 
             <div class="detail-content-grid">
                 <div id="main-side">
-                    ${videoUrl ? `<video controls style="width:100%; border-radius:20px; margin-bottom:2rem; box-shadow:0 10px 30px rgba(0,0,0,0.1);"><source src="${videoUrl}" type="video/mp4"></video>` : ''}
+                    ${videoUrl ? `<video class="mobile-order-1" controls style="width:100%; border-radius:20px; margin-bottom:2rem; box-shadow:0 10px 30px rgba(0,0,0,0.1);"><source src="${videoUrl}" type="video/mp4"></video>` : ''}
                     
-                    <section style="margin-bottom:2.5rem; padding-bottom:2rem; border-bottom:1px solid #f1f5f9;">
+                    <section class="mobile-order-2" style="margin-bottom:2.5rem; padding-bottom:2rem; border-bottom:1px solid #f1f5f9;">
                          <h2 style="margin-bottom:1rem; font-size:1.5rem;">The Experience</h2>
                          <p style="line-height:1.7; color:#334155; white-space:pre-wrap; font-size:1.05rem;">${hotel.description}</p>
                     </section>
 
                     <!-- SPECIAL PACKAGES (Stable) -->
                     ${hotel.packages && hotel.packages.length > 0 ? `
-                    <section style="margin-bottom:3rem; background:#f8fafc; padding:2rem; border-radius:28px; border:1.5px solid #e2e8f0;">
+                    <section class="mobile-order-4" style="margin-bottom:3rem; background:#f8fafc; padding:2rem; border-radius:28px; border:1.5px solid #e2e8f0;">
                         <h2 style="margin-bottom:1.5rem; display:flex; align-items:center; gap:0.6rem; color:#d97706; font-size:1.4rem;">🎁 Special Stay Packages</h2>
                         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:1.5rem;">
                             ${hotel.packages.map((pkg, idx) => `
@@ -117,7 +123,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         </div>
                     </section>` : ''}
 
-                    <section>
+                    <section class="mobile-order-5">
                          <h2 style="margin-bottom:1.5rem; font-size:1.5rem;">Property Amenities</h2>
                          <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:1.2rem;">
                             ${amenities.map(a => `<div style="display:flex; align-items:center; gap:0.8rem; font-size:1.1rem; background:white; padding:1.2rem; border-radius:16px; border:1px solid #f1f5f9;">
@@ -128,7 +134,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     </section>
                 </div>
 
-                <div class="desktop-sidebar" style="position: sticky; top: 2rem;">
+                <div class="desktop-sidebar mobile-order-3" style="position: sticky; top: 2rem;">
                     <div style="background:white; padding:2rem; border:1px solid #eee; border-radius:32px; box-shadow:0 20px 40px rgba(0,0,0,0.06);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
                              <div>

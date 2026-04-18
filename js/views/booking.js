@@ -24,7 +24,6 @@ window.router.addRoute('booking', async (container, params) => {
     }
 
     const calcBase = originalPrice || currentPrice;
-    let amount = params.totalAmount || (calcBase * (params.nights || 2));
     const checkIn = params.checkIn || 'Not set';
     const checkOut = params.checkOut || 'Not set';
     const guests = params.guests || 2;
@@ -39,11 +38,14 @@ window.router.addRoute('booking', async (container, params) => {
     const dOut = parseDate(checkOut);
     
     // Calculate nights to auto-detect package if missing from params
-    let nights = 0;
-    if (dIn && dOut && !isNaN(dIn) && !isNaN(dOut)) {
+    let nights = params.nights ? parseInt(params.nights) : 0;
+    if (!nights && dIn && dOut && !isNaN(dIn) && !isNaN(dOut)) {
         const diff = dOut - dIn;
         nights = Math.ceil(diff / (1000 * 60 * 60 * 24));
     }
+    if (nights <= 0) nights = 1;
+
+    let amount = params.totalAmount ? Number(params.totalAmount) : (calcBase * nights);
 
     let pkgInfo = params.packageInfo || null;
 
