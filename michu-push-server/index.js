@@ -1,26 +1,36 @@
 const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
-const brevo = require('@getbrevo/brevo');
-
-// Setup Brevo
-const apiInstance = new brevo.TransactionalEmailsApi();
-apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY || 'MISSING_KEY');
+const { BrevoClient } = require('@getbrevo/brevo');
 
 
 // 1. Initialize Firebase Admin SDK
-// You must download your Service Account JSON from Firebase -> Project Settings -> Service Accounts
-// and place it in this folder named 'serviceAccountKey.json'.
+// Handle both 'serviceAccountKey.json' and 'serviceAccountKey.json.json' (Windows extension issue)
 let serviceAccount;
 try {
-  serviceAccount = require('./serviceAccountKey.json');
+  try {
+    serviceAccount = require('./serviceAccountKey.json');
+  } catch (err) {
+    serviceAccount = require('./serviceAccountKey.json.json');
+  }
+  
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
   });
   console.log("✅ Firebase Admin Initialized successfully.");
 } catch (e) {
-  console.warn("⚠️ Warning: serviceAccountKey.json not found! Push notifications will fail. Please drop the key file in this folder.");
+  console.warn("⚠️ Warning: serviceAccountKey.json not found! Push notifications will fail.");
 }
+
+// 2. Setup Brevo Client (v5 syntax)
+const brevoClient = new BrevoClient({
+  apiKey: process.env.BREVO_API_KEY || 'MISSING_KEY'
+});
+
+
+
+// Removed redundant old initialization block
+
 
 const app = express();
 app.use(cors({ origin: true }));
@@ -65,12 +75,14 @@ app.post('/request-password-reset', async (req, res) => {
   try {
     // Generate secure reset link
     const resetLink = await admin.auth().generatePasswordResetLink(email, {
-      url: 'https://michustays.pro.et/#login'
+      url: 'https://michu-stays.firebaseapp.com/#login'
     });
 
-    const sendSmtpEmail = new brevo.SendSmtpEmail();
-    sendSmtpEmail.subject = "Reset Your Michu Stays Password 🔐";
-    sendSmtpEmail.htmlContent = `
+
+
+    const emailPayload = {
+      subject: "Reset Your Michu Stays Password 🔐",
+      htmlContent: `
         <div style="font-family: 'Outfit', sans-serif; max-width: 600px; margin: auto; padding: 40px; border: 1px solid #f0f0f0; border-radius: 24px; color: #1a1a1a;">
           <div style="text-align: center; margin-bottom: 30px;">
             <img src="https://michu-stays.web.app/images/logo.png" width="80" style="border-radius: 20px;">
@@ -88,17 +100,25 @@ app.post('/request-password-reset', async (req, res) => {
             &copy; 2026 Michu Stays. All rights reserved.<br>
             Addis Ababa, Ethiopia
           </div>
-        </div>`;
-    sendSmtpEmail.sender = { "name": "Michu Stays", "email": "management@michustays.pro.et" };
-    sendSmtpEmail.to = [{ "email": email }];
+        </div>`,
+      sender: { "name": "Michu Stays", "email": "michustays@gmail.com" },
 
-    await apiInstance.sendTransacEmail(sendSmtpEmail);
-    res.status(200).send({ success: true });
+
+      to: [{ "email": email }]
+    };
+
+    console.log("📨 Attempting to send reset email to:", email);
+    const response = await brevoClient.transactionalEmails.sendTransacEmail(emailPayload);
+    console.log("✅ Brevo API Response:", JSON.stringify(response));
+    
+    res.status(200).send({ success: true, messageId: response.messageId });
   } catch (error) {
-    console.error("Brevo Reset Error:", error);
+    console.error("❌ Brevo Reset Error Details:", error);
     res.status(500).send({ error: error.message });
   }
 });
+
+
 
 
 // Start the server
