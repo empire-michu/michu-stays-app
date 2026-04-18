@@ -179,21 +179,22 @@ class AuthEngine {
     async sendPasswordReset(email) {
         if (!email) return showAlert("Please enter your email first.");
         try {
-            const siteUrl = window.location.origin;
-            // 1. Trigger styled confirmation via EmailJS FIRST for speed
-            await this._triggerEmail('temp_recovery', {
-                to_name: email.split('@')[0],
-                email: email,
-                to_email: email,
-                message: "A password reset request was received. For security, Google is now sending a separate 'Secure Reset Link' to this same email address. Please click the link in that email to create your new password.",
-                link: `${siteUrl}/#login`,
-                subject: "Reset Your Michu Stays Password 🔐"
-            }).catch(e => console.warn("EmailJS Recovery fail-safe:", e));
-
-            // 2. Trigger the actual Firebase password reset link (This sends the SECURE link)
-            await firebase.auth().sendPasswordResetEmail(email);
+            window.showToast("⏳ Sending secure recovery email...");
             
-            window.showToast("✅ Secure reset link sent! Please check your Primary & Spam folders.");
+            // Call our new professional Cloud Function Bridge
+            const response = await fetch('https://us-central1-michu-stays.cloudfunctions.net/requestPasswordReset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                window.showToast("✅ Secure reset link sent! Please check your Primary & Spam folders.");
+            } else {
+                throw new Error(result.error || "Failed to send email.");
+            }
             return true;
         } catch (e) {
             console.error("Recovery Fail:", e);
