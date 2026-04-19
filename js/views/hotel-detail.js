@@ -139,10 +139,10 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
 
                     <section class="mobile-order-5">
                          <h2 style="margin-bottom:1.5rem; font-size:1.5rem;">Property Amenities</h2>
-                         <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:1.2rem;">
-                            ${amenities.map(a => `<div style="display:flex; align-items:center; gap:0.8rem; font-size:1.1rem; background:white; padding:1.2rem; border-radius:16px; border:1px solid #f1f5f9;">
-                                <span>${amenitiesIcons[a] || '✨'}</span>
-                                <span style="font-weight:700; color:#334155;">${a}</span>
+                         <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:0.8rem;">
+                            ${amenities.map(a => `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:white; padding:1.2rem 0.5rem; border-radius:16px; border:1px solid #f1f5f9;">
+                                <span style="font-size:1.8rem; margin-bottom:0.5rem;">${amenitiesIcons[a] || '✨'}</span>
+                                <span style="font-weight:700; font-size:0.85rem; color:#334155; word-wrap:break-word;">${a}</span>
                             </div>`).join('')}
                          </div>
                     </section>
@@ -195,14 +195,14 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                  <h2 style="margin-bottom:2rem; font-size:1.6rem; display:flex; align-items:center; gap:0.8rem;">
                     <span style="color:#f59e0b;">★</span> Guest Reviews (${reviewCount})
                  </h2>
-                 <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:2rem;">
+                 <div style="display:flex; overflow-x:auto; gap:1.5rem; padding-bottom:1rem; padding-top:0.5rem; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
                     ${reviews.length > 0 ? reviews.map(r => `
-                        <div style="background:#f8fafc; padding:2rem; border-radius:24px; border:1px solid #f1f5f9;">
+                        <div style="min-width: 280px; max-width: 320px; flex-shrink: 0; scroll-snap-align: start; background:#f8fafc; padding:1.5rem; border-radius:24px; border:1px solid #f1f5f9;">
                             <div style="display:flex; justify-content:space-between; margin-bottom:0.8rem;">
-                                <strong style="font-size:1.1rem;">${r.userName || 'Guest'}</strong>
-                                <div style="color:#f59e0b;">${'★'.repeat(r.rating)}</div>
+                                <strong style="font-size:1.1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%;">${r.userName || 'Guest'}</strong>
+                                <div style="color:#f59e0b; flex-shrink:0;">${'★'.repeat(r.rating)}</div>
                             </div>
-                            <p style="font-style:italic; line-height:1.6; color:#475569; margin:0;">"${r.text || 'Enjoyed the stay!'}"</p>
+                            <p style="font-style:italic; line-height:1.6; color:#475569; margin:0; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">"${r.text || 'Enjoyed the stay!'}"</p>
                         </div>`).join('') : '<p style="color:#94a3b8;">No reviews yet.</p>'}
                  </div>
             </section>
