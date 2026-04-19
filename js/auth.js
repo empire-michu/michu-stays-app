@@ -160,15 +160,6 @@ class AuthEngine {
                 email, role, fullName: fullName || '', phone: '', city: ''
             });
             window.showToast('✅ Account created! Check your inbox to verify your email.');
-            
-            // Trigger Welcome/Onboarding Email
-            this._triggerEmail('temp_welcome', {
-                to_name: fullName || email.split('@')[0],
-                email: email,
-                welcome_message: "We're thrilled to have you join Michu Stays. Start exploring the best hotels in Ethiopia today!",
-                subject: "Welcome to Michu Stays! 🏡"
-            }).then(() => console.log("Welcome email sent."))
-              .catch(e => console.error("Welcome email failed immediately:", e));
         } catch (e) {
             console.error("Test Email Fail:", e);
             window.showToast("❌ Email Failed: " + (e.message || "Unknown Error. Check Console."));

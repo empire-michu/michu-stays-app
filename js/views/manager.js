@@ -233,8 +233,29 @@ window.router.addRoute('manager', async (container, params) => {
         try {
             await window.db.updateBookingStatus(id, 'Confirmed');
             
-            // Send global broadcast notification
             const booking = allBookings.find(b => b.id === id);
+            
+            // New: Trigger Professional Booking Confirmation Email via Brevo (Render Bridge)
+            if (booking && booking.customerEmail) {
+                fetch('https://michu-push-server.onrender.com/send-booking-confirmation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: booking.customerEmail,
+                        customerName: booking.customerName || 'Guest',
+                        hotelTitle: booking.propertyTitle || (myHotel?.title || 'Michu Stays'),
+                        checkIn: booking.checkIn || 'N/A',
+                        checkOut: booking.checkOut || 'N/A',
+                        totalAmount: booking.totalAmount || 0,
+                        bookingId: id
+                    })
+                })
+                .then(r => r.json())
+                .then(res => console.log("Booking Confirmation Email Dispatched:", res))
+                .catch(err => console.error("Email Dispatch Error:", err));
+            }
+
+            // Send global broadcast notification
             await window.db.createNotification({
                 type: 'booking_confirmed',
                 message: `🎉 Booking Confirmed at ${myHotel?.title || 'a property'}!`,
