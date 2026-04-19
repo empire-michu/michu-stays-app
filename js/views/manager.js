@@ -233,10 +233,13 @@ window.router.addRoute('manager', async (container, params) => {
         try {
             await window.db.updateBookingStatus(id, 'Confirmed');
             
-            const booking = allBookings.find(b => b.id === id);
+            // Fetch the booking directly from Firestore to ensure we have the most accurate email data
+            const bookingDoc = await firestore.collection('bookings').doc(id).get();
+            const booking = bookingDoc.exists ? bookingDoc.data() : null;
             
             // New: Trigger Professional Booking Confirmation Email via Brevo (Render Bridge)
             if (booking && booking.customerEmail) {
+                window.showToast("📧 Sending guest confirmation...");
                 fetch('https://michu-push-server.onrender.com/send-booking-confirmation', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -250,9 +253,20 @@ window.router.addRoute('manager', async (container, params) => {
                         bookingId: id
                     })
                 })
-                .then(r => r.json())
-                .then(res => console.log("Booking Confirmation Email Dispatched:", res))
-                .catch(err => console.error("Email Dispatch Error:", err));
+                .then(r => {
+                    if (!r.ok) throw new Error("Server responded with " + r.status);
+                    return r.json();
+                })
+                .then(res => {
+                    console.log("Booking Confirmation Email Dispatched:", res);
+                    window.showToast("✅ Guest notified via email!");
+                })
+                .catch(err => {
+                    console.error("Email Dispatch Error:", err);
+                    window.showToast("⚠️ Booking confirmed, but email delivery failed.");
+                });
+            } else {
+                console.warn("Skipping email: No guest email found for booking", id);
             }
 
             // Send global broadcast notification

@@ -126,3 +126,66 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`🚀 Michu Push Server listening on port ${port}`);
 });
+
+// 4. Booking Confirmation Endpoint
+app.post('/send-booking-confirmation', async (req, res) => {
+  console.log("-----------------------------------------");
+  console.log("📥 RECEIVED: Booking confirmation request");
+  
+  const { email, customerName, hotelTitle, checkIn, checkOut, totalAmount, bookingId } = req.body;
+  console.log("   - Target Email:", email);
+  console.log("   - Hotel:", hotelTitle);
+  console.log("   - Booking ID:", bookingId);
+  
+  if (!email || !hotelTitle) {
+    console.warn("⚠️ ERROR: Missing required fields in request body.");
+    return res.status(400).send({ error: "Missing required booking details (email or hotel title)" });
+  }
+
+  try {
+    const emailPayload = {
+      subject: `Booking Confirmed at ${hotelTitle} 🏨`,
+      htmlContent: `
+        <div style="font-family: 'Outfit', sans-serif; max-width: 600px; margin: auto; padding: 40px; border: 1px solid #f0f0f0; border-radius: 24px; color: #1a1a1a; background: #ffffff;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <img src="https://michu-stays.web.app/images/logo.png" width="80" style="border-radius: 20px;">
+          </div>
+          <h1 style="font-size: 26px; font-weight: 900; text-align: center; color: #0b6e4f; margin-bottom: 10px;">Booking Confirmed! 🎉</h1>
+          <p style="text-align: center; font-size: 16px; color: #64748b; margin-bottom: 30px;">Hello ${customerName}, your stay at <strong>${hotelTitle}</strong> is officially confirmed.</p>
+          
+          <div style="background: #f8fafc; border-radius: 20px; padding: 25px; margin-bottom: 30px; border: 1px solid #e2e8f0;">
+            <h2 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 15px; margin-top: 0;">Stay Details</h2>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="font-size: 16px; font-weight: 700;">🏨 ${hotelTitle}</div>
+              <div style="font-size: 15px; color: #334155;">📅 ${checkIn} &rarr; ${checkOut}</div>
+              <div style="font-size: 15px; color: #334155;">💰 Total Paid: <strong>${totalAmount} Birr</strong></div>
+              <div style="font-size: 13px; color: #94a3b8; font-family: monospace;">ID: ${bookingId}</div>
+            </div>
+          </div>
+
+          <div style="text-align: center; padding: 20px; background: #ecfdf5; border-radius: 16px; border: 1px solid #d1fae5; margin-bottom: 30px;">
+             <p style="margin: 0; color: #065f46; font-weight: 700; font-size: 15px;">Your room is ready for your arrival. Simply show your booking ID at the front desk!</p>
+          </div>
+
+          <p style="font-size: 14px; color: #64748b; line-height: 1.6;">If you have any questions or need to make changes, please contact the hotel manager directly through the app or email us at <a href="mailto:michustays@gmail.com" style="color: #0b6e4f; font-weight: 700; text-decoration: none;">michustays@gmail.com</a>.</p>
+
+          <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; font-size: 12px; color: #94a3b8;">
+            &copy; 2026 Michu Stays. All rights reserved.<br>
+            Addis Ababa, Ethiopia
+          </div>
+        </div>`,
+      sender: { "name": "Michu Stays", "email": "michustays@gmail.com" },
+      to: [{ "email": email }]
+    };
+
+    console.log("📨 SENDING TRANSAC EMAIL via Brevo API...");
+    const response = await brevoClient.transactionalEmails.sendTransacEmail(emailPayload);
+    console.log("✅ SUCCESS: Brevo Message ID:", response.messageId);
+    
+    res.status(200).send({ success: true, messageId: response.messageId });
+  } catch (error) {
+    console.error("❌ ERROR: Brevo failed to send confirmation email:", error);
+    res.status(500).send({ error: error.message });
+  }
+  console.log("-----------------------------------------");
+});
