@@ -83,10 +83,11 @@ app.post('/request-password-reset', async (req, res) => {
           subject: "Reset Your Michu Stays Password 🔐",
       htmlContent: `
         <div style="font-family: 'Outfit', sans-serif; max-width: 600px; margin: auto; padding: 40px; border: 1px solid #f0f0f0; border-radius: 24px; color: #1a1a1a;">
-          <div style="text-align: center; margin-bottom: 30px;">
+          <div style="text-align: center; margin-bottom: 25px;">
             <img src="https://michu-stays.web.app/images/logo.png" width="80" style="border-radius: 20px;">
+            <h2 style="margin: 10px 0 0 0; color: #0b6e4f; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Michu Stays</h2>
           </div>
-          <h1 style="font-size: 24px; font-weight: 800; text-align: center; color: #0b6e4f; margin-bottom: 20px;">Password Reset Request</h1>
+          <h1 style="font-size: 24px; font-weight: 800; text-align: center; color: #1a1a1a; margin-bottom: 20px;">Password Reset Request</h1>
           <p style="font-size: 16px; line-height: 1.6; color: #5a606a;">We received a request to reset the password for your Michu Stays account. Click the button below to choose a new password:</p>
           
           <div style="text-align: center; margin: 40px 0;">
@@ -132,7 +133,7 @@ app.post('/send-booking-confirmation', async (req, res) => {
   console.log("-----------------------------------------");
   console.log("📥 RECEIVED: Booking confirmation request");
   
-  const { email, customerName, hotelTitle, checkIn, checkOut, totalAmount, bookingId } = req.body;
+  const { email, customerName, hotelTitle, checkIn, checkOut, totalAmount, bookingId, referenceCode, nights } = req.body;
   console.log("   - Target Email:", email);
   console.log("   - Hotel:", hotelTitle);
   console.log("   - Booking ID:", bookingId);
@@ -147,19 +148,35 @@ app.post('/send-booking-confirmation', async (req, res) => {
       subject: `Booking Confirmed at ${hotelTitle} 🏨`,
       htmlContent: `
         <div style="font-family: 'Outfit', sans-serif; max-width: 600px; margin: auto; padding: 40px; border: 1px solid #f0f0f0; border-radius: 24px; color: #1a1a1a; background: #ffffff;">
-          <div style="text-align: center; margin-bottom: 30px;">
+          <div style="text-align: center; margin-bottom: 25px;">
             <img src="https://michu-stays.web.app/images/logo.png" width="80" style="border-radius: 20px;">
+            <h2 style="margin: 10px 0 0 0; color: #0b6e4f; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Michu Stays</h2>
           </div>
-          <h1 style="font-size: 26px; font-weight: 900; text-align: center; color: #0b6e4f; margin-bottom: 10px;">Booking Confirmed! 🎉</h1>
+          <h1 style="font-size: 26px; font-weight: 900; text-align: center; color: #1a1a1a; margin-bottom: 10px;">Booking Confirmed! 🎉</h1>
           <p style="text-align: center; font-size: 16px; color: #64748b; margin-bottom: 30px;">Hello ${customerName}, your stay at <strong>${hotelTitle}</strong> is officially confirmed.</p>
           
-          <div style="background: #f8fafc; border-radius: 20px; padding: 25px; margin-bottom: 30px; border: 1px solid #e2e8f0;">
-            <h2 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 15px; margin-top: 0;">Stay Details</h2>
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-              <div style="font-size: 16px; font-weight: 700;">🏨 ${hotelTitle}</div>
-              <div style="font-size: 15px; color: #334155;">📅 ${checkIn} &rarr; ${checkOut}</div>
-              <div style="font-size: 15px; color: #334155;">💰 Total Paid: <strong>${totalAmount} Birr</strong></div>
-              <div style="font-size: 13px; color: #94a3b8; font-family: monospace;">ID: ${bookingId}</div>
+          <div style="background: #f8fafc; border-radius: 20px; padding: 25px; margin-bottom: 30px; border: 1px solid #e2e8f0; text-align: left;">
+            <h2 style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 20px; margin-top: 0; text-align: center;">Stay Details</h2>
+            
+            <div style="margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+              <span style="color: #64748b; font-size: 12px; display: block; margin-bottom: 4px; text-transform: uppercase;">Hotel</span>
+              <strong style="font-size: 16px; color: #1a1a1a;">🏨 ${hotelTitle}</strong>
+            </div>
+            
+            <div style="margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+              <span style="color: #64748b; font-size: 12px; display: block; margin-bottom: 4px; text-transform: uppercase;">Check-in / Check-out</span>
+              <strong style="font-size: 15px; color: #1a1a1a;">📅 ${checkIn} &rarr; ${checkOut}</strong> 
+              <span style="color: #0b6e4f; font-size: 14px; font-weight: 600; margin-left: 8px;">(${nights || 1} Night${nights > 1 ? 's' : ''})</span>
+            </div>
+            
+            <div style="margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+              <span style="color: #64748b; font-size: 12px; display: block; margin-bottom: 4px; text-transform: uppercase;">Reference / Booking ID</span>
+              <strong style="font-size: 15px; color: #1a1a1a; font-family: monospace; letter-spacing: 1px;">#${referenceCode || bookingId}</strong>
+            </div>
+
+            <div style="padding-top: 5px;">
+              <span style="color: #64748b; font-size: 12px; display: block; margin-bottom: 4px; text-transform: uppercase;">Total Paid</span>
+              <strong style="font-size: 18px; color: #0b6e4f;">💰 ${totalAmount} Birr</strong>
             </div>
           </div>
 
