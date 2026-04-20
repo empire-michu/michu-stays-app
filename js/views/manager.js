@@ -553,12 +553,19 @@ window.router.addRoute('manager', async (container, params) => {
                                             ${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + '<br><small style="color:#aaa;">' + new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + '</small>' : '—'}
                                         </td>
                                         <td data-label="Proof">${b.paymentProofUrl ? `<button class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-radius:8px;" onclick="window.viewProof('${b.paymentProofUrl}')">🖼 Proof</button>` : '<span style="color:#ddd; font-style:italic; font-size:0.8rem;">No file</span>'}</td>
-                                        <td>${b.status === 'Awaiting Verification' ? `<div style="display:flex; gap:0.4rem; flex-direction:column;"><button class="btn-primary" style="padding:0.4rem 0.6rem; font-size:0.75rem; border-radius:8px; width:100%; box-shadow:0 4px 10px rgba(26,96,50,0.2);" onclick="window.mgrConfirmBooking('${b.id}')">Confirm</button><button class="btn-outline" style="padding:0.4rem 0.6rem; font-size:0.75rem; border-radius:8px; width:100%; border-color:#e74c3c; color:#e74c3c;" onclick="window.mgrCancelBooking('${b.id}')">Cancel</button></div>` : ${b.status === 'Confirmed' 
+                                        <td>
+                                            ${b.status === 'Awaiting Verification' 
+                                                ? `<div style="display:flex; gap:0.4rem; flex-direction:column;">
+                                                        <button class="btn-primary" style="padding:0.4rem 0.6rem; font-size:0.75rem; border-radius:8px; width:100%; box-shadow:0 4px 10px rgba(26,96,50,0.2);" onclick="window.mgrConfirmBooking('${b.id}')">Confirm</button>
+                                                        <button class="btn-outline" style="padding:0.4rem 0.6rem; font-size:0.75rem; border-radius:8px; width:100%; border-color:#e74c3c; color:#e74c3c;" onclick="window.mgrCancelBooking('${b.id}')">Cancel</button>
+                                                    </div>` 
+                                                : (b.status === 'Confirmed'
                                                     ? `<div style="display:flex; flex-direction:column; gap:0.3rem;">
                                                         <div style="color:#27ae60; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.3rem;">✅ Confirmed</div>
                                                         <button class="btn-outline" style="padding:0.3rem 0.5rem; font-size:0.65rem; border-radius:6px; background:#f0faf2; border-color:#27ae60; color:#27ae60;" onclick="window.mgrResendEmail('${b.id}')">📧 Resend Email</button>
                                                        </div>`
-                                                    : '<div style="color:#bbb; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.3rem;">❌ Denied</div>'}}</td>
+                                                    : '<div style="color:#bbb; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.3rem;">❌ Denied</div>')}
+                                        </td>
                                     </tr>
                                     `;
                                 }).join('');
