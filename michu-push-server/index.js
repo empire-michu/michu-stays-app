@@ -125,11 +125,7 @@ app.post('/request-password-reset', async (req, res) => {
 
 
 
-// Start the server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`🚀 Michu Push Server listening on port ${port}`);
-});
+// Moved app.listen to the bottom
 
 // 4. Booking Confirmation Endpoint
 app.post('/send-booking-confirmation', async (req, res) => {
@@ -192,4 +188,10 @@ app.post('/send-booking-confirmation', async (req, res) => {
     res.status(500).send({ error: error.message });
   }
   console.log("-----------------------------------------");
+});
+
+// Start the server
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`🚀 Michu Push Server listening on port ${port}`);
 });
