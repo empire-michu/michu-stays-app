@@ -1,9 +1,9 @@
 {
-  "email": "test-xwf90lgs7@srv1.mail-tester.com",
+  "email": "tester@example.com",
   "customerName": "Test User",
-  "hotelTitle": "Michu Test Hotel",
-  "checkIn": "2024-04-19",
-  "checkOut": "2024-04-22",
-  "totalAmount": 1500,
-  "bookingId": "test_123"
+  "hotelTitle": "Test Hotel",
+  "checkIn": "2024-01-01",
+  "checkOut": "2024-01-05",
+  "totalAmount": 1000,
+  "bookingId": "test-id"
 }

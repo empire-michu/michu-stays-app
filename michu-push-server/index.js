@@ -158,7 +158,7 @@ app.post('/send-booking-confirmation', async (req, res) => {
             <div style="display: flex; flex-direction: column; gap: 12px;">
               <div style="font-size: 16px; font-weight: 700;">🏨 ${hotelTitle}</div>
               <div style="font-size: 15px; color: #334155;">📅 ${checkIn} &rarr; ${checkOut}</div>
-              <div style="font-size: 15px; color: #334155;">💰 Total Paid: <strong>${totalAmount} Birr</strong></div>
+              <div style="font-size: 15px; color: #334155;">💰 Total: <strong>${totalAmount} Birr</strong></div>
               <div style="font-size: 13px; color: #94a3b8; font-family: monospace;">ID: ${bookingId}</div>
             </div>
           </div>
@@ -167,14 +167,16 @@ app.post('/send-booking-confirmation', async (req, res) => {
              <p style="margin: 0; color: #065f46; font-weight: 700; font-size: 15px;">Your room is ready for your arrival. Simply show your booking ID at the front desk!</p>
           </div>
 
-          <p style="font-size: 14px; color: #64748b; line-height: 1.6;">If you have any questions or need to make changes, please contact the hotel manager directly through the app or email us at <a href="mailto:michustays@gmail.com" style="color: #0b6e4f; font-weight: 700; text-decoration: none;">michustays@gmail.com</a>.</p>
+          <p style="font-size: 14px; color: #64748b; line-height: 1.6;">If you have any questions, contact us at <a href="mailto:michustays@gmail.com" style="color: #0b6e4f; font-weight: 700; text-decoration: none;">michustays@gmail.com</a>.</p>
 
           <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; font-size: 12px; color: #94a3b8;">
             &copy; 2026 Michu Stays. All rights reserved.<br>
             Addis Ababa, Ethiopia
           </div>
         </div>`,
+      textContent: `Booking Confirmed! Hello ${customerName}, your stay at ${hotelTitle} from ${checkIn} to ${checkOut} is confirmed. Total: ${totalAmount} Birr. Booking ID: ${bookingId}.`,
       sender: { "name": "Michu Stays", "email": "michustays@gmail.com" },
+      replyTo: { "email": "michustays@gmail.com", "name": "Michu Stays Support" },
       to: [{ "email": email }]
     };
 
@@ -184,8 +186,8 @@ app.post('/send-booking-confirmation', async (req, res) => {
     
     res.status(200).send({ success: true, messageId: response.messageId });
   } catch (error) {
-    console.error("❌ ERROR: Brevo failed to send confirmation email:", error);
-    res.status(500).send({ error: error.message });
+    console.error("❌ ERROR: Brevo failed to send confirmation email:", JSON.stringify(error, null, 2));
+    res.status(500).send({ error: error.message || "Failed to dispatch email", details: error });
   }
   console.log("-----------------------------------------");
 });

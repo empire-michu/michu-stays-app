@@ -237,32 +237,38 @@ window.router.addRoute('manager', async (container, params) => {
             
             // New: Trigger Professional Booking Confirmation Email via Brevo (Render Bridge)
             if (booking && booking.customerEmail) {
-                window.showToast("📧 Sending guest confirmation...");
-                fetch('https://michu-push-server.onrender.com/send-booking-confirmation', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: booking.customerEmail,
-                        customerName: booking.customerName || 'Guest',
-                        hotelTitle: booking.propertyTitle || (myHotel?.title || 'Michu Stays'),
-                        checkIn: booking.checkIn || 'N/A',
-                        checkOut: booking.checkOut || 'N/A',
-                        totalAmount: booking.totalAmount || 0,
-                        bookingId: id
-                    })
-                })
-                .then(r => {
-                    if (!r.ok) throw new Error("Server responded with " + r.status);
-                    return r.json();
-                })
-                .then(res => {
+                try {
+                    window.showToast("⏳ Waking up email server...");
+                    // Heartbeat ping to wake up Render (Free Tier cold start)
+                    await fetch('https://michu-push-server.onrender.com/').catch(() => {});
+                    
+                    window.showToast("📧 Sending guest confirmation...");
+                    const response = await fetch('https://michu-push-server.onrender.com/send-booking-confirmation', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: booking.customerEmail,
+                            customerName: booking.customerName || 'Guest',
+                            hotelTitle: booking.propertyTitle || (myHotel?.title || 'Michu Stays'),
+                            checkIn: booking.checkIn || 'N/A',
+                            checkOut: booking.checkOut || 'N/A',
+                            totalAmount: booking.totalAmount || 0,
+                            bookingId: id
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || "Email server error or quota hit");
+                    }
+                    
+                    const res = await response.json();
                     console.log("Booking Confirmation Email Dispatched:", res);
                     window.showToast("✅ Guest notified via email!");
-                })
-                .catch(err => {
+                } catch (err) {
                     console.error("Email Dispatch Error:", err);
-                    window.showToast("⚠️ Booking confirmed, but email delivery failed.");
-                });
+                    window.showToast("⚠️ Booking confirmed, but email notification failed (Server busy).");
+                }
             } else {
                 console.warn("Skipping email: No guest email found for booking", id);
             }
@@ -547,7 +553,12 @@ window.router.addRoute('manager', async (container, params) => {
                                             ${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + '<br><small style="color:#aaa;">' + new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + '</small>' : '—'}
                                         </td>
                                         <td data-label="Proof">${b.paymentProofUrl ? `<button class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-radius:8px;" onclick="window.viewProof('${b.paymentProofUrl}')">🖼 Proof</button>` : '<span style="color:#ddd; font-style:italic; font-size:0.8rem;">No file</span>'}</td>
-                                        <td>${b.status === 'Awaiting Verification' ? `<div style="display:flex; gap:0.4rem; flex-direction:column;"><button class="btn-primary" style="padding:0.4rem 0.6rem; font-size:0.75rem; border-radius:8px; width:100%; box-shadow:0 4px 10px rgba(26,96,50,0.2);" onclick="window.mgrConfirmBooking('${b.id}')">Confirm</button><button class="btn-outline" style="padding:0.4rem 0.6rem; font-size:0.75rem; border-radius:8px; width:100%; border-color:#e74c3c; color:#e74c3c;" onclick="window.mgrCancelBooking('${b.id}')">Cancel</button></div>` : '<div style="color:#bbb; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.3rem;">✅ Done</div>'}</td>
+                                        <td>${b.status === 'Awaiting Verification' ? `<div style="display:flex; gap:0.4rem; flex-direction:column;"><button class="btn-primary" style="padding:0.4rem 0.6rem; font-size:0.75rem; border-radius:8px; width:100%; box-shadow:0 4px 10px rgba(26,96,50,0.2);" onclick="window.mgrConfirmBooking('${b.id}')">Confirm</button><button class="btn-outline" style="padding:0.4rem 0.6rem; font-size:0.75rem; border-radius:8px; width:100%; border-color:#e74c3c; color:#e74c3c;" onclick="window.mgrCancelBooking('${b.id}')">Cancel</button></div>` : ${b.status === 'Confirmed' 
+                                                    ? `<div style="display:flex; flex-direction:column; gap:0.3rem;">
+                                                        <div style="color:#27ae60; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.3rem;">✅ Confirmed</div>
+                                                        <button class="btn-outline" style="padding:0.3rem 0.5rem; font-size:0.65rem; border-radius:6px; background:#f0faf2; border-color:#27ae60; color:#27ae60;" onclick="window.mgrResendEmail('${b.id}')">📧 Resend Email</button>
+                                                       </div>`
+                                                    : '<div style="color:#bbb; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.3rem;">❌ Denied</div>'}}</td>
                                     </tr>
                                     `;
                                 }).join('');
@@ -570,6 +581,39 @@ window.router.addRoute('manager', async (container, params) => {
                 })()}
 
         `;
+     };
+
+    window.mgrResendEmail = async (id) => {
+        try {
+            const bookingDoc = await firestore.collection('bookings').doc(id).get();
+            const booking = bookingDoc.exists ? bookingDoc.data() : null;
+            
+            if (booking && booking.customerEmail) {
+                window.showToast("⏳ Resending email...");
+                // Heartbeat to wake up server
+                await fetch('https://michu-push-server.onrender.com/').catch(() => {});
+                
+                const response = await fetch('https://michu-push-server.onrender.com/send-booking-confirmation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: booking.customerEmail,
+                        customerName: booking.customerName || 'Guest',
+                        hotelTitle: booking.propertyTitle || (myHotel?.title || 'Michu Stays'),
+                        checkIn: booking.checkIn || 'N/A',
+                        checkOut: booking.checkOut || 'N/A',
+                        totalAmount: booking.totalAmount || 0,
+                        bookingId: id
+                    })
+                });
+
+                if (!response.ok) throw new Error("Email server error");
+                window.showToast("✅ Confirmation resent!");
+            }
+        } catch (e) {
+            console.error(e);
+            window.showToast("❌ Resend failed: " + e.message);
+        }
     };
 
     const renderPropertyTab = () => {
