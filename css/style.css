@@ -1293,3 +1293,69 @@ input:focus, select:focus, textarea:focus {
     font-size: 0.9rem !important;
   }
 }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE TABLES (MANAGER & ADMIN)
+   ═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  table.manager-table, 
+  .manager-table thead, 
+  .manager-table tbody, 
+  .manager-table th, 
+  .manager-table td, 
+  .manager-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  /* Hide table headers (but not display: none, for accessibility) */
+  .manager-table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  .manager-table tr {
+    border: 1px solid #eee;
+    border-radius: 12px;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    background: #fff;
+    padding: 0.5rem;
+  }
+
+  /* Force table table rows not to exceed container width */
+  .manager-table {
+    min-width: unset !important;
+  }
+
+  .manager-table td {
+    border: none !important;
+    border-bottom: 1px solid #f9f9f9 !important;
+    position: relative;
+    padding-left: 45% !important;
+    text-align: right;
+    min-height: 2.5rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  
+  .manager-table td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .manager-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 1rem;
+    width: 40%;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #888;
+    text-transform: uppercase;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}

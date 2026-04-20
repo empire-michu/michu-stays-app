@@ -442,6 +442,20 @@ class Database {
                             }, { merge: true });
                             resolve(fcmToken);
                         });
+                        PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
+                            console.log('Push action performed: ', notification);
+                            const data = notification.notification.data || {};
+                            const title = notification.notification.title || '';
+                            const body = notification.notification.body || '';
+                            
+                            const isBooking = data.type === 'booking' || title.toLowerCase().includes('booking') || body.toLowerCase().includes('booking');
+                            
+                            if (isBooking) {
+                                window.location.hash = '#redirect-bookings';
+                            } else {
+                                window.location.hash = '#home';
+                            }
+                        });
                         PushNotifications.addListener('registrationError', (err) => {
                             reject(err);
                         });

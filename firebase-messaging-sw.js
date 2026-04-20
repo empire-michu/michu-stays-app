@@ -32,3 +32,30 @@ messaging.onBackgroundMessage((payload) => {
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
+
+// 4. Handle Notification Clicks (When the user clicks the push notification)
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+
+  const title = event.notification.title || '';
+  const body = event.notification.body || '';
+  const isBooking = title.toLowerCase().includes('booking') || body.toLowerCase().includes('booking');
+  
+  // If it's a booking notification, redirect to the smart redirect route
+  const targetUrl = isBooking ? '/#redirect-bookings' : '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then(function(clientList) {
+      for (var i = 0; i < clientList.length; i++) {
+        var client = clientList[i];
+        if (client.url.includes(self.registration.scope) && 'focus' in client) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});

@@ -454,4 +454,15 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+// Redirect Route for Push Notifications
+window.router.addRoute('redirect-bookings', async (container) => {
+    container.innerHTML = `<div style="text-align:center; padding:5rem; font-weight:700; color:var(--color-primary);">Taking you to your bookings...</div>`;
+    // small wait so auth can load
+    await new Promise(r => setTimeout(r, 600)); 
+    const role = window.auth?.role || window.auth?.userData?.role;
+    if (role === 'admin') window.router.navigate('admin', { tab: 'bookings' });
+    else if (role === 'manager') window.router.navigate('manager', { tab: 'bookings' });
+    else if (role) window.router.navigate('profile', { section: 'bookings' });
+    else window.router.navigate('login');
+});
 
