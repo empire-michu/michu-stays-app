@@ -93,13 +93,15 @@ window.router.addRoute('admin', async (container, params) => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        to: booking.customerEmail,
-                        name: booking.customerName || 'Guest',
+                        email: booking.customerEmail,
+                        customerName: booking.customerName || 'Guest',
                         hotelTitle: booking.propertyTitle || 'Michu Stay',
                         checkIn: booking.checkIn,
                         checkOut: booking.checkOut,
                         referenceCode: booking.referenceCode,
-                        nights: nights
+                        nights: nights,
+                        totalAmount: booking.totalAmount || 0,
+                        bookingId: id
                     })
                 });
                 if (response.ok) window.showToast("✅ Confirmation email sent!");
@@ -604,14 +606,14 @@ window.router.addRoute('admin', async (container, params) => {
                                         const color = avail > 0 ? '#1e7e34' : '#c5221f';
                                         return `
                                         <tr>
-                                            <td style="font-weight:800; color:#888;">${rowNum}</td>
-                                            <td style="font-weight:700;">
+                                            <td data-label="No." style="font-weight:800; color:#888;">${rowNum}</td>
+                                            <td data-label="Name" style="font-weight:700;">
                                                 ${p.title}
                                                 ${p.displaySequence > 0 ? `<span style="background:#fff8e1; color:#f57f17; border:1px solid #ffe082; padding:0.1rem 0.4rem; border-radius:6px; font-size:0.65rem; margin-left:8px; vertical-align:middle; font-weight:800; box-shadow:0 2px 4px rgba(245,127,23,0.1);">📍 #${p.displaySequence}</span>` : ''}
                                             </td>
-                                            <td>${p.type || 'Stay'}</td>
-                                            <td>${p.price} Birr</td>
-                                            <td style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                                            <td data-label="Type">${p.type || 'Stay'}</td>
+                                            <td data-label="Price">${p.price} Birr</td>
+                                            <td data-label="Action" style="display:flex; gap:0.5rem; justify-content:flex-end;">
                                                 <button class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem; color:var(--color-primary);" onclick="window.admEditProperty('${p.id}')">Edit</button>
                                                 <button onclick="window.admDelete('${p.id}','${p.title.replace(/'/g, "\\'")}')" style="color:red;border:none;background:none;cursor:pointer;font-weight:700;font-size:0.75rem;">Delete</button>
                                             </td>
@@ -661,7 +663,7 @@ window.router.addRoute('admin', async (container, params) => {
                     </div>
 
                     <div style="background:white; border-radius:20px; box-shadow:var(--shadow-sm); overflow-x:auto;">
-                        <table class="manager-table" style="width:100%; min-width:1000px;">
+                        <table class="manager-table" style="width:100%;">
                             <thead><tr><th>No.</th><th>Ref</th><th>Stay</th><th>Guest</th><th>Amount</th><th>Status</th><th>Date & Time</th><th>Proof</th><th>Actions</th></tr></thead>
                             <tbody>
                                 ${(() => {
@@ -696,15 +698,15 @@ window.router.addRoute('admin', async (container, params) => {
                                         }
                                         return `
                                         <tr>
-                                            <td style="font-weight:800; color:#888;">${rowNum}</td>
-                                            <td style="font-family:monospace;font-weight:700;color:var(--color-primary);">${b.referenceCode}</td>
-                                            <td>
+                                            <td data-label="No." style="font-weight:800; color:#888;">${rowNum}</td>
+                                            <td data-label="Ref" style="font-family:monospace;font-weight:700;color:var(--color-primary);">${b.referenceCode}</td>
+                                            <td data-label="Stay">
                                                 <div style="font-weight:700">${b.propertyTitle}</div>
                                                 <div style="font-size:0.75rem; color:var(--color-text-light); margin-top:0.2rem;">
                                                     ${b.checkIn} → ${b.checkOut} <span style="font-weight:700;color:#d4af37;margin-left:4px;">(${nights} night${nights !== 1 ? 's' : ''})</span>
                                                 </div>
                                             </td>
-                                            <td>
+                                            <td data-label="Guest">
                                                 <div style="font-weight:700; color:#333; text-transform:uppercase; font-size:0.85rem;">${b.customerName || b.customerEmail}</div>
                                                 ${b.customerName ? `<div style="font-size:0.75rem; color:#08553d; margin-bottom:2px; font-weight:500;">${b.customerEmail}</div>` : ''}
                                                 ${b.customerPhone ? `<div style="font-size:0.75rem; color:#08553d; font-weight:700;"><span style="color:#d4af37; margin-right:4px;">📞</span>${b.customerPhone}</div>` : ''}
@@ -714,11 +716,11 @@ window.router.addRoute('admin', async (container, params) => {
                                                     </div>
                                                 ` : ''}
                                             </td>
-                                            <td style="font-weight:600; white-space:nowrap;">${b.totalAmount} Birr</td>
-                                            <td><span style="padding:0.2rem 0.6rem; border-radius:99px; font-size:0.75rem; background:${b.status==='Confirmed'?'#e6f4ea':'#fff8e1'}; color:${b.status==='Confirmed'?'#1e7e34':'#b05d22'}; font-weight:700; text-transform:uppercase;">${b.status}</span></td>
-                                            <td style="font-size:0.8rem;color:#555;font-weight:600;">${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + '<br><small style="color:#aaa;">' + new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + '</small>' : '—'}</td>
-                                            <td>${b.paymentProofUrl ? `<button class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-radius:8px;" onclick="window.viewProof('${b.paymentProofUrl}')">🖼 Proof</button>` : '—'}</td>
-                                            <td>
+                                            <td data-label="Amount" style="font-weight:600; white-space:nowrap;">${b.totalAmount} Birr</td>
+                                            <td data-label="Status"><span style="padding:0.2rem 0.6rem; border-radius:99px; font-size:0.75rem; background:${b.status==='Confirmed'?'#e6f4ea':'#fff8e1'}; color:${b.status==='Confirmed'?'#1e7e34':'#b05d22'}; font-weight:700; text-transform:uppercase;">${b.status}</span></td>
+                                            <td data-label="Date & Time" style="font-size:0.8rem;color:#555;font-weight:600;">${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + '<br><small style="color:#aaa;">' + new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + '</small>' : '—'}</td>
+                                            <td data-label="Proof">${b.paymentProofUrl ? `<button class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-radius:8px;" onclick="window.viewProof('${b.paymentProofUrl}')">🖼 Proof</button>` : '—'}</td>
+                                            <td data-label="Actions">
                                                 ${b.status === 'Confirmed' ? `
                                                     <button class="btn-outline" style="padding:0.3rem 0.5rem; font-size:0.65rem; border-radius:8px; background:#f0faf2; border-color:#27ae60; color:#27ae60; font-weight:700;" onclick="window.admResendEmail('${b.id}')">📧 Resend Email</button>
                                                 ` : '—'}
@@ -1101,5 +1103,3 @@ window.router.addRoute('admin', async (container, params) => {
 
     await window.syncData();
 });
-/ /   v 2 0   c a c h e   b u s t  
- 
