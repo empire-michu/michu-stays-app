@@ -568,10 +568,7 @@ window.router.addRoute('manager', async (container, params) => {
                                                         <button class="btn-outline" style="padding:0.4rem 0.6rem; font-size:0.75rem; border-radius:8px; width:100%; border-color:#e74c3c; color:#e74c3c;" onclick="window.mgrCancelBooking('${b.id}')">Cancel</button>
                                                     </div>` 
                                                 : (b.status === 'Confirmed'
-                                                    ? `<div style="display:flex; flex-direction:column; gap:0.3rem;">
-                                                        <div style="color:#27ae60; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.3rem;">✅ Confirmed</div>
-                                                        <button class="btn-outline" style="padding:0.3rem 0.5rem; font-size:0.65rem; border-radius:6px; background:#f0faf2; border-color:#27ae60; color:#27ae60;" onclick="window.mgrResendEmail('${b.id}')">📧 Resend Email</button>
-                                                       </div>`
+                                                    ? `<div style="color:#27ae60; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.3rem;">✅ Confirmed</div>`
                                                     : '<div style="color:#bbb; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.3rem;">❌ Denied</div>')}
                                         </td>
                                     </tr>

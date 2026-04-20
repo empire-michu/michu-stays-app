@@ -73,6 +73,43 @@ window.router.addRoute('admin', async (container, params) => {
         }
     };
 
+    window.admResendEmail = async (id) => {
+        try {
+            const bookingDoc = await firestore.collection('bookings').doc(id).get();
+            const booking = bookingDoc.exists ? bookingDoc.data() : null;
+            
+            if (booking && booking.customerEmail) {
+                window.showToast("⏳ Resending email...");
+                // Heartbeat to wake up server
+                await fetch('https://michu-push-server.onrender.com/').catch(() => {});
+                
+                let nights = 0;
+                if (booking.checkIn && booking.checkOut) {
+                    const diffTime = Math.abs(new Date(booking.checkOut) - new Date(booking.checkIn));
+                    nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                }
+
+                const response = await fetch('https://michu-push-server.onrender.com/send-booking-confirmation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to: booking.customerEmail,
+                        name: booking.customerName || 'Guest',
+                        hotelTitle: booking.propertyTitle || 'Michu Stay',
+                        checkIn: booking.checkIn,
+                        checkOut: booking.checkOut,
+                        referenceCode: booking.referenceCode,
+                        nights: nights
+                    })
+                });
+                if (response.ok) window.showToast("✅ Confirmation email sent!");
+                else window.showToast("❌ Server error.");
+            }
+        } catch (e) {
+            window.showToast("❌ Failed to resend.");
+        }
+    };
+
     window.syncData = async () => {
         isSyncing = true;
         container.innerHTML = `<div class="container" style="text-align:center;padding-top:4rem;">
@@ -625,7 +662,7 @@ window.router.addRoute('admin', async (container, params) => {
 
                     <div style="background:white; border-radius:20px; box-shadow:var(--shadow-sm); overflow-x:auto;">
                         <table class="manager-table" style="width:100%; min-width:1000px;">
-                            <thead><tr><th>No.</th><th>Ref</th><th>Stay</th><th>Guest</th><th>Amount</th><th>Status</th><th>Date & Time</th><th>Proof</th></tr></thead>
+                            <thead><tr><th>No.</th><th>Ref</th><th>Stay</th><th>Guest</th><th>Amount</th><th>Status</th><th>Date & Time</th><th>Proof</th><th>Actions</th></tr></thead>
                             <tbody>
                                 ${(() => {
                                     const filtered = cachedBookings.filter(b => {
@@ -681,6 +718,11 @@ window.router.addRoute('admin', async (container, params) => {
                                             <td><span style="padding:0.2rem 0.6rem; border-radius:99px; font-size:0.75rem; background:${b.status==='Confirmed'?'#e6f4ea':'#fff8e1'}; color:${b.status==='Confirmed'?'#1e7e34':'#b05d22'}; font-weight:700; text-transform:uppercase;">${b.status}</span></td>
                                             <td style="font-size:0.8rem;color:#555;font-weight:600;">${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + '<br><small style="color:#aaa;">' + new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + '</small>' : '—'}</td>
                                             <td>${b.paymentProofUrl ? `<button class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-radius:8px;" onclick="window.viewProof('${b.paymentProofUrl}')">🖼 Proof</button>` : '—'}</td>
+                                            <td>
+                                                ${b.status === 'Confirmed' ? `
+                                                    <button class="btn-outline" style="padding:0.3rem 0.5rem; font-size:0.65rem; border-radius:8px; background:#f0faf2; border-color:#27ae60; color:#27ae60; font-weight:700;" onclick="window.admResendEmail('${b.id}')">📧 Resend Email</button>
+                                                ` : '—'}
+                                            </td>
                                         </tr>`;
                                     }).join('');
                                 })()}
