@@ -243,6 +243,12 @@ window.router.addRoute('manager', async (container, params) => {
                     await fetch('https://michu-push-server.onrender.com/').catch(() => {});
                     
                     window.showToast("📧 Sending guest confirmation...");
+                    let nights = 0;
+                    if (booking.checkIn && booking.checkOut) {
+                        const diffTime = Math.abs(new Date(booking.checkOut) - new Date(booking.checkIn));
+                        nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    }
+
                     const response = await fetch('https://michu-push-server.onrender.com/send-booking-confirmation', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -253,7 +259,9 @@ window.router.addRoute('manager', async (container, params) => {
                             checkIn: booking.checkIn || 'N/A',
                             checkOut: booking.checkOut || 'N/A',
                             totalAmount: booking.totalAmount || 0,
-                            bookingId: id
+                            bookingId: id,
+                            referenceCode: booking.referenceCode || id,
+                            nights: nights
                         })
                     });
 
@@ -600,6 +608,12 @@ window.router.addRoute('manager', async (container, params) => {
                 // Heartbeat to wake up server
                 await fetch('https://michu-push-server.onrender.com/').catch(() => {});
                 
+                let nights = 0;
+                if (booking.checkIn && booking.checkOut) {
+                    const diffTime = Math.abs(new Date(booking.checkOut) - new Date(booking.checkIn));
+                    nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                }
+
                 const response = await fetch('https://michu-push-server.onrender.com/send-booking-confirmation', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -610,7 +624,9 @@ window.router.addRoute('manager', async (container, params) => {
                         checkIn: booking.checkIn || 'N/A',
                         checkOut: booking.checkOut || 'N/A',
                         totalAmount: booking.totalAmount || 0,
-                        bookingId: id
+                        bookingId: id,
+                        referenceCode: booking.referenceCode || id,
+                        nights: nights
                     })
                 });
 
