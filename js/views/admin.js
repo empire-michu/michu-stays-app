@@ -591,7 +591,7 @@ window.router.addRoute('admin', async (container, params) => {
                 <!-- HOTELS TAB -->
                 <div id="adm-tab-hotels" style="display:${activeTab==='hotels'?'block':'none'}">
                     <div style="background:white; border-radius:20px; box-shadow:var(--shadow-sm); overflow-x:auto;">
-                        <table class="manager-table vertical-table-mobile">
+                        <table class="manager-table" style="min-width: 800px;">
                             <thead><tr><th>No.</th><th>Name</th><th>Type</th><th>Price</th><th>Action</th></tr></thead>
                             <tbody>
                                 ${(() => {
@@ -749,7 +749,7 @@ window.router.addRoute('admin', async (container, params) => {
                 <!-- MANAGERS TAB -->
                 <div id="adm-tab-managers" style="display:${activeTab==='managers'?'block':'none'}">
                     <div style="background:white; border-radius:20px; box-shadow:var(--shadow-sm); padding:1rem; margin-bottom:2rem; overflow-x:auto;">
-                        <table class="manager-table vertical-table-mobile" style="width:100%; min-width:600px;">
+                        <table class="manager-table" style="width:100%; min-width:800px;">
                             <thead><tr><th>No.</th><th>Email</th><th>Assigned Stay / Hotel</th><th>Action</th></tr></thead>
                             <tbody>${(() => {
                                 totalManagersPages = Math.max(1, Math.ceil(managers.length / 15));
