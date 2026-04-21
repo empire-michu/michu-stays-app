@@ -702,7 +702,7 @@ window.router.addRoute('admin', async (container, params) => {
                                             <td data-label="Ref" style="font-family:monospace;font-weight:700;color:var(--color-primary);">${b.referenceCode}</td>
                                             <td data-label="Stay">
                                                 <div style="font-weight:700">${b.propertyTitle}</div>
-                                                <div style="font-size:0.75rem; color:var(--color-text-light); margin-top:0.2rem;">
+                                                <div style="font-size:0.75rem; color:var(--color-text-light); margin-top:0.2rem; white-space:nowrap;">
                                                     ${b.checkIn} → ${b.checkOut} <span style="font-weight:700;color:#d4af37;margin-left:4px;">(${nights} night${nights !== 1 ? 's' : ''})</span>
                                                 </div>
                                             </td>

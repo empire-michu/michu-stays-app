@@ -1,5 +1,5 @@
 // Michu Stays Service Worker - Enhanced for today's updates
-const CACHE_NAME = 'michu-stays-v2.6';
+const CACHE_NAME = 'michu-stays-v2.7';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -12,6 +12,7 @@ const ASSETS_TO_CACHE = [
   '/js/views/booking.js',
   '/js/views/profile.js',
   '/images/logo.png',
+  '/favicon.ico',
   '/images/icon-192.png',
   '/images/icon-512.png'
 ];
