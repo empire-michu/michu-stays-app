@@ -1293,29 +1293,224 @@ input:focus, select:focus, textarea:focus {
     font-size: 0.9rem !important;
   }
 }
+  margin-top: 1.5rem;
+}
+
+.testimonial-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.03);
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-5px);
+}
+
+.testimonial-stars {
+  color: #f59e0b; /* Gold */
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  letter-spacing: 2px;
+}
+
+.testimonial-card p {
+  color: #444;
+  line-height: 1.7;
+  font-style: italic;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 1.2rem;
+}
+
+.testimonial-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 10px rgba(11, 110, 79, 0.2);
+}
+
+.testimonial-author-info strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  margin-bottom: 0.1rem;
+}
+
+.testimonial-author-info span {
+  font-size: 0.75rem;
+  color: #888;
+  font-weight: 600;
+}
+
+/* Animations */
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 6px 16px rgba(245, 158, 11, 0.6); }
+  100% { transform: scale(1); box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4); }
+}
+
+@keyframes badgePulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════
+   MOBILE CHROME BROWSER FIXES
+   All fixes for responsive tables, toasts,
+   safe areas & push notifications on mobile
+   Chrome browser (non-Capacitor)
+   ═══════════════════════════════════════════ */
+
+/* Responsive Card Layout removed per user request to keep native horizontal table scroll */
+
+/* --- Toast: Reposition above mobile nav --- */
+@media (max-width: 768px) {
+  .toast {
+    bottom: calc(85px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 1rem !important;
+    left: 1rem !important;
+    width: auto !important;
+    max-width: unset !important;
+    text-align: center;
+    border-radius: 14px !important;
+    font-size: 0.9rem;
+  }
+}
+
+/* --- Safe area inset fallbacks (for Chrome without env() support) --- */
+@supports not (padding-bottom: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: 0;
+  }
+  @media (max-width: 768px) {
+    body {
+      padding-bottom: 85px;
+    }
+    .mobile-nav {
+      padding-bottom: 16px;
+    }
+    .mobile-sticky-save {
+      bottom: 90px !important;
+    }
+  }
+}
+
+/* --- Mobile Chrome: Ensure mobile nav renders on first load --- */
+@media (max-width: 768px) {
+  .mobile-nav:not(.nav-hidden) {
+    display: flex !important;
+  }
+  .mobile-nav.nav-hidden {
+    display: none !important;
+  }
+}
+
+/* --- Push notification popups: keep clear of mobile nav --- */
+@media (max-width: 768px) {
+  /* Handled via JS positioning, but provide CSS anchor */
+  .push-notification-container {
+    bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* --- Ensure overflow scrollable tables work in Chrome --- */
+@media (max-width: 768px) {
+  [style*="overflow-x: auto"],
+  [style*="overflow-x:auto"] {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* --- Fix header actions overflow on small screens --- */
+@media (max-width: 400px) {
+  .header-actions {
+    gap: 0.3rem !important;
+    max-width: 65%;
+    justify-content: flex-end;
+    overflow: hidden;
+  }
+  .header-actions button {
+    font-size: 0.65rem !important;
+    padding: 0.25rem 0.5rem !important;
+    white-space: nowrap;
+  }
+}
+
+/* --- Profile view mobile-friendly booking history cards --- */
+@media (max-width: 768px) {
+  .booking-history-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .booking-history-header > div {
+    width: 100%;
+  }
+  .booking-history-header input[type="date"],
+  .booking-history-header select {
+    width: 100% !important;
+    font-size: 16px !important; /* Prevent iOS/Android zoom */
+  }
+}
+
+/* --- Footer clearance for mobile nav --- */
+@media (max-width: 768px) {
+  .site-footer {
+    margin-bottom: 0;
+    padding-bottom: calc(1rem + 60px) !important;
+  }
+}
+
+/* --- Responsive hero section for very small screens --- */
+@media (max-width: 380px) {
+  .hero-title {
+    font-size: 1.8rem !important;
+  }
+  .hero-subtitle {
+    font-size: 0.9rem !important;
+  }
+}
 
 /* ═══════════════════════════════════════════
    RESPONSIVE TABLES (MANAGER & ADMIN)
    ═══════════════════════════════════════════ */
 @media (max-width: 768px) {
-  table.manager-table, 
-  .manager-table thead, 
-  .manager-table tbody, 
-  .manager-table th, 
-  .manager-table td, 
-  .manager-table tr {
+  table.vertical-table-mobile, 
+  .vertical-table-mobile thead, 
+  .vertical-table-mobile tbody, 
+  .vertical-table-mobile th, 
+  .vertical-table-mobile td, 
+  .vertical-table-mobile tr {
     display: block;
     width: 100%;
   }
 
   /* Hide table headers (but not display: none, for accessibility) */
-  .manager-table thead tr {
+  .vertical-table-mobile thead tr {
     position: absolute;
     top: -9999px;
     left: -9999px;
   }
 
-  .manager-table tr {
+  .vertical-table-mobile tr {
     border: 1px solid #eee;
     border-radius: 12px;
     margin-bottom: 1.2rem;
@@ -1325,11 +1520,11 @@ input:focus, select:focus, textarea:focus {
   }
 
   /* Force table table rows not to exceed container width */
-  .manager-table {
+  .vertical-table-mobile {
     min-width: unset !important;
   }
 
-  .manager-table td {
+  .vertical-table-mobile td {
     border: none !important;
     border-bottom: 1px solid #f9f9f9 !important;
     position: relative;
@@ -1341,11 +1536,11 @@ input:focus, select:focus, textarea:focus {
     align-items: center;
   }
   
-  .manager-table td:last-child {
+  .vertical-table-mobile td:last-child {
     border-bottom: 0 !important;
   }
 
-  .manager-table td::before {
+  .vertical-table-mobile td::before {
     content: attr(data-label);
     position: absolute;
     left: 1rem;
