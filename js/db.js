@@ -491,9 +491,29 @@ class Database {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
                 const registration = await navigator.serviceWorker.ready;
-                const currentToken = await messaging.getToken({
-                    serviceWorkerRegistration: registration
-                });
+                let currentToken;
+                try {
+                    currentToken = await messaging.getToken({
+                        serviceWorkerRegistration: registration
+                    });
+                } catch (tokenErr) {
+                    console.warn("Failed to get token, attempting to clear corrupted IndexedDB...", tokenErr);
+                    if (tokenErr.message && tokenErr.message.includes('atob')) {
+                        // Clear corrupted Firebase IndexedDB and try again once
+                        const dbs = await window.indexedDB.databases();
+                        for (let db of dbs) {
+                            if (db.name === 'firebase-messaging-database') {
+                                window.indexedDB.deleteDatabase(db.name);
+                            }
+                        }
+                        // Need to reload page to re-initialize firebase correctly after wiping DB
+                        window.showToast("Fixing notification settings... please wait.");
+                        setTimeout(() => window.location.reload(), 1500);
+                        return null;
+                    } else {
+                        throw tokenErr;
+                    }
+                }
                 
                 if (currentToken) {
                     await firestore.collection('users').doc(userId).set({

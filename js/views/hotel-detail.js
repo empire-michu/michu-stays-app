@@ -228,6 +228,18 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
              </div>
              <div id="gallery-thumbnails" style="margin-top:2.5rem; display:flex; gap:1rem; overflow-x:auto; padding:1rem; width:85%;"></div>
         </div>
+
+        <div id="reply-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); z-index:9999; align-items:center; justify-content:center;">
+             <div style="background:#fff; width:90%; max-width:400px; padding:2rem; border-radius:24px; box-shadow:0 20px 40px rgba(0,0,0,0.15); animation:fadeUp 0.3s ease;">
+                 <h3 style="margin-bottom:1rem; font-size:1.3rem; color:#0f172a;">Reply to Guest</h3>
+                 <p style="font-size:0.85rem; color:#64748b; margin-bottom:1.5rem;">Respond professionally to this review. Your reply will be visible to everyone.</p>
+                 <textarea id="reply-text-area" rows="4" placeholder="Thank you for your stay..." style="width:100%; padding:1rem; border:2px solid #e2e8f0; border-radius:14px; resize:none; font-family:inherit; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='var(--color-primary)'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+                 <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+                     <button onclick="document.getElementById('reply-modal').style.display='none'" style="flex:1; padding:1rem; background:#f1f5f9; color:#475569; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Cancel</button>
+                     <button id="reply-submit-btn" style="flex:1; padding:1rem; background:var(--color-primary); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Post Reply</button>
+                 </div>
+             </div>
+        </div>
     `;
 
     // --- LOGIC INITIALIZATION ---
@@ -281,18 +293,42 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         window.showToast(`✅ ${pkg.title} Activated! Check the total below.`);
     };
 
-    window.replyToReview = async (reviewId) => {
-        const reply = prompt("Enter your reply to this review:");
-        if (!reply || !reply.trim()) return;
-        try {
-            await window.db.addReviewReply(reviewId, reply.trim(), hotel.managerName || 'Hotel Manager');
-            window.showToast("✅ Reply posted successfully!");
-            // Re-render to show the new reply
-            window.router.navigate('hotel_detail_view', { id: hotel.id });
-        } catch (e) {
-            console.error(e);
-            window.showToast("❌ Failed to post reply.");
-        }
+    window.replyToReview = (reviewId) => {
+        const modal = document.getElementById('reply-modal');
+        const textArea = document.getElementById('reply-text-area');
+        const submitBtn = document.getElementById('reply-submit-btn');
+        
+        textArea.value = '';
+        modal.style.display = 'flex';
+        
+        submitBtn.onclick = async () => {
+            const reply = textArea.value.trim();
+            if (!reply) {
+                window.showToast("❌ Please enter a reply.");
+                return;
+            }
+            
+            submitBtn.innerText = 'Posting...';
+            submitBtn.style.opacity = '0.7';
+            submitBtn.disabled = true;
+            
+            try {
+                // Ensure managerName is pulled from auth or use default
+                const managerName = window.auth?.currentUser?.displayName || hotel.managerName || 'Hotel Manager';
+                await window.db.addReviewReply(reviewId, reply, managerName);
+                window.showToast("✅ Reply posted successfully!");
+                modal.style.display = 'none';
+                // Re-render to show the new reply
+                window.router.navigate('hotel_detail_view', { id: hotel.id });
+            } catch (e) {
+                console.error("Firestore Review Reply Error:", e);
+                window.showToast("❌ Failed to post reply.");
+            } finally {
+                submitBtn.innerText = 'Post Reply';
+                submitBtn.style.opacity = '1';
+                submitBtn.disabled = false;
+            }
+        };
     };
 
     // Initialize Dates
