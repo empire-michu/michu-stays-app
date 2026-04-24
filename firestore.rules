@@ -38,8 +38,13 @@ service cloud.firestore {
     }
 
     // ─── BOOKINGS ────────────────────────────────────────────────────────
+    // Only the guest who made the booking, their assigned manager, or an admin can read
     match /bookings/{bookingId} {
-      allow read: if true;
+      allow read: if isSignedIn() && (
+        resource.data.customerId == request.auth.uid ||
+        resource.data.managerId == request.auth.uid ||
+        isAdmin()
+      );
       allow create: if isSignedIn();
       allow update: if isAdmin() ||
         (isManager() && resource.data.managerId == request.auth.uid);
@@ -50,13 +55,14 @@ service cloud.firestore {
     match /reviews/{reviewId} {
       allow read:   if true;
       allow create: if isSignedIn();
-      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin() || (isManager() && get(/databases/$(database)/documents/properties/$(resource.data.propertyId)).data.managerId == request.auth.uid));
       allow delete: if isAdmin();
     }
 
     // ─── NOTIFICATIONS ────────────────────────────────────────────────────
+    // Only authenticated users can read notifications
     match /notifications/{notifId} {
-      allow read:   if true;
+      allow read:   if isSignedIn();
       allow create: if isSignedIn();
       allow update: if isAdmin();
       allow delete: if isAdmin();

@@ -572,14 +572,14 @@ window.router.addRoute('home', async (container, params) => {
                             <div class="news-slider" id="home-news-slider">
                                 ${(() => {
                                     const items = [
-                                        { card: 'TRADITION', title: 'Netsanet Workneh: A Legacy That Lives On', excerpt: 'Celebrating the life and career of a legend who shaped the sound of a generation.', img: 'images/news_1.png' },
-                                        { card: 'FESTIVAL', title: 'Unity in Rhythm: Shashamane Reggae 2026', excerpt: 'A soulful gathering of music and culture as Ethiopia celebrates its deep-rooted Rastafarian heritage.', img: 'images/news_2.png' },
-                                        { card: 'CREATIVE', title: 'Kezira Hub: The Future of Dire Dawa Art', excerpt: 'Step inside the new historic-meets-modern creative district turning heads across the Horn of Africa.', img: 'images/news_3.png' },
-                                        { card: 'LIFESTYLE', title: 'A Taste of Dire: Street Food Festival', excerpt: 'From aromatic coffee to the perfect Basha bread—discover the flavors of Ethiopia\'s crossroad city.', img: 'images/news_4.png' }
+                                        { card: 'TRADITION', title: 'Netsanet Workneh: A Legacy That Lives On', excerpt: 'Celebrating the life and career of a legend who shaped the sound of a generation.', img: 'images/news_1.jpg' },
+                                        { card: 'FESTIVAL', title: 'Unity in Rhythm: Shashamane Reggae 2026', excerpt: 'A soulful gathering of music and culture as Ethiopia celebrates its deep-rooted Rastafarian heritage.', img: 'images/news_2.jpg' },
+                                        { card: 'CREATIVE', title: 'Kezira Hub: The Future of Dire Dawa Art', excerpt: 'Step inside the new historic-meets-modern creative district turning heads across the Horn of Africa.', img: 'images/news_3.jpg' },
+                                        { card: 'LIFESTYLE', title: 'A Taste of Dire: Street Food Festival', excerpt: 'From aromatic coffee to the perfect Basha bread—discover the flavors of Ethiopia\'s crossroad city.', img: 'images/news_4.jpg' }
                                     ];
                                     return items.map((n, i) => `
                                         <div class="news-slide" style="flex: 0 0 100%;">
-                                            <img src="${n.img}" class="news-image" alt="${n.title}">
+                                            <img src="${n.img}" class="news-image" alt="${n.title}" loading="lazy">
                                             <div class="news-overlay"></div>
                                             <div class="news-content-box">
                                                 <span class="news-badge">${n.card}</span>

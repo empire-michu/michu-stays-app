@@ -356,7 +356,7 @@ input:focus, select:focus, textarea:focus {
   position: relative;
   height: 320px;
   width: 100%;
-  background: url('../images/iconic_dire_dawa_hero.png') center/cover no-repeat;
+  background: url('../images/iconic_dire_dawa_hero.jpg') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;

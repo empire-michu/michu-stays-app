@@ -331,6 +331,18 @@ class Database {
         return { id: ref.id, ...review };
     }
 
+    async addReviewReply(reviewId, replyText, managerName) {
+        const reply = {
+            text: replyText,
+            managerName: managerName || 'Hotel Manager',
+            createdAt: new Date().toISOString()
+        };
+        await firestore.collection('reviews').doc(reviewId).update({
+            managerReply: reply
+        });
+        return reply;
+    }
+
     async getReviews(propertyId) {
         const snapshot = await firestore.collection('reviews')
             .where('propertyId', '==', propertyId).get();
@@ -352,17 +364,12 @@ class Database {
     }
 
     async uploadPaymentProof(file, bookingRefCode) {
-        return new Promise((resolve, reject) => {
-            // Limit file size to 800KB to stay within Firestore's 1MB doc limit
-            if (file.size > 800 * 1024) {
-                reject(new Error('Image is too large. Please use a screenshot under 800KB.'));
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result); // returns base64 data URL
-            reader.onerror = () => reject(new Error('Failed to read file.'));
-            reader.readAsDataURL(file);
-        });
+        // Upload to Cloudinary instead of storing as base64 in Firestore
+        // This avoids Firestore's 1MB document limit and saves storage
+        if (file.size > 5 * 1024 * 1024) {
+            throw new Error('Image is too large. Please use a file under 5MB.');
+        }
+        return await this.uploadFile(file, 'payment-proofs');
     }
 
     // ─── NOTIFICATIONS ─────────────────────────────────────────
@@ -485,8 +492,7 @@ class Database {
             if (permission === 'granted') {
                 const registration = await navigator.serviceWorker.ready;
                 const currentToken = await messaging.getToken({
-                    serviceWorkerRegistration: registration,
-                    vapidKey: 'BM-S93j6Wp98...' // Optional: Add if using VAPID
+                    serviceWorkerRegistration: registration
                 });
                 
                 if (currentToken) {

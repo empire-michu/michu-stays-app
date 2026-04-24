@@ -59,6 +59,8 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
 
     const amenitiesIcons = { 'WiFi': '📶', 'Pool': '🏊', 'Spa': '🧖', 'Breakfast': '🍳', 'Parking': '🚗', 'Gym': '💪', 'AC': '❄️', 'Bar': '🍸' };
 
+    const isManager = window.auth.currentUser && window.auth.currentUser.uid === hotel.managerId;
+
     container.innerHTML = `
         <div class="container" style="padding-top:1.5rem; padding-bottom:5rem;">
             <!-- Header -->
@@ -203,6 +205,16 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                 <div style="color:#f59e0b; flex-shrink:0;">${'★'.repeat(r.rating)}</div>
                             </div>
                             <p style="font-style:italic; line-height:1.6; color:#475569; margin:0; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">"${r.text || 'Enjoyed the stay!'}"</p>
+                            ${r.managerReply ? `
+                                <div style="margin-top:1rem; padding:0.8rem; background:#fff; border-radius:12px; border-left:3px solid #f59e0b; font-size:0.9rem;">
+                                    <strong style="color:#1e293b; display:block; margin-bottom:0.2rem;">↳ Reply from Manager:</strong>
+                                    <span style="color:#64748b; font-style:italic;">"${r.managerReply.text}"</span>
+                                </div>
+                            ` : isManager ? `
+                                <div style="margin-top:0.8rem;">
+                                    <button onclick="window.replyToReview('${r.id}')" style="background:none; border:1px solid #cbd5e1; color:#475569; padding:0.4rem 0.8rem; border-radius:8px; font-size:0.8rem; cursor:pointer; font-weight:700;">↩ Reply to Guest</button>
+                                </div>
+                            ` : ''}
                         </div>`).join('') : '<p style="color:#94a3b8;">No reviews yet.</p>'}
                  </div>
             </section>
@@ -267,6 +279,20 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         bout.value = end.toISOString().split('T')[0];
         window.refreshMichuPricing();
         window.showToast(`✅ ${pkg.title} Activated! Check the total below.`);
+    };
+
+    window.replyToReview = async (reviewId) => {
+        const reply = prompt("Enter your reply to this review:");
+        if (!reply || !reply.trim()) return;
+        try {
+            await window.db.addReviewReply(reviewId, reply.trim(), hotel.managerName || 'Hotel Manager');
+            window.showToast("✅ Reply posted successfully!");
+            // Re-render to show the new reply
+            window.router.navigate('hotel_detail_view', { id: hotel.id });
+        } catch (e) {
+            console.error(e);
+            window.showToast("❌ Failed to post reply.");
+        }
     };
 
     // Initialize Dates
