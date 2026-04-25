@@ -369,7 +369,8 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     };
 
     window.michuDeleteReview = async (reviewId) => {
-        if (!confirm("Are you sure you want to delete your review? This cannot be undone.")) return;
+        const confirmed = await window.michuConfirm("Delete Review?", "Are you sure you want to delete your review? This cannot be undone.");
+        if (!confirmed) return;
         try {
             await window.db.deleteReview(reviewId);
             window.showToast("✅ Review deleted.");
@@ -381,7 +382,8 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     };
 
     window.michuDeleteReply = async (reviewId) => {
-        if (!confirm("Are you sure you want to delete your reply?")) return;
+        const confirmed = await window.michuConfirm("Remove Reply?", "Are you sure you want to delete your response to this guest?");
+        if (!confirmed) return;
         try {
             await window.db.deleteReviewReply(reviewId);
             window.showToast("✅ Reply removed.");

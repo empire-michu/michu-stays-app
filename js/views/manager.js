@@ -218,7 +218,8 @@ window.router.addRoute('manager', async (container, params) => {
     };
 
     window.mgDeleteReply = async (reviewId) => {
-        if (!confirm("Are you sure you want to delete your reply?")) return;
+        const confirmed = await window.michuConfirm("Remove Reply?", "Are you sure you want to delete your response to this guest?");
+        if (!confirmed) return;
         try {
             await window.db.deleteReviewReply(reviewId);
             window.showToast("✅ Reply removed.");

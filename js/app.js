@@ -459,3 +459,25 @@ window.router.addRoute('redirect-bookings', async (container) => {
     else window.router.navigate('login');
 });
 
+window.michuConfirm = (title, message) => {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirm-modal');
+        const titleEl = document.getElementById('confirm-title');
+        const msgEl = document.getElementById('confirm-msg');
+        const yesBtn = document.getElementById('confirm-yes-btn');
+        const noBtn = document.getElementById('confirm-cancel-btn');
+
+        titleEl.innerText = title || "Are you sure?";
+        msgEl.innerText = message || "This action cannot be undone.";
+        modal.style.display = 'flex';
+
+        const cleanup = (val) => {
+            modal.style.display = 'none';
+            resolve(val);
+        };
+
+        yesBtn.onclick = () => cleanup(true);
+        noBtn.onclick = () => cleanup(false);
+        modal.onclick = (e) => { if (e.target === modal) cleanup(false); };
+    });
+};
