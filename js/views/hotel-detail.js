@@ -207,8 +207,8 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                             ${isOwner ? `
                                 <button onclick="window.michuDeleteReview('${r.id}')" 
                                         title="Delete My Review"
-                                        style="position:absolute; top:1rem; right:1rem; background:#fee2e2; color:#ef4444; border:none; width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(239,68,68,0.15); z-index:10; transition:all 0.2s;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                        style="position:absolute; top:0.8rem; right:0.8rem; background:#fee2e2; color:#ef4444; border:none; width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 10px rgba(239,68,68,0.2); z-index:50; transition:all 0.2s; -webkit-tap-highlight-color: transparent;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                                 </button>
                             ` : ''}
 
@@ -234,10 +234,10 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                         <p style="color:#64748b; font-style:italic; margin:0; line-height:1.5;">"${r.managerReply.text}"</p>
                                         
                                         ${isManager ? `
-                                            <div style="margin-top:0.8rem; border-top:1px dashed #e2e8f0; padding-top:0.6rem; text-align:right;">
+                                            <div style="margin-top:0.8rem; border-top:1px dashed #e2e8f0; padding-top:0.8rem; text-align:right;">
                                                 <button onclick="window.michuDeleteReply('${r.id}')" 
-                                                        style="background:#fff1f2; border:none; color:#ef4444; font-size:0.7rem; font-weight:800; cursor:pointer; padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:4px;">
-                                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                                        style="background:#fff1f2; border:none; color:#ef4444; font-size:0.75rem; font-weight:800; cursor:pointer; padding:8px 16px; border-radius:10px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(239,68,68,0.08); -webkit-tap-highlight-color: transparent;">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                                                     Remove
                                                 </button>
                                             </div>
