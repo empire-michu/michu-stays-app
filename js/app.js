@@ -132,11 +132,16 @@ class Router {
                     window.history.pushState({ name, params }, '', hashPath);
                 }
             }
+            const isSameRoute = window.location.hash.split('?')[0] === `#${name}`;
             this.appContainer.innerHTML = ''; // Clear current view
             this.routes[name](this.appContainer, params); // Render new view
             this.updateSEO(); // Initial reset to default SEO
             this.updateMobileNav(name); // Highlight current menu item
-            window.scrollTo(0,0);
+            
+            // Only scroll to top if it's a fresh navigation, not a re-render of the same view
+            if (!isSameRoute) {
+                window.scrollTo(0,0);
+            }
         } else {
             console.error(`Route ${name} not found`);
         }
@@ -476,9 +481,13 @@ window.michuConfirm = (title, message) => {
         titleEl.innerText = title || "Are you sure?";
         msgEl.innerText = message || "This action cannot be undone.";
         modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overscrollBehavior = 'none';
 
         const cleanup = (val) => {
             modal.style.display = 'none';
+            document.body.style.overflow = '';
+            document.documentElement.style.overscrollBehavior = '';
             resolve(val);
         };
 
