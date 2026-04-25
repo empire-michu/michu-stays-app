@@ -467,6 +467,12 @@ window.michuConfirm = (title, message) => {
         const yesBtn = document.getElementById('confirm-yes-btn');
         const noBtn = document.getElementById('confirm-cancel-btn');
 
+        if (!modal) {
+            console.warn("SW: Confirm modal not found, using fallback");
+            resolve(window.confirm(message || "Are you sure?"));
+            return;
+        }
+
         titleEl.innerText = title || "Are you sure?";
         msgEl.innerText = message || "This action cannot be undone.";
         modal.style.display = 'flex';
@@ -481,3 +487,37 @@ window.michuConfirm = (title, message) => {
         modal.onclick = (e) => { if (e.target === modal) cleanup(false); };
     });
 };
+
+// --- GLOBAL ROBUST HANDLERS FOR ACTIONS ---
+window.michuDeleteReviewGlobal = async (reviewId, hotelId) => {
+    console.log(`[Michu] Review Delete Clicked: ${reviewId}`);
+    try {
+        const confirmed = await window.michuConfirm("Delete Review", "Are you sure you want to delete your review forever?");
+        if (confirmed) {
+            window.showToast("Deleting review...", "info");
+            await window.db.deleteReview(reviewId);
+            window.showToast("Review deleted successfully", "success");
+            if (hotelId) window.router.navigate('hotel_detail_view', { id: hotelId });
+        }
+    } catch (err) {
+        console.error("Delete review error:", err);
+        window.showToast("Error deleting review", "error");
+    }
+};
+
+window.michuDeleteReplyGlobal = async (reviewId, hotelId) => {
+    console.log(`[Michu] Reply Remove Clicked: ${reviewId}`);
+    try {
+        const confirmed = await window.michuConfirm("Remove Reply", "Are you sure you want to remove your manager response?");
+        if (confirmed) {
+            window.showToast("Removing reply...", "info");
+            await window.db.deleteReviewReply(reviewId);
+            window.showToast("Reply removed successfully", "success");
+            if (hotelId) window.router.navigate('hotel_detail_view', { id: hotelId });
+        }
+    } catch (err) {
+        console.error("Remove reply error:", err);
+        window.showToast("Error removing reply", "error");
+    }
+};
+

@@ -205,10 +205,10 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         return `
                         <div style="min-width: 280px; max-width: 320px; flex-shrink: 0; scroll-snap-align: start; background:#f8fafc; padding:1.5rem; border-radius:24px; border:1px solid #f1f5f9; position:relative; display:flex; flex-direction:column; min-height:220px;">
                             ${isOwner ? `
-                                <button onclick="window.michuDeleteReview('${r.id}')" 
+                                <button onclick="event.stopPropagation(); window.michuDeleteReviewGlobal('${r.id}', '${hotel.id}')" 
                                         title="Delete My Review"
-                                        style="position:absolute; top:0.8rem; right:0.8rem; background:#fee2e2; color:#ef4444; border:none; width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 10px rgba(239,68,68,0.2); z-index:50; transition:all 0.2s; -webkit-tap-highlight-color: transparent;">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                        style="position:absolute; top:0.6rem; right:0.6rem; background:#fee2e2; color:#ef4444; border:none; width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 15px rgba(239,68,68,0.25); z-index:1000; transition:all 0.2s; -webkit-tap-highlight-color: transparent; pointer-events: auto !important;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                                 </button>
                             ` : ''}
 
@@ -234,11 +234,11 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                         <p style="color:#64748b; font-style:italic; margin:0; line-height:1.5;">"${r.managerReply.text}"</p>
                                         
                                         ${isManager ? `
-                                            <div style="margin-top:0.8rem; border-top:1px dashed #e2e8f0; padding-top:0.8rem; text-align:right;">
-                                                <button onclick="window.michuDeleteReply('${r.id}')" 
-                                                        style="background:#fff1f2; border:none; color:#ef4444; font-size:0.75rem; font-weight:800; cursor:pointer; padding:8px 16px; border-radius:10px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(239,68,68,0.08); -webkit-tap-highlight-color: transparent;">
-                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                                                    Remove
+                                            <div style="margin-top:1rem; border-top:1px dashed #e2e8f0; padding-top:1rem; text-align:right;">
+                                                <button onclick="event.stopPropagation(); window.michuDeleteReplyGlobal('${r.id}', '${hotel.id}')" 
+                                                        style="background:#fff1f2; border:none; color:#ef4444; font-size:0.8rem; font-weight:800; cursor:pointer; padding:10px 20px; border-radius:12px; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(239,68,68,0.12); z-index:1000; -webkit-tap-highlight-color: transparent; pointer-events: auto !important;">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                                    Remove Reply
                                                 </button>
                                             </div>
                                         ` : ''}
@@ -368,31 +368,8 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         };
     };
 
-    window.michuDeleteReview = async (reviewId) => {
-        const confirmed = await window.michuConfirm("Delete Review?", "Are you sure you want to delete your review? This cannot be undone.");
-        if (!confirmed) return;
-        try {
-            await window.db.deleteReview(reviewId);
-            window.showToast("✅ Review deleted.");
-            window.router.navigate('hotel_detail_view', { id: hotel.id });
-        } catch (e) {
-            console.error("Delete Review Error:", e);
-            window.showToast("❌ Failed to delete review.");
-        }
-    };
+    // Logic for deletions now handled globally via michuDeleteReviewGlobal and michuDeleteReplyGlobal in app.js
 
-    window.michuDeleteReply = async (reviewId) => {
-        const confirmed = await window.michuConfirm("Remove Reply?", "Are you sure you want to delete your response to this guest?");
-        if (!confirmed) return;
-        try {
-            await window.db.deleteReviewReply(reviewId);
-            window.showToast("✅ Reply removed.");
-            window.router.navigate('hotel_detail_view', { id: hotel.id });
-        } catch (e) {
-            console.error("Delete Reply Error:", e);
-            window.showToast("❌ Failed to delete reply.");
-        }
-    };
 
     // Initialize Dates
     const d1 = new Date(); const d2 = new Date(); d2.setDate(d1.getDate() + 1);
