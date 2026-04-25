@@ -132,15 +132,26 @@ class Router {
                     window.history.pushState({ name, params }, '', hashPath);
                 }
             }
+            const currentScroll = window.scrollY;
             const isSameRoute = window.location.hash.split('?')[0] === `#${name}`;
+            
+            // Stabilization: prevent the page from jumping to top by keeping container height
+            const oldHeight = this.appContainer.offsetHeight;
+            this.appContainer.style.minHeight = oldHeight + 'px';
+
             this.appContainer.innerHTML = ''; // Clear current view
             this.routes[name](this.appContainer, params); // Render new view
+            
+            // Reset stabilization
+            setTimeout(() => { this.appContainer.style.minHeight = ''; }, 100);
+
             this.updateSEO(); // Initial reset to default SEO
             this.updateMobileNav(name); // Highlight current menu item
             
-            // Only scroll to top if it's a fresh navigation, not a re-render of the same view
             if (!isSameRoute) {
                 window.scrollTo(0,0);
+            } else {
+                window.scrollTo(0, currentScroll);
             }
         } else {
             console.error(`Route ${name} not found`);
