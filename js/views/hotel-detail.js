@@ -203,54 +203,54 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         const isOwner = window.auth.currentUser && window.auth.currentUser.uid === r.userId;
                         
                         return `
-                        <div style="min-width: 280px; max-width: 320px; flex-shrink: 0; scroll-snap-align: start; background:#f8fafc; padding:1.5rem; border-radius:24px; border:1px solid #f1f5f9; position:relative; display:flex; flex-direction:column; justify-content:space-between;">
-                            <div>
-                                <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
-                                    <strong style="font-size:1.1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%;">${r.userName || 'Guest'}</strong>
+                        <div style="min-width: 280px; max-width: 320px; flex-shrink: 0; scroll-snap-align: start; background:#f8fafc; padding:1.5rem; border-radius:24px; border:1px solid #f1f5f9; position:relative; display:flex; flex-direction:column; min-height:220px;">
+                            ${isOwner ? `
+                                <button onclick="window.michuDeleteReview('${r.id}')" 
+                                        title="Delete My Review"
+                                        style="position:absolute; top:1rem; right:1rem; background:#fee2e2; color:#ef4444; border:none; width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(239,68,68,0.15); z-index:10; transition:all 0.2s;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                </button>
+                            ` : ''}
+
+                            <div style="flex:1;">
+                                <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem; padding-right:${isOwner ? '40px' : '0'};">
+                                    <strong style="font-size:1.1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.userName || 'Guest'}</strong>
                                     <div style="color:#f59e0b; flex-shrink:0;">${'★'.repeat(r.rating)}</div>
                                 </div>
                                 <div style="font-size:0.75rem; color:#94a3b8; font-weight:700; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.5px;">${rDate}</div>
                                 
                                 <p style="font-style:italic; line-height:1.6; color:#475569; margin:0; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">"${r.text || 'Enjoyed the stay!'}"</p>
-                                
-                                ${isOwner ? `
-                                    <div style="margin-top:1rem; text-align:right;">
-                                        <button onclick="window.michuDeleteReview('${r.id}')" 
-                                                style="background:#fee2e2; color:#ef4444; border:none; padding:0.5rem 1rem; border-radius:12px; font-size:0.75rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 2px 5px rgba(239,68,68,0.1);">
-                                            🗑️ Delete My Review
-                                        </button>
-                                    </div>
-                                ` : ''}
-
-                                ${(() => {
-                                    if (r.managerReply && r.managerReply.text) {
-                                        const replyDate = r.managerReply.createdAt ? new Date(r.managerReply.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-                                        return `
-                                        <div style="margin-top:1.2rem; padding:1rem; background:#fff; border-radius:16px; border-left:4px solid #f59e0b; font-size:0.9rem; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
-                                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                                                <strong style="color:#1e293b; font-size:0.85rem;">↳ Manager Response:</strong>
-                                                ${(replyDate && replyDate !== 'Invalid Date') ? `<span style="font-size:0.7rem; color:#94a3b8; font-weight:700;">${replyDate}</span>` : ''}
-                                            </div>
-                                            <p style="color:#64748b; font-style:italic; margin:0; line-height:1.5;">"${r.managerReply.text}"</p>
-                                            
-                                            ${isManager ? `
-                                                <div style="margin-top:0.8rem; border-top:1px dashed #e2e8f0; padding-top:0.5rem; text-align:right;">
-                                                    <button onclick="window.michuDeleteReply('${r.id}')" 
-                                                            style="background:none; border:none; color:#ef4444; font-size:0.7rem; font-weight:800; cursor:pointer; padding:4px 0;">
-                                                        🗑️ Remove Reply
-                                                    </button>
-                                                </div>
-                                            ` : ''}
-                                        </div>`;
-                                    } else if (isManager) {
-                                        return `
-                                        <div style="margin-top:1rem;">
-                                            <button onclick="window.replyToReview('${r.id}')" style="width:100%; background:#f1f5f9; border:1px dashed #cbd5e1; color:#475569; padding:0.6rem; border-radius:12px; font-size:0.8rem; cursor:pointer; font-weight:700; transition:all 0.2s;">↩ Reply to Guest</button>
-                                        </div>`;
-                                    }
-                                    return '';
-                                })()}
                             </div>
+
+                            ${(() => {
+                                if (r.managerReply && r.managerReply.text) {
+                                    const replyDate = r.managerReply.createdAt ? new Date(r.managerReply.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+                                    return `
+                                    <div style="margin-top:1.5rem; padding:1rem; background:#fff; border-radius:18px; border-left:4px solid #f59e0b; font-size:0.85rem; box-shadow:0 4px 12px rgba(0,0,0,0.04); position:relative;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+                                            <strong style="color:#1e293b; font-size:0.8rem;">↳ Manager Response:</strong>
+                                            ${(replyDate && replyDate !== 'Invalid Date') ? `<span style="font-size:0.65rem; color:#94a3b8; font-weight:700;">${replyDate}</span>` : ''}
+                                        </div>
+                                        <p style="color:#64748b; font-style:italic; margin:0; line-height:1.5;">"${r.managerReply.text}"</p>
+                                        
+                                        ${isManager ? `
+                                            <div style="margin-top:0.8rem; border-top:1px dashed #e2e8f0; padding-top:0.6rem; text-align:right;">
+                                                <button onclick="window.michuDeleteReply('${r.id}')" 
+                                                        style="background:#fff1f2; border:none; color:#ef4444; font-size:0.7rem; font-weight:800; cursor:pointer; padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:4px;">
+                                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        ` : ''}
+                                    </div>`;
+                                } else if (isManager) {
+                                    return `
+                                    <div style="margin-top:1.2rem;">
+                                        <button onclick="window.replyToReview('${r.id}')" style="width:100%; background:#f1f5f9; border:1px dashed #cbd5e1; color:#475569; padding:0.7rem; border-radius:14px; font-size:0.8rem; cursor:pointer; font-weight:700; transition:all 0.2s;">↩ Reply to Guest</button>
+                                    </div>`;
+                                }
+                                return '';
+                            })()}
                         </div>`;
                     }).join('') : '<p style="color:#94a3b8;">No reviews yet.</p>'}
                  </div>
