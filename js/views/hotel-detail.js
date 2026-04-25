@@ -222,28 +222,34 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                     </div>
                                 ` : ''}
 
-                                ${r.managerReply ? `
-                                    <div style="margin-top:1.2rem; padding:1rem; background:#fff; border-radius:16px; border-left:4px solid #f59e0b; font-size:0.9rem; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
-                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                                            <strong style="color:#1e293b; font-size:0.85rem;">↳ Manager Response:</strong>
-                                            <span style="font-size:0.7rem; color:#94a3b8; font-weight:700;">${r.managerReply.createdAt ? new Date(r.managerReply.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}</span>
-                                        </div>
-                                        <p style="color:#64748b; font-style:italic; margin:0; line-height:1.5;">"${r.managerReply.text}"</p>
-                                        
-                                        ${isManager ? `
-                                            <div style="margin-top:0.8rem; border-top:1px dashed #e2e8f0; pt:0.5rem; text-align:right;">
-                                                <button onclick="window.michuDeleteReply('${r.id}')" 
-                                                        style="background:none; border:none; color:#ef4444; font-size:0.7rem; font-weight:800; cursor:pointer; padding:4px 0;">
-                                                    🗑️ Remove Reply
-                                                </button>
+                                ${(() => {
+                                    if (r.managerReply && r.managerReply.text) {
+                                        const replyDate = r.managerReply.createdAt ? new Date(r.managerReply.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+                                        return `
+                                        <div style="margin-top:1.2rem; padding:1rem; background:#fff; border-radius:16px; border-left:4px solid #f59e0b; font-size:0.9rem; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+                                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                                                <strong style="color:#1e293b; font-size:0.85rem;">↳ Manager Response:</strong>
+                                                ${(replyDate && replyDate !== 'Invalid Date') ? `<span style="font-size:0.7rem; color:#94a3b8; font-weight:700;">${replyDate}</span>` : ''}
                                             </div>
-                                        ` : ''}
-                                    </div>
-                                ` : isManager ? `
-                                    <div style="margin-top:1rem;">
-                                        <button onclick="window.replyToReview('${r.id}')" style="width:100%; background:#f1f5f9; border:1px dashed #cbd5e1; color:#475569; padding:0.6rem; border-radius:12px; font-size:0.8rem; cursor:pointer; font-weight:700; transition:all 0.2s;">↩ Reply to Guest</button>
-                                    </div>
-                                ` : ''}
+                                            <p style="color:#64748b; font-style:italic; margin:0; line-height:1.5;">"${r.managerReply.text}"</p>
+                                            
+                                            ${isManager ? `
+                                                <div style="margin-top:0.8rem; border-top:1px dashed #e2e8f0; padding-top:0.5rem; text-align:right;">
+                                                    <button onclick="window.michuDeleteReply('${r.id}')" 
+                                                            style="background:none; border:none; color:#ef4444; font-size:0.7rem; font-weight:800; cursor:pointer; padding:4px 0;">
+                                                        🗑️ Remove Reply
+                                                    </button>
+                                                </div>
+                                            ` : ''}
+                                        </div>`;
+                                    } else if (isManager) {
+                                        return `
+                                        <div style="margin-top:1rem;">
+                                            <button onclick="window.replyToReview('${r.id}')" style="width:100%; background:#f1f5f9; border:1px dashed #cbd5e1; color:#475569; padding:0.6rem; border-radius:12px; font-size:0.8rem; cursor:pointer; font-weight:700; transition:all 0.2s;">↩ Reply to Guest</button>
+                                        </div>`;
+                                    }
+                                    return '';
+                                })()}
                             </div>
                         </div>`;
                     }).join('') : '<p style="color:#94a3b8;">No reviews yet.</p>'}
