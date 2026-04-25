@@ -217,6 +217,18 @@ window.router.addRoute('manager', async (container, params) => {
         input.focus();
     };
 
+    window.mgDeleteReply = async (reviewId) => {
+        if (!confirm("Are you sure you want to delete your reply?")) return;
+        try {
+            await window.db.deleteReviewReply(reviewId);
+            window.showToast("✅ Reply removed.");
+            loadManagerReviews();
+        } catch (e) {
+            console.error("Delete Reply Error:", e);
+            window.showToast("❌ Failed to delete reply.");
+        }
+    };
+
     window.mgSubmitReply = async () => {
         const reviewId = document.getElementById('reply-review-id').value;
         const text = document.getElementById('reply-text-input').value.trim();
@@ -683,7 +695,10 @@ window.router.addRoute('manager', async (container, params) => {
                                 <span style="font-size:0.75rem; color:#94a3b8; margin-left:auto;">${new Date(r.managerReply.createdAt).toLocaleDateString()}</span>
                             </div>
                             <p style="color:#64748b; font-size:0.9rem; font-style:italic; margin:0; line-height:1.5;">"${r.managerReply.text}"</p>
-                            <button onclick="window.mgOpenReply('${r.id}')" style="margin-top:1rem; background:none; border:none; color:var(--color-primary); font-weight:800; font-size:0.8rem; cursor:pointer;">✎ Edit Reply</button>
+                            <div style="display:flex; gap:1rem; margin-top:1rem;">
+                                <button onclick="window.mgOpenReply('${r.id}')" style="background:none; border:none; color:var(--color-primary); font-weight:800; font-size:0.8rem; cursor:pointer;">✎ Edit Reply</button>
+                                <button onclick="window.mgDeleteReply('${r.id}')" style="background:none; border:none; color:#ef4444; font-weight:800; font-size:0.8rem; cursor:pointer;">🗑️ Delete Reply</button>
+                            </div>
                         ` : `
                             <button onclick="window.mgOpenReply('${r.id}')" class="btn-primary" style="padding:0.6rem 1.2rem; font-size:0.85rem; border-radius:10px;">↩ Reply to Guest</button>
                         `}

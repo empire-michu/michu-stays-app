@@ -198,24 +198,46 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     <span style="color:#f59e0b;">★</span> Guest Reviews (${reviewCount})
                  </h2>
                  <div style="display:flex; overflow-x:auto; gap:1.5rem; padding-bottom:1rem; padding-top:0.5rem; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
-                    ${reviews.length > 0 ? reviews.map(r => `
-                        <div style="min-width: 280px; max-width: 320px; flex-shrink: 0; scroll-snap-align: start; background:#f8fafc; padding:1.5rem; border-radius:24px; border:1px solid #f1f5f9;">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:0.8rem;">
+                    ${reviews.length > 0 ? reviews.map(r => {
+                        const rDate = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently';
+                        const isOwner = window.auth.currentUser && window.auth.currentUser.uid === r.userId;
+                        
+                        return `
+                        <div style="min-width: 280px; max-width: 320px; flex-shrink: 0; scroll-snap-align: start; background:#f8fafc; padding:1.5rem; border-radius:24px; border:1px solid #f1f5f9; position:relative;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
                                 <strong style="font-size:1.1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%;">${r.userName || 'Guest'}</strong>
                                 <div style="color:#f59e0b; flex-shrink:0;">${'★'.repeat(r.rating)}</div>
                             </div>
+                            <div style="font-size:0.75rem; color:#94a3b8; font-weight:700; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.5px;">${rDate}</div>
+                            
                             <p style="font-style:italic; line-height:1.6; color:#475569; margin:0; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">"${r.text || 'Enjoyed the stay!'}"</p>
+                            
+                            ${isOwner ? `
+                                <button onclick="window.michuDeleteReview('${r.id}')" 
+                                        style="position:absolute; bottom:1.2rem; right:1.2rem; background:#fee2e2; color:#ef4444; border:none; padding:0.4rem 0.8rem; border-radius:10px; font-size:0.7rem; font-weight:800; cursor:pointer;">
+                                    🗑️ Delete
+                                </button>
+                            ` : ''}
+
                             ${r.managerReply ? `
-                                <div style="margin-top:1rem; padding:0.8rem; background:#fff; border-radius:12px; border-left:3px solid #f59e0b; font-size:0.9rem;">
-                                    <strong style="color:#1e293b; display:block; margin-bottom:0.2rem;">↳ Reply from Manager:</strong>
+                                <div style="margin-top:1rem; padding:0.8rem; background:#fff; border-radius:12px; border-left:3px solid #f59e0b; font-size:0.9rem; position:relative;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem;">
+                                        <strong style="color:#1e293b; font-size:0.9rem;">↳ Reply from Manager:</strong>
+                                        <span style="font-size:0.7rem; color:#94a3b8; font-weight:700;">${r.managerReply.createdAt ? new Date(r.managerReply.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}</span>
+                                    </div>
                                     <span style="color:#64748b; font-style:italic;">"${r.managerReply.text}"</span>
+                                    ${isManager ? `
+                                        <button onclick="window.michuDeleteReply('${r.id}')" 
+                                                style="position:absolute; top:0.5rem; right:0.5rem; background:none; border:none; color:#94a3b8; font-size:0.8rem; cursor:pointer; padding:2px;">✕</button>
+                                    ` : ''}
                                 </div>
                             ` : isManager ? `
                                 <div style="margin-top:0.8rem;">
                                     <button onclick="window.replyToReview('${r.id}')" style="background:none; border:1px solid #cbd5e1; color:#475569; padding:0.4rem 0.8rem; border-radius:8px; font-size:0.8rem; cursor:pointer; font-weight:700;">↩ Reply to Guest</button>
                                 </div>
                             ` : ''}
-                        </div>`).join('') : '<p style="color:#94a3b8;">No reviews yet.</p>'}
+                        </div>`;
+                    }).join('') : '<p style="color:#94a3b8;">No reviews yet.</p>'}
                  </div>
             </section>
         </div>
@@ -329,6 +351,30 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 submitBtn.disabled = false;
             }
         };
+    };
+
+    window.michuDeleteReview = async (reviewId) => {
+        if (!confirm("Are you sure you want to delete your review? This cannot be undone.")) return;
+        try {
+            await window.db.deleteReview(reviewId);
+            window.showToast("✅ Review deleted.");
+            window.router.navigate('hotel_detail_view', { id: hotel.id });
+        } catch (e) {
+            console.error("Delete Review Error:", e);
+            window.showToast("❌ Failed to delete review.");
+        }
+    };
+
+    window.michuDeleteReply = async (reviewId) => {
+        if (!confirm("Are you sure you want to delete your reply?")) return;
+        try {
+            await window.db.deleteReviewReply(reviewId);
+            window.showToast("✅ Reply removed.");
+            window.router.navigate('hotel_detail_view', { id: hotel.id });
+        } catch (e) {
+            console.error("Delete Reply Error:", e);
+            window.showToast("❌ Failed to delete reply.");
+        }
     };
 
     // Initialize Dates

@@ -372,6 +372,16 @@ class Database {
         return reply;
     }
 
+    async deleteReview(reviewId) {
+        return await firestore.collection('reviews').doc(reviewId).delete();
+    }
+
+    async deleteReviewReply(reviewId) {
+        return await firestore.collection('reviews').doc(reviewId).update({
+            managerReply: firebase.firestore.FieldValue.delete()
+        });
+    }
+
     async getReviews(propertyId) {
         const snapshot = await firestore.collection('reviews')
             .where('propertyId', '==', propertyId).get();
