@@ -203,39 +203,48 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         const isOwner = window.auth.currentUser && window.auth.currentUser.uid === r.userId;
                         
                         return `
-                        <div style="min-width: 280px; max-width: 320px; flex-shrink: 0; scroll-snap-align: start; background:#f8fafc; padding:1.5rem; border-radius:24px; border:1px solid #f1f5f9; position:relative;">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
-                                <strong style="font-size:1.1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%;">${r.userName || 'Guest'}</strong>
-                                <div style="color:#f59e0b; flex-shrink:0;">${'★'.repeat(r.rating)}</div>
-                            </div>
-                            <div style="font-size:0.75rem; color:#94a3b8; font-weight:700; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.5px;">${rDate}</div>
-                            
-                            <p style="font-style:italic; line-height:1.6; color:#475569; margin:0; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">"${r.text || 'Enjoyed the stay!'}"</p>
-                            
-                            ${isOwner ? `
-                                <button onclick="window.michuDeleteReview('${r.id}')" 
-                                        style="position:absolute; bottom:1.2rem; right:1.2rem; background:#fee2e2; color:#ef4444; border:none; padding:0.4rem 0.8rem; border-radius:10px; font-size:0.7rem; font-weight:800; cursor:pointer;">
-                                    🗑️ Delete
-                                </button>
-                            ` : ''}
-
-                            ${r.managerReply ? `
-                                <div style="margin-top:1rem; padding:0.8rem; background:#fff; border-radius:12px; border-left:3px solid #f59e0b; font-size:0.9rem; position:relative;">
-                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem;">
-                                        <strong style="color:#1e293b; font-size:0.9rem;">↳ Reply from Manager:</strong>
-                                        <span style="font-size:0.7rem; color:#94a3b8; font-weight:700;">${r.managerReply.createdAt ? new Date(r.managerReply.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}</span>
+                        <div style="min-width: 280px; max-width: 320px; flex-shrink: 0; scroll-snap-align: start; background:#f8fafc; padding:1.5rem; border-radius:24px; border:1px solid #f1f5f9; position:relative; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
+                                    <strong style="font-size:1.1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%;">${r.userName || 'Guest'}</strong>
+                                    <div style="color:#f59e0b; flex-shrink:0;">${'★'.repeat(r.rating)}</div>
+                                </div>
+                                <div style="font-size:0.75rem; color:#94a3b8; font-weight:700; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.5px;">${rDate}</div>
+                                
+                                <p style="font-style:italic; line-height:1.6; color:#475569; margin:0; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">"${r.text || 'Enjoyed the stay!'}"</p>
+                                
+                                ${isOwner ? `
+                                    <div style="margin-top:1rem; text-align:right;">
+                                        <button onclick="window.michuDeleteReview('${r.id}')" 
+                                                style="background:#fee2e2; color:#ef4444; border:none; padding:0.5rem 1rem; border-radius:12px; font-size:0.75rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 2px 5px rgba(239,68,68,0.1);">
+                                            🗑️ Delete My Review
+                                        </button>
                                     </div>
-                                    <span style="color:#64748b; font-style:italic;">"${r.managerReply.text}"</span>
-                                    ${isManager ? `
-                                        <button onclick="window.michuDeleteReply('${r.id}')" 
-                                                style="position:absolute; top:0.5rem; right:0.5rem; background:none; border:none; color:#94a3b8; font-size:0.8rem; cursor:pointer; padding:2px;">✕</button>
-                                    ` : ''}
-                                </div>
-                            ` : isManager ? `
-                                <div style="margin-top:0.8rem;">
-                                    <button onclick="window.replyToReview('${r.id}')" style="background:none; border:1px solid #cbd5e1; color:#475569; padding:0.4rem 0.8rem; border-radius:8px; font-size:0.8rem; cursor:pointer; font-weight:700;">↩ Reply to Guest</button>
-                                </div>
-                            ` : ''}
+                                ` : ''}
+
+                                ${r.managerReply ? `
+                                    <div style="margin-top:1.2rem; padding:1rem; background:#fff; border-radius:16px; border-left:4px solid #f59e0b; font-size:0.9rem; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                                            <strong style="color:#1e293b; font-size:0.85rem;">↳ Manager Response:</strong>
+                                            <span style="font-size:0.7rem; color:#94a3b8; font-weight:700;">${r.managerReply.createdAt ? new Date(r.managerReply.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}</span>
+                                        </div>
+                                        <p style="color:#64748b; font-style:italic; margin:0; line-height:1.5;">"${r.managerReply.text}"</p>
+                                        
+                                        ${isManager ? `
+                                            <div style="margin-top:0.8rem; border-top:1px dashed #e2e8f0; pt:0.5rem; text-align:right;">
+                                                <button onclick="window.michuDeleteReply('${r.id}')" 
+                                                        style="background:none; border:none; color:#ef4444; font-size:0.7rem; font-weight:800; cursor:pointer; padding:4px 0;">
+                                                    🗑️ Remove Reply
+                                                </button>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                ` : isManager ? `
+                                    <div style="margin-top:1rem;">
+                                        <button onclick="window.replyToReview('${r.id}')" style="width:100%; background:#f1f5f9; border:1px dashed #cbd5e1; color:#475569; padding:0.6rem; border-radius:12px; font-size:0.8rem; cursor:pointer; font-weight:700; transition:all 0.2s;">↩ Reply to Guest</button>
+                                    </div>
+                                ` : ''}
+                            </div>
                         </div>`;
                     }).join('') : '<p style="color:#94a3b8;">No reviews yet.</p>'}
                  </div>
