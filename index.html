@@ -162,25 +162,27 @@
 
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/firebase-messaging-sw.js').then((registration) => {
-                console.log('Service Worker registered with scope:', registration.scope);
-            }).catch((err) => {
-                console.log('Service Worker registration failed:', err);
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/firebase-messaging-sw.js?v=1197').then((registration) => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                }).catch((err) => {
+                    console.log('Service Worker registration failed:', err);
+                });
             });
         }
     </script>
-    <script src="js/db.js?v=1191"></script>
-    <script src="js/auth.js?v=1191"></script>
-    <script src="js/app.js?v=1191"></script>
-    <script src="js/views/home.js?v=1191"></script>
-    <script src="js/views/admin.js?v=1191"></script>
-    <script src="js/views/manager.js?v=1191"></script>
-    <script src="js/views/booking.js?v=1191"></script>
-    <script src="js/views/hotel-detail.js?v=1191"></script>
-    <script src="js/views/add-property.js?v=1191"></script>
-    <script src="js/views/login.js?v=1191"></script>
-    <script src="js/views/signup.js?v=1191"></script>
-    <script src="js/views/profile.js?v=1191"></script>
+    <script src="js/db.js?v=1197"></script>
+    <script src="js/auth.js?v=1197"></script>
+    <script src="js/app.js?v=1197"></script>
+    <script src="js/views/home.js?v=1197"></script>
+    <script src="js/views/admin.js?v=1197"></script>
+    <script src="js/views/manager.js?v=1197"></script>
+    <script src="js/views/booking.js?v=1197"></script>
+    <script src="js/views/hotel-detail.js?v=1197"></script>
+    <script src="js/views/add-property.js?v=1197"></script>
+    <script src="js/views/login.js?v=1197"></script>
+    <script src="js/views/signup.js?v=1197"></script>
+    <script src="js/views/profile.js?v=1197"></script>
 
     <!-- ═══════════════════════════════════════════
          PROFESSIONAL SITE FOOTER

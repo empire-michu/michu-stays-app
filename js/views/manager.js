@@ -4,7 +4,7 @@ window.router.addRoute('manager', async (container, params) => {
         window.router.navigate('login'); return;
     }
 
-    let activeTab = params?.tab || 'bookings'; // bookings, property, account
+    let activeTab = params?.tab || 'bookings'; // bookings, property, account, reviews
     let filterFrom = '';
     let filterTo = '';
     const uid = window.auth?.currentUser?.uid;
@@ -202,6 +202,38 @@ window.router.addRoute('manager', async (container, params) => {
             }
         } finally {
             if (btn) btn.disabled = false;
+        }
+    };
+    
+    window.mgOpenReply = (reviewId) => {
+        const modal = document.getElementById('reply-modal');
+        const input = document.getElementById('reply-text-input');
+        const idInput = document.getElementById('reply-review-id');
+        if (!modal || !input || !idInput) return;
+        
+        idInput.value = reviewId;
+        input.value = '';
+        modal.style.display = 'flex';
+        input.focus();
+    };
+
+    window.mgSubmitReply = async () => {
+        const reviewId = document.getElementById('reply-review-id').value;
+        const text = document.getElementById('reply-text-input').value.trim();
+        const btn = document.getElementById('reply-submit-btn');
+        
+        if (!text) { window.showToast("Please enter a reply."); return; }
+        
+        btn.innerText = "Posting..."; btn.disabled = true;
+        try {
+            await window.db.addReviewReply(reviewId, text, userData.fullName || myHotel?.title || 'Hotel Manager');
+            window.showToast("✅ Reply posted and guest notified!");
+            document.getElementById('reply-modal').style.display = 'none';
+            window.setMgrTab('reviews');
+        } catch (e) {
+            console.error("Reply post failed:", e);
+            window.showToast("❌ Failed to post reply.");
+            btn.innerText = "Post Reply"; btn.disabled = false;
         }
     };
 
@@ -444,6 +476,7 @@ window.router.addRoute('manager', async (container, params) => {
                 <div class="mgr-tab-bar">
                     <button style="${tabStyle('bookings')}" onclick="window.setMgrTab('bookings')">📅 Bookings</button>
                     <button style="${tabStyle('property')}" onclick="window.setMgrTab('property')">🏨 My Property</button>
+                    <button style="${tabStyle('reviews')}" onclick="window.setMgrTab('reviews')">💬 Reviews</button>
                     <button style="${tabStyle('account')}" onclick="window.setMgrTab('account')">👤 My Account</button>
                 </div>
 
@@ -460,6 +493,20 @@ window.router.addRoute('manager', async (container, params) => {
                     <img id="proof-img" src="" style="max-width:100%;max-height:450px;border-radius:16px; box-shadow:var(--shadow-md);">
                 </div>
             </div>
+
+            <!-- Reply Modal -->
+            <div id="reply-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;align-items:center;justify-content:center;" onclick="this.style.display='none'">
+                <div style="background:white;border-radius:24px;padding:2rem;max-width:450px;width:90%;" onclick="event.stopPropagation()">
+                    <h3 style="margin-top:0; color:var(--color-primary);">Reply to Guest</h3>
+                    <p style="color:#666; font-size:0.85rem; margin-bottom:1.5rem;">Your reply will be visible to the guest and other potential customers. Keep it professional and helpful.</p>
+                    <input type="hidden" id="reply-review-id">
+                    <textarea id="reply-text-input" placeholder="Type your response here..." style="width:100%; height:120px; padding:1rem; border:2px solid #eee; border-radius:14px; font-family:inherit; font-size:0.95rem; margin-bottom:1.5rem; resize:none;"></textarea>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                        <button class="btn-outline" style="border-radius:12px; padding:0.8rem;" onclick="document.getElementById('reply-modal').style.display='none'">Cancel</button>
+                        <button id="reply-submit-btn" class="btn-primary" style="border-radius:12px; padding:0.8rem;" onclick="window.mgSubmitReply()">Post Reply</button>
+                    </div>
+                </div>
+            </div>
         `;
     };
 
@@ -473,6 +520,7 @@ window.router.addRoute('manager', async (container, params) => {
     const renderActiveTab = () => {
         if (activeTab === 'bookings') return renderBookingsTab();
         if (activeTab === 'property') return renderPropertyTab();
+        if (activeTab === 'reviews') return renderReviewsTab();
         if (activeTab === 'account') return renderAccountTab();
     };
 
@@ -594,6 +642,73 @@ window.router.addRoute('manager', async (container, params) => {
 
         `;
      };
+
+    const loadManagerReviews = async () => {
+        try {
+            const reviews = await window.db.getReviews(myHotel.id);
+            const container = document.getElementById('mgr-reviews-container');
+            if (!container) return;
+            
+            if (reviews.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:5rem; background:white; border-radius:24px; box-shadow:var(--shadow-sm);"><h3>No reviews yet</h3><p style="color:#666;">Guests will be able to leave reviews after their stay.</p></div>';
+                return;
+            }
+
+            container.innerHTML = reviews.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).map(r => `
+                <div style="background:white; border-radius:20px; padding:1.5rem; margin-bottom:1.5rem; border:1px solid #eee; box-shadow:var(--shadow-sm);">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
+                        <div>
+                            <div style="font-weight:800; font-size:1.1rem; color:#1e293b; text-transform:uppercase;">${r.userName || 'Guest'}</div>
+                            <div style="color:#f59e0b; font-size:1.1rem; margin-top:0.2rem;">
+                                ${'★'.repeat(r.rating || 0)}${'☆'.repeat(5 - (r.rating || 0))}
+                            </div>
+                        </div>
+                        <div style="font-size:0.8rem; color:#94a3b8; font-weight:600;">
+                            ${new Date(r.createdAt).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <p style="color:#475569; line-height:1.6; margin-bottom:1.5rem; font-size:0.95rem;">"${r.text}"</p>
+                    
+                    ${r.images && r.images.length > 0 ? `
+                        <div style="display:flex; gap:0.5rem; margin-bottom:1.5rem; overflow-x:auto; padding-bottom:0.5rem;">
+                            ${r.images.map(img => `<img src="${img}" style="width:100px; height:100px; object-fit:cover; border-radius:12px; border:1px solid #eee;">`).join('')}
+                        </div>
+                    ` : ''}
+
+                    <div id="reply-box-${r.id}" style="background:#f8fafc; border-radius:16px; padding:1.2rem; border:1px solid #f1f5f9;">
+                        ${r.managerReply ? `
+                            <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.6rem;">
+                                <span style="font-size:1.2rem;">💬</span>
+                                <strong style="color:#1e293b; font-size:0.9rem;">Your Reply:</strong>
+                                <span style="font-size:0.75rem; color:#94a3b8; margin-left:auto;">${new Date(r.managerReply.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <p style="color:#64748b; font-size:0.9rem; font-style:italic; margin:0; line-height:1.5;">"${r.managerReply.text}"</p>
+                            <button onclick="window.mgOpenReply('${r.id}')" style="margin-top:1rem; background:none; border:none; color:var(--color-primary); font-weight:800; font-size:0.8rem; cursor:pointer;">✎ Edit Reply</button>
+                        ` : `
+                            <button onclick="window.mgOpenReply('${r.id}')" class="btn-primary" style="padding:0.6rem 1.2rem; font-size:0.85rem; border-radius:10px;">↩ Reply to Guest</button>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) {
+            console.error("Error loading reviews:", e);
+        }
+    };
+
+    const renderReviewsTab = () => {
+        if (!myHotel) return `<div style="text-align:center; padding:5rem;"><h3>Property not found</h3><p>Please contact admin.</p></div>`;
+        
+        setTimeout(() => loadManagerReviews(), 50);
+
+        return `
+            <div id="mgr-reviews-container">
+                <div style="text-align:center; padding:3rem;">
+                    <div class="loader-spinner" style="width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid var(--color-primary); border-radius:50%; margin:0 auto 1rem; animation: spin 1s linear infinite;"></div>
+                    <p style="color:#666; font-weight:600;">Fetching guest feedback...</p>
+                </div>
+            </div>
+        `;
+    };
 
     window.mgrResendEmail = async (id) => {
         try {

@@ -7,7 +7,7 @@ service cloud.firestore {
     // (Find your UID in Firebase Console → Authentication)
     function isKnownAdmin() {
       return request.auth.uid in [
-        '6NSK4deIAaZpkxeJHoVv22Ndoux2',  // bolaleempire@gmail.com
+        '2ZyN2eFQKsddGGF7wJioOI6HI4i1',  // bolaleempire@gmail.com
         'uxIVdE1lqgZRAJ5dQ4ea9WLH7282'   // michustays@gmail.com
       ];
     }

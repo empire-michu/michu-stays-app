@@ -23,6 +23,8 @@ try {
     console.warn("Firebase Messaging initialization skipped/failed:", e);
 }
 
+// Push notification utility removed - replaced with pre-calculated byte array in requestPushPermission to guarantee compatibility.
+
 class Database {
     constructor() {
         this.cache = {
@@ -340,6 +342,33 @@ class Database {
         await firestore.collection('reviews').doc(reviewId).update({
             managerReply: reply
         });
+
+        // NOTIFY GUEST
+        try {
+            const reviewDoc = await firestore.collection('reviews').doc(reviewId).get();
+            if (reviewDoc.exists) {
+                const reviewData = reviewDoc.data();
+                // Add in-app notification
+                await this.createNotification({
+                    message: '💬 Review Reply',
+                    details: `${managerName} replied to your review: "${replyText.substring(0, 50)}..."`,
+                    targetUserId: reviewData.userId,
+                    type: 'review_reply',
+                    link: 'hotel_detail_view',
+                    params: { id: reviewData.propertyId }
+                });
+                // Send push notification
+                this.triggerPushNotification(
+                    null, 
+                    'New Reply to Your Review! 💬', 
+                    `${managerName} replied: "${replyText.substring(0, 50)}..."`,
+                    reviewData.userId
+                );
+            }
+        } catch (e) {
+            console.warn("Notification for review reply failed:", e);
+        }
+
         return reply;
     }
 
@@ -526,7 +555,7 @@ class Database {
         }
     }
 
-    async triggerPushNotification(hotelId, title, body) {
+    async triggerPushNotification(hotelId, title, body, targetUserId = null) {
         try {
             let tokens = [];
 
@@ -545,6 +574,14 @@ class Database {
                     if (managerDoc.exists && managerDoc.data().fcmTokens) {
                         tokens = tokens.concat(managerDoc.data().fcmTokens);
                     }
+                }
+            }
+
+            // 3. Get the specific Target User's tokens (e.g. for review replies)
+            if (targetUserId) {
+                const userDoc = await firestore.collection('users').doc(targetUserId).get();
+                if (userDoc.exists && userDoc.data().fcmTokens) {
+                    tokens = tokens.concat(userDoc.data().fcmTokens);
                 }
             }
 

@@ -3,7 +3,7 @@ importScripts('https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js');
 
 // ─── ASSET CACHING (merged from sw.js) ─────────────────────
-const CACHE_NAME = 'michu-stays-v3.0';
+const CACHE_NAME = 'michu-stays-v3.4';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

@@ -445,14 +445,7 @@ window.stopNotifications = () => {
     }
 };
 
-// --- PWA SERVICE WORKER REGISTRATION ---
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('Service Worker registered successfully'))
-            .catch(err => console.log('Service Worker registration failed', err));
-    });
-}
+// PWA Service Worker is handled in index.html (firebase-messaging-sw.js)
 
 // Redirect Route for Push Notifications
 window.router.addRoute('redirect-bookings', async (container) => {
