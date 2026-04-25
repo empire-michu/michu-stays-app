@@ -491,14 +491,23 @@ window.michuConfirm = (title, message) => {
 
         titleEl.innerText = title || "Are you sure?";
         msgEl.innerText = message || "This action cannot be undone.";
+        
+        // --- BULLETPROOF SCROLL LOCK (Freeze body at current pixel) ---
+        const scrollY = window.scrollY;
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.width = '100%';
+        document.body.style.overflowY = 'scroll'; // Prevent width shift
         modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        document.documentElement.style.overscrollBehavior = 'none';
 
         const cleanup = (val) => {
             modal.style.display = 'none';
-            document.body.style.overflow = '';
-            document.documentElement.style.overscrollBehavior = '';
+            // --- RESTORE SCROLL ---
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            document.body.style.overflowY = '';
+            window.scrollTo(0, scrollY);
             resolve(val);
         };
 

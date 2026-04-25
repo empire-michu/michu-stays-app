@@ -204,6 +204,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         
                         return `
                         <div style="min-width: 280px; max-width: 320px; flex-shrink: 0; scroll-snap-align: start; background:#f8fafc; padding:1.5rem; border-radius:24px; border:1px solid #f1f5f9; position:relative; display:flex; flex-direction:column; min-height:220px;">
+                            ${isOwner ? `
                                 <button class="michu-action-btn"
                                         data-action="delete-review"
                                         data-review-id="${r.id}"
@@ -213,6 +214,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                                 </button>
                             ` : ''}
+
 
                             <div style="flex:1;">
                                 <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem; padding-right:${isOwner ? '40px' : '0'};">
