@@ -204,13 +204,12 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         
                         return `
                         <div style="min-width: 280px; max-width: 320px; flex-shrink: 0; scroll-snap-align: start; background:#f8fafc; padding:1.5rem; border-radius:24px; border:1px solid #f1f5f9; position:relative; display:flex; flex-direction:column; min-height:220px;">
-                            ${isOwner ? `
                                 <button class="michu-action-btn"
                                         data-action="delete-review"
                                         data-review-id="${r.id}"
                                         data-hotel-id="${hotel.id}"
                                         title="Delete My Review"
-                                        style="position:absolute; top:0.6rem; right:0.6rem; background:#fee2e2; color:#ef4444; border:none; width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 15px rgba(239,68,68,0.25); z-index:1000; transition:all 0.2s; -webkit-tap-highlight-color: transparent;">
+                                        style="position:absolute; top:0.6rem; right:0.6rem; background:#fee2e2; color:#ef4444; border:none; width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 15px rgba(239,68,68,0.25); z-index:1000; transition:all 0.2s; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">
                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                                 </button>
                             ` : ''}
@@ -242,7 +241,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                                         data-action="delete-reply"
                                                         data-review-id="${r.id}"
                                                         data-hotel-id="${hotel.id}"
-                                                        style="background:#fff1f2; border:none; color:#ef4444; font-size:0.8rem; font-weight:800; cursor:pointer; padding:10px 20px; border-radius:12px; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(239,68,68,0.12); z-index:1000; -webkit-tap-highlight-color: transparent;">
+                                                        style="background:#fff1f2; border:none; color:#ef4444; font-size:0.8rem; font-weight:800; cursor:pointer; padding:10px 20px; border-radius:12px; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(239,68,68,0.12); z-index:1000; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                                                     Remove Reply
                                                 </button>
@@ -284,24 +283,6 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
              </div>
         </div>
     `;
-
-    // --- LOGIC INITIALIZATION (Robust Action Delegation) ---
-    container.addEventListener('click', (e) => {
-        const btn = e.target.closest('.michu-action-btn');
-        if (!btn) return;
-        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const action = btn.dataset.action;
-        const reviewId = btn.dataset.reviewId;
-        const hotelId = btn.dataset.hotelId;
-        
-        console.log(`[Delegation] Action detected: ${action} for ${reviewId}`);
-        
-        if (action === 'delete-review') window.michuDeleteReviewGlobal(reviewId, hotelId);
-        if (action === 'delete-reply') window.michuDeleteReplyGlobal(reviewId, hotelId);
-    });
 
     const bin = document.getElementById('book-in');
     const bout = document.getElementById('book-out');

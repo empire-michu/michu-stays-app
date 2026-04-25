@@ -521,3 +521,36 @@ window.michuDeleteReplyGlobal = async (reviewId, hotelId) => {
     }
 };
 
+// --- GLOBAL ROBUST EVENT DELEGATION FOR ACTIONS ---
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.michu-action-btn');
+    if (!btn) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const action = btn.dataset.action;
+    const reviewId = btn.dataset.reviewId;
+    const hotelId = btn.dataset.hotelId;
+    
+    console.log("[Global Delegation] Action:", action, "| ID:", reviewId);
+    
+    if (action === 'delete-review') {
+        if (window.michuDeleteReviewGlobal) {
+            window.michuDeleteReviewGlobal(reviewId, hotelId);
+        } else {
+            console.error("michuDeleteReviewGlobal not found");
+            window.showToast("System error: Delete handler missing", "error");
+        }
+    }
+    
+    if (action === 'delete-reply') {
+        if (window.michuDeleteReplyGlobal) {
+            window.michuDeleteReplyGlobal(reviewId, hotelId);
+        } else {
+            console.error("michuDeleteReplyGlobal not found");
+            window.showToast("System error: Remove handler missing", "error");
+        }
+    }
+});
+
