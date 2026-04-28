@@ -52,6 +52,9 @@ class Database {
                 }
             }
         } catch(e) {}
+
+        // Wake up the Render push server on app start (free tier sleeps after 15 min)
+        fetch('https://michu-push-server.onrender.com/', { method: 'GET' }).catch(() => {});
     }
 
     clearCache(type) {
@@ -199,12 +202,12 @@ class Database {
             params: { tab: 'bookings' }
         });
 
-        // SEND HARD NOTIFICATION (PUSH)
-        this.triggerPushNotification(
+        // SEND HARD NOTIFICATION (PUSH) - MUST await to prevent fetch from being aborted
+        await this.triggerPushNotification(
             propertyId,
             '🛎️ New Booking!',
             `${newBooking.customerName} booked ${property.title}. Ref: ${referenceCode}`,
-            null // Guest shouldn't get the 'New Booking' alert on their own action, they just see success UI. Admin/Manager get it.
+            null
         );
 
         this.clearCache('bookings');
@@ -249,14 +252,14 @@ class Database {
 
         // SEND HARD NOTIFICATION (PUSH) to all users (guest, admin, manager) if confirmed
         if (status === 'Confirmed') {
-            this.triggerPushNotification(
+            await this.triggerPushNotification(
                 booking.propertyId,
                 '✅ Booking Confirmed!',
                 `Booking ${booking.referenceCode} at ${booking.propertyTitle} has been confirmed.`,
                 booking.customerId
             );
         } else if (status === 'Denied') {
-            this.triggerPushNotification(
+            await this.triggerPushNotification(
                 booking.propertyId,
                 '❌ Booking Denied',
                 `Booking ${booking.referenceCode} at ${booking.propertyTitle} was denied.`,
@@ -511,18 +514,30 @@ class Database {
 
                 if (perm.receive === 'granted') {
                     window.showToast?.("✅ Permission granted! Setting up...");
-                    // Create high priority channel for lock screen wake (Android only)
+                    // Create notification channels with max importance
                     try {
+                        // Primary channel
                         await PushNotifications.createChannel({
                             id: 'michu_high_priority',
                             name: 'Michu Stays Alerts',
-                            description: 'High priority alerts for bookings',
+                            description: 'Booking alerts',
                             importance: 5,
                             visibility: 1,
                             vibration: true,
-                            lights: true
+                            lights: true,
+                            sound: 'default'
                         });
-                        console.log("✅ Notification channel created: michu_high_priority");
+                        // Also override the default channel with high importance
+                        await PushNotifications.createChannel({
+                            id: 'default',
+                            name: 'Default',
+                            description: 'Default notifications',
+                            importance: 5,
+                            visibility: 1,
+                            vibration: true,
+                            lights: true,
+                            sound: 'default'
+                        });
                     } catch(e) { console.warn("Channel creation issue:", e); }
 
                     // Set up listeners ONCE (globally)
@@ -690,14 +705,38 @@ class Database {
             
             console.log("📤 Sending push to", tokens.length, "device(s)...");
 
-            // Ping your free Render server!
-            const response = await fetch('https://michu-push-server.onrender.com/send-push', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tokens, title, body })
-            });
-            const result = await response.json();
-            console.log("✅ Push Server Response:", JSON.stringify(result));
+            // Send to Render push server with retry (free tier may be sleeping)
+            const sendPush = async () => {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+                try {
+                    const response = await fetch('https://michu-push-server.onrender.com/send-push', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ tokens, title, body }),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeout);
+                    return await response.json();
+                } catch(e) {
+                    clearTimeout(timeout);
+                    throw e;
+                }
+            };
+
+            try {
+                const result = await sendPush();
+                console.log("✅ Push Server Response:", JSON.stringify(result));
+            } catch(firstErr) {
+                console.warn("⚠️ First push attempt failed (server may be waking up), retrying in 3s...");
+                await new Promise(r => setTimeout(r, 3000));
+                try {
+                    const result = await sendPush();
+                    console.log("✅ Push Server Response (retry):", JSON.stringify(result));
+                } catch(retryErr) {
+                    console.error("❌ Push retry also failed:", retryErr);
+                }
+            }
         } catch (e) {
             console.error("❌ Push Server Error:", e);
         }
