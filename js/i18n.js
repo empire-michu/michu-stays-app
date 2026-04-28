@@ -1119,11 +1119,11 @@ window.setMichuLang = function(lang) {
 
 // Standard explicit translate function (Option 1 wrapper)
 window.t = function(key, defaultEnglish) {
-    if (currentLang === 'en') return defaultEnglish;
+    if (currentLang === 'en') return defaultEnglish || key;
     if (translations[currentLang] && translations[currentLang][key]) {
         return translations[currentLang][key];
     }
-    return defaultEnglish;
+    return defaultEnglish || key;
 };
 
 const dynamicTranslations = {
