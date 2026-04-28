@@ -56,6 +56,20 @@ class AuthEngine {
             // Notification Listener Lifecycle
             if (user) {
                 if (window.startNotifications) window.startNotifications();
+                
+                // AUTO-REGISTER PUSH NOTIFICATIONS for every logged-in user
+                // This ensures FCM tokens are always saved so they can receive push alerts
+                setTimeout(async () => {
+                    try {
+                        if (window.db && window.db.requestPushPermission) {
+                            console.log("🔔 Auto-registering push notifications for user:", user.uid);
+                            await window.db.requestPushPermission(user.uid);
+                            console.log("✅ Push notification auto-registration complete.");
+                        }
+                    } catch (e) {
+                        console.warn("⚠️ Push auto-registration skipped:", e.message);
+                    }
+                }, 2000); // Delay 2s to let the app fully load
             } else {
                 if (window.stopNotifications) window.stopNotifications();
             }

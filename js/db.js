@@ -502,35 +502,36 @@ class Database {
                 }
 
                 if (perm.receive === 'granted') {
-                    // Create high priority channel for lock screen wake
+                    // Create high priority channel for lock screen wake (Android only)
                     try {
                         await PushNotifications.createChannel({
                             id: 'michu_high_priority',
                             name: 'Michu Stays Alerts',
                             description: 'High priority alerts for bookings',
-                            importance: 5, // MAX importance (heads-up, lock screen)
-                            visibility: 1, // PUBLIC visibility (show on lock screen)
+                            importance: 5,
+                            visibility: 1,
                             vibration: true,
                             lights: true
                         });
+                        console.log("✅ Notification channel created: michu_high_priority");
                     } catch(e) { console.warn("Channel creation issue:", e); }
 
-                    await PushNotifications.register();
-                    
-                    // The actual token is received via 'registration' listener
-                    return new Promise((resolve, reject) => {
-                        PushNotifications.addListener('registration', async (token) => {
-                            const fcmToken = token.value;
-                            await firestore.collection('users').doc(userId).set({
-                                fcmTokens: firebase.firestore.FieldValue.arrayUnion(fcmToken)
-                            }, { merge: true });
-                            resolve(fcmToken);
+                    // Set up listeners ONCE (globally)
+                    if (!window.__pushListenersSetup) {
+                        window.__pushListenersSetup = true;
+                        
+                        // When a notification arrives while app is in foreground
+                        PushNotifications.addListener('pushNotificationReceived', (notification) => {
+                            console.log('📬 Foreground push received:', notification);
+                            window.showToast?.("🔔 " + (notification.title || 'Michu Stays') + ": " + (notification.body || 'New update'));
                         });
+                        
+                        // When user taps on a notification
                         PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-                            console.log('Push action performed: ', notification);
-                            const data = notification.notification.data || {};
-                            const title = notification.notification.title || '';
-                            const body = notification.notification.body || '';
+                            console.log('👆 Push notification tapped:', notification);
+                            const data = notification.notification?.data || {};
+                            const title = notification.notification?.title || '';
+                            const body = notification.notification?.body || '';
                             
                             const isBooking = data.type === 'booking' || title.toLowerCase().includes('booking') || body.toLowerCase().includes('booking');
                             
@@ -540,9 +541,32 @@ class Database {
                                 window.location.hash = '#home';
                             }
                         });
+                        
                         PushNotifications.addListener('registrationError', (err) => {
-                            reject(err);
+                            console.error('❌ Push registration error:', err);
                         });
+                    }
+
+                    // Register and get token
+                    await PushNotifications.register();
+                    
+                    return new Promise((resolve, reject) => {
+                        PushNotifications.addListener('registration', async (token) => {
+                            const fcmToken = token.value;
+                            console.log("📱 FCM Token received:", fcmToken.substring(0, 20) + "...");
+                            try {
+                                await firestore.collection('users').doc(userId).set({
+                                    fcmTokens: firebase.firestore.FieldValue.arrayUnion(fcmToken)
+                                }, { merge: true });
+                                console.log("✅ FCM Token saved to Firestore for user:", userId);
+                            } catch(e) {
+                                console.error("❌ Failed to save FCM token:", e);
+                            }
+                            resolve(fcmToken);
+                        });
+                        
+                        // Timeout after 10 seconds in case registration event doesn't fire
+                        setTimeout(() => reject(new Error("Push registration timed out")), 10000);
                     });
                 } else {
                     throw new Error("Push permission denied on device.");
@@ -606,49 +630,64 @@ class Database {
     async triggerPushNotification(hotelId, title, body, targetUserId = null) {
         try {
             let tokens = [];
+            console.log("🔔 PUSH TRIGGER START - title:", title, "hotelId:", hotelId, "targetUserId:", targetUserId);
 
             // 1. Get ALL Admin tokens
             const adminsSnap = await firestore.collection('users').where('role', '==', 'admin').get();
             adminsSnap.docs.forEach(doc => {
                 const data = doc.data();
-                if (data.fcmTokens) tokens = tokens.concat(data.fcmTokens);
+                if (data.fcmTokens && data.fcmTokens.length > 0) {
+                    console.log("  📌 Admin tokens found for:", doc.id, "count:", data.fcmTokens.length);
+                    tokens = tokens.concat(data.fcmTokens);
+                }
             });
 
             // 2. Get the specific Hotel Manager's tokens
             if (hotelId) {
                 const hotelDoc = await firestore.collection('properties').doc(hotelId).get();
                 if (hotelDoc.exists && hotelDoc.data().managerId) {
-                    const managerDoc = await firestore.collection('users').doc(hotelDoc.data().managerId).get();
-                    if (managerDoc.exists && managerDoc.data().fcmTokens) {
+                    const managerId = hotelDoc.data().managerId;
+                    const managerDoc = await firestore.collection('users').doc(managerId).get();
+                    if (managerDoc.exists && managerDoc.data().fcmTokens && managerDoc.data().fcmTokens.length > 0) {
+                        console.log("  📌 Manager tokens found for:", managerId, "count:", managerDoc.data().fcmTokens.length);
                         tokens = tokens.concat(managerDoc.data().fcmTokens);
+                    } else {
+                        console.warn("  ⚠️ Manager has NO fcmTokens:", managerId);
                     }
                 }
             }
 
-            // 3. Get the specific Target User's tokens (e.g. for review replies)
+            // 3. Get the specific Target User's tokens (e.g. for booking confirmations)
             if (targetUserId) {
                 const userDoc = await firestore.collection('users').doc(targetUserId).get();
-                if (userDoc.exists && userDoc.data().fcmTokens) {
+                if (userDoc.exists && userDoc.data().fcmTokens && userDoc.data().fcmTokens.length > 0) {
+                    console.log("  📌 Target user tokens found for:", targetUserId, "count:", userDoc.data().fcmTokens.length);
                     tokens = tokens.concat(userDoc.data().fcmTokens);
+                } else {
+                    console.warn("  ⚠️ Target user has NO fcmTokens:", targetUserId);
                 }
             }
 
             // Remove duplicates
             tokens = [...new Set(tokens)];
 
-            if (tokens.length === 0) return; // No one subscribed
+            if (tokens.length === 0) {
+                console.warn("🚨 PUSH ABORTED: No FCM tokens found for any target user. Nobody is subscribed!");
+                return;
+            }
             
-            console.log("Push trigger: sending to " + tokens.length + " subscribed devices.");
+            console.log("📤 Sending push to", tokens.length, "device(s)...");
 
             // Ping your free Render server!
-            await fetch('https://michu-push-server.onrender.com/send-push', {
+            const response = await fetch('https://michu-push-server.onrender.com/send-push', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ tokens, title, body })
             });
-            console.log("Push Ping Sent to Render!");
+            const result = await response.json();
+            console.log("✅ Push Server Response:", JSON.stringify(result));
         } catch (e) {
-            console.error("Push Server Error:", e);
+            console.error("❌ Push Server Error:", e);
         }
     }
 }
