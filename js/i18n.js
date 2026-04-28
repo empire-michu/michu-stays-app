@@ -59,6 +59,35 @@ const translations = {
         "Bank Transfer": "የባንክ ማስተላለፍ",
         "Quick Links": "ፈጣን አገናኞች",
 
+        // New missing strings (Home, Detail, Booking)
+        "All Cities": "ሁሉም ከተሞች",
+        "Fully Booked": "ሙሉ በሙሉ ተይዟል",
+        "night": "አዳር",
+        "SPECIAL STAY PACKAGES": "ልዩ የማረፊያ ፓኬጆች",
+        "LIMITED TIME DEAL": "ለተወሰነ ጊዜ የተሰጠ ቅናሽ",
+        "Select Bundle": "ጥምረትን ይምረጡ",
+        "Reserve Now": "አሁኑኑ ያስይዙ",
+        "Total": "ድምር",
+        "Price includes all taxes & fees": "ዋጋው ሁሉንም ግብሮች እና ክፍያዎች ያካትታል",
+        "Property Amenities": "የማረፊያው አገልግሎቶች",
+        "WIFI": "ዋይፋይ",
+        "Pool": "መዋኛ ገንዳ",
+        "Spa": "ስፓ",
+        "CHECK-IN": "መግቢያ",
+        "CHECK-OUT": "መውጫ",
+        "Secure Your Booking": "ቦታዎን ያረጋግጡ",
+        "Choose your preferred payment method:": "የሚመርጡትን የክፍያ መንገድ ይምረጡ፦",
+        "CBE Bank": "የኢትዮጵያ ንግድ ባንክ",
+        "telebirr": "ቴሌብር",
+        "CBE Account:": "የኢትዮጵያ ንግድ ባንክ ሂሳብ፦",
+        "Account Name:": "የሂሳቡ ስም፦",
+        "Your Contact Phone (for verification)": "የእርስዎ ስልክ ቁጥር (ለማረጋገጫ)",
+        "Upload Proof of Payment": "የክፍያ ማረጋገጫ ይስቀሉ",
+        "Click to upload your payment screenshot": "የክፍያዎን ስክሪንሾት ለመስቀል ይጫኑ",
+        "Birr": "ብር",
+        "CBE Mobile Banking": "ሲቢኢ ሞባይል ባንኪንግ",
+        "nights": "አዳሮች",
+
         // Actions & Modals
         "Are you sure?": "እርግጠኛ ነዎት?",
         "Cancel": "ሰርዝ",
@@ -122,6 +151,35 @@ const translations = {
         "Bank Transfer": "Baankiin Dabarsuu",
         "Quick Links": "Geessituu Saffisaa",
 
+        // New missing strings (Home, Detail, Booking)
+        "All Cities": "Magaalota Hunda",
+        "Fully Booked": "Guutummaatti Qabameera",
+        "night": "halkan",
+        "SPECIAL STAY PACKAGES": "QURXAA IDDOO ADDAA",
+        "LIMITED TIME DEAL": "QOPHIIN YEROO MURTAA'AA",
+        "Select Bundle": "Qurxaa Filadhu",
+        "Reserve Now": "Ammummaa Qabadhu",
+        "Total": "Ida'ama",
+        "Price includes all taxes & fees": "Gatiin gibira fi kaffaltii hunda of keessatti qabata",
+        "Property Amenities": "Tajaajiloota Iddoo",
+        "WIFI": "WIFI",
+        "Pool": "Bishaan Daakuu",
+        "Spa": "Spa",
+        "CHECK-IN": "SEENUU",
+        "CHECK-OUT": "BAHU",
+        "Secure Your Booking": "Iddoo Keessan Mirkaneessaa",
+        "Choose your preferred payment method:": "Mala kaffaltii filattan filadhaa:",
+        "CBE Bank": "Baankii Daldala Itoophiyaa",
+        "telebirr": "telebirr",
+        "CBE Account:": "Lakkoofsa Herregaa CBE:",
+        "Account Name:": "Maqaa Herregaa:",
+        "Your Contact Phone (for verification)": "Lakkoofsa Bilbilaa Keessan (mirkaneessuuf)",
+        "Upload Proof of Payment": "Ragaa Kaffaltii Fidaa",
+        "Click to upload your payment screenshot": "Suuraa kaffaltii keessan fiduuf cuqaasaa",
+        "Birr": "Birrii",
+        "CBE Mobile Banking": "CBE Mobile Banking",
+        "nights": "Halkani",
+
         // Actions & Modals
         "Are you sure?": "Mirkaneessaa?",
         "Cancel": "Haqi",
@@ -146,6 +204,33 @@ window.t = function(key, defaultEnglish) {
     return defaultEnglish;
 };
 
+const dynamicTranslations = {
+    am: [
+        { regex: /^Showing (\d+) stays in (.*)$/i, replace: "በ $2 ውስጥ $1 ማረፊያዎችን በማሳየት ላይ" },
+        { regex: /^(\d+(\.\d+)?) km from centre$/i, replace: "ከማዕከል $1 ኪ.ሜ ይርቃል" },
+        { regex: /^\/\s*night$/i, replace: "/ አዳር" },
+        { regex: /^(\d+)\s+NIGHT BUNDLE$/i, replace: "የ $1 አዳር ጥምረት" },
+        { regex: /^(\d+)%\s+OFF$/i, replace: "$1% ቅናሽ" },
+        { regex: /^Discount\s*\((\d+)%\)$/i, replace: "ቅናሽ ($1%)" },
+        { regex: /^Transfer (.*?) Birr via (.*?) to:$/i, replace: "እባክዎ $1 ብር በ $2 ወደዚህ ያስተላልፉ፦" },
+        { regex: /^\*\s*Please screenshot your (.*?) confirmation\.?$/i, replace: "* እባክዎ የ $1 ማረጋገጫዎን ስክሪንሾት ያንሱ።" },
+        { regex: /^0 stays found$/i, replace: "ምንም ማረፊያ አልተገኘም" },
+        { regex: /^(\d+) nights$/i, replace: "$1 አዳሮች" }
+    ],
+    om: [
+        { regex: /^Showing (\d+) stays in (.*)$/i, replace: "Iddoowwan $1 $2 keessatti argisiisaa" },
+        { regex: /^(\d+(\.\d+)?) km from centre$/i, replace: "Giddugala irraa km $1 fagaata" },
+        { regex: /^\/\s*night$/i, replace: "/ halkan" },
+        { regex: /^(\d+)\s+NIGHT BUNDLE$/i, replace: "Qurxaa halkan $1" },
+        { regex: /^(\d+)%\s+OFF$/i, replace: "Hir'isuu %$1" },
+        { regex: /^Discount\s*\((\d+)%\)$/i, replace: "Hir'isuu (%$1)" },
+        { regex: /^Transfer (.*?) Birr via (.*?) to:$/i, replace: "Birrii $1 karaa $2 gara kanaatti dabarsaa:" },
+        { regex: /^\*\s*Please screenshot your (.*?) confirmation\.?$/i, replace: "* Maaloo mirkaneessa $1 keessan suuraa kaasaa." },
+        { regex: /^0 stays found$/i, replace: "Iddoowwan 0 argamaniiru" },
+        { regex: /^(\d+) nights$/i, replace: "Halkan $1" }
+    ]
+};
+
 // AUTO-TRANSLATOR (Safeguard)
 // This strictly follows the "DON'T TOUCH OTHER WORKING FEATURES" rule.
 // It magically translates the DOM text dynamically so you don't have to alter existing logic.
@@ -158,9 +243,32 @@ function autoTranslateNode(node) {
 
     if (node.nodeType === Node.TEXT_NODE) {
         let text = node.textContent.trim();
+        if (!text) return;
+
         // Exact match replacement
-        if (text && translations[currentLang][text]) {
+        if (translations[currentLang][text]) {
             node.textContent = node.textContent.replace(text, translations[currentLang][text]);
+            return;
+        }
+
+        // Dynamic regex replacement
+        let dynRules = dynamicTranslations[currentLang] || [];
+        for (let i = 0; i < dynRules.length; i++) {
+            let rule = dynRules[i];
+            let match = text.match(rule.regex);
+            if (match) {
+                let replaced = rule.replace;
+                // Replace $1, $2 with matched groups, translating them if possible
+                for (let j = 1; j < match.length; j++) {
+                    let val = match[j] || '';
+                    if (translations[currentLang][val]) {
+                        val = translations[currentLang][val];
+                    }
+                    replaced = replaced.replace('$' + j, val);
+                }
+                node.textContent = node.textContent.replace(text, replaced);
+                return;
+            }
         }
     } else if (node.nodeType === Node.ELEMENT_NODE) {
         // Translate placeholders in inputs
@@ -170,9 +278,6 @@ function autoTranslateNode(node) {
                 node.setAttribute('placeholder', translations[currentLang][placeholder]);
             }
         }
-        
-        // Translate specific elements by their known ID (optional safeguard for deeply nested elements)
-        // ...
         
         node.childNodes.forEach(autoTranslateNode);
     }
