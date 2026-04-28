@@ -498,22 +498,18 @@ class Database {
             try {
                 const { PushNotifications } = window.Capacitor.Plugins;
                 if (!PushNotifications) {
-                    window.showToast?.("❌ Push plugin not available");
                     throw new Error("PushNotifications plugin not loaded");
                 }
 
-                window.showToast?.("🔔 Checking notification permission...");
                 let perm = await PushNotifications.checkPermissions();
                 console.log("📋 Permission status:", JSON.stringify(perm));
                 
                 if (perm.receive !== 'granted') {
-                    window.showToast?.("📋 Requesting permission...");
                     perm = await PushNotifications.requestPermissions();
                     console.log("📋 After request:", JSON.stringify(perm));
                 }
 
                 if (perm.receive === 'granted') {
-                    window.showToast?.("✅ Permission granted! Setting up...");
                     // Create notification channels with max importance
                     try {
                         // Primary channel
@@ -583,7 +579,6 @@ class Database {
                                     fcmTokens: firebase.firestore.FieldValue.arrayUnion(fcmToken)
                                 }, { merge: true });
                                 console.log("✅ FCM Token saved to Firestore for user:", userId);
-                                window.showToast?.("📱 Push notifications are now active!");
                             } catch(e) {
                                 console.error("❌ Failed to save FCM token:", e);
                             }
@@ -594,12 +589,10 @@ class Database {
                         setTimeout(() => reject(new Error("Push registration timed out")), 10000);
                     });
                 } else {
-                    window.showToast?.("⚠️ Push permission denied! Status: " + perm.receive);
                     throw new Error("Push permission denied. Status: " + perm.receive);
                 }
             } catch (err) {
                 console.error("Native push error:", err);
-                window.showToast?.("❌ Push setup error: " + err.message);
                 throw err;
             }
         }
