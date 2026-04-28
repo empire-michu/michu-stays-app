@@ -5,6 +5,18 @@ window.michuFinalNav = (pId, binVal, boutVal, totalStr) => {
         return;
     }
 
+    // Block booking if hotel is fully booked
+    if (window._michuCurrentHotelFullyBooked) {
+        const lang = localStorage.getItem('michuLang') || 'en';
+        const msgs = {
+            en: "🚫 This hotel is currently fully booked. Please check back later or try another property.",
+            am: "🚫 ይህ ሆቴል በአሁኑ ጊዜ ሙሉ በሙሉ ተይዟል። እባክዎ ወደፊት ይመልከቱ ወይም ሌላ ንብረት ይሞክሩ።",
+            om: "🚫 Hoteelli kun yeroo ammaa guutummaatti qabameera. Maaloo booda deebi'aatii ilaalaa ykn qabeenya biraa yaalaa."
+        };
+        window.showAlert ? window.showAlert(msgs[lang] || msgs.en) : alert(msgs[lang] || msgs.en);
+        return;
+    }
+
     const reserveBtn = document.getElementById('final-reserve-trigger');
     if (reserveBtn) {
         reserveBtn.innerText = "⏳ Redirecting...";
@@ -60,6 +72,10 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     const amenitiesIcons = { 'WiFi': '📶', 'Pool': '🏊', 'Spa': '🧖', 'Breakfast': '🍳', 'Parking': '🚗', 'Gym': '💪', 'AC': '❄️', 'Bar': '🍸' };
 
     const isManager = window.auth.currentUser && window.auth.currentUser.uid === hotel.managerId;
+    
+    // Track fully booked status for reserve button blocking
+    const isFullyBooked = (hotel.availableRooms !== undefined && hotel.availableRooms !== null && hotel.availableRooms <= 0);
+    window._michuCurrentHotelFullyBooked = isFullyBooked;
 
     container.innerHTML = `
         <div class="container" style="padding-top:1.5rem; padding-bottom:5rem;">
@@ -173,11 +189,19 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                              </div>
                         </div>
 
+                        ${isFullyBooked ? `
+                        <button id="final-reserve-trigger" class="btn-primary" 
+                                style="width:100%; padding:1.5rem; font-size:1.3rem; border-radius:20px; font-weight:950; background:#c5221f; box-shadow:0 12px 24px rgba(197,34,31,0.25); cursor:not-allowed; opacity:0.9;"
+                                onclick="const tEl=document.getElementById('final-total-val'); window.michuFinalNav('${id}', document.getElementById('book-in').value, document.getElementById('book-out').value, tEl?tEl.innerText:'')">
+                           Fully Booked
+                        </button>
+                        ` : `
                         <button id="final-reserve-trigger" class="btn-primary" 
                                 style="width:100%; padding:1.5rem; font-size:1.3rem; border-radius:20px; font-weight:950; background:linear-gradient(135deg, var(--color-primary), #1e7e34); box-shadow:0 12px 24px rgba(11,102,70,0.25);"
                                 onclick="const tEl=document.getElementById('final-total-val'); window.michuFinalNav('${id}', document.getElementById('book-in').value, document.getElementById('book-out').value, tEl?tEl.innerText:'')">
                            Reserve Now
                         </button>
+                        `}
                         
                         <div id="price-summary-area" style="margin-top:1.8rem;"></div>
                     </div>
