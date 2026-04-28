@@ -199,6 +199,14 @@ class Database {
             params: { tab: 'bookings' }
         });
 
+        // SEND HARD NOTIFICATION (PUSH)
+        this.triggerPushNotification(
+            propertyId,
+            '🛎️ New Booking!',
+            `${newBooking.customerName} booked ${property.title}. Ref: ${referenceCode}`,
+            null // Guest shouldn't get the 'New Booking' alert on their own action, they just see success UI. Admin/Manager get it.
+        );
+
         this.clearCache('bookings');
         this.clearCache('properties'); // Just in case rooms changed
         return { id: ref.id, ...newBooking };
@@ -238,6 +246,23 @@ class Database {
             link: 'profile',
             params: { tab: 'bookings' }
         });
+
+        // SEND HARD NOTIFICATION (PUSH) to all users (guest, admin, manager) if confirmed
+        if (status === 'Confirmed') {
+            this.triggerPushNotification(
+                booking.propertyId,
+                '✅ Booking Confirmed!',
+                `Booking ${booking.referenceCode} at ${booking.propertyTitle} has been confirmed.`,
+                booking.customerId
+            );
+        } else if (status === 'Denied') {
+            this.triggerPushNotification(
+                booking.propertyId,
+                '❌ Booking Denied',
+                `Booking ${booking.referenceCode} at ${booking.propertyTitle} was denied.`,
+                booking.customerId
+            );
+        }
     }
 
     // ─── USERS ────────────────────────────────────────────────
