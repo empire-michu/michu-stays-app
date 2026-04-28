@@ -502,6 +502,19 @@ class Database {
                 }
 
                 if (perm.receive === 'granted') {
+                    // Create high priority channel for lock screen wake
+                    try {
+                        await PushNotifications.createChannel({
+                            id: 'michu_high_priority',
+                            name: 'Michu Stays Alerts',
+                            description: 'High priority alerts for bookings',
+                            importance: 5, // MAX importance (heads-up, lock screen)
+                            visibility: 1, // PUBLIC visibility (show on lock screen)
+                            vibration: true,
+                            lights: true
+                        });
+                    } catch(e) { console.warn("Channel creation issue:", e); }
+
                     await PushNotifications.register();
                     
                     // The actual token is received via 'registration' listener
