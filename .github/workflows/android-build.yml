@@ -56,11 +56,11 @@ jobs:
           cp google-services.json android/app/ || echo "Warning: google-services.json not found in root"
         fi
 
-    - name: Generate App Icons
-      run: |
-        # Use npx to run capacitor-assets without needing to install it globally
-        # We use logo.png as the source for all icons and splash screens
-        npx -y @capacitor/assets generate --android
+    # - name: Generate App Icons
+    #   run: |
+    #     # Use npx to run capacitor-assets without needing to install it globally
+    #     # We use logo.png as the source for all icons and splash screens
+    #     npx -y @capacitor/assets generate --android
 
     - name: Sync Capacitor
       run: npx cap sync android
