@@ -55,6 +55,21 @@ app.post('/send-push', async (req, res) => {
       title: title || 'Michu Stays',
       body: body || 'You have a new update.'
     },
+    data: {
+      type: (title && title.toLowerCase().includes('booking')) ? 'booking' : 'general'
+    },
+    android: {
+      priority: 'high',
+      notification: {
+        sound: 'default',
+        channelId: 'default'
+      }
+    },
+    apns: {
+      payload: {
+        aps: { sound: 'default' }
+      }
+    },
     tokens: tokens // This allows sending to multiple devices at once
   };
 

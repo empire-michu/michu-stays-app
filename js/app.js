@@ -471,12 +471,27 @@ window.stopNotifications = () => {
 // Redirect Route for Push Notifications
 window.router.addRoute('redirect-bookings', async (container) => {
     container.innerHTML = `<div style="text-align:center; padding:5rem; font-weight:700; color:var(--color-primary);">Taking you to your bookings...</div>`;
-    // small wait so auth can load
-    await new Promise(r => setTimeout(r, 600)); 
-    const role = window.auth?.role || window.auth?.userData?.role;
-    if (role === 'admin') window.router.navigate('admin', { tab: 'bookings' });
-    else if (role === 'manager') window.router.navigate('manager', { tab: 'bookings' });
-    else if (role) window.router.navigate('profile', { section: 'bookings' });
+    
+    // Wait for auth to initialize robustly (up to 6 seconds)
+    let retries = 30;
+    while (!window.auth?.hasInitialized && retries > 0) {
+        await new Promise(r => setTimeout(r, 200));
+        retries--;
+    }
+    
+    // Give extra time for role to load from Firestore if needed
+    if (window.auth?.currentUser) {
+         let r2 = 15;
+         while(!window.auth?.userData?.role && r2 > 0) {
+             await new Promise(r => setTimeout(r, 200));
+             r2--;
+         }
+    }
+
+    const role = window.auth?.userData?.role;
+    if (role === 'admin') window.router.navigate('admin');
+    else if (role === 'manager') window.router.navigate('manager');
+    else if (window.auth?.currentUser) window.router.navigate('profile');
     else window.router.navigate('login');
 });
 
