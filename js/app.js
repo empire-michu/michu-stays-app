@@ -253,6 +253,11 @@ window.showAlert = function(message, type) {
     };
     const c = config[type];
 
+    // i18n: translate title and button
+    const t = (key) => (window.i18n && window.i18n.t) ? window.i18n.t(key) : key;
+    const localTitle = t(c.title);
+    const localBtn = t('Got it');
+
     const overlay = document.createElement('div');
     overlay.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,0.35); backdrop-filter:blur(6px); z-index:10001; display:flex; align-items:center; justify-content:center; animation: _alertFadeIn 0.25s ease;`;
     overlay.innerHTML = `
@@ -267,9 +272,9 @@ window.showAlert = function(message, type) {
             <div style="width:64px; height:64px; border-radius:50%; background:${c.bg}; display:flex; align-items:center; justify-content:center; margin:0 auto 1.2rem; font-size:1.8rem; animation:_alertIconPulse 0.6s ease;">
                 ${c.icon}
             </div>
-            <h3 style="margin:0 0 0.6rem; font-size:1.3rem; font-weight:800; color:#1a1a1a;">${c.title}</h3>
+            <h3 style="margin:0 0 0.6rem; font-size:1.3rem; font-weight:800; color:#1a1a1a;">${localTitle}</h3>
             <p style="margin:0 0 2rem; color:#555; line-height:1.6; font-size:0.95rem; word-break:break-word;">${message}</p>
-            <button class="_alert-ok" style="width:100%; padding:1rem; border-radius:14px; border:none; background:${c.color}; color:white; font-weight:800; font-size:1rem; cursor:pointer; transition:all 0.2s ease; letter-spacing:0.5px;">Got it</button>
+            <button class="_alert-ok" style="width:100%; padding:1rem; border-radius:14px; border:none; background:${c.color}; color:white; font-weight:800; font-size:1rem; cursor:pointer; transition:all 0.2s ease; letter-spacing:0.5px;">${localBtn}</button>
         </div>
     `;
     document.body.appendChild(overlay);
