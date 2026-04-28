@@ -140,6 +140,10 @@ const translations = {
         "❌ Cancellation Policy": "❌ የስረዛ ፖሊሲ",
         "💰 Refund Policy": "💰 የተመላሽ ገንዘብ ፖሊሲ",
         "⚖️ Compliance & Ethics": "⚖️ ህግ ማክበር እና ስነ-ምግባር",
+        "📈 Trendy Stays": "📈 ተወዳጅ ማረፊያዎች",
+        "✨ New on Michu Stays": "✨ አዳዲስ በሚቹ ስቴይስ ላይ",
+        "Discover the newest additions to our collection.": "ወደ ስብስባችን አዲስ የተጨመሩትን ያግኙ።",
+        "Just Arrived": "አዲስ የገባ",
         
         // Profile missing strings
         "No.": "ቁጥር",
@@ -387,6 +391,10 @@ const translations = {
         "❌ Cancellation Policy": "❌ Imaammata Haqaa",
         "💰 Refund Policy": "💰 Imaammata Deebii",
         "⚖️ Compliance & Ethics": "⚖️ Seera Kabajuu fi Safuu",
+        "📈 Trendy Stays": "📈 Iddoowwan Filatamoo",
+        "✨ New on Michu Stays": "✨ Haaraa Michu Stays irratti",
+        "Discover the newest additions to our collection.": "Haaraa gara kuusaa keenyaatti dabalame argadhaa.",
+        "Just Arrived": "Haaraa Dhufe",
 
         // Profile missing strings
         "No.": "Lakkoofsa",
