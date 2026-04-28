@@ -439,8 +439,29 @@
     window.openLegalModal = function(key) {
         const content = _legalContent[key];
         if (!content) return;
-        document.getElementById('legal-modal-title').textContent = content.title;
-        document.getElementById('legal-modal-body').innerHTML = content.body;
+        
+        // Translate Title
+        const translatedTitle = window.i18n.t(content.title);
+        document.getElementById('legal-modal-title').textContent = translatedTitle;
+        
+        // Translate Body (The body contains HTML tags h3, p, etc.)
+        // We'll create a temporary div to parse the HTML and translate each text node
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content.body;
+        
+        const walk = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while(node = walk.nextNode()) {
+            const trimmed = node.textContent.trim();
+            if (trimmed) {
+                // Look up the translation
+                const trans = window.i18n.t(trimmed);
+                // Only replace if we found a match (to avoid breaking things)
+                node.textContent = node.textContent.replace(trimmed, trans);
+            }
+        }
+        
+        document.getElementById('legal-modal-body').innerHTML = tempDiv.innerHTML;
         document.getElementById('legal-modal').classList.add('open');
         document.body.style.overflow = 'hidden';
     };

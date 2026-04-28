@@ -256,9 +256,9 @@ window.router.addRoute('profile', async (container, params) => {
 
             <!-- Danger Zone -->
             <div style="background:#fff5f5;border-radius:20px;padding:2rem;border:1px solid #ffcfcf;text-align:center;">
-                <h3 style="color:#c53030;margin:0 0 0.5rem;">🔒 Private Zone</h3>
-                <p style="color:#822727;font-size:0.9rem;margin-bottom:1.5rem;">Deleting your account will remove all booking history and personal data permanently.</p>
-                <button class="btn-outline" style="border-color:#feb2b2;color:#c53030;background:white;padding:0.8rem 2rem;font-weight:700;" onclick="confirmDeleteAccount()">Delete My Account Forever</button>
+                <h3 style="color:#c53030;margin:0 0 0.5rem;">🔒 ${window.i18n.t('Private Zone')}</h3>
+                <p style="color:#822727;font-size:0.9rem;margin-bottom:1.5rem;">${window.i18n.t('Deleting your account will remove all booking history and personal data permanently.')}</p>
+                <button class="btn-outline" style="border-color:#feb2b2;color:#c53030;background:white;padding:0.8rem 2rem;font-weight:700;" onclick="confirmDeleteAccount()">${window.i18n.t('Delete My Account Forever')}</button>
             </div>
         </div>
 
@@ -304,11 +304,11 @@ window.router.addRoute('profile', async (container, params) => {
         <div id="del-acc-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
             <div style="background:white;border-radius:24px;padding:2.5rem;max-width:400px;width:90%;text-align:center;">
                 <div style="font-size:3rem;margin-bottom:1rem;">⚠️</div>
-                <h3 style="margin-bottom:1rem;">Are you sure?</h3>
-                <p style="color:#666;line-height:1.6;margin-bottom:2rem;">Your account and booking history will be gone forever. There is no coming back from this.</p>
+                <h3 style="margin-bottom:1rem;">${window.i18n.t('Are you sure?')}</h3>
+                <p style="color:#666;line-height:1.6;margin-bottom:2rem;">${window.i18n.t('Your account and booking history will be gone forever. There is no coming back from this.')}</p>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                    <button class="btn-outline" style="padding:0.8rem;" onclick="document.getElementById('del-acc-modal').style.display='none'">Keep Account</button>
-                    <button class="btn-primary" style="background:#c53030;padding:0.8rem;" onclick="processAccountDeletion()">Delete Forever</button>
+                    <button class="btn-outline" style="padding:0.8rem;" onclick="document.getElementById('del-acc-modal').style.display='none'">${window.i18n.t('Keep Account')}</button>
+                    <button class="btn-primary" style="background:#c53030;padding:0.8rem;" onclick="processAccountDeletion()">${window.i18n.t('Delete Forever')}</button>
                 </div>
             </div>
         </div>
@@ -334,7 +334,7 @@ window.router.addRoute('profile', async (container, params) => {
         const phone = document.getElementById('p-phone').value;
         const city = document.getElementById('p-city').value;
         await firestore.collection('users').doc(uid).update({ fullName, phone, city, profilePic: selectedProfilePic });
-        window.showToast("✅ Profile updated successfully!");
+        window.showToast(window.i18n.t("✅ Profile updated successfully!"));
         window.auth.userData = { ...window.auth.userData, fullName, profilePic: selectedProfilePic };
         window.auth.renderNav();
     };
@@ -348,15 +348,15 @@ window.router.addRoute('profile', async (container, params) => {
         const confirmPass = document.getElementById('p-confirmpass').value;
 
         if (!curr || !newPass || !confirmPass) {
-            return window.showToast('ℹ️ Please fill in all password fields.');
+            return window.showToast(window.i18n.t('ℹ️ Please fill in all password fields.'));
         }
         if (newPass !== confirmPass) {
-            return window.showToast('❌ New passwords do not match!');
+            return window.showToast(window.i18n.t('❌ New passwords do not match!'));
         }
 
         const btn = document.getElementById('btn-changepass');
         btn.disabled = true;
-        btn.innerText = 'Updating...';
+        btn.innerText = window.i18n.t('Updating...');
 
         try {
             await window.auth.changePassword(curr, newPass);
@@ -367,7 +367,7 @@ window.router.addRoute('profile', async (container, params) => {
             // Error alert handled in auth.js
         } finally {
             btn.disabled = false;
-            btn.innerText = 'Update Password';
+            btn.innerText = window.i18n.t('Update Password');
         }
     };
 

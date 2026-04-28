@@ -476,6 +476,23 @@ const translations = {
         "Photo Gallery (Max 10 photos)": "የፎቶ ማዕከል (ከፍተኛ 10 ፎቶዎች)",
         "Photo": "ፎቶ",
 
+
+        // Profile - Private Zone
+        "Private Zone": "የግል ክልል",
+        "Deleting your account will remove all booking history and personal data permanently.": "መለያዎን መሰረዝ ሁሉንም የቦታ ማስያዣ ታሪክዎን እና የግል መረጃዎን በቋሚነት ያስወግዳል።",
+        "Delete My Account Forever": "መለያዬን ለዘላለም ሰርዝ",
+        "Keep Account": "መለያ ይቆይ",
+        "Delete Forever": "ለዘላለም ሰርዝ",
+        "Your account and booking history will be gone forever. There is no coming back from this.": "መለያዎ እና የቦታ ማስያዣ ታሪክዎ ለዘላለም ይጠፋል። ከዚህ በኋላ መመለስ አይቻልም።",
+
+
+        "👋 Your account has been deleted. We're sorry to see you go.": "👋 መለያዎ ተሰርዟል። ስለሄዱ እናዝናለን።",
+        "✅ Profile updated successfully!": "✅ መገለጫዎ በተሳካ ሁኔታ ተዘምኗል!",
+        "ℹ️ Please fill in all password fields.": "ℹ️ እባክዎ ሁሉንም የይለፍ ቃል መስኮች ይሙሉ።",
+        "❌ New passwords do not match!": "❌ አዲሶቹ የይለፍ ቃላት አይዛመዱም!",
+        "Updating...": "በማዘመን ላይ...",
+        "Update Password": "የይለፍ ቃል አዘምን",
+
         // Alert dialog titles & buttons
         "Heads Up": "ትኩረት",
         "Oops!": "ይቅርታ!",
@@ -1011,6 +1028,23 @@ const translations = {
         "Video Tour (Watchable from Gallery)": "Viidiyoo Daawwannaa (Kuusaa irraa ilaalama)",
         "Photo Gallery (Max 10 photos)": "Kuusaa Suuraa (Baay'inaan 10)",
         "Photo": "Suuraa",
+
+
+        // Profile - Private Zone
+        "Private Zone": "Naannoo Dhuunfaa",
+        "Deleting your account will remove all booking history and personal data permanently.": "Herrega keessan haquun seenaa qabxii hundaafi odeeffannoo dhuunfaa keessan dhaabbataatti ni balleessa.",
+        "Delete My Account Forever": "Herrega Ko Bara Baraan Haqi",
+        "Keep Account": "Herregni Haa Turu",
+        "Delete Forever": "Bara Baraan Haqi",
+        "Your account and booking history will be gone forever. There is no coming back from this.": "Herreigni keessanii fi seenaan qabxii keessanii bara baraan ni bada. Kanaan booda deebi'uun hin danda'amu.",
+
+
+        "👋 Your account has been deleted. We're sorry to see you go.": "👋 Herregni keessan haqameera. Deemuu keessaniif gadda qabna.",
+        "✅ Profile updated successfully!": "✅ Ibsamni keessan milkiidhaan fooyya'eera!",
+        "ℹ️ Please fill in all password fields.": "ℹ️ Maaloo kutaawwan jecha iccitii hunda guutaa.",
+        "❌ New passwords do not match!": "❌ Jechi iccitii haaraan wal hin fakkaatu!",
+        "Updating...": "Fooyyeffamaa jira...",
+        "Update Password": "Jecha Iccitii Fooyyessi",
 
         // Alert dialog titles & buttons
         "Heads Up": "Of Eeggadhu",
