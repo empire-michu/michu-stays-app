@@ -1554,3 +1554,131 @@ input:focus, select:focus, textarea:focus {
     transform: translateY(-50%);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE HEADER — CLEAN FIT (overrides previous mobile rules)
+   All items (logo, lang, AI, bell, profile) fit in one row
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .header {
+    padding: calc(0.4rem + env(safe-area-inset-top, 0px)) 0.6rem 0.4rem !important;
+    gap: 0.3rem !important;
+  }
+  .logo-container {
+    gap: 0.2rem !important;
+    min-width: 0;
+    flex-shrink: 0;
+  }
+  .logo-container img {
+    height: 32px !important;
+    width: 32px !important;
+  }
+  .logo-container span {
+    font-size: 0.85rem !important;
+    letter-spacing: -0.5px;
+  }
+  .header-actions {
+    gap: 0.25rem !important;
+    flex-shrink: 1;
+    min-width: 0;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    overflow: visible !important;
+    max-width: none !important;
+  }
+  /* Lang switcher: compact pill */
+  #lang-switcher-container button {
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.7rem !important;
+    gap: 0.15rem !important;
+    min-height: 30px;
+  }
+  #lang-switcher-container button svg {
+    width: 10px !important;
+    height: 10px !important;
+  }
+  /* AI button: icon-only circle on mobile */
+  .michu-ai-btn .michu-ai-label {
+    display: none !important;
+  }
+  .michu-ai-btn {
+    padding: 0 !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    gap: 0 !important;
+  }
+  .michu-ai-btn span:first-child {
+    font-size: 0.9rem !important;
+    margin: 0 !important;
+  }
+  /* Notification bell: compact */
+  #header-notif-btn {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px;
+  }
+  #header-notif-btn svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+  /* Auth nav buttons: compact */
+  #auth-nav-container button {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.68rem !important;
+    border-radius: 10px !important;
+    white-space: nowrap;
+  }
+  #auth-nav-container img {
+    width: 20px !important;
+    height: 20px !important;
+  }
+}
+
+/* Extra-small screens (< 380px) — tighten further */
+@media (max-width: 380px) {
+  .logo-container span {
+    font-size: 0.72rem !important;
+    max-width: 55px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .header-actions {
+    gap: 0.15rem !important;
+  }
+  #lang-switcher-container button {
+    padding: 0.15rem 0.3rem !important;
+    font-size: 0.65rem !important;
+  }
+  .michu-ai-btn {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+  }
+  #header-notif-btn {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+  }
+  #auth-nav-container button {
+    padding: 0.2rem 0.35rem !important;
+    font-size: 0.6rem !important;
+  }
+}
+
+/* Language dropdown: ensure proper tap targets on mobile */
+#lang-dropdown {
+  -webkit-tap-highlight-color: transparent;
+}
+#lang-dropdown > div {
+  min-height: 44px;
+  display: flex !important;
+  align-items: center;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
