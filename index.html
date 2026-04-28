@@ -441,7 +441,7 @@
         if (!content) return;
         
         // Translate Title
-        const translatedTitle = window.i18n.t(content.title);
+        const translatedTitle = window.t(content.title);
         document.getElementById('legal-modal-title').textContent = translatedTitle;
         
         // Translate Body (The body contains HTML tags h3, p, etc.)
@@ -455,7 +455,7 @@
             const trimmed = node.textContent.trim();
             if (trimmed) {
                 // Look up the translation
-                const trans = window.i18n.t(trimmed);
+                const trans = window.t(trimmed);
                 // Only replace if we found a match (to avoid breaking things)
                 node.textContent = node.textContent.replace(trimmed, trans);
             }

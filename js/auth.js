@@ -419,7 +419,7 @@ class AuthEngine {
             localStorage.removeItem(`ms_role_${user.uid}`);
             this.currentUser = null;
             this.userData = null;
-            window.showToast(window.i18n.t("👋 Your account has been deleted. We're sorry to see you go."));
+            window.showToast(window.t("👋 Your account has been deleted. We're sorry to see you go."));
             window.router.navigate('home');
         } catch (e) {
             console.error(e);
