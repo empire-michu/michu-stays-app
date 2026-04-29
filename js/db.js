@@ -624,6 +624,20 @@ class Database {
 
         console.log("🛠️ Setting up Push Listeners...");
 
+        // Create the high-importance channel (Required for Android 8+ / Samsung background)
+        try {
+            PushNotifications.createChannel({
+                id: 'michu_urgent_v3',
+                name: 'Urgent Booking Alerts',
+                description: 'Notifications for new bookings and status changes',
+                importance: 5, // Importance.HIGH (5)
+                visibility: 1, // Visibility.PUBLIC (1)
+                vibration: true,
+                lights: true
+            });
+            console.log("✅ Push channel 'michu_urgent_v3' created/verified");
+        } catch(e) { console.error("Failed to create push channel:", e); }
+
         // Foreground listener — show our clickable overlay
         PushNotifications.addListener('pushNotificationReceived', (notification) => {
             console.log('📬 Foreground push received:', JSON.stringify(notification));
