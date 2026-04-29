@@ -13,6 +13,7 @@
     }
   },
   "android": {
-    "allowMixedContent": true
+    "allowMixedContent": true,
+    "notificationChannelId": "michu_urgent_v3"
   }
 }

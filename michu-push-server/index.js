@@ -57,7 +57,10 @@ app.post('/send-push', async (req, res) => {
     },
     data: {
       type: (title && title.toLowerCase().includes('booking')) ? 'booking' : 'general',
-      click_action: 'FCM_PLUGIN_ACTIVITY'
+      click_action: 'FCM_PLUGIN_ACTIVITY',
+      title: title || 'Michu Stays',
+      body: body || 'You have a new update.',
+      forceShow: '1'
     },
     android: {
       priority: 'high',
@@ -67,7 +70,9 @@ app.post('/send-push', async (req, res) => {
         priority: 'max',
         visibility: 'public',
         sound: 'default',
-        clickAction: 'FCM_PLUGIN_ACTIVITY'
+        clickAction: 'FCM_PLUGIN_ACTIVITY',
+        icon: 'stock_ticker_update',
+        color: '#0e442c'
       }
     },
     apns: {

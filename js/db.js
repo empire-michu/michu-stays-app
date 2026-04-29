@@ -758,37 +758,62 @@ class Database {
         const body = notif.body || 'You have a new notification';
         const data = notif.data || {};
         
-        const container = document.createElement('div');
-        container.id = 'michu-push-banner';
-        container.style = `
-            position: fixed; top: 15px; left: 15px; right: 15px; 
-            background: white; border-radius: 16px; padding: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 10000;
-            display: flex; align-items: center; gap: 15px;
-            animation: michuPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border-left: 5px solid #10b981; cursor: pointer;
+        const isBooking = data.type === 'booking' || title.toLowerCase().includes('booking') || body.toLowerCase().includes('booking');
+        
+        // Remove existing if any
+        const old = document.getElementById('michu-push-overlay');
+        if (old) old.remove();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'michu-push-overlay';
+        overlay.style = `
+            position: fixed; inset: 0; z-index: 99999;
+            background: rgba(14, 68, 44, 0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 2rem; color: white; text-align: center;
+            backdrop-filter: blur(8px); animation: michuPop 0.5s ease;
         `;
         
-        container.innerHTML = `
-            <div style="font-size: 24px;">🔔</div>
-            <div style="flex: 1;">
-                <div style="font-weight: 800; color: #1e293b; font-size: 0.9rem;">${title}</div>
-                <div style="color: #64748b; font-size: 0.8rem; line-height: 1.2; margin-top: 2px;">${body}</div>
-            </div>
-            <div style="color: #10b981; font-weight: 700; font-size: 0.75rem;">VIEW</div>
+        overlay.innerHTML = `
+            <div style="font-size: 5rem; margin-bottom: 2rem; animation: pulse 2s infinite;">🔔</div>
+            <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 1rem;">${title}</h2>
+            <p style="font-size: 1.1rem; opacity: 0.9; margin-bottom: 3rem; max-width: 400px; line-height: 1.6;">${body}</p>
+            
+            <button id="michu-view-btn" style="
+                background: white; color: #0e442c; border: none;
+                padding: 1.2rem 3rem; border-radius: 50px; font-weight: 800;
+                font-size: 1.2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                cursor: pointer; transform: scale(1); transition: transform 0.2s;
+            ">VIEW BOOKINGS</button>
+            
+            <button id="michu-close-btn" style="
+                background: transparent; color: rgba(255,255,255,0.6); border: none;
+                margin-top: 2rem; font-weight: 600; cursor: pointer;
+            ">Dismiss</button>
+
+            <style>
+                @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+            </style>
         `;
         
-        container.onclick = () => {
-            container.remove();
-            if (data.type === 'booking' || title.toLowerCase().includes('booking') || body.toLowerCase().includes('booking')) {
-                window.router?.navigate('bookings');
+        document.body.appendChild(overlay);
+
+        overlay.querySelector('#michu-view-btn').onclick = () => {
+            overlay.remove();
+            if (isBooking) {
+                if (window.router) window.router.navigate('bookings');
+                else window.location.hash = '#bookings';
             } else {
-                window.router?.navigate('home');
+                if (window.router) window.router.navigate('home');
+                else window.location.hash = '#home';
             }
         };
-        
-        document.body.appendChild(container);
-        setTimeout(() => { if(container.parentElement) container.style.opacity = '0'; setTimeout(() => container.remove(), 400); }, 8000);
+
+        overlay.querySelector('#michu-close-btn').onclick = () => {
+            overlay.style.opacity = '0';
+            overlay.style.transition = 'opacity 0.3s';
+            setTimeout(() => overlay.remove(), 300);
+        };
     }
 }
 
