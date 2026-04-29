@@ -58,19 +58,10 @@ app.post('/send-push', async (req, res) => {
     data: {
       type: (title && title.toLowerCase().includes('booking')) ? 'booking' : 'general',
       title: title || 'Michu Stays',
-      body: body || 'You have a new update.',
-      forceShow: '1'
+      body: body || 'You have a new update.'
     },
     android: {
-      priority: 'high',
-      ttl: '86400s',
-      notification: {
-        channelId: 'michu_urgent_v3',
-        priority: 'max',
-        visibility: 'public',
-        sound: 'default',
-        color: '#0e442c'
-      }
+      priority: 'high'
     },
     apns: {
       payload: {
