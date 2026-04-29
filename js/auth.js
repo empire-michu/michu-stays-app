@@ -159,8 +159,8 @@ class AuthEngine {
             
             container.innerHTML = `
                 <div style="display:flex;align-items:center;gap:0.4rem;">
-                    <button class="btn-outline" style="padding:0.35rem 0.6rem;border:none;font-size:0.8rem;font-weight:600;" onclick="window.router.navigate('login')">Log In</button>
-                    <button class="btn-primary" style="padding:0.35rem 0.8rem;font-size:0.8rem;border-radius:12px;" onclick="window.router.navigate('signup')">Sign Up</button>
+                    <button class="btn-outline" style="padding:0.35rem 0.6rem;border:none;font-size:0.8rem;font-weight:600;" onclick="window.router.navigate('login')">${__('Log In')}</button>
+                    <button class="btn-primary" style="padding:0.35rem 0.8rem;font-size:0.8rem;border-radius:12px;" onclick="window.router.navigate('signup')">${__('Sign Up')}</button>
                 </div>
             `;
         }

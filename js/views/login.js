@@ -24,8 +24,8 @@ window.router.addRoute('login', (container) => {
                 
                 <div style="position: relative; z-index: 10;">
                     <div style="background: var(--color-primary); width: 40px; height: 4px; margin-bottom: 2rem;"></div>
-                    <h1 style="font-size: 3.8rem; font-weight: 800; margin-bottom: 1.5rem; line-height: 1.1; letter-spacing: -0.02em;">Discover<br>Exceptional Stays.</h1>
-                    <p style="font-size: 1.25rem; opacity: 0.9; max-width: 450px; line-height: 1.6; font-weight: 300;">Your journey through Ethiopia's finest hospitality begins here. Experience luxury and comfort redesigned.</p>
+                    <h1 style="font-size: 3.8rem; font-weight: 800; margin-bottom: 1.5rem; line-height: 1.1; letter-spacing: -0.02em;">${__('Discover')}<br>${__('Exceptional Stays.')}</h1>
+                    <p style="font-size: 1.25rem; opacity: 0.9; max-width: 450px; line-height: 1.6; font-weight: 300;">${__("Your journey through Ethiopia's finest hospitality begins here. Experience luxury and comfort redesigned.")}</p>
                 </div>
             </div>
 
@@ -33,22 +33,22 @@ window.router.addRoute('login', (container) => {
             <div class="auth-form-panel">
                 <div style="width: 100%; max-width: 400px; width: 100%;">
                     <div style="margin-bottom: 3rem;">
-                        <h2 style="font-size: 2.2rem; color: var(--color-secondary); font-weight: 800; margin-bottom: 0.75rem;">Welcome Back</h2>
-                        <p style="color: var(--color-text-light); font-size: 1.05rem;">Sign in to your account to manage your stays.</p>
+                        <h2 style="font-size: 2.2rem; color: var(--color-secondary); font-weight: 800; margin-bottom: 0.75rem;">${__('Welcome Back')}</h2>
+                        <p style="color: var(--color-text-light); font-size: 1.05rem;">${__('Sign in to your account to manage your stays.')}</p>
                     </div>
 
                     <form id="login-form" autocomplete="on" onsubmit="event.preventDefault(); window.handleLogin();">
                         <div class="form-group" style="margin-bottom: 1.8rem; max-width: 100%;">
-                            <label style="display: block; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-secondary); margin-bottom: 0.75rem;">Email Address</label>
+                            <label style="display: block; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-secondary); margin-bottom: 0.75rem;">${__('Email Address')}</label>
                             <input type="email" id="login-email" name="email" required placeholder="name@company.com" 
                                 style="width:100%; box-sizing: border-box; border: 2px solid #f0f0f0; border-radius: 12px; padding: 1.1rem; font-size: 1rem; transition: all 0.3s; background: #f9f9f9;">
                         </div>
 
                         <div class="form-group" style="margin-bottom: 0.8rem; max-width: 100%;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.75rem;">
-                                <label style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-secondary); margin:0;">Password</label>
+                                <label style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-secondary); margin:0;">${__('Password')}</label>
                                 <a href="#" onclick="event.preventDefault(); window.handleForgotPassword()" 
-                                    style="font-size: 0.8rem; color: var(--color-primary); font-weight: 700; text-decoration: none;">Forgot?</a>
+                                    style="font-size: 0.8rem; color: var(--color-primary); font-weight: 700; text-decoration: none;">${__('Forgot?')}</a>
                             </div>
                             <div style="position: relative;">
                                 <input type="password" id="login-password" name="password" required placeholder="••••••••" 
@@ -66,25 +66,25 @@ window.router.addRoute('login', (container) => {
 
                         <button type="submit" id="btn-email-login" class="btn-primary" 
                             style="width: 100%; padding: 1.2rem; border-radius: 12px; font-size: 1.1rem; font-weight: 800; margin-top: 2rem; box-shadow: 0 12px 24px rgba(0, 102, 68, 0.2); transition: transform 0.2s;">
-                            Sign In to Michu Stays
+                            ${__('Sign In to Michu Stays')}
                         </button>
                     </form>
 
                     <div style="display: flex; align-items: center; margin: 2.5rem 0;">
                         <div style="flex: 1; height: 1px; background: #eee;"></div>
-                        <span style="padding: 0 1.2rem; font-size: 0.75rem; color: #aaa; font-weight: 700; letter-spacing: 0.1em;">OR CONTINUE WITH</span>
+                        <span style="padding: 0 1.2rem; font-size: 0.75rem; color: #aaa; font-weight: 700; letter-spacing: 0.1em;">${__('OR CONTINUE WITH')}</span>
                         <div style="flex: 1; height: 1px; background: #eee;"></div>
                     </div>
 
                     <button onclick="window.auth.loginWithGoogle()" 
                         style="width: 100%; box-sizing: border-box; background: white; border: 2px solid #eee; border-radius: 12px; padding: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.75rem; cursor: pointer; transition: all 0.2s; font-weight: 700; color: #444;">
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
-                        Google Account
+                        ${__('Google Account')}
                     </button>
 
                     <p style="text-align: center; margin-top: 2.5rem; color: #666; font-size: 1rem;">
-                        Don't have an account? <a href="#" onclick="event.preventDefault(); window.router.navigate('signup')" 
-                            style="color: var(--color-primary); font-weight: 800; text-decoration: none; border-bottom: 2px solid var(--color-primary-light);">Create Account</a>
+                        ${__("Don't have an account?")} <a href="#" onclick="event.preventDefault(); window.router.navigate('signup')" 
+                            style="color: var(--color-primary); font-weight: 800; text-decoration: none; border-bottom: 2px solid var(--color-primary-light);">${__('Create Account')}</a>
                     </p>
                 </div>
             </div>

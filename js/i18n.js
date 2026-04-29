@@ -454,6 +454,27 @@ const translations = {
         "Force guests to book from stay packages. Use for festivals/holidays.": "እንግዶች ከማረፊያ ጥቅሎች እንዲያስይዙ ያስገድዱ። ለበዓላት/ክስተቶች ይጠቀሙ።",
         "+ Add Package Option": "+ የጥቅል አማራጭ ያክሉ",
         "Publish Property": "ንብረቱን ያስነሱ",
+        
+        // Auth / Login / Signup
+        "Welcome Back": "እንኳን ደህና መጡ",
+        "Sign in to your account to manage your stays.": "ቆይታዎችዎን ለማስተዳደር ወደ መለያዎ ይግቡ።",
+        "Email Address": "የኢሜይል አድራሻ",
+        "Password": "የይለፍ ቃል",
+        "Forgot?": "ረሱ?",
+        "Sign In to Michu Stays": "ወደ ምቹ ስቴይስ ይግቡ",
+        "OR CONTINUE WITH": "ወይም በዚህ ይቀጥሉ",
+        "Google Account": "የጎግል መለያ",
+        "Don't have an account?": "መለያ የለዎትም?",
+        "Create Account": "መለያ ይፍጠሩ",
+        "Join the Elite Circle.": "የምርጦች ክበብ አባል ይሁኑ።",
+        "Unlock exclusive access to Ethiopia's most prestigious properties and high-end hospitality services.": "የኢትዮጵያ ምርጥ ማረፊያዎች እና ከፍተኛ ጥራት ያላቸው አገልግሎቶች መዳረሻ ያግኙ።",
+        "Enter your details to start your journey.": "ጉዞዎን ለመጀመር ዝርዝር መረጃዎን ያስገቡ።",
+        "Full Legal Name": "ሙሉ ህጋዊ ስም",
+        "Create My Profile": "መገለጫዬን ፍጠር",
+        "Already joined?": "ቀደም ብለው ተመዝግበዋል?",
+        "Sign In": "ግባ",
+        "Creating Account...": "መለያ በመፍጠር ላይ...",
+        "Verifying...": "በማረጋገጥ ላይ...",
 
         // Add-property page (old form)
         "Add New Property": "አዲስ ንብረት ያክሉ",
@@ -553,7 +574,34 @@ const translations = {
         "Are you sure?": "እርግጠኛ ነዎት?",
         "Cancel": "ሰርዝ",
         "Delete": "አጥፋ",
-        "Got It!": "ገባኝ!"
+        "Got It!": "ገባኝ!",
+        
+        // Auth / Login / Signup
+        "Welcome Back": "እንኳን ደህና መጡ",
+        "Sign in to your account to manage your stays.": "ቆይታዎችዎን ለማስተዳደር ወደ መለያዎ ይግቡ።",
+        "Email Address": "የኢሜይል አድራሻ",
+        "Password": "የይለፍ ቃል",
+        "Forgot?": "ረሱ?",
+        "Sign In to Michu Stays": "ወደ ምቹ ስቴይስ ይግቡ",
+        "OR CONTINUE WITH": "ወይም በዚህ ይቀጥሉ",
+        "Google Account": "የጎግል መለያ",
+        "Don't have an account?": "መለያ የለዎትም?",
+        "Create Account": "መለያ ይፍጠሩ",
+        "Join the": "ይቀላቀሉ",
+        "Elite Circle.": "የምርጦች ክበብ።",
+        "Unlock exclusive access to Ethiopia's most prestigious properties and high-end hospitality services.": "የኢትዮጵያ ምርጥ ማረፊያዎች እና ከፍተኛ ጥራት ያላቸው አገልግሎቶች መዳረሻ ያግኙ።",
+        "Enter your details to start your journey.": "ጉዞዎን ለመጀመር ዝርዝር መረጃዎን ያስገቡ።",
+        "Full Legal Name": "ሙሉ ህጋዊ ስም",
+        "Create My Profile": "መገለጫዬን ፍጠር",
+        "Already joined?": "ቀደም ብለው ተመዝግበዋል?",
+        "Sign In": "ግባ",
+        "Creating Account...": "መለያ በመፍጠር ላይ...",
+        "Verifying...": "በማረጋገጥ ላይ...",
+        "Log In": "ግባ",
+        "Sign Up": "ይመዝገቡ",
+        "Discover": "ያግኙ",
+        "Exceptional Stays.": "ልዩ ማረፊያዎች።",
+        "Your journey through Ethiopia's finest hospitality begins here. Experience luxury and comfort redesigned.": "የኢትዮጵያ ምርጥ መስተንግዶ ጉዞዎ እዚህ ይጀምራል። በድጋሚ የተነደፈ የቅንጦት እና ምቾት ይለማመዱ。"
     },
     om: {
         // Core Navigation & UI
@@ -1105,25 +1153,50 @@ const translations = {
         // Actions & Modals
         "Are you sure?": "Mirkaneessaa?",
         "Cancel": "Haqi",
-        "Delete": "Balleessi",
-        "Got It!": "Beekera!"
+        "Delete": "Haqi",
+        "Got It!": "Galaam!",
+
+        // Auth / Login / Signup
+        "Welcome Back": "Baga Nagaan Deebitan",
+        "Sign in to your account to manage your stays.": "Turmaata keessan bulchuuf herrega keessanitti seenaa.",
+        "Email Address": "Teessoo Imeelii",
+        "Password": "Jecha Darbii",
+        "Forgot?": "Irraanfattee?",
+        "Sign In to Michu Stays": "Gara Michu Stays Seeni",
+        "OR CONTINUE WITH": "YKN KANAAN ITTI FUFI",
+        "Google Account": "Herrega Google",
+        "Don't have an account?": "Herrega hin qabduu?",
+        "Create Account": "Herrega Uumi",
+        "Join the": "Dabalami",
+        "Elite Circle.": "Maree Filatamaa.",
+        "Unlock exclusive access to Ethiopia's most prestigious properties and high-end hospitality services.": "Qabeenya Itoophiyaa beekamoo fi tajaajila keessummeessaa olaanaa qaqqabummaa addaa argadhu.",
+        "Enter your details to start your journey.": "Imala keessan jalqabuuf bal'ina keessan galchaa.",
+        "Full Legal Name": "Maqaa Seeraa Guutuu",
+        "Create My Profile": "Ibsama Koo Uumi",
+        "Already joined?": "Duraan galmooftee?",
+        "Sign In": "Seeni",
+        "Creating Account...": "Herrega Uumaa Jira...",
+        "Verifying...": "Mirkaneessaa Jira...",
+        "Log In": "Seeni",
+        "Sign Up": "Galmoofnu",
+        "Discover": "Argadhu",
+        "Exceptional Stays.": "Iddoowwan Addaa.",
+        "Your journey through Ethiopia's finest hospitality begins here. Experience luxury and comfort redesigned.": "Muuxannoon keessummeessaa Itoophiyaa isa gaarii asitti jalqaba. Qananii fi mijuu haala haaraatti ijaarame dhandhami."
     }
 };
 
 let currentLang = localStorage.getItem('michu_lang') || 'en';
 
+// Global translation helper for JS templates
+window.__ = (key) => {
+    if (currentLang === 'en') return key;
+    return (translations[currentLang] && translations[currentLang][key]) ? translations[currentLang][key] : key;
+};
+window.t = window.__; // alias used in some places
+
 window.setMichuLang = function(lang) {
     localStorage.setItem('michu_lang', lang);
     location.reload();
-};
-
-// Standard explicit translate function (Option 1 wrapper)
-window.t = function(key, defaultEnglish) {
-    if (currentLang === 'en') return defaultEnglish || key;
-    if (translations[currentLang] && translations[currentLang][key]) {
-        return translations[currentLang][key];
-    }
-    return defaultEnglish || key;
 };
 
 const dynamicTranslations = {
