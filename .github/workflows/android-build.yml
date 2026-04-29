@@ -56,6 +56,22 @@ jobs:
           cp google-services.json android/app/ || echo "Warning: google-services.json not found in root"
         fi
 
+    - name: Patch AndroidManifest for FCM Background Notifications
+      run: |
+        MANIFEST="android/app/src/main/AndroidManifest.xml"
+        # Inject default_notification_channel_id meta-data so Android knows
+        # which channel to use for FCM notifications when app is backgrounded/killed.
+        # Without this, background notifications are silently dropped.
+        if ! grep -q "default_notification_channel_id" "$MANIFEST"; then
+          sed -i '/<\/application>/i \
+            <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="michu_urgent_v3" />\
+            <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:value="@mipmap/ic_launcher" />\
+            <meta-data android:name="com.google.firebase.messaging.default_notification_color" android:value="#0e442c" />' "$MANIFEST"
+          echo "✅ FCM meta-data injected into AndroidManifest.xml"
+        else
+          echo "FCM meta-data already present"
+        fi
+
     # - name: Generate App Icons
     #   run: |
     #     # Use npx to run capacitor-assets without needing to install it globally
