@@ -59,14 +59,37 @@ jobs:
     - name: Patch AndroidManifest for FCM Background Notifications
       run: |
         MANIFEST="android/app/src/main/AndroidManifest.xml"
+        
         # Inject notification icon meta-data for background FCM display
         if ! grep -q "default_notification_icon" "$MANIFEST"; then
           sed -i '/<\/application>/i \
             <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:value="@mipmap/ic_launcher" />' "$MANIFEST"
-          echo "✅ FCM icon meta-data injected into AndroidManifest.xml"
-        else
-          echo "FCM meta-data already present"
+          echo "✅ FCM icon meta-data injected"
         fi
+        
+        # Inject RECEIVE_BOOT_COMPLETED permission (required for Samsung FCM after reboot)
+        if ! grep -q "RECEIVE_BOOT_COMPLETED" "$MANIFEST"; then
+          sed -i '/<\/manifest>/i \
+            <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />' "$MANIFEST"
+          echo "✅ RECEIVE_BOOT_COMPLETED permission injected"
+        fi
+        
+        # Inject VIBRATE permission
+        if ! grep -q "android.permission.VIBRATE" "$MANIFEST"; then
+          sed -i '/<\/manifest>/i \
+            <uses-permission android:name="android.permission.VIBRATE" />' "$MANIFEST"
+          echo "✅ VIBRATE permission injected"
+        fi
+        
+        # Inject USE_FULL_SCREEN_INTENT for lock screen notifications
+        if ! grep -q "USE_FULL_SCREEN_INTENT" "$MANIFEST"; then
+          sed -i '/<\/manifest>/i \
+            <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />' "$MANIFEST"
+          echo "✅ USE_FULL_SCREEN_INTENT permission injected"
+        fi
+        
+        echo "--- Final AndroidManifest.xml ---"
+        cat "$MANIFEST"
 
     # - name: Generate App Icons
     #   run: |

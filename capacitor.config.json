@@ -4,7 +4,7 @@
   "webDir": "www",
   "plugins": {
     "PushNotifications": {
-      "presentationOptions": ["badge", "sound"]
+      "presentationOptions": ["badge", "sound", "alert"]
     },
     "StatusBar": {
       "style": "LIGHT",

@@ -53,8 +53,8 @@ class Database {
             }
         } catch(e) {}
 
-        // Wake up the Render push server on app start (free tier sleeps after 15 min)
-        fetch('https://michu-push-server.onrender.com/', { method: 'GET' }).catch(() => {});
+
+
         
         // Setup push listeners immediately
         this.setupPushListeners();
@@ -624,15 +624,9 @@ class Database {
 
         console.log("🛠️ Setting up Push Listeners...");
 
-        // Foreground listener — dismiss native banner, show our clickable overlay instead
+        // Foreground listener — show our clickable overlay
         PushNotifications.addListener('pushNotificationReceived', (notification) => {
             console.log('📬 Foreground push received:', JSON.stringify(notification));
-            
-            // CRITICAL: Remove the native Android heads-up notification immediately
-            // so only our custom interactive overlay is visible
-            try {
-                PushNotifications.removeAllDeliveredNotifications();
-            } catch(e) { console.warn('Could not clear native notifs:', e); }
             
             // Show our own clickable overlay
             if (window.db && window.db.showClickableNotification) {
@@ -811,9 +805,8 @@ class Database {
 
         overlay.querySelector('#michu-view-btn').onclick = () => {
             overlay.remove();
-            if (isBooking) {
-                if (window.router) window.router.navigate('bookings');
-                else window.location.hash = '#bookings';
+            if (isBooking && window.mobileBookings) {
+                window.mobileBookings();
             } else {
                 if (window.router) window.router.navigate('home');
                 else window.location.hash = '#home';
