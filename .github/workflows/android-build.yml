@@ -63,11 +63,7 @@ jobs:
       run: |
         cd android
         chmod +x gradlew
-        ./gradlew assembleRelease \
-          -Pandroid.injected.signing.store.file=app/michu-stays-release.keystore \
-          -Pandroid.injected.signing.store.password=MichuStays2026 \
-          -Pandroid.injected.signing.key.alias=michu-key \
-          -Pandroid.injected.signing.key.password=MichuStays2026
+        ./gradlew assembleRelease
 
     - name: Upload Release APK Artifact
       uses: actions/upload-artifact@v4
