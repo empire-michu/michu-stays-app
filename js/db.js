@@ -651,15 +651,8 @@ class Database {
 
             // Use a small delay to ensure the app/router is fully loaded after cold start
             setTimeout(() => {
-                if (isBooking) {
-                    const role = window.auth?.userData?.role;
-                    if (role === 'manager' || role === 'admin') {
-                        if (window.router) window.router.navigate('manager');
-                        else window.location.hash = '#manager';
-                    } else {
-                        if (window.router) window.router.navigate('bookings');
-                        else window.location.hash = '#bookings';
-                    }
+                if (isBooking && window.mobileBookings) {
+                    window.mobileBookings();
                 } else {
                     if (window.router) window.router.navigate('home');
                     else window.location.hash = '#home';
