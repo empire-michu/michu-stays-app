@@ -59,24 +59,10 @@ jobs:
     - name: Sync Capacitor
       run: npx cap sync android
 
-    - name: Patch AndroidManifest for Samsung
+    - name: Final Manifest Check (Log Only)
       run: |
-        MANIFEST="android/app/src/main/AndroidManifest.xml"
-        
-        # Inject required permissions for Samsung background delivery
-        for PERM in RECEIVE_BOOT_COMPLETED VIBRATE USE_FULL_SCREEN_INTENT; do
-          if ! grep -q "$PERM" "$MANIFEST"; then
-            sed -i "/<\/manifest>/i \    <uses-permission android:name=\"android.permission.$PERM\" />" "$MANIFEST"
-          fi
-        done
-        
-        # Inject notification icon meta-data
-        if ! grep -q "default_notification_icon" "$MANIFEST"; then
-          sed -i '/<\/application>/i \    <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:value="@mipmap/ic_launcher" />' "$MANIFEST"
-        fi
-
-        echo "--- Final AndroidManifest.xml ---"
-        cat "$MANIFEST"
+        echo "--- Verifying Native Service in AndroidManifest.xml ---"
+        cat android/app/src/main/AndroidManifest.xml
 
     - name: Build Debug APK
       run: |
