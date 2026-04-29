@@ -43,15 +43,20 @@ class Router {
         
         // Also fire manually in case deviceready is already passed or not fired on modern Capacitor
         setTimeout(() => {
-            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
-                window.Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
-                    const currentHash = window.location.hash.replace('#', '');
-                    if (currentHash && currentHash !== 'home' && currentHash !== 'login') {
-                        window.history.back();
-                    } else {
-                        window.Capacitor.Plugins.App.exitApp();
-                    }
-                });
+            if (window.Capacitor && window.Capacitor.Plugins) {
+                if (window.Capacitor.Plugins.App) {
+                    window.Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
+                        const currentHash = window.location.hash.replace('#', '');
+                        if (currentHash && currentHash !== 'home' && currentHash !== 'login') {
+                            window.history.back();
+                        } else {
+                            window.Capacitor.Plugins.App.exitApp();
+                        }
+                    });
+                }
+                if (window.db && window.db.setupPushListeners) {
+                    window.db.setupPushListeners();
+                }
             }
         }, 1500);
 
@@ -358,7 +363,7 @@ let unreadCount = 0;
 const notifications = [];
 let notifUnsub = null;
 
-window.showPushNotification = ({ message, details, createdAt, link }) => {
+window.showPushNotification = ({ message, details, createdAt, link, params }) => {
     unreadCount++;
     const badge = document.getElementById('notif-badge');
     if (badge) {
@@ -374,7 +379,7 @@ window.showPushNotification = ({ message, details, createdAt, link }) => {
     } catch(e) { console.warn('Audio play failed:', e); }
 
     // Add to internal list (prevent duplicates by ID if possible, but Firestore 'added' type handles it)
-    notifications.unshift({ message, details, createdAt, link });
+    notifications.unshift({ message, details, createdAt, link, params });
     renderNotifList();
 
     const container = document.createElement('div');
@@ -448,7 +453,8 @@ window.startNotifications = () => {
                     message: notif.message,
                     details: notif.details,
                     createdAt: notif.createdAt,
-                    link: notif.link
+                    link: notif.link,
+                    params: notif.params
                 });
             }, (err) => {
                 if(!err.message?.includes('permission')) {

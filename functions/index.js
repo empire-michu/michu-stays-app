@@ -27,7 +27,7 @@ exports.sendPush = functions.https.onRequest((req, res) => {
       android: {
         priority: 'high',
         notification: {
-          channel_id: 'michu_urgent_v3',
+          channelId: 'michu_urgent_v3',
           priority: 'max',
           visibility: 'public',
           sound: 'default',
