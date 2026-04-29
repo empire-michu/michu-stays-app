@@ -62,7 +62,7 @@ app.post('/send-push', async (req, res) => {
       priority: 'high',
       notification: {
         sound: 'default',
-        channelId: 'michu_high_priority'
+        channelId: 'michu_alerts_v2'
       }
     },
     apns: {

@@ -514,9 +514,9 @@ class Database {
                     try {
                         // Primary channel
                         await PushNotifications.createChannel({
-                            id: 'michu_high_priority',
-                            name: 'Michu Stays Alerts',
-                            description: 'Booking alerts',
+                            id: 'michu_alerts_v2',
+                            name: 'Michu Booking Alerts',
+                            description: 'Critical booking alerts',
                             importance: 5,
                             visibility: 1,
                             vibration: true,
@@ -556,9 +556,9 @@ class Database {
                             const isBooking = data.type === 'booking' || title.toLowerCase().includes('booking') || body.toLowerCase().includes('booking');
                             
                             if (isBooking) {
-                                window.location.hash = '#redirect-bookings';
+                                window.router.navigate('bookings');
                             } else {
-                                window.location.hash = '#home';
+                                window.router.navigate('home');
                             }
                         });
                         
