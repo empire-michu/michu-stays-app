@@ -539,11 +539,8 @@ class Database {
                         });
                     } catch(e) { console.warn("Channel creation issue:", e); }
 
-                    // Set up listeners ONCE (globally)
-                    // Register and get token
-                    await PushNotifications.register();
-                    
-                    return new Promise((resolve, reject) => {
+                    // CRITICAL: Attach listener BEFORE calling register() to avoid race condition
+                    const tokenPromise = new Promise((resolve, reject) => {
                         PushNotifications.addListener('registration', async (token) => {
                             const fcmToken = token.value;
                             console.log("📱 FCM Token received:", fcmToken.substring(0, 20) + "...");
@@ -558,9 +555,18 @@ class Database {
                             resolve(fcmToken);
                         });
                         
-                        // Timeout after 10 seconds in case registration event doesn't fire
-                        setTimeout(() => reject(new Error("Push registration timed out")), 10000);
+                        PushNotifications.addListener('registrationError', (err) => {
+                            console.error('❌ Push registration error:', err);
+                            reject(new Error('Push registration failed: ' + JSON.stringify(err)));
+                        });
+                        
+                        // Timeout after 30 seconds
+                        setTimeout(() => reject(new Error("Push registration timed out")), 30000);
                     });
+
+                    // NOW call register after listeners are ready
+                    await PushNotifications.register();
+                    return await tokenPromise;
                 } else {
                     throw new Error("Push permission denied. Status: " + perm.receive);
                 }
@@ -618,35 +624,47 @@ class Database {
 
         console.log("🛠️ Setting up Push Listeners...");
 
-        // Foreground listener
+        // Foreground listener — dismiss native banner, show our clickable overlay instead
         PushNotifications.addListener('pushNotificationReceived', (notification) => {
-            console.log('📬 Foreground push received:', notification);
-            // Use window.db explicitly to ensure context
+            console.log('📬 Foreground push received:', JSON.stringify(notification));
+            
+            // CRITICAL: Remove the native Android heads-up notification immediately
+            // so only our custom interactive overlay is visible
+            try {
+                PushNotifications.removeAllDeliveredNotifications();
+            } catch(e) { console.warn('Could not clear native notifs:', e); }
+            
+            // Show our own clickable overlay
             if (window.db && window.db.showClickableNotification) {
                 window.db.showClickableNotification(notification);
             }
         });
 
-        // Tap listener
+        // Tap listener — fires when notification is tapped from tray (background/killed)
         PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-            console.log('👆 Push notification tapped:', notification);
+            console.log('👆 Push notification tapped:', JSON.stringify(notification));
             const data = notification.notification?.data || {};
             const title = notification.notification?.title || '';
             const body = notification.notification?.body || '';
 
             const isBooking = data.type === 'booking' || title.toLowerCase().includes('booking') || body.toLowerCase().includes('booking');
 
-            if (isBooking) {
-                if (window.router) window.router.navigate('bookings');
-                else window.location.hash = '#bookings';
-            } else {
-                if (window.router) window.router.navigate('home');
-                else window.location.hash = '#home';
-            }
-        });
-
-        PushNotifications.addListener('registrationError', (err) => {
-            console.error('❌ Push registration error:', err);
+            // Use a small delay to ensure the app/router is fully loaded after cold start
+            setTimeout(() => {
+                if (isBooking) {
+                    const role = window.auth?.userData?.role;
+                    if (role === 'manager' || role === 'admin') {
+                        if (window.router) window.router.navigate('manager');
+                        else window.location.hash = '#manager';
+                    } else {
+                        if (window.router) window.router.navigate('bookings');
+                        else window.location.hash = '#bookings';
+                    }
+                } else {
+                    if (window.router) window.router.navigate('home');
+                    else window.location.hash = '#home';
+                }
+            }, 500);
         });
     }
 
