@@ -568,11 +568,46 @@ class Database {
                 console.error("Native push error:", err);
                 throw err;
             }
+        } else {
+            // WEB PUSH (Desktop/PWA)
+            if (!messaging) throw new Error("Firebase Messaging not supported by your browser.");
+
+            // Automatically handle foreground notifications if the browser tab is currently open.
+            if (!window.__pushListenerAdded) {
+                messaging.onMessage((payload) => {
+                    console.log("Foreground Notification Received:", payload);
+                    window.showToast("🔔 Push Alert: " + (payload.notification?.body || 'New Update!'));
+                });
+                window.__pushListenerAdded = true;
+            }
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    const registration = await navigator.serviceWorker.ready;
+                    const currentToken = await messaging.getToken({
+                        serviceWorkerRegistration: registration,
+                        vapidKey: 'BDO3OkgwZmVticyOc3vxB-ytVWSyM8XOjPqis7KfyJ5hckPa6qLi8Vvn4-BxcZqUTesZjgVy3dkJ4GwIFQoMc44'
+                    });
+                    
+                    if (currentToken) {
+                        await firestore.collection('users').doc(userId).set({
+                            fcmTokens: firebase.firestore.FieldValue.arrayUnion(currentToken)
+                        }, { merge: true });
+                        return currentToken;
+                    }
+                } else {
+                    throw new Error("Notification permission denied by user.");
+                }
+            } catch (err) {
+                console.error("Web push error:", err);
+                throw err;
+            }
         }
     }
 
     setupPushListeners() {
-        const platform = window.Capacitor ? window.Capacitor.getPlatform() : 'web';
+        if (!window.Capacitor) return;
+        const platform = window.Capacitor.getPlatform();
         if (platform === 'web') return;
 
         const { PushNotifications } = window.Capacitor.Plugins;
@@ -613,41 +648,6 @@ class Database {
         PushNotifications.addListener('registrationError', (err) => {
             console.error('❌ Push registration error:', err);
         });
-    }
-
-        // WEB PUSH (Desktop/PWA)
-        if (!messaging) throw new Error("Firebase Messaging not supported by your browser.");
-
-        // Automatically handle foreground notifications if the browser tab is currently open.
-        if (!window.__pushListenerAdded) {
-            messaging.onMessage((payload) => {
-                console.log("Foreground Notification Received:", payload);
-                window.showToast("🔔 Push Alert: " + (payload.notification?.body || 'New Update!'));
-            });
-            window.__pushListenerAdded = true;
-        }
-        try {
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                const registration = await navigator.serviceWorker.ready;
-                const currentToken = await messaging.getToken({
-                    serviceWorkerRegistration: registration,
-                    vapidKey: 'BDO3OkgwZmVticyOc3vxB-ytVWSyM8XOjPqis7KfyJ5hckPa6qLi8Vvn4-BxcZqUTesZjgVy3dkJ4GwIFQoMc44'
-                });
-                
-                if (currentToken) {
-                    await firestore.collection('users').doc(userId).set({
-                        fcmTokens: firebase.firestore.FieldValue.arrayUnion(currentToken)
-                    }, { merge: true });
-                    return currentToken;
-                }
-            } else {
-                throw new Error("Notification permission denied by user.");
-            }
-        } catch (err) {
-            console.error("Web push error:", err);
-            throw err;
-        }
     }
 
     async removePushPermission(userId) {
