@@ -56,49 +56,60 @@ jobs:
           cp google-services.json android/app/ || echo "Warning: google-services.json not found in root"
         fi
 
+    - name: Sync Capacitor
+      run: npx cap sync android
+
+    - name: Install Native FCM Background Service
+      run: |
+        # Copy custom MichuMessagingService.java into the Android project
+        JAVA_DIR="android/app/src/main/java/com/michustays/pro"
+        mkdir -p "$JAVA_DIR"
+        cp android/app/src/main/java/com/michustays/pro/MichuMessagingService.java "$JAVA_DIR/" 2>/dev/null || true
+        
+        # If cap sync removed it, copy from root android dir
+        if [ ! -f "$JAVA_DIR/MichuMessagingService.java" ]; then
+          echo "MichuMessagingService.java not found after sync — this shouldn't happen since it's in the android dir"
+          ls -la "$JAVA_DIR/"
+        else
+          echo "✅ MichuMessagingService.java is in place"
+        fi
+
     - name: Patch AndroidManifest for FCM Background Notifications
       run: |
         MANIFEST="android/app/src/main/AndroidManifest.xml"
         
-        # Inject notification icon meta-data for background FCM display
+        # Inject the native FCM service (CRITICAL for background notifications)
+        if ! grep -q "MichuMessagingService" "$MANIFEST"; then
+          sed -i '/<\/application>/i \
+            <service android:name=".MichuMessagingService" android:exported="false"><intent-filter><action android:name="com.google.firebase.MESSAGING_EVENT" \/><\/intent-filter><\/service>' "$MANIFEST"
+          echo "✅ MichuMessagingService injected"
+        fi
+        
+        # Inject notification icon meta-data
         if ! grep -q "default_notification_icon" "$MANIFEST"; then
           sed -i '/<\/application>/i \
-            <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:value="@mipmap/ic_launcher" />' "$MANIFEST"
+            <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:value="@mipmap/ic_launcher" \/>' "$MANIFEST"
           echo "✅ FCM icon meta-data injected"
         fi
         
-        # Inject RECEIVE_BOOT_COMPLETED permission (required for Samsung FCM after reboot)
-        if ! grep -q "RECEIVE_BOOT_COMPLETED" "$MANIFEST"; then
-          sed -i '/<\/manifest>/i \
-            <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />' "$MANIFEST"
-          echo "✅ RECEIVE_BOOT_COMPLETED permission injected"
+        # Inject notification channel default
+        if ! grep -q "default_notification_channel_id" "$MANIFEST"; then
+          sed -i '/<\/application>/i \
+            <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="michu_urgent_v3" \/>' "$MANIFEST"
+          echo "✅ Default channel injected"
         fi
         
-        # Inject VIBRATE permission
-        if ! grep -q "android.permission.VIBRATE" "$MANIFEST"; then
-          sed -i '/<\/manifest>/i \
-            <uses-permission android:name="android.permission.VIBRATE" />' "$MANIFEST"
-          echo "✅ VIBRATE permission injected"
-        fi
-        
-        # Inject USE_FULL_SCREEN_INTENT for lock screen notifications
-        if ! grep -q "USE_FULL_SCREEN_INTENT" "$MANIFEST"; then
-          sed -i '/<\/manifest>/i \
-            <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />' "$MANIFEST"
-          echo "✅ USE_FULL_SCREEN_INTENT permission injected"
-        fi
+        # Inject required permissions
+        for PERM in RECEIVE_BOOT_COMPLETED VIBRATE USE_FULL_SCREEN_INTENT; do
+          if ! grep -q "$PERM" "$MANIFEST"; then
+            sed -i "/<\/manifest>/i \\
+              <uses-permission android:name=\"android.permission.$PERM\" />" "$MANIFEST"
+            echo "✅ $PERM permission injected"
+          fi
+        done
         
         echo "--- Final AndroidManifest.xml ---"
         cat "$MANIFEST"
-
-    # - name: Generate App Icons
-    #   run: |
-    #     # Use npx to run capacitor-assets without needing to install it globally
-    #     # We use logo.png as the source for all icons and splash screens
-    #     npx -y @capacitor/assets generate --android
-
-    - name: Sync Capacitor
-      run: npx cap sync android
 
     - name: Build Debug APK
       run: |
