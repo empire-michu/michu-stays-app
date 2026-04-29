@@ -59,51 +59,81 @@ jobs:
     - name: Sync Capacitor
       run: npx cap sync android
 
-    - name: Install Native FCM Background Service
+    - name: Restore Native FCM Service After Sync
       run: |
-        # Copy custom MichuMessagingService.java into the Android project
         JAVA_DIR="android/app/src/main/java/com/michustays/pro"
-        mkdir -p "$JAVA_DIR"
-        cp android/app/src/main/java/com/michustays/pro/MichuMessagingService.java "$JAVA_DIR/" 2>/dev/null || true
-        
-        # If cap sync removed it, copy from root android dir
-        if [ ! -f "$JAVA_DIR/MichuMessagingService.java" ]; then
-          echo "MichuMessagingService.java not found after sync — this shouldn't happen since it's in the android dir"
-          ls -la "$JAVA_DIR/"
-        else
-          echo "✅ MichuMessagingService.java is in place"
-        fi
-
-    - name: Patch AndroidManifest for FCM Background Notifications
-      run: |
         MANIFEST="android/app/src/main/AndroidManifest.xml"
         
-        # Inject the native FCM service (CRITICAL for background notifications)
+        # Ensure MichuMessagingService.java exists (cap sync should NOT remove it)
+        if [ -f "$JAVA_DIR/MichuMessagingService.java" ]; then
+          echo "✅ MichuMessagingService.java is in place"
+        else
+          echo "❌ MichuMessagingService.java is MISSING after sync!"
+          exit 1
+        fi
+        
+        # Ensure our service is declared in manifest (cap sync may reset manifest)
         if ! grep -q "MichuMessagingService" "$MANIFEST"; then
-          sed -i '/<\/application>/i \
-            <service android:name=".MichuMessagingService" android:exported="false"><intent-filter><action android:name="com.google.firebase.MESSAGING_EVENT" \/><\/intent-filter><\/service>' "$MANIFEST"
-          echo "✅ MichuMessagingService injected"
+          # Use Python for reliable XML-safe injection instead of sed
+          python3 -c "
+import re
+with open('$MANIFEST', 'r') as f:
+    content = f.read()
+service_block = '''
+        <service
+            android:name=\".MichuMessagingService\"
+            android:exported=\"false\">
+            <intent-filter>
+                <action android:name=\"com.google.firebase.MESSAGING_EVENT\" />
+            </intent-filter>
+        </service>
+'''
+content = content.replace('</application>', service_block + '    </application>')
+with open('$MANIFEST', 'w') as f:
+    f.write(content)
+"
+          echo "✅ MichuMessagingService injected into manifest"
+        else
+          echo "✅ MichuMessagingService already in manifest"
         fi
         
-        # Inject notification icon meta-data
-        if ! grep -q "default_notification_icon" "$MANIFEST"; then
-          sed -i '/<\/application>/i \
-            <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:value="@mipmap/ic_launcher" \/>' "$MANIFEST"
-          echo "✅ FCM icon meta-data injected"
-        fi
-        
-        # Inject notification channel default
+        # Ensure default notification channel meta-data
         if ! grep -q "default_notification_channel_id" "$MANIFEST"; then
-          sed -i '/<\/application>/i \
-            <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="michu_urgent_v3" \/>' "$MANIFEST"
-          echo "✅ Default channel injected"
+          python3 -c "
+with open('$MANIFEST', 'r') as f:
+    content = f.read()
+meta = '        <meta-data android:name=\"com.google.firebase.messaging.default_notification_channel_id\" android:value=\"michu_urgent_v3\" />\n'
+content = content.replace('</application>', meta + '    </application>')
+with open('$MANIFEST', 'w') as f:
+    f.write(content)
+"
+          echo "✅ Default channel meta-data injected"
+        fi
+
+        # Ensure default notification icon meta-data
+        if ! grep -q "default_notification_icon" "$MANIFEST"; then
+          python3 -c "
+with open('$MANIFEST', 'r') as f:
+    content = f.read()
+meta = '        <meta-data android:name=\"com.google.firebase.messaging.default_notification_icon\" android:value=\"@mipmap/ic_launcher\" />\n'
+content = content.replace('</application>', meta + '    </application>')
+with open('$MANIFEST', 'w') as f:
+    f.write(content)
+"
+          echo "✅ Notification icon meta-data injected"
         fi
         
-        # Inject required permissions
+        # Ensure required permissions
         for PERM in RECEIVE_BOOT_COMPLETED VIBRATE USE_FULL_SCREEN_INTENT; do
           if ! grep -q "$PERM" "$MANIFEST"; then
-            sed -i "/<\/manifest>/i \\
-              <uses-permission android:name=\"android.permission.$PERM\" />" "$MANIFEST"
+            python3 -c "
+with open('$MANIFEST', 'r') as f:
+    content = f.read()
+perm = '    <uses-permission android:name=\"android.permission.$PERM\" />\n'
+content = content.replace('</manifest>', perm + '</manifest>')
+with open('$MANIFEST', 'w') as f:
+    f.write(content)
+"
             echo "✅ $PERM permission injected"
           fi
         done
