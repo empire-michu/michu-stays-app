@@ -59,14 +59,18 @@ jobs:
     - name: Sync Capacitor
       run: npx cap sync android
 
-    - name: Build Debug APK
+    - name: Build Signed Release APK
       run: |
         cd android
         chmod +x gradlew
-        ./gradlew assembleDebug
+        ./gradlew assembleRelease \
+          -Pandroid.injected.signing.store.file=michu-stays-release.keystore \
+          -Pandroid.injected.signing.store.password=MichuStays2026 \
+          -Pandroid.injected.signing.key.alias=michu-key \
+          -Pandroid.injected.signing.key.password=MichuStays2026
 
-    - name: Upload APK Artifact
+    - name: Upload Release APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: michu-stays-debug-apk
-        path: android/app/build/outputs/apk/debug/app-debug.apk
+        name: michu-stays-release-apk
+        path: android/app/build/outputs/apk/release/app-release.apk
