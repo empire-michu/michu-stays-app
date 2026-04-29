@@ -49,22 +49,25 @@ app.post('/send-push', async (req, res) => {
     return res.status(400).send({ error: 'No FCM tokens provided.' });
   }
 
-  // Create the Firebase message payload
+  // Create the Firebase message payload with high-priority wake flags
   const message = {
     notification: {
       title: title || 'Michu Stays',
       body: body || 'You have a new update.'
     },
     data: {
-      type: (title && title.toLowerCase().includes('booking')) ? 'booking' : 'general'
+      type: (title && title.toLowerCase().includes('booking')) ? 'booking' : 'general',
+      click_action: 'FCM_PLUGIN_ACTIVITY'
     },
     android: {
       priority: 'high',
+      ttl: '86400s',
       notification: {
-        sound: 'default',
         channelId: 'michu_urgent_v3',
-        priority: 'high',
-        visibility: 'public'
+        priority: 'max',
+        visibility: 'public',
+        sound: 'default',
+        clickAction: 'FCM_PLUGIN_ACTIVITY'
       }
     },
     apns: {
@@ -76,7 +79,7 @@ app.post('/send-push', async (req, res) => {
         }
       }
     },
-    tokens: tokens // This allows sending to multiple devices at once
+    tokens: tokens 
   };
 
   try {

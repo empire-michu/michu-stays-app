@@ -55,6 +55,9 @@ class Database {
 
         // Wake up the Render push server on app start (free tier sleeps after 15 min)
         fetch('https://michu-push-server.onrender.com/', { method: 'GET' }).catch(() => {});
+        
+        // Setup push listeners immediately
+        this.setupPushListeners();
     }
 
     clearCache(type) {
@@ -537,36 +540,6 @@ class Database {
                     } catch(e) { console.warn("Channel creation issue:", e); }
 
                     // Set up listeners ONCE (globally)
-                    if (!window.__pushListenersSetup) {
-                        window.__pushListenersSetup = true;
-                        
-                        // When a notification arrives while app is in foreground
-                        PushNotifications.addListener('pushNotificationReceived', (notification) => {
-                            console.log('📬 Foreground push received:', notification);
-                            this.showClickableNotification(notification);
-                        });
-                        
-                        // When user taps on a notification
-                        PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-                            console.log('👆 Push notification tapped:', notification);
-                            const data = notification.notification?.data || {};
-                            const title = notification.notification?.title || '';
-                            const body = notification.notification?.body || '';
-                            
-                            const isBooking = data.type === 'booking' || title.toLowerCase().includes('booking') || body.toLowerCase().includes('booking');
-                            
-                            if (isBooking) {
-                                window.router.navigate('bookings');
-                            } else {
-                                window.router.navigate('home');
-                            }
-                        });
-                        
-                        PushNotifications.addListener('registrationError', (err) => {
-                            console.error('❌ Push registration error:', err);
-                        });
-                    }
-
                     // Register and get token
                     await PushNotifications.register();
                     
@@ -596,6 +569,51 @@ class Database {
                 throw err;
             }
         }
+    }
+
+    setupPushListeners() {
+        const platform = window.Capacitor ? window.Capacitor.getPlatform() : 'web';
+        if (platform === 'web') return;
+
+        const { PushNotifications } = window.Capacitor.Plugins;
+        if (!PushNotifications) return;
+
+        if (window.__pushListenersSetup) return;
+        window.__pushListenersSetup = true;
+
+        console.log("🛠️ Setting up Push Listeners...");
+
+        // Foreground listener
+        PushNotifications.addListener('pushNotificationReceived', (notification) => {
+            console.log('📬 Foreground push received:', notification);
+            // Use window.db explicitly to ensure context
+            if (window.db && window.db.showClickableNotification) {
+                window.db.showClickableNotification(notification);
+            }
+        });
+
+        // Tap listener
+        PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
+            console.log('👆 Push notification tapped:', notification);
+            const data = notification.notification?.data || {};
+            const title = notification.notification?.title || '';
+            const body = notification.notification?.body || '';
+
+            const isBooking = data.type === 'booking' || title.toLowerCase().includes('booking') || body.toLowerCase().includes('booking');
+
+            if (isBooking) {
+                if (window.router) window.router.navigate('bookings');
+                else window.location.hash = '#bookings';
+            } else {
+                if (window.router) window.router.navigate('home');
+                else window.location.hash = '#home';
+            }
+        });
+
+        PushNotifications.addListener('registrationError', (err) => {
+            console.error('❌ Push registration error:', err);
+        });
+    }
 
         // WEB PUSH (Desktop/PWA)
         if (!messaging) throw new Error("Firebase Messaging not supported by your browser.");
