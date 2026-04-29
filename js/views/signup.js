@@ -109,7 +109,7 @@ window.router.addRoute('signup', (container) => {
         if (pass.length < 6) return showAlert('Password too short.');
 
         const btn = document.getElementById('btn-signup');
-        const orig = btn.innerText; btn.innerText = 'Creating Account...'; btn.disabled = true;
+        const orig = btn.innerText; btn.innerText = __('Creating Account...'); btn.disabled = true;
         try {
             await window.auth.signup(email, pass, role, fullName);
         } catch(e) {
