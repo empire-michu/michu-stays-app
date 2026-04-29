@@ -739,7 +739,7 @@ class Database {
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
                 try {
-                    const response = await fetch('https://michu-push-server.onrender.com/send-push', {
+                    const response = await fetch('https://us-central1-michu-stays.cloudfunctions.net/sendPush', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ tokens, title, body }),

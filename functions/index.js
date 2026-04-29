@@ -1,14 +1,15 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const cors = require("cors")({ origin: true });
-const brevo = require("@getbrevo/brevo");
+const { BrevoClient } = require('@getbrevo/brevo');
 
 // INITIALIZE
 admin.initializeApp();
 
 // Setup Brevo
-const apiInstance = new brevo.TransactionalEmailsApi();
-apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY || "YOUR_BREVO_API_KEY");
+const brevoClient = new BrevoClient({
+  apiKey: process.env.BREVO_API_KEY || "YOUR_BREVO_API_KEY"
+});
 
 exports.sendPush = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
@@ -18,6 +19,26 @@ exports.sendPush = functions.https.onRequest((req, res) => {
 
     const message = {
       notification: { title: title || 'Michu Stays', body: body || 'You have a new update.' },
+      data: {
+        type: (title && title.toLowerCase().includes('booking')) ? 'booking' : 'general',
+        title: title || 'Michu Stays',
+        body: body || 'You have a new update.'
+      },
+      android: {
+        priority: 'high',
+        notification: {
+          priority: 'max',
+          visibility: 'public',
+          sound: 'default',
+          defaultVibrateTimings: true,
+          defaultLightSettings: true
+        }
+      },
+      apns: {
+        payload: {
+          aps: { sound: 'default', contentAvailable: true, mutableContent: true }
+        }
+      },
       tokens: tokens
     };
 
@@ -70,7 +91,13 @@ exports.requestPasswordReset = functions.https.onRequest((req, res) => {
       sendSmtpEmail.sender = { "name": "Michu Stays", "email": "management@michustays.pro.et" };
       sendSmtpEmail.to = [{ "email": email }];
 
-      await apiInstance.sendTransacEmail(sendSmtpEmail);
+      const emailPayload = {
+        subject: sendSmtpEmail.subject,
+        htmlContent: sendSmtpEmail.htmlContent,
+        sender: sendSmtpEmail.sender,
+        to: sendSmtpEmail.to
+      };
+      await brevoClient.transactionalEmails.sendTransacEmail(emailPayload);
 
       res.status(200).send({ success: true });
     } catch (error) {
