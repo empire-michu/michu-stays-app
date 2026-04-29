@@ -59,14 +59,14 @@ jobs:
     - name: Sync Capacitor
       run: npx cap sync android
 
-    - name: Build Signed Release APK
+    - name: Build Signed Release AAB (App Bundle)
       run: |
         cd android
         chmod +x gradlew
-        ./gradlew assembleRelease
+        ./gradlew bundleRelease
 
-    - name: Upload Release APK Artifact
+    - name: Upload Release AAB Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: michu-stays-release-apk
-        path: android/app/build/outputs/apk/release/app-release.apk
+        name: michu-stays-release-aab
+        path: android/app/build/outputs/bundle/release/app-release.aab
