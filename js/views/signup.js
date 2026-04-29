@@ -101,18 +101,18 @@ window.router.addRoute('signup', (container) => {
 
     window.handleSignup = async () => {
         const fullName = document.getElementById('signup-fullname').value.trim();
-        const email    = document.getElementById('signup-email').value.trim();
-        const pass     = document.getElementById('signup-password').value;
-        const role     = 'customer'; // Defaulted to customer as requested
-        
+        const email = document.getElementById('signup-email').value.trim();
+        const pass = document.getElementById('signup-password').value;
+        const role = 'customer'; // Defaulted to customer as requested
+
         if (!email || !pass || !fullName) return showAlert('All fields required.');
         if (pass.length < 6) return showAlert('Password too short.');
 
         const btn = document.getElementById('btn-signup');
-        const orig = btn.innerText; btn.innerText = __('Creating Account...'); btn.disabled = true;
+        const orig = btn.innerText; btn.innerText = 'Creating Account...'; btn.disabled = true;
         try {
             await window.auth.signup(email, pass, role, fullName);
-        } catch(e) {
+        } catch (e) {
             btn.innerText = orig; btn.disabled = false;
         }
     };

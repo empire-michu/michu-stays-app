@@ -1,4 +1,4 @@
-package com.michustays.pro;
+package com.michustays.app;
 
 import com.getcapacitor.BridgeActivity;
 

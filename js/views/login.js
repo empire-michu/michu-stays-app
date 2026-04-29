@@ -114,14 +114,14 @@ window.router.addRoute('login', (container) => {
         const errorDiv = document.getElementById('login-error-msg');
         if (errorDiv) { errorDiv.style.display = 'none'; errorDiv.textContent = ''; }
 
-        if (!email || !pass) return showAlert(__('Email and password are required.'));
+        if (!email || !pass) return showAlert('Email and password are required.');
         const btn = document.getElementById('btn-email-login');
-        const orig = btn.innerText; btn.innerText = __('Verifying...'); btn.disabled = true;
-        try { 
-            await window.auth.login(email, pass); 
+        const orig = btn.innerText; btn.innerText = 'Verifying...'; btn.disabled = true;
+        try {
+            await window.auth.login(email, pass);
             // Reset button in case redirection is taking a moment (don't leave it as "Verifying...")
             btn.innerText = orig; btn.disabled = false;
-        } catch(e) { 
+        } catch (e) {
             btn.innerText = orig; btn.disabled = false;
             // Show inline error for better UX
             if (errorDiv) {

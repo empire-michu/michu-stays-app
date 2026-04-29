@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Michu Stays</string>
     <string name="title_activity_main">Michu Stays</string>
-    <string name="package_name">com.michustays.pro</string>
-    <string name="custom_url_scheme">com.michustays.pro</string>
+    <string name="package_name">com.michustays.app</string>
+    <string name="custom_url_scheme">com.michustays.app</string>
 </resources>

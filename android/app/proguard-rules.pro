@@ -6,7 +6,7 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Michu Stays Push Fix
--keep class com.michustays.pro.MichuMessagingService { *; }
+-keep class com.michustays.app.MichuMessagingService { *; }
 
 # Capacitor plugins
 -keep class com.capacitorjs.plugins.** { *; }

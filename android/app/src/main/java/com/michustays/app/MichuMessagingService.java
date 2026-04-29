@@ -1,4 +1,4 @@
-package com.michustays.pro;
+package com.michustays.app;
 
 import android.app.ActivityManager;
 import android.app.NotificationChannel;

@@ -7,6 +7,35 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:1054031423633:android:9d25d941d494d61bc33730",
+        "android_client_info": {
+          "package_name": "com.michustays.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1054031423633-os0ltvup6rt8jt6tv1sl2pc1tg0jrh2u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmQlAFxzsWer1apExcmRWb2kClBcbmLTs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1054031423633-os0ltvup6rt8jt6tv1sl2pc1tg0jrh2u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:1054031423633:android:8cafdd7aa49bac2fc33730",
         "android_client_info": {
           "package_name": "com.michustays.pro"

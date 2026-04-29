@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#F7F9FC">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -19,76 +21,106 @@
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
+
         .header {
             padding-top: max(2.2rem, calc(0.6rem + var(--safe-top))) !important;
         }
+
         body {
             padding-bottom: var(--safe-bottom);
         }
     </style>
     <script>
-      // Force status bar visibility on native Android APK
-      function initStatusBar() {
-        try {
-          if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.StatusBar) {
-            const StatusBar = window.Capacitor.Plugins.StatusBar;
-            StatusBar.setOverlaysWebView({ overlay: false });
-            StatusBar.setBackgroundColor({ color: '#F7F9FC' });
-            StatusBar.setStyle({ style: 'LIGHT' });
-            StatusBar.show();
-            console.log('StatusBar configured successfully');
-          }
-        } catch (e) {
-          console.error('StatusBar init failed:', e);
+        // Force status bar visibility on native Android APK
+        function initStatusBar() {
+            try {
+                if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.StatusBar) {
+                    const StatusBar = window.Capacitor.Plugins.StatusBar;
+                    StatusBar.setOverlaysWebView({ overlay: false });
+                    StatusBar.setBackgroundColor({ color: '#F7F9FC' });
+                    StatusBar.setStyle({ style: 'LIGHT' });
+                    StatusBar.show();
+                    console.log('StatusBar configured successfully');
+                }
+            } catch (e) {
+                console.error('StatusBar init failed:', e);
+            }
         }
-      }
-      // Try all possible entry points to ensure it fires
-      document.addEventListener('deviceready', initStatusBar);
-      document.addEventListener('DOMContentLoaded', () => setTimeout(initStatusBar, 300));
-      setTimeout(initStatusBar, 2000); // Fallback for slow devices
+        // Try all possible entry points to ensure it fires
+        document.addEventListener('deviceready', initStatusBar);
+        document.addEventListener('DOMContentLoaded', () => setTimeout(initStatusBar, 300));
+        setTimeout(initStatusBar, 2000); // Fallback for slow devices
     </script>
     <!-- Leaflet Maps CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <!-- Leaflet Maps JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
+
 <body>
-    <div id="confirm-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.8);backdrop-filter:blur(8px);z-index:15000;align-items:center;justify-content:center;padding:1.5rem;overflow:hidden;">
-        <div style="background:white;border-radius:32px;padding:2rem;max-width:400px;width:100%;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);animation:michuPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            <div style="width:64px;height:64px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:#ef4444;">
-                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+    <div id="confirm-modal"
+        style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.8);backdrop-filter:blur(8px);z-index:15000;align-items:center;justify-content:center;padding:1.5rem;overflow:hidden;">
+        <div
+            style="background:white;border-radius:32px;padding:2rem;max-width:400px;width:100%;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);animation:michuPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <div
+                style="width:64px;height:64px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:#ef4444;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+                    <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
             </div>
-            <h3 id="confirm-title" style="margin:0 0 0.5rem;color:#0f172a;font-size:1.25rem;font-weight:800;">Are you sure?</h3>
-            <p id="confirm-msg" style="color:#64748b;font-size:0.95rem;margin:0 0 2rem;line-height:1.6;">This action cannot be undone. Please confirm to proceed.</p>
+            <h3 id="confirm-title" style="margin:0 0 0.5rem;color:#0f172a;font-size:1.25rem;font-weight:800;">Are you
+                sure?</h3>
+            <p id="confirm-msg" style="color:#64748b;font-size:0.95rem;margin:0 0 2rem;line-height:1.6;">This action
+                cannot be undone. Please confirm to proceed.</p>
             <div style="display:flex; gap:1rem;">
-                <button id="confirm-cancel-btn" style="flex:1;padding:1rem;border-radius:16px;border:1px solid #e2e8f0;background:white;color:#64748b;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.2s;">Cancel</button>
-                <button id="confirm-yes-btn" style="flex:1;padding:1rem;border-radius:16px;border:none;background:#ef4444;color:white;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 12px rgba(239,68,68,0.25);">Delete</button>
+                <button id="confirm-cancel-btn"
+                    style="flex:1;padding:1rem;border-radius:16px;border:1px solid #e2e8f0;background:white;color:#64748b;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.2s;">Cancel</button>
+                <button id="confirm-yes-btn"
+                    style="flex:1;padding:1rem;border-radius:16px;border:none;background:#ef4444;color:white;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 12px rgba(239,68,68,0.25);">Delete</button>
             </div>
         </div>
     </div>
     <header class="header">
         <div class="logo-container" onclick="router.navigate('home')">
-            <img src="images/logo.png?v=2" alt="Michu Stays Logo" style="height: 42px; width: 42px; object-fit: contain;">
+            <img src="images/logo.png?v=2" alt="Michu Stays Logo"
+                style="height: 42px; width: 42px; object-fit: contain;">
             <span>Michu Stays</span>
         </div>
-        
+
         <div class="header-actions" style="gap:0.5rem;">
             <!-- Language Switcher -->
             <div style="position:relative;" id="lang-switcher-container">
-                <button id="lang-toggle-btn" onclick="event.stopPropagation(); var dd=document.getElementById('lang-dropdown'); dd.style.display = dd.style.display === 'block' ? 'none' : 'block';" style="display:flex; align-items:center; gap:0.3rem; background:white; border:1px solid #e2e8f0; padding:0.3rem 0.6rem; border-radius:99px; font-weight:700; font-size:0.75rem; cursor:pointer; color:#1e293b; box-shadow:0 2px 5px rgba(0,0,0,0.02); height: 100%;">
+                <button id="lang-toggle-btn"
+                    onclick="event.stopPropagation(); var dd=document.getElementById('lang-dropdown'); dd.style.display = dd.style.display === 'block' ? 'none' : 'block';"
+                    style="display:flex; align-items:center; gap:0.3rem; background:white; border:1px solid #e2e8f0; padding:0.3rem 0.6rem; border-radius:99px; font-weight:700; font-size:0.75rem; cursor:pointer; color:#1e293b; box-shadow:0 2px 5px rgba(0,0,0,0.02); height: 100%;">
                     <span id="current-lang-flag">🇬🇧</span>
                     <span id="current-lang-code" style="margin-left: 2px;">EN</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left: -2px;"><path d="M6 9l6 6 6-6"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        style="margin-left: -2px;">
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
                 </button>
-                <div id="lang-dropdown" style="display:none; position:absolute; top:120%; right:0; background:white; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid #e2e8f0; width:140px; z-index:15000; overflow:hidden; animation:michuPop 0.2s ease-out;">
-                    <div onclick="event.stopPropagation(); setMichuLang('en')" style="padding:0.75rem 1rem; display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.85rem; font-weight:700; color:#1e293b; border-bottom:1px solid #f1f5f9;"><span>🇬🇧</span> English</div>
-                    <div onclick="event.stopPropagation(); setMichuLang('am')" style="padding:0.75rem 1rem; display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.85rem; font-weight:700; color:#1e293b; border-bottom:1px solid #f1f5f9;"><span>🇪🇹</span> አማርኛ</div>
-                    <div onclick="event.stopPropagation(); setMichuLang('om')" style="padding:0.75rem 1rem; display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.85rem; font-weight:700; color:#1e293b;"><span>🇪🇹</span> Oromiffa</div>
+                <div id="lang-dropdown"
+                    style="display:none; position:absolute; top:120%; right:0; background:white; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid #e2e8f0; width:140px; z-index:15000; overflow:hidden; animation:michuPop 0.2s ease-out;">
+                    <div onclick="event.stopPropagation(); setMichuLang('en')"
+                        style="padding:0.75rem 1rem; display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.85rem; font-weight:700; color:#1e293b; border-bottom:1px solid #f1f5f9;">
+                        <span>🇬🇧</span> English</div>
+                    <div onclick="event.stopPropagation(); setMichuLang('am')"
+                        style="padding:0.75rem 1rem; display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.85rem; font-weight:700; color:#1e293b; border-bottom:1px solid #f1f5f9;">
+                        <span>🇪🇹</span> አማርኛ</div>
+                    <div onclick="event.stopPropagation(); setMichuLang('om')"
+                        style="padding:0.75rem 1rem; display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.85rem; font-weight:700; color:#1e293b;">
+                        <span>🇪🇹</span> Oromiffa</div>
                 </div>
             </div>
             <script>
                 // Close language dropdown when tapping anywhere else
-                document.addEventListener('click', function(e) {
+                document.addEventListener('click', function (e) {
                     var dd = document.getElementById('lang-dropdown');
                     var container = document.getElementById('lang-switcher-container');
                     if (dd && container && !container.contains(e.target)) {
@@ -97,24 +129,34 @@
                 });
             </script>
 
-            
 
-            <div id="header-notif-btn" style="display:none; cursor:pointer; position:relative; background:#f0f4f1; width:34px; height:34px; border-radius:50%; align-items:center; justify-content:center;" onclick="showNotifModal()">
+
+            <div id="header-notif-btn"
+                style="display:none; cursor:pointer; position:relative; background:#f0f4f1; width:34px; height:34px; border-radius:50%; align-items:center; justify-content:center;"
+                onclick="showNotifModal()">
                 <svg width="18" height="18" fill="none" stroke="#1a6032" stroke-width="2.5" viewBox="0 0 24 24">
                     <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                     <path d="M13.73 21a2 2 0 01-3.46 0"></path>
                 </svg>
-                <div id="notif-badge" style="display:none; position:absolute; top:0; right:0; width:10px; height:10px; background:#ff385c; border:2px solid white; border-radius:50%;"></div>
+                <div id="notif-badge"
+                    style="display:none; position:absolute; top:0; right:0; width:10px; height:10px; background:#ff385c; border:2px solid white; border-radius:50%;">
+                </div>
             </div>
 
-            <div id="ai-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;">
-                <div style="background:white;border-radius:24px;padding:2rem;max-width:400px;width:95%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.3);animation:aiSlide 0.25s cubic-bezier(.34,1.56,.64,1);">
-                    <div style="width:56px;height:56px;border-radius:50%;background:#e3f2fd;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
-                         <span style="font-size:2rem;">🤖</span>
+            <div id="ai-modal"
+                style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;">
+                <div
+                    style="background:white;border-radius:24px;padding:2rem;max-width:400px;width:95%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.3);animation:aiSlide 0.25s cubic-bezier(.34,1.56,.64,1);">
+                    <div
+                        style="width:56px;height:56px;border-radius:50%;background:#e3f2fd;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                        <span style="font-size:2rem;">🤖</span>
                     </div>
                     <h3 style="margin:0 0 0.4rem;color:#1a1a1a;font-size:1.1rem;font-weight:800;">Ask Michu A.I</h3>
-                    <p style="color:#666;font-size:0.88rem;margin:0 0 1.5rem;line-height:1.5;">Our smart assistant is currently learning how to help you find the best stays. This feature is coming very soon!</p>
-                    <button onclick="document.getElementById('ai-modal').style.display='none'" style="width:100%;padding:0.9rem;border-radius:99px;border:none;background:var(--color-primary);color:white;font-weight:700;font-size:0.9rem;cursor:pointer;box-shadow:0 4px 12px rgba(26,96,50,0.2);">Got It!</button>
+                    <p style="color:#666;font-size:0.88rem;margin:0 0 1.5rem;line-height:1.5;">Our smart assistant is
+                        currently learning how to help you find the best stays. This feature is coming very soon!</p>
+                    <button onclick="document.getElementById('ai-modal').style.display='none'"
+                        style="width:100%;padding:0.9rem;border-radius:99px;border:none;background:var(--color-primary);color:white;font-weight:700;font-size:0.9rem;cursor:pointer;box-shadow:0 4px 12px rgba(26,96,50,0.2);">Got
+                        It!</button>
                 </div>
             </div>
 
@@ -127,23 +169,41 @@
                 }
             </script>
 
-            <div id="notif-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;">
-                <div style="background:white;border-radius:24px;padding:2rem;max-width:400px;width:95%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.3);animation:aiSlide 0.25s cubic-bezier(.34,1.56,.64,1);">
-                    <div style="width:56px;height:56px;border-radius:50%;background:#fff8e1;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
-                         <img src="images/logo.png" style="width:32px;height:32px;object-fit:contain;">
+            <div id="notif-modal"
+                style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;">
+                <div
+                    style="background:white;border-radius:24px;padding:2rem;max-width:400px;width:95%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.3);animation:aiSlide 0.25s cubic-bezier(.34,1.56,.64,1);">
+                    <div
+                        style="width:56px;height:56px;border-radius:50%;background:#fff8e1;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                        <img src="images/logo.png" style="width:32px;height:32px;object-fit:contain;">
                     </div>
-                    <h3 style="margin:0 0 0.4rem;color:#1a1a1a;font-size:1.1rem;font-weight:800;">Notification Center</h3>
-                    
-                    <div id="notif-list-container" style="max-height:300px; overflow-y:auto; margin:1rem 0; text-align:left; display:flex; flex-direction:column; gap:0.8rem; padding:0.5rem;">
-                        <p id="notif-empty-state" style="color:#999;font-size:0.88rem;margin:1rem 0;text-align:center;">You're all caught up — no new notifications.</p>
+                    <h3 style="margin:0 0 0.4rem;color:#1a1a1a;font-size:1.1rem;font-weight:800;">Notification Center
+                    </h3>
+
+                    <div id="notif-list-container"
+                        style="max-height:300px; overflow-y:auto; margin:1rem 0; text-align:left; display:flex; flex-direction:column; gap:0.8rem; padding:0.5rem;">
+                        <p id="notif-empty-state" style="color:#999;font-size:0.88rem;margin:1rem 0;text-align:center;">
+                            You're all caught up — no new notifications.</p>
                     </div>
 
-                    <button onclick="document.getElementById('notif-modal').style.display='none'" style="width:100%;padding:0.9rem;border-radius:99px;border:1.5px solid #e0e0e0;background:white;font-weight:700;font-size:0.9rem;cursor:pointer;color:#444;margin-top:0.5rem;">Close Tray</button>
+                    <button onclick="document.getElementById('notif-modal').style.display='none'"
+                        style="width:100%;padding:0.9rem;border-radius:99px;border:1.5px solid #e0e0e0;background:white;font-weight:700;font-size:0.9rem;cursor:pointer;color:#444;margin-top:0.5rem;">Close
+                        Tray</button>
                 </div>
             </div>
 
             <style>
-                @keyframes michuPop { from { opacity:0; transform:scale(0.9) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+                @keyframes michuPop {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.9) translateY(10px);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: scale(1) translateY(0);
+                    }
+                }
             </style>
             <!-- Auth Nav Container -->
             <div id="auth-nav-container"></div>
@@ -167,17 +227,20 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
-        (function() {
+        (function () {
             emailjs.init("OQ-6hZ4MFw_jIL6LJ");
         })();
     </script>
     <title>Michu Stays | Best Hotels in Dire Dawa, Ethiopia</title>
-    <meta name="description" content="Searching for hotels in Dire Dawa? Book the best stays, guest houses, and apartments on Michu Stays. Your premium choice for Ethiopian hospitality.">
-    <meta name="keywords" content="Hotels in Dire Dawa, Ethiopia hotels, guesthouses in Dire Dawa, Michu Stays, Ethiopia stays">
-    
+    <meta name="description"
+        content="Searching for hotels in Dire Dawa? Book the best stays, guest houses, and apartments on Michu Stays. Your premium choice for Ethiopian hospitality.">
+    <meta name="keywords"
+        content="Hotels in Dire Dawa, Ethiopia hotels, guesthouses in Dire Dawa, Michu Stays, Ethiopia stays">
+
     <!-- Open Graph / SEO -->
     <meta property="og:title" content="Michu Stays | Best Hotels in Dire Dawa, Ethiopia">
-    <meta property="og:description" content="Book premium stays in Dire Dawa and across Ethiopia. Find your home away from home on Michu Stays.">
+    <meta property="og:description"
+        content="Book premium stays in Dire Dawa and across Ethiopia. Find your home away from home on Michu Stays.">
     <meta property="og:image" content="https://michustays.com/og-image.jpg">
     <meta property="og:type" content="website">
 
@@ -209,19 +272,19 @@
             });
         }
     </script>
-    <script src="js/i18n.js?v=1240"></script>
-    <script src="js/db.js?v=1240"></script>
-    <script src="js/auth.js?v=1240"></script>
-    <script src="js/app.js?v=1240"></script>
-    <script src="js/views/home.js?v=1240"></script>
-    <script src="js/views/admin.js?v=1240"></script>
-    <script src="js/views/manager.js?v=1240"></script>
-    <script src="js/views/booking.js?v=1240"></script>
-    <script src="js/views/hotel-detail.js?v=1240"></script>
-    <script src="js/views/add-property.js?v=1240"></script>
-    <script src="js/views/login.js?v=1240"></script>
-    <script src="js/views/signup.js?v=1240"></script>
-    <script src="js/views/profile.js?v=1240"></script>
+    <script src="js/i18n.js?v=1224"></script>
+    <script src="js/db.js?v=1224"></script>
+    <script src="js/auth.js?v=1224"></script>
+    <script src="js/app.js?v=1224"></script>
+    <script src="js/views/home.js?v=1224"></script>
+    <script src="js/views/admin.js?v=1224"></script>
+    <script src="js/views/manager.js?v=1224"></script>
+    <script src="js/views/booking.js?v=1224"></script>
+    <script src="js/views/hotel-detail.js?v=1224"></script>
+    <script src="js/views/add-property.js?v=1224"></script>
+    <script src="js/views/login.js?v=1224"></script>
+    <script src="js/views/signup.js?v=1224"></script>
+    <script src="js/views/profile.js?v=1224"></script>
 
     <!-- ═══════════════════════════════════════════
          PROFESSIONAL SITE FOOTER
@@ -231,22 +294,36 @@
             <!-- Brand Column -->
             <div class="footer-brand footer-col">
                 <h2>🏠 Michu Stays</h2>
-                <p>Your trusted platform for finding premium accommodations across Ethiopia. We connect travelers with authentic, comfortable homes in the heart of Dire Dawa and beyond.</p>
+                <p>Your trusted platform for finding premium accommodations across Ethiopia. We connect travelers with
+                    authentic, comfortable homes in the heart of Dire Dawa and beyond.</p>
 
                 <div class="footer-contact-item">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C9.39 21 3 14.61 3 7a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z"/></svg>
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C9.39 21 3 14.61 3 7a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
+                    </svg>
                     <a href="tel:+251977916787" style="color:#c8e6c9;text-decoration:none;">+251 977 916 787</a>
                 </div>
                 <div class="footer-contact-item">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C9.39 21 3 14.61 3 7a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z"/></svg>
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C9.39 21 3 14.61 3 7a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
+                    </svg>
                     <a href="tel:+251973802000" style="color:#c8e6c9;text-decoration:none;">+251 973 802 000</a>
                 </div>
                 <div class="footer-contact-item">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                    <a href="mailto:michustays@gmail.com" style="color:#c8e6c9;text-decoration:none;">michustays@gmail.com</a>
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                    </svg>
+                    <a href="mailto:michustays@gmail.com"
+                        style="color:#c8e6c9;text-decoration:none;">michustays@gmail.com</a>
                 </div>
                 <div class="footer-contact-item">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 119.5 9 2.5 2.5 0 0112 11.5z"/></svg>
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 119.5 9 2.5 2.5 0 0112 11.5z" />
+                    </svg>
                     <span>Dire Dawa, Ethiopia</span>
                 </div>
             </div>
@@ -329,28 +406,41 @@
     <!-- Modern Bottom Mobile Navigation -->
     <nav id="mobile-nav" class="mobile-nav">
         <div class="mobile-nav-item" onclick="router.navigate('home')">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                <path d="M9 22V12h6v10" />
+            </svg>
             <span>Home</span>
         </div>
         <div class="mobile-nav-item" onclick="window.mobileSearch()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+            </svg>
             <span>Search</span>
         </div>
         <div class="mobile-nav-item" id="mobile-nav-bookings" onclick="window.mobileBookings()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 14l2 2 4-4"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2" />
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+                <path d="M9 14l2 2 4-4" />
+            </svg>
             <span>Bookings</span>
         </div>
         <div class="mobile-nav-item" onclick="router.navigate('profile')">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+            </svg>
             <span>Profile</span>
         </div>
     </nav>
 
     <script>
-    const _legalContent = {
-        terms: {
-            title: '📄 Terms & Conditions',
-            body: `
+        const _legalContent = {
+            terms: {
+                title: '📄 Terms & Conditions',
+                body: `
                 <h3>1. Acceptance of Terms</h3>
                 <p>By accessing and using Michu Stays ("the Platform"), you agree to be bound by these Terms and Conditions. If you do not agree, please do not use our services. Michu Stays reserves the right to update these terms at any time with notice to registered users.</p>
                 <h3>2. User Responsibilities</h3>
@@ -368,10 +458,10 @@
                 <h3>8. Contact</h3>
                 <p>For any questions regarding these terms, contact us at michustays@gmail.com or call +251 977 916 787.</p>
             `
-        },
-        privacy: {
-            title: '🔒 Privacy Policy',
-            body: `
+            },
+            privacy: {
+                title: '🔒 Privacy Policy',
+                body: `
                 <h3>1. Information We Collect</h3>
                 <p>We collect personal information you provide at registration (name, email, phone number) and booking details. We also collect usage data such as pages visited, filters applied, and search queries to improve our services.</p>
                 <h3>2. How We Use Your Information</h3>
@@ -385,10 +475,10 @@
                 <h3>6. Contact</h3>
                 <p>For privacy-related inquiries, contact michustays@gmail.com.</p>
             `
-        },
-        booking: {
-            title: '📑 Booking Policy',
-            body: `
+            },
+            booking: {
+                title: '📑 Booking Policy',
+                body: `
                 <h3>1. How to Book</h3>
                 <p>Select your preferred property, choose your check-in and check-out dates, and submit a booking request with proof of payment. Your booking will be listed as "Awaiting Verification" until confirmed by the property manager.</p>
                 <h3>2. Payment Requirement</h3>
@@ -400,10 +490,10 @@
                 <h3>5. Room Availability</h3>
                 <p>Available rooms are shown in real time. A booking confirmation deducts from the property's available room count. If all rooms are booked, the property will show as "Fully Booked".</p>
             `
-        },
-        refund: {
-            title: '💰 Refund Policy',
-            body: `
+            },
+            refund: {
+                title: '💰 Refund Policy',
+                body: `
                 <h3>1. No Refund Policy</h3>
                 <p>At the moment, Michu Stays does not issue any refunds for confirmed bookings. We are committed to providing the best service possible and apologize for any inconvenience this may cause.</p>
                 <h3>2. Future Updates</h3>
@@ -411,10 +501,10 @@
                 <h3>3. Contact Us</h3>
                 <p>If you have any questions or concerns regarding this policy, please reach out to us at michustays@gmail.com.</p>
             `
-        },
-        compliance: {
-            title: '⚖️ Legal & Compliance',
-            body: `
+            },
+            compliance: {
+                title: '⚖️ Legal & Compliance',
+                body: `
                 <h3>1. Regulatory Compliance</h3>
                 <p>Michu Stays operates in full compliance with the laws and regulations of the Federal Democratic Republic of Ethiopia, including applicable consumer protection, data privacy, and e-commerce regulations.</p>
                 <h3>2. Anti-Fraud Measures</h3>
@@ -430,56 +520,72 @@
                 <h3>7. Contact for Compliance Issues</h3>
                 <p>To report a compliance concern, contact us at michustays@gmail.com or call +251 977 916 787. We are committed to addressing all compliance issues within 48 hours.</p>
             `
-        }
-    };
-
-    window.openLegalModal = function(key) {
-        const content = _legalContent[key];
-        if (!content) return;
-        
-        // Translate Title
-        const translatedTitle = window.t(content.title);
-        document.getElementById('legal-modal-title').textContent = translatedTitle;
-        
-        // Translate Body (The body contains HTML tags h3, p, etc.)
-        // We'll create a temporary div to parse the HTML and translate each text node
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = content.body;
-        
-        const walk = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null, false);
-        let node;
-        while(node = walk.nextNode()) {
-            const trimmed = node.textContent.trim();
-            if (trimmed) {
-                // Look up the translation
-                const trans = window.t(trimmed);
-                // Only replace if we found a match (to avoid breaking things)
-                node.textContent = node.textContent.replace(trimmed, trans);
             }
-        }
-        
-        document.getElementById('legal-modal-body').innerHTML = tempDiv.innerHTML;
-        document.getElementById('legal-modal').classList.add('open');
-        document.body.style.overflow = 'hidden';
-    };
+        };
 
-    window.closeLegalModal = function() {
-        document.getElementById('legal-modal').classList.remove('open');
-        document.body.style.overflow = '';
-    };
+        window.openLegalModal = function (key) {
+            const content = _legalContent[key];
+            if (!content) return;
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeLegalModal();
-    });
+            // Translate Title
+            const translatedTitle = window.t(content.title);
+            document.getElementById('legal-modal-title').textContent = translatedTitle;
+
+            // Translate Body (The body contains HTML tags h3, p, etc.)
+            // We'll create a temporary div to parse the HTML and translate each text node
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content.body;
+
+            const walk = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null, false);
+            let node;
+            while (node = walk.nextNode()) {
+                const trimmed = node.textContent.trim();
+                if (trimmed) {
+                    // Look up the translation
+                    const trans = window.t(trimmed);
+                    // Only replace if we found a match (to avoid breaking things)
+                    node.textContent = node.textContent.replace(trimmed, trans);
+                }
+            }
+
+            document.getElementById('legal-modal-body').innerHTML = tempDiv.innerHTML;
+            document.getElementById('legal-modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeLegalModal = function () {
+            document.getElementById('legal-modal').classList.remove('open');
+            document.body.style.overflow = '';
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeLegalModal();
+        });
     </script>
 
 
     <style>
-        .michu-action-btn:active { transform: scale(0.92); transition: transform 0.1s; }
-        @keyframes michuPop { from { opacity:0; transform:scale(0.9) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+        .michu-action-btn:active {
+            transform: scale(0.92);
+            transition: transform 0.1s;
+        }
+
+        @keyframes michuPop {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
     </style>
 
-    <div style="text-align:center; padding:1rem; background:#1e293b; color:rgba(255,255,255,0.3); font-size:0.6rem; font-weight:800;">BUILD: V1240.I18N.FORCE_RELOAD</div>
+    <div
+        style="text-align:center; padding:1rem; background:#1e293b; color:rgba(255,255,255,0.3); font-size:0.6rem; font-weight:800;">
+        BUILD: V1213.I18N.UPDATE</div>
 </body>
-</html>
 
+</html>
