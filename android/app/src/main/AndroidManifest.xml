@@ -33,6 +33,11 @@
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="michu_urgent_v3" />
 
+        <!-- Remove default Capacitor service to avoid conflict -->
+        <service
+            android:name="com.capacitorjs.plugins.pushnotifications.MessagingService"
+            tools:node="remove" />
+
         <service
             android:name=".MichuMessagingService"
             android:exported="false"
