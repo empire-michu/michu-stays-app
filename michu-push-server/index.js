@@ -61,7 +61,14 @@ app.post('/send-push', async (req, res) => {
       body: body || 'You have a new update.'
     },
     android: {
-      priority: 'high'
+      priority: 'high',
+      notification: {
+        priority: 'max',
+        visibility: 'public',
+        sound: 'default',
+        defaultVibrateTimings: true,
+        defaultLightSettings: true
+      }
     },
     apns: {
       payload: {
