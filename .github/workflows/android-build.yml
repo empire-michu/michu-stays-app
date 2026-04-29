@@ -59,11 +59,6 @@ jobs:
     - name: Sync Capacitor
       run: npx cap sync android
 
-    - name: Final Manifest Check (Log Only)
-      run: |
-        echo "--- Verifying Native Service in AndroidManifest.xml ---"
-        cat android/app/src/main/AndroidManifest.xml
-
     - name: Build Debug APK
       run: |
         cd android
