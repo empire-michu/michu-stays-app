@@ -514,9 +514,9 @@ class Database {
                     try {
                         // Primary channel
                         await PushNotifications.createChannel({
-                            id: 'michu_alerts_v2',
-                            name: 'Michu Booking Alerts',
-                            description: 'Critical booking alerts',
+                            id: 'michu_urgent_v3',
+                            name: 'Michu Urgent Alerts',
+                            description: 'Important booking and status updates',
                             importance: 5,
                             visibility: 1,
                             vibration: true,
@@ -543,7 +543,7 @@ class Database {
                         // When a notification arrives while app is in foreground
                         PushNotifications.addListener('pushNotificationReceived', (notification) => {
                             console.log('📬 Foreground push received:', notification);
-                            window.showToast?.("🔔 " + (notification.title || 'Michu Stays') + ": " + (notification.body || 'New update'));
+                            this.showClickableNotification(notification);
                         });
                         
                         // When user taps on a notification
@@ -733,6 +733,44 @@ class Database {
         } catch (e) {
             console.error("❌ Push Server Error:", e);
         }
+    }
+
+    showClickableNotification(notif) {
+        const title = notif.title || 'New Update';
+        const body = notif.body || 'You have a new notification';
+        const data = notif.data || {};
+        
+        const container = document.createElement('div');
+        container.id = 'michu-push-banner';
+        container.style = `
+            position: fixed; top: 15px; left: 15px; right: 15px; 
+            background: white; border-radius: 16px; padding: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 10000;
+            display: flex; align-items: center; gap: 15px;
+            animation: michuPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-left: 5px solid #10b981; cursor: pointer;
+        `;
+        
+        container.innerHTML = `
+            <div style="font-size: 24px;">🔔</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 800; color: #1e293b; font-size: 0.9rem;">${title}</div>
+                <div style="color: #64748b; font-size: 0.8rem; line-height: 1.2; margin-top: 2px;">${body}</div>
+            </div>
+            <div style="color: #10b981; font-weight: 700; font-size: 0.75rem;">VIEW</div>
+        `;
+        
+        container.onclick = () => {
+            container.remove();
+            if (data.type === 'booking' || title.toLowerCase().includes('booking') || body.toLowerCase().includes('booking')) {
+                window.router?.navigate('bookings');
+            } else {
+                window.router?.navigate('home');
+            }
+        };
+        
+        document.body.appendChild(container);
+        setTimeout(() => { if(container.parentElement) container.style.opacity = '0'; setTimeout(() => container.remove(), 400); }, 8000);
     }
 }
 

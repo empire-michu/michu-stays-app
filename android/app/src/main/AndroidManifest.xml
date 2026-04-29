@@ -30,7 +30,7 @@
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="michu_alerts_v2" />
+            android:value="michu_urgent_v3" />
     </application>
 
     <!-- Permissions -->

@@ -62,12 +62,18 @@ app.post('/send-push', async (req, res) => {
       priority: 'high',
       notification: {
         sound: 'default',
-        channelId: 'michu_alerts_v2'
+        channelId: 'michu_urgent_v3',
+        priority: 'high',
+        visibility: 'public'
       }
     },
     apns: {
       payload: {
-        aps: { sound: 'default' }
+        aps: { 
+          sound: 'default',
+          contentAvailable: true,
+          mutableContent: true
+        }
       }
     },
     tokens: tokens // This allows sending to multiple devices at once
