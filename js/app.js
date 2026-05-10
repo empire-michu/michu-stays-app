@@ -154,7 +154,8 @@ class Router {
             this.updateMobileNav(name); // Highlight current menu item
             
             if (!isSameRoute) {
-                window.scrollTo(0,0);
+                // Defer scroll reset to beat async route rendering (Firestore data, listeners, etc.)
+                setTimeout(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }), 50);
             } else {
                 window.scrollTo(0, currentScroll);
             }

@@ -139,6 +139,9 @@ window.router.addRoute('profile', async (container, params) => {
                 <td data-label="Proof">
                     ${b.paymentProofUrl ? `<button onclick="showGuestProof('${b.id}')" class="btn-outline" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🖼 Proof</button>` : '—'}
                 </td>
+                <td data-label="Chat">
+                    <button onclick="window.router.navigate('chat', { bookingId: '${b.id}' })" class="btn-outline" style="padding:0.3rem 0.7rem; border-radius:8px; border:1.5px solid var(--color-primary); color:var(--color-primary); font-weight:700; font-size:0.75rem; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:0.3rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Message</button>
+                </td>
             </tr>
         `;
         }).join('');
@@ -246,7 +249,7 @@ window.router.addRoute('profile', async (container, params) => {
                 </div>
                 <div style="overflow-x:auto;">
                     <table class="manager-table" style="width: 100%; min-width: 900px;">
-                        <thead><tr><th>No.</th><th>Ref</th><th>Hotel</th><th>Total</th><th>Status</th><th>Date</th><th>Rating</th><th>Proof</th></tr></thead>
+                        <thead><tr><th>No.</th><th>Ref</th><th>Hotel</th><th>Total</th><th>Status</th><th>Date</th><th>Rating</th><th>Proof</th><th>Chat</th></tr></thead>
                         <tbody id="booking-table-body"></tbody>
                     </table>
                 </div>
@@ -255,10 +258,35 @@ window.router.addRoute('profile', async (container, params) => {
             ` : ''}
 
             <!-- Danger Zone -->
-            <div style="background:#fff5f5;border-radius:20px;padding:2rem;border:1px solid #ffcfcf;text-align:center;">
+            <div style="background:#fff5f5;border-radius:20px;padding:2rem;border:1px solid #ffcfcf;">
                 <h3 style="color:#c53030;margin:0 0 0.5rem;">🔒 ${window.t('Private Zone')}</h3>
                 <p style="color:#822727;font-size:0.9rem;margin-bottom:1.5rem;">${window.t('Deleting your account will remove all booking history and personal data permanently.')}</p>
-                <button class="btn-outline" style="border-color:#feb2b2;color:#c53030;background:white;padding:0.8rem 2rem;font-weight:700;" onclick="confirmDeleteAccount()">${window.t('Delete My Account Forever')}</button>
+                
+                <div style="display:grid;gap:1rem;margin-bottom:1.5rem;">
+                    <!-- Clear Profile Data -->
+                    <div style="background:white;border-radius:14px;padding:1.2rem;border:1px solid #fed7d7;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+                        <div>
+                            <div style="font-weight:700;color:#744210;font-size:0.95rem;">🧹 ${window.t('Reset Profile Details')}</div>
+                            <div style="font-size:0.8rem;color:#975a16;margin-top:0.2rem;">${window.t('Clears your name, phone, city, and profile photo.')}</div>
+                        </div>
+                        <button class="btn-outline" style="border-color:#fbd38d;color:#744210;background:white;padding:0.6rem 1.4rem;font-weight:700;white-space:nowrap;flex-shrink:0;" onclick="window.confirmResetProfile()">${window.t('Reset Profile')}</button>
+                    </div>
+
+                    <!-- Delete Booking History -->
+                    <div style="background:white;border-radius:14px;padding:1.2rem;border:1px solid #fed7d7;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+                        <div>
+                            <div style="font-weight:700;color:#822727;font-size:0.95rem;">📋 ${window.t('Delete Booking History')}</div>
+                            <div style="font-size:0.8rem;color:#9b2c2c;margin-top:0.2rem;">${window.t('Permanently removes all your booking records.')}</div>
+                        </div>
+                        <button class="btn-outline" style="border-color:#fc8181;color:#c53030;background:white;padding:0.6rem 1.4rem;font-weight:700;white-space:nowrap;flex-shrink:0;" onclick="window.confirmClearBookings()">${window.t('Clear History')}</button>
+                    </div>
+                </div>
+
+                <!-- Delete Account -->
+                <div style="text-align:center;border-top:1px dashed #feb2b2;padding-top:1.5rem;">
+                    <p style="color:#822727;font-size:0.85rem;margin-bottom:1rem;">${window.t('Or permanently delete your entire account:')}</p>
+                    <button class="btn-outline" style="border-color:#feb2b2;color:#c53030;background:white;padding:0.8rem 2rem;font-weight:700;" onclick="confirmDeleteAccount()">${window.t('Delete My Account Forever')}</button>
+                </div>
             </div>
         </div>
 
@@ -300,7 +328,7 @@ window.router.addRoute('profile', async (container, params) => {
 
         <input type="file" id="input-profile-pic" accept="image/*" style="display:none;" onchange="handleProfilePicSelect(this)">
 
-        <!-- Modals -->
+        <!-- Delete Account Modal -->
         <div id="del-acc-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
             <div style="background:white;border-radius:24px;padding:2.5rem;max-width:400px;width:90%;text-align:center;">
                 <div style="font-size:3rem;margin-bottom:1rem;">⚠️</div>
@@ -309,6 +337,21 @@ window.router.addRoute('profile', async (container, params) => {
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
                     <button class="btn-outline" style="padding:0.8rem;" onclick="document.getElementById('del-acc-modal').style.display='none'">${window.t('Keep Account')}</button>
                     <button class="btn-primary" style="background:#c53030;padding:0.8rem;" onclick="processAccountDeletion()">${window.t('Delete Forever')}</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Re-Auth Modal (shown when Firebase requires recent login) -->
+        <div id="reauth-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:10001;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
+            <div style="background:white;border-radius:24px;padding:2.5rem;max-width:420px;width:92%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.3);">
+                <div style="font-size:3rem;margin-bottom:1rem;">🔐</div>
+                <h3 style="margin-bottom:0.5rem;">Confirm Your Identity</h3>
+                <p style="color:#666;font-size:0.9rem;line-height:1.6;margin-bottom:1.5rem;">For your security, please enter your password to confirm account deletion.</p>
+                <input type="password" id="reauth-password" placeholder="Your current password" style="width:100%;padding:0.9rem;border:1.5px solid #eee;border-radius:12px;font-size:1rem;margin-bottom:1.2rem;box-sizing:border-box;">
+                <p id="reauth-error" style="color:#c53030;font-size:0.85rem;margin-bottom:1rem;display:none;"></p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                    <button class="btn-outline" style="padding:0.8rem;" onclick="document.getElementById('reauth-modal').style.display='none'">Cancel</button>
+                    <button class="btn-primary" id="reauth-confirm-btn" style="background:#c53030;padding:0.8rem;" onclick="window.processReauth()">Confirm & Delete</button>
                 </div>
             </div>
         </div>
@@ -341,6 +384,107 @@ window.router.addRoute('profile', async (container, params) => {
 
     window.confirmDeleteAccount = () => document.getElementById('del-acc-modal').style.display = 'flex';
     window.processAccountDeletion = () => window.auth.deleteCurrentUserAccount();
+
+    // ── Re-Auth Flow (fires when Firebase needs recent login) ─────────
+    window.showReauthModal = () => {
+        const modal = document.getElementById('reauth-modal');
+        const passInput = document.getElementById('reauth-password');
+        const errEl = document.getElementById('reauth-error');
+        if (errEl) errEl.style.display = 'none';
+        if (passInput) passInput.value = '';
+        if (modal) modal.style.display = 'flex';
+        setTimeout(() => passInput && passInput.focus(), 200);
+    };
+
+    window.processReauth = async () => {
+        const passInput = document.getElementById('reauth-password');
+        const errEl = document.getElementById('reauth-error');
+        const btn = document.getElementById('reauth-confirm-btn');
+        const password = passInput?.value?.trim();
+        if (!password) {
+            if (errEl) { errEl.innerText = 'Please enter your password.'; errEl.style.display = 'block'; }
+            return;
+        }
+        btn.disabled = true;
+        btn.innerText = 'Verifying...';
+        try {
+            await window.auth.deleteCurrentUserAccount(password);
+            document.getElementById('reauth-modal').style.display = 'none';
+        } catch(e) {
+            // Error is handled inside deleteCurrentUserAccount
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'Confirm & Delete';
+        }
+    };
+
+    // ── Reset Profile Details ──────────────────────────────────────────
+    window.confirmResetProfile = async () => {
+        const confirmed = await window.showConfirm({
+            title: '🧹 Reset Profile?',
+            message: 'This will clear your name, phone, city, and profile photo. Your account and booking history will remain.',
+            confirmText: 'Reset',
+            cancelText: 'Cancel',
+            type: 'warning'
+        });
+        if (!confirmed) return;
+        try {
+            await firestore.collection('users').doc(uid).update({
+                fullName: '',
+                phone: '',
+                city: '',
+                profilePic: ''
+            });
+            // Update local cache
+            if (window.auth.userData) {
+                window.auth.userData.fullName = '';
+                window.auth.userData.profilePic = '';
+            }
+            window.auth.renderNav();
+            window.showToast(window.t('✅ Profile data cleared successfully.'));
+            // Refresh the profile page
+            window.router.navigate('profile');
+        } catch(e) {
+            console.error(e);
+            showAlert('Error resetting profile: ' + e.message);
+        }
+    };
+
+    // ── Delete All Bookings ────────────────────────────────────────────
+    window.confirmClearBookings = async () => {
+        if (allBookings.length === 0) {
+            window.showToast(window.t('ℹ️ You have no booking history to delete.'));
+            return;
+        }
+        const confirmed = await window.showConfirm({
+            title: '📋 Delete All Bookings?',
+            message: `This will permanently delete all ${allBookings.length} booking record(s). This cannot be undone.`,
+            confirmText: 'Delete All',
+            cancelText: 'Cancel',
+            type: 'danger'
+        });
+        if (!confirmed) return;
+
+        const btn = document.querySelector('[onclick="window.confirmClearBookings()"]');
+        if (btn) { btn.disabled = true; btn.innerText = 'Deleting...'; }
+
+        try {
+            // Delete each booking sequentially
+            const batch = firestore.batch();
+            allBookings.forEach(b => {
+                batch.delete(firestore.collection('bookings').doc(b.id));
+            });
+            await batch.commit();
+            allBookings = [];
+            window.showToast(window.t('✅ All booking history deleted successfully.'));
+            renderBookings();
+        } catch(e) {
+            console.error(e);
+            showAlert('Error deleting bookings: ' + e.message);
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerText = window.t('Clear History'); }
+        }
+    };
 
     window.processPasswordChange = async () => {
         const curr = document.getElementById('p-currpass').value;

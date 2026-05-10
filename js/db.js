@@ -206,11 +206,12 @@ class Database {
         });
 
         // SEND HARD NOTIFICATION (PUSH) - MUST await to prevent fetch from being aborted
+        // Pass the guest's own UID so they also receive a push confirmation
         await this.triggerPushNotification(
             propertyId,
             '🛎️ New Booking!',
             `${newBooking.customerName} booked ${property.title}. Ref: ${referenceCode}`,
-            null
+            user?.uid || null
         );
 
         this.clearCache('bookings');
@@ -480,8 +481,14 @@ class Database {
                     .filter(c => c.type === 'added')
                     .map(c => ({ id: c.doc.id, ...c.doc.data() }))
                     .filter(n => {
-                        // Filter for current user: specifically for them, OR for their role
-                        return n.targetUserId === user.uid || (n.targetRole === role && role);
+                        // Filter for current user:
+                        // 1. Specifically targeted at this user by UID
+                        // 2. Targeted at their role (admin/manager broadcasts)
+                        // 3. No targetRole set = broadcast to all authenticated users
+                        const matchesUser = n.targetUserId === user.uid;
+                        const matchesRole = n.targetRole && n.targetRole === role;
+                        const isGlobalBroadcast = !n.targetUserId && !n.targetRole;
+                        return matchesUser || matchesRole || isGlobalBroadcast;
                     })
                     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 
@@ -832,6 +839,91 @@ class Database {
             overlay.style.transition = 'opacity 0.3s';
             setTimeout(() => overlay.remove(), 300);
         };
+    }
+
+    // ─── CHAT METHODS ────────────────────────────────────────────────────────
+
+    async getBookingById(bookingId) {
+        const doc = await firestore.collection('bookings').doc(bookingId).get();
+        return doc.exists ? { id: doc.id, ...doc.data() } : null;
+    }
+
+    async getOrCreateChatThread(propertyId, guestId, bookingId, property, booking) {
+        const threadId = `${propertyId}_${guestId}`;
+        const ref = firestore.collection('chatThreads').doc(threadId);
+        const doc = await ref.get();
+        if (doc.exists) {
+            if (bookingId && doc.data().bookingId !== bookingId) {
+                await ref.update({ bookingId, bookingRef: booking?.referenceCode || doc.data().bookingRef || '', updatedAt: new Date().toISOString() });
+            }
+            return { id: doc.id, ...doc.data() };
+        }
+        const thread = {
+            propertyId, propertyTitle: property?.title || '', managerId: property?.managerId || '',
+            guestId, guestName: null, guestEmail: null,
+            bookingId: bookingId || null, bookingRef: booking?.referenceCode || null,
+            lastMessage: null, lastMessageAt: null,
+            unreadByGuest: 0, unreadByManager: 0,
+            createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+        };
+        try {
+            const uDoc = await firestore.collection('users').doc(guestId).get();
+            if (uDoc.exists) {
+                thread.guestName  = uDoc.data().fullName || uDoc.data().name || uDoc.data().displayName || null;
+                thread.guestEmail = uDoc.data().email || null;
+            }
+        } catch(e) {}
+        await ref.set(thread);
+        return { id: threadId, ...thread };
+    }
+
+    async sendChatMessage(threadId, { senderId, senderName, senderRole, text }) {
+        await firestore.collection('chatThreads').doc(threadId).collection('messages').add({
+            senderId, senderName: senderName || '', senderRole: senderRole || 'guest',
+            text, readAt: null, createdAt: new Date().toISOString()
+        });
+        const update = { lastMessage: text.length > 100 ? text.slice(0,100)+'…' : text, lastMessageAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+        if (senderRole === 'guest') { update.unreadByManager = firebase.firestore.FieldValue.increment(1); update.unreadByGuest = 0; }
+        else { update.unreadByGuest = firebase.firestore.FieldValue.increment(1); update.unreadByManager = 0; }
+        await firestore.collection('chatThreads').doc(threadId).update(update);
+    }
+
+    listenToChatMessages(threadId, callback) {
+        return firestore.collection('chatThreads').doc(threadId).collection('messages')
+            .orderBy('createdAt', 'asc')
+            .onSnapshot(snap => callback(snap.docs.map(d => ({ id: d.id, ...d.data() }))), err => console.warn('Chat listener:', err));
+    }
+
+    async markThreadRead(threadId, userId) {
+        try {
+            const role = window.auth?.userData?.role || 'guest';
+            const key  = role === 'guest' ? 'unreadByGuest' : 'unreadByManager';
+            await firestore.collection('chatThreads').doc(threadId).update({ [key]: 0 });
+            const unread = await firestore.collection('chatThreads').doc(threadId).collection('messages')
+                .where('senderId', '!=', userId).where('readAt', '==', null).get();
+            if (!unread.empty) {
+                const batch = firestore.batch();
+                unread.docs.forEach(d => batch.update(d.ref, { readAt: new Date().toISOString() }));
+                await batch.commit();
+            }
+        } catch(e) { console.warn('markThreadRead:', e); }
+    }
+
+    async getManagerChatThreads(managerId) {
+        try {
+            const snap = await firestore.collection('chatThreads').where('managerId', '==', managerId).orderBy('lastMessageAt', 'desc').get();
+            return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        } catch(e) {
+            console.warn('getManagerChatThreads (may need index):', e.message);
+            // Fallback without orderBy if index not yet created
+            const snap = await firestore.collection('chatThreads').where('managerId', '==', managerId).get();
+            return snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => (b.lastMessageAt||'') > (a.lastMessageAt||'') ? 1 : -1);
+        }
+    }
+
+    async getGuestChatThreads(guestId) {
+        const snap = await firestore.collection('chatThreads').where('guestId', '==', guestId).get();
+        return snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => (b.lastMessageAt||'') > (a.lastMessageAt||'') ? 1 : -1);
     }
 }
 

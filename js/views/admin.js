@@ -143,11 +143,75 @@ window.router.addRoute('admin', async (container, params) => {
                 if (!isSyncing) renderAdmin();
             });
 
+            // Announcements Listener
+            window.annsUnsub = firestore.collection('announcements').orderBy('createdAt', 'desc').onSnapshot(snap => {
+                window.cachedAnnouncements = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                if (activeTab === 'announcements') renderAdmin();
+            });
+
             // Wait a moment for initial sync
             await new Promise(r => setTimeout(r, 1500));
         } catch(e) { console.error(e); }
         isSyncing = false;
         renderAdmin();
+    };
+
+    window.admSaveAnnouncement = async () => {
+        try {
+            window.showToast("⏳ Publishing...");
+            const title = document.getElementById('ann-title').value.trim();
+            const body = document.getElementById('ann-body').value.trim();
+            if (!title || !body) throw new Error("Title and Body are required");
+
+            const active = document.getElementById('ann-active').checked;
+            const type = document.getElementById('ann-type').value;
+            const badge = document.getElementById('ann-badge').value.trim();
+            const cta = document.getElementById('ann-cta').value.trim();
+            const link = document.getElementById('ann-link').value.trim();
+            const fileInput = document.getElementById('ann-media');
+
+            let mediaUrl = null, mediaType = null;
+            if (fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const storageRef = firebase.storage().ref(\`announcements/\${Date.now()}_\${file.name}\`);
+                await storageRef.put(file);
+                mediaUrl = await storageRef.getDownloadURL();
+                mediaType = file.type.startsWith('video') ? 'video' : 'image';
+            }
+
+            await firestore.collection('announcements').add({
+                title, body, active, type, badge, cta, ctaLink: link,
+                mediaUrl, mediaType, createdAt: new Date().toISOString()
+            });
+
+            window.showToast("✅ Announcement published!");
+            document.getElementById('ann-title').value = '';
+            document.getElementById('ann-body').value = '';
+            document.getElementById('ann-media').value = '';
+            
+            if (!isSyncing) renderAdmin();
+        } catch(e) {
+            window.showToast("❌ Error: " + e.message);
+        }
+    };
+
+    window.admDeleteAnnouncement = async (id) => {
+        const ok = await window.showConfirm({
+            title: 'Delete Announcement',
+            message: 'Are you sure you want to remove this announcement forever?',
+            confirmText: 'Delete',
+            type: 'danger'
+        });
+        if(ok) {
+            await firestore.collection('announcements').doc(id).delete();
+            window.showToast("✅ Announcement removed.");
+        }
+    };
+
+    window.admToggleAnnouncement = async (id, active) => {
+        await firestore.collection('announcements').doc(id).update({ active: !active });
+        window.showToast("✅ Status updated.");
+    };
     };
 
     window.admDelete = async (id, name) => { 
@@ -518,6 +582,7 @@ window.router.addRoute('admin', async (container, params) => {
                     <button style="${tabStyle('hotels')}" onclick="window.fastTab('hotels')">Properties</button>
                     <button style="${tabStyle('bookings')}" onclick="window.fastTab('bookings')">Bookings</button>
                     <button style="${tabStyle('managers')}" onclick="window.fastTab('managers')">Managers</button>
+                    <button style="${tabStyle('announcements')}" onclick="window.fastTab('announcements')">Announcements</button>
                     <button style="${tabStyle('add-hotel')}" onclick="window.fastTab('add-hotel')">Add Stay</button>
                     <button style="${tabStyle('account')}" onclick="window.fastTab('account')">My Account</button>
                 </div>
@@ -968,6 +1033,59 @@ window.router.addRoute('admin', async (container, params) => {
                             </div>
                         </div>`;
                     })()}
+                </div>
+
+                <!-- ANNOUNCEMENTS TAB -->
+                <div id="adm-tab-announcements" style="display:${activeTab==='announcements'?'block':'none'};">
+                    <div style="background:white; padding:2rem; border-radius:24px; box-shadow:var(--shadow-sm); margin-bottom:2rem;">
+                        <h3 style="margin-top:0; color:var(--color-primary);">📢 Manage Announcements</h3>
+                        <p style="color:#666; font-size:0.85rem; margin-bottom:1.5rem;">Create dynamic banners that appear on the Michu Stays home screen for all users.</p>
+                        
+                        <div style="display:grid; gap:1.2rem; background:#f9f9f9; padding:1.5rem; border-radius:16px; border:1px solid #eee;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                                <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Internal Title</label><input type="text" id="ann-title" placeholder="e.g., Summer Sale" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"></div>
+                                <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Badge Text</label><input type="text" id="ann-badge" placeholder="e.g., 📢 Special Offer" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"></div>
+                            </div>
+                            
+                            <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Message Body</label><textarea id="ann-body" placeholder="Announcement details..." rows="3" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"></textarea></div>
+                            
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem;">
+                                <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Visual Type</label><select id="ann-type" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"><option value="promo">Promo (Green/Gold)</option><option value="dark">Dark (Deep Green)</option><option value="gold">Gold (Premium)</option><option value="light">Light (Clean)</option></select></div>
+                                <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">CTA Button Text</label><input type="text" id="ann-cta" placeholder="Learn More" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"></div>
+                                <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">CTA Link (Route)</label><input type="text" id="ann-link" placeholder="home" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"></div>
+                            </div>
+                            
+                            <div style="display:flex; gap:1rem; align-items:center; background:white; padding:1rem; border-radius:12px; border:1px dashed #ccc;">
+                                <div style="flex:1;">
+                                    <label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Media Upload (Image/Video)</label>
+                                    <input type="file" id="ann-media" accept="image/*,video/mp4" style="width:100%;">
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.5rem; font-weight:700; font-size:0.85rem;">
+                                    <input type="checkbox" id="ann-active" checked style="width:20px; height:20px; accent-color:var(--color-primary);"> Active (Live)
+                                </div>
+                            </div>
+                            
+                            <button class="btn-primary" onclick="window.admSaveAnnouncement()" style="padding:1rem; border-radius:12px;">📢 Publish Announcement</button>
+                        </div>
+                        
+                        <div id="adm-ann-list" style="margin-top:2rem; display:grid; gap:1rem;">
+                            ${(window.cachedAnnouncements || []).map(a => `
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:1.2rem; border-radius:16px; border:1px solid #eee; opacity:${a.active?1:0.6};">
+                                    <div style="display:flex; align-items:center; gap:1rem;">
+                                        ${a.mediaUrl ? `<img src="${a.mediaUrl}" style="width:60px; height:60px; border-radius:8px; object-fit:cover;">` : `<div style="width:60px; height:60px; border-radius:8px; background:#f0f0f0; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">📢</div>`}
+                                        <div>
+                                            <h4 style="margin:0; font-size:1rem;">${a.title}</h4>
+                                            <div style="font-size:0.75rem; color:#666; margin-top:0.2rem;">${a.badge} • ${a.type}</div>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; gap:0.5rem;">
+                                        <button class="btn-outline" onclick="window.admToggleAnnouncement('${a.id}', ${a.active})" style="padding:0.5rem 1rem; border-radius:8px; font-size:0.8rem; border-color:${a.active?'#f59e0b':'#10b981'}; color:${a.active?'#d97706':'#059669'};">${a.active?'Pause':'Activate'}</button>
+                                        <button class="btn-outline" onclick="window.admDeleteAnnouncement('${a.id}')" style="padding:0.5rem 1rem; border-radius:8px; font-size:0.8rem; border-color:#ef4444; color:#dc2626;">Delete</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
                 </div>
 
                 <!-- ACCOUNT TAB -->

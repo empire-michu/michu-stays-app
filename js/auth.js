@@ -421,11 +421,17 @@ class AuthEngine {
         }
     }
 
-    async deleteCurrentUserAccount() {
+    async deleteCurrentUserAccount(password = null) {
         const user = this.currentUser;
         if (!user) return;
         
         try {
+            // If a password was provided, re-authenticate first (required if session is old)
+            if (password) {
+                const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+                await user.reauthenticateWithCredential(credential);
+            }
+
             // Delete Firestore user data first
             await firestore.collection('users').doc(user.uid).delete();
             // Delete Auth account
@@ -437,8 +443,11 @@ class AuthEngine {
             window.router.navigate('home');
         } catch (e) {
             console.error(e);
-            if (e.code === 'auth/requires-recent-login') {
-                showAlert("🔒 For security, please Log Out and Log In again before deleting your account.");
+            if (e.code === 'auth/requires-recent-login' || e.code === 'auth/user-token-expired') {
+                // Show re-auth modal — prompt user for their password to proceed
+                window.showReauthModal && window.showReauthModal();
+            } else if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+                showAlert(window.t("❌ Incorrect password. Please try again."));
             } else {
                 showAlert("Error deleting account: " + e.message);
             }

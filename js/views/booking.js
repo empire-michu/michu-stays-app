@@ -265,14 +265,6 @@ window.router.addRoute('booking', async (container, params) => {
 
             if (bar) bar.style.width = '100%';
             window.showToast(`📤 Proof uploaded! Manager notified.`);
-            
-            // FIRE THE PUSH NOTIFICATION
-            const guestName = user?.displayName || user?.email || 'A guest';
-            window.db.triggerPushNotification(
-                property.id, 
-                '🛎️ New Booking Alert!', 
-                `${guestName} has submitted a booking and payment proof for ${property.title}. Please review it.`
-            );
 
             const stepA = document.getElementById('step-A');
             const stepC = document.getElementById('step-C');

@@ -564,6 +564,7 @@ window.router.addRoute('manager', async (container, params) => {
                                 <th>Status</th>
                                 <th>Date</th>
                                 <th>Proof</th>
+                                <th>Chat</th>
                                 <th style="border-top-right-radius:20px;">Actions</th>
                             </tr>
                         </thead>
@@ -622,6 +623,7 @@ window.router.addRoute('manager', async (container, params) => {
                                             ${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + '<br><small style="color:#aaa;">' + new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + '</small>' : '—'}
                                         </td>
                                         <td data-label="Proof">${b.paymentProofUrl ? `<button class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-radius:8px;" onclick="window.viewProof('${b.paymentProofUrl}')">🖼 Proof</button>` : '<span style="color:#ddd; font-style:italic; font-size:0.8rem;">No file</span>'}</td>
+                                        <td data-label="Chat"><button onclick="window.router.navigate('chat', { bookingId: '${b.id}' })" class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-radius:8px; border-color:var(--color-primary); color:var(--color-primary); font-weight:700;">💬 Chat</button></td>
                                         <td>
                                             ${b.status === 'Awaiting Verification' 
                                                 ? `<div style="display:flex; gap:0.4rem; flex-direction:column;">
