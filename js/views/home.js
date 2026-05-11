@@ -343,9 +343,6 @@ window.router.addRoute('home', async (container, params) => {
 
     // --- Render Page Shell ---
     container.innerHTML = `
-        <div class="container" style="padding-top:1rem; padding-bottom:0;">
-            <div id="ann-banner-container"></div>
-        </div>
         <!-- Minimal Search Bar Just Below Header -->
         <div id="home-search-wrapper" style="display:flex; justify-content:center; background:white; padding:0.6rem 0.75rem; border-bottom:1px solid #f0f0f0; position:relative; z-index:20; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
             <div class="home-search-bar-inline" style="max-width:500px; width:100%; height:48px; border:1.5px solid #eaeaea; padding:0 0.4rem; display:flex; align-items:center; border-radius:99px; background:#ffffff; box-sizing:border-box; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
@@ -359,13 +356,15 @@ window.router.addRoute('home', async (container, params) => {
             </div>
         </div>
 
-        <section class="hero-section">
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-                <h1 class="hero-title">Experience the Spirit of <br><span style="color:var(--color-secondary); font-weight: 800; border-bottom: 3px solid var(--color-secondary);">Dire Dawa</span></h1>
-                <p class="hero-subtitle">Premium stays in Ethiopia's iconic railway gateway.</p>
-            </div>
-        </section>
+        <div id="ann-banner-container">
+            <section class="hero-section">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <h1 class="hero-title">Experience the Spirit of <br><span style="color:var(--color-secondary); font-weight: 800; border-bottom: 3px solid var(--color-secondary);">Dire Dawa</span></h1>
+                    <p class="hero-subtitle">Premium stays in Ethiopia's iconic railway gateway.</p>
+                </div>
+            </section>
+        </div>
 
         <div class="container" style="position:relative; z-index:10; margin-top:-2rem;">
             <!-- Categories -->

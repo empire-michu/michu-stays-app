@@ -44,7 +44,44 @@ window.router.addRoute('chat', async (container, params) => {
         const otherParty = role === 'guest' ? hotelName : (thread.guestName || thread.guestEmail || 'Guest');
         const avatar     = otherParty.charAt(0).toUpperCase();
 
+        // Track editing state
+        let _editingMsgId = null;
+
         container.innerHTML = `
+        <style>
+            #chat-ctx-sheet { display:none; position:fixed; inset:0; z-index:9998; }
+            #chat-ctx-sheet .overlay { position:absolute; inset:0; background:rgba(0,0,0,0.4); }
+            #chat-ctx-sheet .sheet {
+                position:absolute; bottom:0; left:0; right:0;
+                background:white; border-radius:24px 24px 0 0;
+                padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom,0px));
+                box-shadow:0 -8px 40px rgba(0,0,0,0.15);
+                animation: slideUp 0.25s cubic-bezier(0.32,0.72,0,1);
+            }
+            @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+            #chat-ctx-sheet .sheet-handle { width:40px;height:4px;background:#e2e8f0;border-radius:99px;margin:0 auto 1.2rem; }
+            .ctx-btn {
+                display:flex; align-items:center; gap:0.9rem;
+                width:100%; padding:1rem 0.5rem;
+                border:none; background:none; cursor:pointer;
+                font-size:1rem; font-weight:600; color:#1e293b;
+                border-bottom:1px solid #f1f5f9; text-align:left;
+            }
+            .ctx-btn:last-child { border-bottom:none; }
+            .ctx-btn .icon { width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0; }
+            .ctx-btn.danger { color:#dc2626; }
+            .ctx-btn.danger-strong { color:#b91c1c; }
+            .msg-bubble-wrap { display:flex; position:relative; }
+            .msg-bubble { transition: background 0.3s; }
+            .msg-bubble.highlighted { filter: brightness(0.88); }
+            #edit-bar {
+                display:none; align-items:center; gap:0.5rem;
+                padding:0.5rem 1rem; background:#fff7ed;
+                border-top:2px solid #d97706; font-size:0.82rem; color:#92400e;
+            }
+            #edit-bar.active { display:flex; }
+        </style>
+
         <div style="display:flex;flex-direction:column;height:calc(100vh - 70px);background:#f0f4f1;">
 
             <div style="padding:1rem;background:white;border-bottom:1px solid var(--color-border);display:flex;align-items:center;gap:0.9rem;box-shadow:var(--shadow-sm);">
@@ -54,13 +91,19 @@ window.router.addRoute('chat', async (container, params) => {
                     <div style="font-weight:700;font-size:0.95rem;color:var(--color-text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${otherParty}</div>
                     <div style="font-size:0.75rem;color:var(--color-text-light);">${role === 'guest' ? '💬 Direct message to hotel' : '📩 Guest conversation'}</div>
                 </div>
-                ${thread.bookingRef ? `<div style="background:#e8f5ec;color:var(--color-primary);font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:99px;">${thread.bookingRef}</div>` : ''}
+                <button onclick="window._clearChatHistory('${thread.id}', '${role}')" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#ef4444;padding:4px;" title="Clear Chat History">🗑️</button>
             </div>
 
             <div id="chat-messages" style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.6rem;scroll-behavior:smooth;">
                 <div data-header style="text-align:center;color:#aaa;font-size:0.75rem;padding:0.5rem;">
                     ${thread.bookingRef ? `Booking <strong>${thread.bookingRef}</strong> · ` : ''}Conversation with <strong>${hotelName}</strong>
                 </div>
+            </div>
+
+            <!-- Edit indicator bar -->
+            <div id="edit-bar">
+                <span style="flex:1;">✏️ Editing message…</span>
+                <button onclick="window._cancelEdit()" style="border:none;background:#fee2e2;color:#b91c1c;padding:4px 12px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.8rem;">Cancel</button>
             </div>
 
             <div style="background:white;border-top:1px solid var(--color-border);padding:0.75rem 1rem;padding-bottom:calc(0.75rem + env(safe-area-inset-bottom,0px));display:flex;align-items:flex-end;gap:0.6rem;">
@@ -70,13 +113,22 @@ window.router.addRoute('chat', async (container, params) => {
                     onfocus="this.style.borderColor='var(--color-primary)'"
                     onblur="this.style.borderColor='var(--color-border)'"
                     onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();window._sendChat();}"></textarea>
-                <button onclick="window._sendChat()"
+                <button id="send-btn" onclick="window._sendChat()"
                     style="width:42px;height:42px;border-radius:50%;background:var(--color-primary);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(11,110,79,0.3);"
                     aria-label="Send">
                     <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
                     </svg>
                 </button>
+            </div>
+        </div>
+
+        <!-- Context bottom sheet -->
+        <div id="chat-ctx-sheet">
+            <div class="overlay" onclick="window._closeCtxSheet()"></div>
+            <div class="sheet">
+                <div class="sheet-handle"></div>
+                <div id="ctx-sheet-body"></div>
             </div>
         </div>`;
 
@@ -89,16 +141,32 @@ window.router.addRoute('chat', async (container, params) => {
             msgBox.innerHTML = '';
             if (header) msgBox.appendChild(header);
 
-            if (messages.length === 0) {
+            const clearedAt = role === 'guest' ? window._currentChatThread?.clearedByGuestAt : window._currentChatThread?.clearedByManagerAt;
+
+            const visibleMessages = messages.filter(msg => {
+                if (clearedAt && msg.createdAt < clearedAt) return false;
+                if (role === 'guest' && msg.hiddenForGuest) return false;
+                if (role === 'manager' && msg.hiddenForManager) return false;
+                return true;
+            });
+
+            // Auto-mark as read if receiver is viewing
+            const unreadOthers = visibleMessages.filter(m => m.senderId !== user.uid && !m.readAt);
+            if (unreadOthers.length > 0) {
+                window.db.markThreadRead(thread.id, user.uid).catch(() => {});
+            }
+
+            if (visibleMessages.length === 0) {
                 const empty = document.createElement('div');
                 empty.style.cssText = 'text-align:center;color:#aaa;font-size:0.85rem;margin-top:2rem;';
-                empty.textContent = role === 'guest' ? '✉️ Send your first message to the hotel.' : '✉️ No messages yet from this guest.';
+                empty.textContent = clearedAt ? '📭 History cleared.' : (role === 'guest' ? '✉️ Send your first message to the hotel.' : '✉️ No messages yet from this guest.');
                 msgBox.appendChild(empty);
                 return;
             }
 
             let lastDate = '';
-            messages.forEach(msg => {
+
+            visibleMessages.forEach(msg => {
                 const isMe    = msg.senderId === user.uid;
                 const d       = new Date(msg.createdAt);
                 const dateStr = d.toLocaleDateString('en-ET', { weekday:'short', month:'short', day:'numeric' });
@@ -113,25 +181,211 @@ window.router.addRoute('chat', async (container, params) => {
                 }
 
                 const wrap = document.createElement('div');
-                wrap.style.cssText = `display:flex;justify-content:${isMe ? 'flex-end' : 'flex-start'};`;
+                wrap.className = 'msg-bubble-wrap';
+                wrap.style.cssText = `justify-content:${isMe ? 'flex-end' : 'flex-start'};`;
 
                 const bubble = document.createElement('div');
-                bubble.style.cssText = `max-width:78%;background:${isMe ? 'var(--color-primary)' : 'white'};color:${isMe ? 'white' : 'var(--color-text-dark)'};padding:0.65rem 0.9rem;border-radius:${isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px'};font-size:0.88rem;line-height:1.5;box-shadow:var(--shadow-sm);word-break:break-word;border:${isMe ? 'none' : '1px solid var(--color-border)'};`;
+                bubble.className = 'msg-bubble';
+                bubble.dataset.msgId = msg.id;
+                bubble.style.cssText = `max-width:78%;background:${isMe ? 'var(--color-primary)' : 'white'};color:${isMe ? 'white' : 'var(--color-text-dark)'};padding:0.65rem 0.9rem;border-radius:${isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px'};font-size:0.88rem;line-height:1.5;box-shadow:var(--shadow-sm);word-break:break-word;border:${isMe ? 'none' : '1px solid var(--color-border)'};user-select:none;cursor:${isMe && !msg.isDeleted ? 'pointer' : 'default'};`;
 
-                const escaped = String(msg.text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-                bubble.innerHTML = `${escaped.replace(/\n/g,'<br>')}
-                    <div style="font-size:0.65rem;opacity:0.65;text-align:${isMe?'right':'left'};margin-top:3px;">${timeStr}${isMe && msg.readAt ? ' · ✓✓' : ''}</div>`;
+                const escaped = String(msg.text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+                // Read receipt
+                let receipt = '';
+                if (isMe) {
+                    receipt = msg.readAt
+                        ? ' · <span style="color:#3b82f6;font-weight:700;font-size:0.75rem;" title="Seen">✓✓</span>'
+                        : ' · <span style="color:#9ca3af;font-weight:700;font-size:0.75rem;" title="Delivered">✓✓</span>';
+                }
+
+                const messageText = msg.isDeleted
+                    ? `<em style="opacity:0.6;font-size:0.85rem;">🚫 This message was deleted</em>`
+                    : escaped.replace(/\n/g,'<br>');
+
+                bubble.innerHTML = `${messageText}
+                    <div style="font-size:0.65rem;opacity:0.65;text-align:${isMe?'right':'left'};margin-top:3px;display:flex;align-items:center;justify-content:${isMe?'flex-end':'flex-start'};gap:3px;">
+                        <span>${timeStr}</span>
+                        ${msg.editedAt && !msg.isDeleted ? '<em style="font-size:0.6rem;">(Edited)</em>' : ''}
+                        ${receipt}
+                    </div>`;
+
+                // Long-press / hold to open context menu (only for own non-deleted messages)
+                if (isMe && !msg.isDeleted) {
+                    let pressTimer = null;
+
+                    const openMenu = (e) => {
+                        e.preventDefault();
+                        // highlight bubble
+                        document.querySelectorAll('.msg-bubble.highlighted').forEach(b => b.classList.remove('highlighted'));
+                        bubble.classList.add('highlighted');
+                        window._showCtxSheet(msg);
+                    };
+
+                    // Mobile: long press
+                    bubble.addEventListener('touchstart', (e) => {
+                        pressTimer = setTimeout(() => openMenu(e), 350);
+                    }, { passive: true });
+                    bubble.addEventListener('touchend', () => clearTimeout(pressTimer));
+                    bubble.addEventListener('touchmove', () => clearTimeout(pressTimer));
+
+                    // Desktop: right-click
+                    bubble.addEventListener('contextmenu', openMenu);
+                }
+
                 wrap.appendChild(bubble);
                 msgBox.appendChild(wrap);
             });
+
             msgBox.scrollTop = msgBox.scrollHeight;
         });
 
-        // ── Send handler ─────────────────────────────────────────────────────
+        // Store thread for reference
+        window._currentChatThread = thread;
+
+        // ── Context Sheet ────────────────────────────────────────────────────
+        window._closeCtxSheet = () => {
+            document.getElementById('chat-ctx-sheet').style.display = 'none';
+            document.querySelectorAll('.msg-bubble.highlighted').forEach(b => b.classList.remove('highlighted'));
+        };
+
+        window._showCtxSheet = (msg) => {
+            const sheet = document.getElementById('chat-ctx-sheet');
+            const body  = document.getElementById('ctx-sheet-body');
+            body.innerHTML = `
+                <div style="padding:0 0.5rem;">
+                    <div style="text-align:center; color:#94a3b8; font-size:0.7rem; font-weight:800; text-transform:uppercase; margin-bottom:1rem; letter-spacing:1px;">Message Options</div>
+                    
+                    <button class="ctx-btn" onclick="window._editMsg('${msg.id}', \`${msg.text.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">
+                        <span class="icon" style="background:#f0fdf4;color:#16a34a;">✏️</span>
+                        <div style="display:flex; flex-direction:column;">
+                            <span>Edit Message</span>
+                            <span style="font-size:0.75rem; color:#94a3b8; font-weight:400;">Modify your sent message</span>
+                        </div>
+                    </button>
+
+                    <button class="ctx-btn" onclick="window._delMsg('${msg.id}')">
+                        <span class="icon" style="background:#fff7ed;color:#ea580c;">🗑️</span>
+                        <div style="display:flex; flex-direction:column;">
+                            <span>Delete for Me</span>
+                            <span style="font-size:0.75rem; color:#94a3b8; font-weight:400;">Hide from your conversation</span>
+                        </div>
+                    </button>
+
+                    <button class="ctx-btn danger-strong" onclick="window._delForEveryone('${msg.id}')">
+                        <span class="icon" style="background:#fef2f2;color:#dc2626;">🚫</span>
+                        <div style="display:flex; flex-direction:column;">
+                            <span>Delete for Everyone</span>
+                            <span style="font-size:0.75rem; color:#f87171; font-weight:400;">Permanent removal for both parties</span>
+                        </div>
+                    </button>
+
+                    <button class="ctx-btn" onclick="window._closeCtxSheet()" style="color:#64748b; margin-top:1.5rem; background:#f8fafc; border-radius:16px; border-bottom:none; justify-content:center; gap:0.5rem; padding:0.8rem;">
+                        <span>Dismiss</span>
+                    </button>
+                </div>`;
+            sheet.style.display = 'block';
+        };
+
+        // ── Edit Message ─────────────────────────────────────────────────────
+        window._editMsg = (msgId, oldText) => {
+            window._closeCtxSheet();
+            _editingMsgId = msgId;
+            const input = document.getElementById('chat-input');
+            const editBar = document.getElementById('edit-bar');
+            const sendBtn = document.getElementById('send-btn');
+
+            input.value = oldText;
+            input.style.height = 'auto';
+            input.style.height = input.scrollHeight + 'px';
+            input.focus();
+            editBar.classList.add('active');
+
+            // Change send icon to checkmark
+            sendBtn.innerHTML = `<svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+            sendBtn.style.background = '#d97706';
+        };
+
+        window._cancelEdit = () => {
+            _editingMsgId = null;
+            const input = document.getElementById('chat-input');
+            const editBar = document.getElementById('edit-bar');
+            const sendBtn = document.getElementById('send-btn');
+            input.value = '';
+            input.style.height = 'auto';
+            editBar.classList.remove('active');
+            sendBtn.innerHTML = `<svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`;
+            sendBtn.style.background = 'var(--color-primary)';
+        };
+
+        // ── Delete for Me ────────────────────────────────────────────────────
+        window._delMsg = async (msgId) => {
+            window._closeCtxSheet();
+            const confirmed = await window.showConfirm({
+                title: 'Delete for Me?',
+                message: 'This message will be hidden from your view but remain visible to the other person.',
+                confirmText: 'Delete for Me',
+                type: 'warning'
+            });
+            if (confirmed) {
+                try {
+                    await window.db.deleteChatMessageForMe(thread.id, msgId, role);
+                } catch(e) { window.showToast('❌ Error: ' + e.message); }
+            }
+        };
+
+        // ── Delete for Everyone ──────────────────────────────────────────────
+        window._delForEveryone = async (msgId) => {
+            window._closeCtxSheet();
+            const confirmed = await window.showConfirm({
+                title: 'Delete for Everyone?',
+                message: 'This will permanently remove the message for both you and the other person. This cannot be undone.',
+                confirmText: 'Delete for Everyone',
+                type: 'danger'
+            });
+            if (confirmed) {
+                try {
+                    await window.db.deleteChatMessageForEveryone(thread.id, msgId);
+                    window.showToast('🗑️ Deleted for everyone.');
+                } catch(e) { window.showToast('❌ Error: ' + e.message); }
+            }
+        };
+
+        // ── Clear Chat History ───────────────────────────────────────────────
+        window._clearChatHistory = async (tid, userRole) => {
+            const confirmed = await window.showConfirm({
+                title: 'Clear History?',
+                message: 'All current messages will be hidden from your view. The other person will still be able to see their copy of the conversation.',
+                confirmText: 'Clear My History',
+                type: 'danger'
+            });
+            if (confirmed) {
+                try {
+                    await window.db.clearChatHistory(tid, userRole);
+                    window._currentChatThread[userRole === 'guest' ? 'clearedByGuestAt' : 'clearedByManagerAt'] = new Date().toISOString();
+                    window.showToast('✅ History cleared.');
+                } catch(e) { window.showToast('Error: ' + e.message); }
+            }
+        };
+
+        // ── Send / Save Edit ─────────────────────────────────────────────────
         window._sendChat = async () => {
             const input = document.getElementById('chat-input');
             const text  = (input?.value || '').trim();
             if (!text) return;
+
+            // If editing, save edit
+            if (_editingMsgId) {
+                const editId = _editingMsgId;
+                window._cancelEdit();
+                try {
+                    await window.db.editChatMessage(thread.id, editId, text);
+                    window.showToast('✅ Message updated.');
+                } catch(e) { window.showToast('❌ Edit failed: ' + e.message); }
+                return;
+            }
+
+            // Normal send
             input.value = '';
             input.style.height = 'auto';
             try {
@@ -151,7 +405,7 @@ window.router.addRoute('chat', async (container, params) => {
                     params:       { bookingId: thread.bookingId || '', propertyId: thread.propertyId }
                 });
                 if (role === 'guest') {
-                    window.db.triggerPushNotification(thread.propertyId, `💬 New message from ${window.auth.userData?.fullName || 'Guest'}`, text.length > 80 ? text.slice(0,80)+'…' : text).catch(()=>{});
+                    window.db.triggerPushNotification(thread.propertyId, `💬 New message from ${window.auth.userData?.fullName || 'Guest'}`, text.length > 80 ? text.slice(0,80)+'…' : text).catch(() => {});
                 }
             } catch(err) {
                 console.error('Send error:', err);
@@ -159,7 +413,7 @@ window.router.addRoute('chat', async (container, params) => {
             }
         };
 
-        // cleanup on navigate away
+        // Cleanup on navigate away
         const _origNav = window.router.navigate.bind(window.router);
         window.router.navigate = (...args) => {
             if (unsubscribe) { unsubscribe(); unsubscribe = null; }

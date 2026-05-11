@@ -157,11 +157,18 @@ window.router.addRoute('admin', async (container, params) => {
     };
 
     window.admSaveAnnouncement = async () => {
+        const btn = document.querySelector('[onclick="window.admSaveAnnouncement()"]');
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ Publishing...'; }
         try {
-            window.showToast("⏳ Publishing...");
             const title = document.getElementById('ann-title').value.trim();
             const body = document.getElementById('ann-body').value.trim();
-            if (!title || !body) throw new Error("Title and Body are required");
+            const fileInput = document.getElementById('ann-media');
+
+            if (!title && !body && !fileInput.files[0]) {
+                window.showToast('❌ Please provide at least an image/video or a message.');
+                if (btn) { btn.disabled = false; btn.textContent = '📢 Publish Announcement'; }
+                return;
+            }
 
             const active = document.getElementById('ann-active').checked;
             const type = document.getElementById('ann-type').value;
@@ -172,11 +179,16 @@ window.router.addRoute('admin', async (container, params) => {
 
             let mediaUrl = null, mediaType = null;
             if (fileInput.files[0]) {
-                const file = fileInput.files[0];
-                const storageRef = firebase.storage().ref(\`announcements/\${Date.now()}_\${file.name}\`);
-                await storageRef.put(file);
-                mediaUrl = await storageRef.getDownloadURL();
-                mediaType = file.type.startsWith('video') ? 'video' : 'image';
+                try {
+                    const file = fileInput.files[0];
+                    const storageRef = firebase.storage().ref(`announcements/${Date.now()}_${file.name}`);
+                    await storageRef.put(file);
+                    mediaUrl = await storageRef.getDownloadURL();
+                    mediaType = file.type.startsWith('video') ? 'video' : 'image';
+                } catch(storageErr) {
+                    console.warn('Media upload failed (storage rules not deployed?):', storageErr.message);
+                    window.showToast('⚠️ Media upload skipped (run: firebase deploy --only storage). Saving text-only...');
+                }
             }
 
             await firestore.collection('announcements').add({
@@ -184,14 +196,20 @@ window.router.addRoute('admin', async (container, params) => {
                 mediaUrl, mediaType, createdAt: new Date().toISOString()
             });
 
-            window.showToast("✅ Announcement published!");
+            window.showToast('✅ Announcement published!');
             document.getElementById('ann-title').value = '';
             document.getElementById('ann-body').value = '';
+            if (document.getElementById('ann-badge')) document.getElementById('ann-badge').value = '';
+            if (document.getElementById('ann-cta')) document.getElementById('ann-cta').value = '';
+            if (document.getElementById('ann-link')) document.getElementById('ann-link').value = '';
             document.getElementById('ann-media').value = '';
             
+            if (btn) { btn.disabled = false; btn.textContent = '📢 Publish Announcement'; }
             if (!isSyncing) renderAdmin();
         } catch(e) {
-            window.showToast("❌ Error: " + e.message);
+            console.error('admSaveAnnouncement error:', e);
+            window.showToast('❌ Failed: ' + (e.code || e.message));
+            if (btn) { btn.disabled = false; btn.textContent = '📢 Publish Announcement'; }
         }
     };
 
@@ -211,7 +229,6 @@ window.router.addRoute('admin', async (container, params) => {
     window.admToggleAnnouncement = async (id, active) => {
         await firestore.collection('announcements').doc(id).update({ active: !active });
         window.showToast("✅ Status updated.");
-    };
     };
 
     window.admDelete = async (id, name) => { 
@@ -1043,15 +1060,15 @@ window.router.addRoute('admin', async (container, params) => {
                         
                         <div style="display:grid; gap:1.2rem; background:#f9f9f9; padding:1.5rem; border-radius:16px; border:1px solid #eee;">
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-                                <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Internal Title</label><input type="text" id="ann-title" placeholder="e.g., Summer Sale" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"></div>
-                                <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Badge Text</label><input type="text" id="ann-badge" placeholder="e.g., 📢 Special Offer" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"></div>
+                                <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Internal Title (Optional)</label><input type="text" id="ann-title" placeholder="e.g., Summer Sale" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"></div>
+                                <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Badge Text (Optional)</label><input type="text" id="ann-badge" placeholder="e.g., 📢 Special Offer" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"></div>
                             </div>
                             
-                            <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Message Body</label><textarea id="ann-body" placeholder="Announcement details..." rows="3" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"></textarea></div>
+                            <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Message Body (Optional)</label><textarea id="ann-body" placeholder="Announcement details..." rows="3" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"></textarea></div>
                             
                             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem;">
                                 <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Visual Type</label><select id="ann-type" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"><option value="promo">Promo (Green/Gold)</option><option value="dark">Dark (Deep Green)</option><option value="gold">Gold (Premium)</option><option value="light">Light (Clean)</option></select></div>
-                                <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">CTA Button Text</label><input type="text" id="ann-cta" placeholder="Learn More" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"></div>
+                                <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">CTA Button (Optional)</label><input type="text" id="ann-cta" placeholder="Learn More" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"></div>
                                 <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">CTA Link (Route)</label><input type="text" id="ann-link" placeholder="home" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #ddd;"></div>
                             </div>
                             

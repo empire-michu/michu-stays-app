@@ -84,16 +84,22 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 <span style="cursor:pointer;" onclick="router.navigate('home')">Home</span> / <strong>${hotel.title}</strong>
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
                 <div>
                    <h1 style="margin:0; font-size:2.2rem; color:var(--color-primary); letter-spacing:-0.5px;">${hotel.title}</h1>
                    <p style="margin:0.2rem 0 0; color:#64748b; font-weight:600;">📍 ${hotel.address}</p>
                 </div>
+                <button id="header-book-btn" onclick="document.getElementById('book-in').scrollIntoView({behavior:'smooth',block:'center'});document.getElementById('book-in').focus();" class="btn-primary" style="padding:0.9rem 2rem; border-radius:16px; font-weight:800; font-size:1rem; background:linear-gradient(135deg,var(--color-primary),#1e7e34); box-shadow:0 8px 20px rgba(11,102,70,0.25); white-space:nowrap; display:flex; align-items:center; gap:0.5rem; animation:headerBookPulse 2s ease-in-out infinite;">
+                    <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Book Now
+                </button>
             </div>
 
             <style>
                 .detail-gallery-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.8rem; height: 450px; margin-bottom: 2.5rem; border-radius:24px; overflow:hidden; }
                 .detail-content-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 3rem; align-items: start; }
+                @keyframes headerBookPulse { 0%,100%{box-shadow:0 8px 20px rgba(11,102,70,0.25)} 50%{box-shadow:0 8px 30px rgba(11,102,70,0.45)} }
+                #mobile-book-bar { display:none; }
                 @media(max-width: 768px) {
                     .detail-gallery-grid { grid-template-columns: 1fr; height: 260px; }
                     .detail-gallery-grid > div:not(:first-child) { display: none; }
@@ -102,9 +108,28 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     .desktop-sidebar { position: static !important; width: 100%; box-sizing: border-box; }
                     .mobile-order-1 { order: 1; }
                     .mobile-order-2 { order: 2; }
-                    .mobile-order-3 { order: 3; } /* Sidebar comes 3rd, right after the description */
+                    .mobile-order-3 { order: 3; }
                     .mobile-order-4 { order: 4; }
                     .mobile-order-5 { order: 5; }
+                    #header-book-btn { display:none !important; }
+                    #mobile-book-bar { 
+                        display:flex !important; 
+                        position:fixed; bottom:0; left:0; right:0; 
+                        background:rgba(255,255,255,0.95); 
+                        backdrop-filter:blur(10px);
+                        padding:0.9rem 1.2rem; 
+                        padding-bottom:calc(0.9rem + env(safe-area-inset-bottom,0px)); 
+                        box-shadow:0 -10px 30px rgba(0,0,0,0.08); 
+                        z-index:11000; /* Higher than other modals if needed */
+                        align-items:center; 
+                        justify-content:space-between; 
+                        gap:1rem; 
+                        border-top:1px solid rgba(0,0,0,0.05);
+                        animation: slideUpIn 0.5s ease-out;
+                    }
+                    @keyframes slideUpIn { from{transform:translateY(100%)} to{transform:translateY(0)} }
+                    .mobile-book-pulse { animation: mobilePulse 2s infinite; }
+                    @keyframes mobilePulse { 0%{box-shadow:0 0 0 0 rgba(11,110,79,0.4)} 70%{box-shadow:0 0 0 15px rgba(11,110,79,0)} 100%{box-shadow:0 0 0 0 rgba(11,110,79,0)} }
                 }
             </style>
 
@@ -216,76 +241,100 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                  </div>
             </section>
 
-            <!-- REVIEWS SECTION -->
+            <!-- REVIEWS SECTION (Vertical Feed) -->
             <section style="margin-top:4rem; padding-top:3rem; border-top:1px solid #f1f5f9;">
-                 <h2 style="margin-bottom:2rem; font-size:1.6rem; display:flex; align-items:center; gap:0.8rem;">
-                    <span style="color:#f59e0b;">★</span> Guest Reviews (${reviewCount})
-                 </h2>
-                 <div style="display:flex; overflow-x:auto; gap:1.5rem; padding-bottom:1rem; padding-top:0.5rem; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
+                 <!-- Rating Summary -->
+                 <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:2rem; flex-wrap:wrap;">
+                    <div style="text-align:center;">
+                        <div style="font-size:3rem; font-weight:950; color:var(--color-primary); line-height:1;">${avgRating || '—'}</div>
+                        <div style="color:#f59e0b; font-size:1.2rem; margin:0.3rem 0;">${'★'.repeat(Math.round(avgRating))}${'☆'.repeat(5-Math.round(avgRating))}</div>
+                        <div style="font-size:0.8rem; color:#94a3b8; font-weight:700;">${reviewCount} review${reviewCount!==1?'s':''}</div>
+                    </div>
+                    <div style="flex:1; min-width:200px;">
+                        ${[5,4,3,2,1].map(s => {
+                            const cnt = reviews.filter(r=>r.rating===s).length;
+                            const pct = reviewCount>0 ? Math.round(cnt/reviewCount*100) : 0;
+                            return `<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:4px;">
+                                <span style="font-size:0.75rem;font-weight:700;color:#64748b;width:12px;">${s}</span>
+                                <div style="flex:1;height:8px;background:#f1f5f9;border-radius:99px;overflow:hidden;">
+                                    <div style="height:100%;width:${pct}%;background:${s>=4?'#f59e0b':s>=3?'#fbbf24':'#fb923c'};border-radius:99px;transition:width 0.6s;"></div>
+                                </div>
+                                <span style="font-size:0.7rem;color:#94a3b8;width:20px;">${cnt}</span>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                 </div>
+
+                 <!-- Review Cards (Vertical) -->
+                 <div id="reviews-feed" style="display:flex; flex-direction:column; gap:1.5rem;">
                     ${reviews.length > 0 ? reviews.map(r => {
-                        const rDate = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently';
+                        const rDate = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : 'Recently';
                         const isOwner = window.auth.currentUser && window.auth.currentUser.uid === r.userId;
+                        const avatar = (r.userName || 'G').charAt(0).toUpperCase();
+                        const escapedText = (r.text || 'Enjoyed the stay!').replace(/'/g, "\\'").replace(/"/g, '&quot;');
                         
                         return `
-                        <div style="min-width: 280px; max-width: 320px; flex-shrink: 0; scroll-snap-align: start; background:#f8fafc; padding:1.5rem; border-radius:24px; border:1px solid #f1f5f9; position:relative; display:flex; flex-direction:column; min-height:220px;">
-                            ${isOwner ? `
-                                <button class="michu-action-btn"
-                                        data-action="delete-review"
-                                        data-review-id="${r.id}"
-                                        data-hotel-id="${hotel.id}"
-                                        title="Delete My Review"
-                                        style="position:absolute; top:0.6rem; right:0.6rem; background:#fee2e2; color:#ef4444; border:none; width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 15px rgba(239,68,68,0.25); z-index:1000; transition:all 0.2s; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                                </button>
-                            ` : ''}
-
-
-                            <div style="flex:1;">
-                                <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem; padding-right:${isOwner ? '40px' : '0'};">
-                                    <strong style="font-size:1.1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.userName || 'Guest'}</strong>
-                                    <div style="color:#f59e0b; flex-shrink:0;">${'★'.repeat(r.rating)}</div>
+                        <div id="review-${r.id}" style="background:#f8fafc; padding:1.5rem; border-radius:24px; border:1px solid #f1f5f9;">
+                            <!-- Review Header -->
+                            <div style="display:flex; align-items:center; gap:0.8rem; margin-bottom:1rem;">
+                                <div style="width:42px;height:42px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:1rem;flex-shrink:0;">${avatar}</div>
+                                <div style="flex:1;min-width:0;">
+                                    <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                                        <strong style="font-size:1rem;">${r.userName || 'Guest'}</strong>
+                                        <span style="color:#f59e0b;font-size:0.9rem;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+                                    </div>
+                                    <div style="font-size:0.7rem;color:#94a3b8;font-weight:700;">${rDate}${r.updatedAt ? ' · <em>Edited</em>' : ''}</div>
                                 </div>
-                                <div style="font-size:0.75rem; color:#94a3b8; font-weight:700; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.5px;">${rDate}</div>
-                                
-                                <p style="font-style:italic; line-height:1.6; color:#475569; margin:0; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">"${r.text || 'Enjoyed the stay!'}"</p>
+                                ${isOwner ? `
+                                <div style="display:flex;gap:6px;">
+                                    <button onclick="window._editReview('${r.id}','${escapedText}',${r.rating})" style="background:#f0fdf4;color:#16a34a;border:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.95rem;" title="Edit">✏️</button>
+                                    <button class="michu-action-btn" data-action="delete-review" data-review-id="${r.id}" data-hotel-id="${hotel.id}" style="background:#fef2f2;color:#ef4444;border:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.95rem;" title="Delete">🗑️</button>
+                                </div>` : ''}
                             </div>
+                            <!-- Review Text -->
+                            <p style="line-height:1.7;color:#475569;margin:0 0 0.3rem;font-size:0.95rem;">"${r.text || 'Enjoyed the stay!'}"</p>
 
                             ${(() => {
                                 if (r.managerReply && r.managerReply.text) {
-                                    const replyDate = r.managerReply.createdAt ? new Date(r.managerReply.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+                                    const replyDate = r.managerReply.createdAt ? new Date(r.managerReply.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+                                    const replyEscaped = r.managerReply.text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                                     return `
-                                    <div style="margin-top:1.5rem; padding:1rem; background:#fff; border-radius:18px; border-left:4px solid #f59e0b; font-size:0.85rem; box-shadow:0 4px 12px rgba(0,0,0,0.04); position:relative;">
-                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
-                                            <strong style="color:#1e293b; font-size:0.8rem;">↳ Manager Response:</strong>
-                                            ${(replyDate && replyDate !== 'Invalid Date') ? `<span style="font-size:0.65rem; color:#94a3b8; font-weight:700;">${replyDate}</span>` : ''}
-                                        </div>
-                                        <p style="color:#64748b; font-style:italic; margin:0; line-height:1.5;">"${r.managerReply.text}"</p>
-                                        
-                                        ${isManager ? `
-                                            <div style="margin-top:1rem; border-top:1px dashed #e2e8f0; padding-top:1rem; text-align:right;">
-                                                <button class="michu-action-btn"
-                                                        data-action="delete-reply"
-                                                        data-review-id="${r.id}"
-                                                        data-hotel-id="${hotel.id}"
-                                                        style="background:#fff1f2; border:none; color:#ef4444; font-size:0.8rem; font-weight:800; cursor:pointer; padding:10px 20px; border-radius:12px; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(239,68,68,0.12); z-index:1000; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                                                    Remove Reply
-                                                </button>
+                                    <div style="margin-top:1.2rem;padding:1rem 1.2rem;background:#fff;border-radius:16px;border-left:4px solid #f59e0b;box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                                            <strong style="color:#1e293b;font-size:0.82rem;">↳ Hotel Response</strong>
+                                            <div style="display:flex;align-items:center;gap:6px;">
+                                                ${(replyDate && replyDate!=='Invalid Date') ? `<span style="font-size:0.65rem;color:#94a3b8;font-weight:700;">${replyDate}${r.managerReply.updatedAt?' · Edited':''}</span>` : ''}
+                                                ${isManager ? `
+                                                    <button onclick="window._editReply('${r.id}','${replyEscaped}')" style="background:#f0fdf4;color:#16a34a;border:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.8rem;" title="Edit Reply">✏️</button>
+                                                    <button class="michu-action-btn" data-action="delete-reply" data-review-id="${r.id}" data-hotel-id="${hotel.id}" style="background:#fef2f2;color:#ef4444;border:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.8rem;" title="Delete Reply">🗑️</button>
+                                                ` : ''}
                                             </div>
-                                        ` : ''}
+                                        </div>
+                                        <p style="color:#64748b;font-style:italic;margin:0;line-height:1.6;font-size:0.88rem;">"${r.managerReply.text}"</p>
                                     </div>`;
                                 } else if (isManager) {
-                                    return `
-                                    <div style="margin-top:1.2rem;">
-                                        <button onclick="window.replyToReview('${r.id}')" style="width:100%; background:#f1f5f9; border:1px dashed #cbd5e1; color:#475569; padding:0.7rem; border-radius:14px; font-size:0.8rem; cursor:pointer; font-weight:700; transition:all 0.2s;">↩ Reply to Guest</button>
+                                    return `<div style="margin-top:1rem;">
+                                        <button onclick="window.replyToReview('${r.id}')" style="width:100%;background:#f1f5f9;border:1px dashed #cbd5e1;color:#475569;padding:0.7rem;border-radius:14px;font-size:0.8rem;cursor:pointer;font-weight:700;">↩ Reply to Guest</button>
                                     </div>`;
                                 }
                                 return '';
                             })()}
                         </div>`;
-                    }).join('') : '<p style="color:#94a3b8;">No reviews yet.</p>'}
+                    }).join('') : '<p style="color:#94a3b8;text-align:center;padding:2rem;">No reviews yet. Be the first to share your experience!</p>'}
                  </div>
             </section>
+        </div>
+
+        <!-- Mobile Sticky Book Now Bar -->
+        <div id="mobile-book-bar">
+            <div style="display:flex; flex-direction:column;">
+                <span style="font-size:1.3rem;font-weight:950;color:var(--color-primary);line-height:1;">${currentPrice.toLocaleString()} Birr</span>
+                <span style="color:#64748b;font-size:0.75rem;font-weight:700;margin-top:2px;">per night</span>
+            </div>
+            <button onclick="window.michuMobileBookTrigger()" 
+                class="btn-primary mobile-book-pulse" style="padding:0.9rem 2.2rem;border-radius:18px;font-weight:800;font-size:1rem;background:linear-gradient(135deg,var(--color-primary),#1e7e34);box-shadow:0 8px 20px rgba(11,102,70,0.3);white-space:nowrap;border:none;color:white;">
+                ${isFullyBooked ? 'Fully Booked' : 'Book Now'}
+            </button>
         </div>
 
         <div id="gallery-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.96); z-index:10000; align-items:center; justify-content:center; flex-direction:column;">
@@ -299,12 +348,26 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
 
         <div id="reply-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); z-index:9999; align-items:center; justify-content:center;">
              <div style="background:#fff; width:90%; max-width:400px; padding:2rem; border-radius:24px; box-shadow:0 20px 40px rgba(0,0,0,0.15); animation:fadeUp 0.3s ease;">
-                 <h3 style="margin-bottom:1rem; font-size:1.3rem; color:#0f172a;">Reply to Guest</h3>
-                 <p style="font-size:0.85rem; color:#64748b; margin-bottom:1.5rem;">Respond professionally to this review. Your reply will be visible to everyone.</p>
+                 <h3 id="reply-modal-title" style="margin-bottom:1rem; font-size:1.3rem; color:#0f172a;">Reply to Guest</h3>
+                 <p style="font-size:0.85rem; color:#64748b; margin-bottom:1.5rem;">Your reply will be visible to everyone.</p>
                  <textarea id="reply-text-area" rows="4" placeholder="Thank you for your stay..." style="width:100%; padding:1rem; border:2px solid #e2e8f0; border-radius:14px; resize:none; font-family:inherit; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='var(--color-primary)'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
                  <div style="display:flex; gap:1rem; margin-top:1.5rem;">
                      <button onclick="document.getElementById('reply-modal').style.display='none'" style="flex:1; padding:1rem; background:#f1f5f9; color:#475569; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Cancel</button>
                      <button id="reply-submit-btn" style="flex:1; padding:1rem; background:var(--color-primary); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Post Reply</button>
+                 </div>
+             </div>
+        </div>
+
+        <!-- Review Edit Modal -->
+        <div id="review-edit-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); z-index:9999; align-items:center; justify-content:center;">
+             <div style="background:#fff; width:90%; max-width:420px; padding:2rem; border-radius:24px; box-shadow:0 20px 40px rgba(0,0,0,0.15); animation:fadeUp 0.3s ease;">
+                 <h3 style="margin-bottom:0.5rem; font-size:1.3rem; color:#0f172a;">Edit Your Review</h3>
+                 <p style="font-size:0.82rem; color:#64748b; margin-bottom:1.2rem;">Update your rating and feedback.</p>
+                 <div id="edit-rating-stars" style="display:flex;gap:0.4rem;margin-bottom:1rem;font-size:1.6rem;cursor:pointer;"></div>
+                 <textarea id="edit-review-text" rows="4" style="width:100%;padding:1rem;border:2px solid #e2e8f0;border-radius:14px;resize:none;font-family:inherit;outline:none;" onfocus="this.style.borderColor='var(--color-primary)'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+                 <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+                     <button onclick="document.getElementById('review-edit-modal').style.display='none'" style="flex:1;padding:1rem;background:#f1f5f9;color:#475569;border:none;border-radius:12px;font-weight:700;cursor:pointer;">Cancel</button>
+                     <button id="edit-review-submit" style="flex:1;padding:1rem;background:var(--color-primary);color:white;border:none;border-radius:12px;font-weight:700;cursor:pointer;">Save Changes</button>
                  </div>
              </div>
         </div>
@@ -398,6 +461,75 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         };
     };
 
+    window._editReview = (reviewId, oldText, oldRating) => {
+        const modal = document.getElementById('review-edit-modal');
+        const textArea = document.getElementById('edit-review-text');
+        const starsContainer = document.getElementById('edit-rating-stars');
+        const submitBtn = document.getElementById('edit-review-submit');
+        
+        textArea.value = oldText;
+        let currentRating = oldRating;
+
+        const renderStars = () => {
+            starsContainer.innerHTML = [1,2,3,4,5].map(s => 
+                `<span onclick="currentRating=${s};renderStars()" style="color:${s<=currentRating?'#f59e0b':'#cbd5e1'}">${s<=currentRating?'★':'☆'}</span>`
+            ).join('');
+        };
+        
+        window.renderStars = renderStars;
+        renderStars();
+        modal.style.display = 'flex';
+
+        submitBtn.onclick = async () => {
+            const newText = textArea.value.trim();
+            if(!newText) return window.showToast("Please enter some text.");
+            
+            submitBtn.innerText = 'Saving...';
+            submitBtn.disabled = true;
+
+            try {
+                await window.db.editReview(reviewId, newText, currentRating);
+                window.showToast("✅ Review updated!");
+                modal.style.display = 'none';
+                window.router.navigate('hotel-detail', {id: hotel.id}); // Refresh
+            } catch(e) {
+                window.showToast("❌ Error: " + e.message);
+                submitBtn.innerText = 'Save Changes';
+                submitBtn.disabled = false;
+            }
+        };
+    };
+
+    window._editReply = (reviewId, oldReplyText) => {
+        const modal = document.getElementById('reply-modal');
+        const title = document.getElementById('reply-modal-title');
+        const textArea = document.getElementById('reply-text-area');
+        const submitBtn = document.getElementById('reply-submit-btn');
+
+        title.innerText = 'Edit Reply';
+        textArea.value = oldReplyText;
+        modal.style.display = 'flex';
+
+        submitBtn.onclick = async () => {
+            const newReply = textArea.value.trim();
+            if(!newReply) return window.showToast("Please enter a reply.");
+
+            submitBtn.innerText = 'Saving...';
+            submitBtn.disabled = true;
+
+            try {
+                await window.db.editReviewReply(reviewId, newReply);
+                window.showToast("✅ Reply updated!");
+                modal.style.display = 'none';
+                window.router.navigate('hotel-detail', {id: hotel.id});
+            } catch(e) {
+                window.showToast("❌ Error: " + e.message);
+                submitBtn.innerText = 'Save Changes';
+                submitBtn.disabled = false;
+            }
+        };
+    };
+
     // Logic for deletions now handled globally via michuDeleteReviewGlobal and michuDeleteReplyGlobal in app.js
 
 
@@ -423,5 +555,24 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         img.style.display = 'none'; vid.style.display = 'none';
         if (item.type === 'image') { img.src = item.url; img.style.display = 'block'; }
         else { vid.querySelector('source').src = item.url; vid.load(); vid.style.display = 'block'; vid.play(); }
+    };
+
+    // Smart Trigger for Mobile Book Now
+    window.michuMobileBookTrigger = () => {
+        const dIn = document.getElementById('book-in');
+        const dOut = document.getElementById('book-out');
+        const totalVal = document.getElementById('final-total-val');
+        
+        if (dIn && dOut && dIn.value && dOut.value) {
+            // Dates are selected, go to booking directly
+            window.michuFinalNav(id, dIn.value, dOut.value, totalVal ? totalVal.innerText : '');
+        } else {
+            // No dates, scroll to picker
+            if (dIn) {
+                dIn.scrollIntoView({behavior:'smooth',block:'center'});
+                setTimeout(() => dIn.focus(), 500);
+                window.showToast("Please select your stay dates!");
+            }
+        }
     };
 });

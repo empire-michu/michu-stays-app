@@ -414,6 +414,27 @@ class Database {
         });
     }
 
+    async editReview(reviewId, newText, newRating) {
+        return await firestore.collection('reviews').doc(reviewId).update({
+            text: newText,
+            rating: newRating,
+            updatedAt: new Date().toISOString()
+        });
+    }
+
+    async editReviewReply(reviewId, newReplyText) {
+        const doc = await firestore.collection('reviews').doc(reviewId).get();
+        if (!doc.exists) throw new Error('Review not found');
+        const existing = doc.data().managerReply || {};
+        return await firestore.collection('reviews').doc(reviewId).update({
+            managerReply: {
+                ...existing,
+                text: newReplyText,
+                updatedAt: new Date().toISOString()
+            }
+        });
+    }
+
     async getReviews(propertyId) {
         const snapshot = await firestore.collection('reviews')
             .where('propertyId', '==', propertyId).get();
@@ -886,6 +907,43 @@ class Database {
         if (senderRole === 'guest') { update.unreadByManager = firebase.firestore.FieldValue.increment(1); update.unreadByGuest = 0; }
         else { update.unreadByGuest = firebase.firestore.FieldValue.increment(1); update.unreadByManager = 0; }
         await firestore.collection('chatThreads').doc(threadId).update(update);
+    }
+
+    async editChatMessage(threadId, messageId, newText) {
+        try {
+            await firestore.collection('chatThreads').doc(threadId).collection('messages').doc(messageId).update({
+                text: newText,
+                editedAt: new Date().toISOString()
+            });
+        } catch(e) { console.warn('editChatMessage error:', e); throw e; }
+    }
+
+    async deleteChatMessageForMe(threadId, messageId, role) {
+        try {
+            const key = role === 'guest' ? 'hiddenForGuest' : 'hiddenForManager';
+            await firestore.collection('chatThreads').doc(threadId).collection('messages').doc(messageId).update({
+                [key]: true
+            });
+        } catch(e) { console.warn('deleteChatMessageForMe error:', e); throw e; }
+    }
+
+    async deleteChatMessageForEveryone(threadId, messageId) {
+        try {
+            await firestore.collection('chatThreads').doc(threadId).collection('messages').doc(messageId).update({
+                text: "🚫 This message was deleted",
+                isDeleted: true,
+                deletedAt: new Date().toISOString()
+            });
+        } catch(e) { console.warn('deleteChatMessageForEveryone error:', e); throw e; }
+    }
+
+    async clearChatHistory(threadId, role) {
+        try {
+            const key = role === 'guest' ? 'clearedByGuestAt' : 'clearedByManagerAt';
+            await firestore.collection('chatThreads').doc(threadId).update({
+                [key]: new Date().toISOString()
+            });
+        } catch(e) { console.warn('clearChatHistory error:', e); throw e; }
     }
 
     listenToChatMessages(threadId, callback) {

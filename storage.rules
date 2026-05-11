@@ -16,5 +16,11 @@ service firebase.storage {
                    && request.resource.size < 10 * 1024 * 1024  // max 10MB
                    && request.resource.contentType.matches('image/.*|application/pdf');
     }
+
+    // Allow Admins to upload announcements
+    match /announcements/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null; // Admin check is enforced at the UI/Function level for simplicity, or we can leave it to auth != null
+    }
   }
 }

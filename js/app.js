@@ -308,38 +308,68 @@ document.addEventListener('click', (e) => {
     if (e.target.id === 'notif-modal') e.target.style.display = 'none';
 });
 
-// Premium Global Confirmation Modal
+// Premium Global Confirmation Modal (Michu Stays Branded)
 window.showConfirm = ({ title, message, confirmText = 'Confirm', cancelText = 'Cancel', type = 'primary' }) => {
     return new Promise((resolve) => {
         const overlay = document.createElement('div');
-        overlay.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(4px); z-index:10000; display:flex; align-items:center; justify-content:center; animation: fadeIn 0.2s ease;`;
+        overlay.style.cssText = `position:fixed; inset:0; background:rgba(15,23,42,0.6); backdrop-filter:blur(10px); z-index:20000; display:flex; align-items:center; justify-content:center; animation: _fadeIn 0.3s ease; padding:1.5rem;`;
         
         const colors = {
-            primary: 'var(--color-primary)',
-            danger: '#c5221f',
-            warning: '#e37400'
+            primary: 'var(--color-primary)', // #0B6E4F
+            danger: '#dc2626',
+            warning: '#f59e0b',
+            secondary: 'var(--color-secondary)' // #F4B400
         };
         const activeColor = colors[type] || colors.primary;
+        const isDanger = type === 'danger';
 
         overlay.innerHTML = `
             <style>
-                @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-                @keyframes slideUp { from{transform:translateY(20px); opacity:0} to{transform:translateY(0); opacity:1} }
+                @keyframes _fadeIn { from{opacity:0} to{opacity:1} }
+                @keyframes _slideUpPop { from{transform:scale(0.9) translateY(30px); opacity:0} to{transform:scale(1) translateY(0); opacity:1} }
+                ._michu-confirm-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+                ._michu-confirm-btn:active { transform: scale(0.96); }
             </style>
-            <div style="background:white; border-radius:24px; padding:2.5rem; width:90%; max-width:400px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.15); animation:slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); border-top:5px solid ${activeColor};">
-                <h3 style="margin:0 0 0.8rem; font-size:1.4rem; color:#1a1a1a;">${title}</h3>
-                <p style="margin:0 0 2rem; color:#666; line-height:1.5;">${message}</p>
-                <div style="display:flex; gap:1rem;">
-                    <button id="_modal-cancel" style="flex:1; padding:0.9rem; border-radius:12px; border:1px solid #eee; background:#fff; font-weight:700; cursor:pointer; color:#888;">${cancelText}</button>
-                    <button id="_modal-confirm" style="flex:1; padding:0.9rem; border-radius:12px; border:none; background:${activeColor}; color:white; font-weight:700; cursor:pointer;">${confirmText}</button>
+            <div style="background:white; border-radius:32px; padding:2.5rem 2rem; width:100%; max-width:400px; text-align:center; box-shadow:0 30px 70px rgba(0,0,0,0.25); animation:_slideUpPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); position:relative; overflow:hidden;">
+                <!-- Decorative brand accent -->
+                <div style="position:absolute; top:0; left:0; right:0; height:6px; background:linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--color-primary));"></div>
+                
+                <div style="width:72px; height:72px; border-radius:50%; background:${isDanger ? '#fef2f2' : '#f0fdf4'}; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem; font-size:2rem; box-shadow:inset 0 2px 10px rgba(0,0,0,0.05);">
+                    ${isDanger ? '🗑️' : '✨'}
+                </div>
+
+                <h3 style="margin:0 0 0.8rem; font-size:1.5rem; font-weight:900; color:#0f172a; letter-spacing:-0.5px;">${title}</h3>
+                <p style="margin:0 0 2.5rem; color:#64748b; line-height:1.6; font-size:1rem;">${message}</p>
+                
+                <div style="display:flex; flex-direction:column; gap:0.8rem;">
+                    <button id="_modal-confirm" class="_michu-confirm-btn" style="width:100%; padding:1.1rem; border-radius:18px; border:none; background:${activeColor}; color:white; font-weight:800; font-size:1rem; cursor:pointer; box-shadow:0 8px 20px ${activeColor}44; letter-spacing:0.3px;">
+                        ${confirmText}
+                    </button>
+                    <button id="_modal-cancel" class="_michu-confirm-btn" style="width:100%; padding:1.1rem; border-radius:18px; border:1px solid #e2e8f0; background:white; font-weight:700; cursor:pointer; color:#64748b; font-size:1rem;">
+                        ${cancelText}
+                    </button>
                 </div>
             </div>
         `;
         document.body.appendChild(overlay);
 
-        overlay.querySelector('#_modal-cancel').onclick = () => { overlay.remove(); resolve(false); };
-        overlay.querySelector('#_modal-confirm').onclick = () => { overlay.remove(); resolve(true); };
-        overlay.onclick = (e) => { if (e.target === overlay) { overlay.remove(); resolve(false); } };
+        // Trap focus or just handle buttons
+        const confirmBtn = overlay.querySelector('#_modal-confirm');
+        const cancelBtn = overlay.querySelector('#_modal-cancel');
+
+        confirmBtn.onclick = () => { 
+            overlay.style.opacity = '0';
+            overlay.style.transition = 'opacity 0.2s';
+            setTimeout(() => { overlay.remove(); resolve(true); }, 200);
+        };
+        cancelBtn.onclick = () => { 
+            overlay.style.opacity = '0';
+            overlay.style.transition = 'opacity 0.2s';
+            setTimeout(() => { overlay.remove(); resolve(false); }, 200);
+        };
+        overlay.onclick = (e) => { if (e.target === overlay) cancelBtn.click(); };
+        
+        confirmBtn.focus();
     });
 };
 
