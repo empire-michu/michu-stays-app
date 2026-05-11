@@ -28,6 +28,7 @@ window.renderAnnouncementBanner = async function(container) {
         s.id = 'ann-hero-styles';
         s.textContent = `
             .ann-hero-vp { overflow:hidden; position:relative; width:100%; touch-action:pan-y; min-height: 320px; }
+            @media (max-width: 768px) { .ann-hero-vp { min-height: 220px; } }
             .ann-hero-track { display:flex; will-change:transform; height:100%; }
             .ann-hero-slide { flex:0 0 100%; position:relative; height:100%; }
             
@@ -50,6 +51,7 @@ window.renderAnnouncementBanner = async function(container) {
                 text-align: center;
                 color: white;
             }
+            @media (max-width: 768px) { .hero-section-ann { min-height: 220px; } }
 
             .ann-hero-media { position:absolute; inset:0; z-index:0; }
             .ann-hero-media img, .ann-hero-media video { width:100%; height:100%; object-fit:cover; display:block; }
@@ -90,6 +92,12 @@ window.renderAnnouncementBanner = async function(container) {
                 margin-bottom: 0.6rem;
                 text-shadow: 0 4px 12px rgba(0,0,0,0.5);
                 letter-spacing: -0.5px;
+            }
+            @media (max-width: 768px) { 
+                .ann-hero-title { font-size: 1.4rem; margin-bottom: 0.3rem; }
+                .ann-hero-body { font-size: 0.85rem; margin-bottom: 12px; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+                .ann-hero-cta { padding: 8px 20px; font-size: 13px; }
+                .ann-hero-badge { margin-bottom: 6px; padding: 2px 8px; font-size: 9px; }
             }
 
             .ann-hero-body {

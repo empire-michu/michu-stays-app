@@ -560,19 +560,12 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     // Smart Trigger for Mobile Book Now
     window.michuMobileBookTrigger = () => {
         const dIn = document.getElementById('book-in');
-        const dOut = document.getElementById('book-out');
-        const totalVal = document.getElementById('final-total-val');
-        
-        if (dIn && dOut && dIn.value && dOut.value) {
-            // Dates are selected, go to booking directly
-            window.michuFinalNav(id, dIn.value, dOut.value, totalVal ? totalVal.innerText : '');
-        } else {
-            // No dates, scroll to picker
-            if (dIn) {
-                dIn.scrollIntoView({behavior:'smooth',block:'center'});
-                setTimeout(() => dIn.focus(), 500);
-                window.showToast("Please select your stay dates!");
-            }
+        if (dIn) {
+            dIn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                dIn.focus();
+                if (!dIn.value) window.showToast("Please select your stay dates!");
+            }, 600);
         }
     };
 });
