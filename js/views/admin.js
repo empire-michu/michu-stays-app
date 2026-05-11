@@ -175,7 +175,6 @@ window.router.addRoute('admin', async (container, params) => {
             const badge = document.getElementById('ann-badge').value.trim();
             const cta = document.getElementById('ann-cta').value.trim();
             const link = document.getElementById('ann-link').value.trim();
-            const fileInput = document.getElementById('ann-media');
 
             let mediaUrl = null, mediaType = null;
             if (fileInput.files[0]) {
