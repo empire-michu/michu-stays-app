@@ -1,5 +1,5 @@
 window.router.addRoute('home', async (container, params) => {
-    container.innerHTML = `<div class="container" style="text-align:center; padding-top:4rem;"><div style="font-size:2rem; margin-bottom:1rem;">🏨</div>Loading Stays...</div>`;
+    container.innerHTML = `<div class="container" style="text-align:center; padding-top:4rem;"><div style="display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%; background:#f0f7f2; color:var(--color-primary); margin-bottom:1.5rem;"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 21h18M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16M9 21v-4a2 2 0 012-2h2a2 2 0 012 2v4M9 7h6M9 11h6"/></svg></div><div style="font-size:1.2rem; font-weight:700; color:#555;">Loading Stays...</div></div>`;
     let allProperties = [];
     let allBookings = [];
     let propertyRatings = {};
@@ -535,7 +535,7 @@ window.router.addRoute('home', async (container, params) => {
                             <div style="margin-top:4rem;">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:2rem;">
                                     <div>
-                                        <h2 style="font-size:2rem; font-weight:900; margin:0; letter-spacing:-1px;">📈 Trendy Stays</h2>
+                                        <h2 style="font-size:2rem; font-weight:900; margin:0; letter-spacing:-1px; display:flex; align-items:center; gap:0.6rem;"><svg width="28" height="28" fill="none" stroke="var(--color-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg> Trendy Stays</h2>
                                         <p style="color:#666; margin-top:0.4rem; font-size:1rem;">${hasActiveBookings ? 'Most booked properties in Dire Dawa this week.' : 'Handpicked favorites gaining popularity.'}</p>
                                     </div>
                                     <div style="background:#fff4e5; color:#b45309; padding:0.4rem 0.8rem; border-radius:10px; font-weight:800; font-size:0.75rem;">Hot Pick</div>
@@ -551,7 +551,7 @@ window.router.addRoute('home', async (container, params) => {
                             <div style="margin-top:4rem;">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:2rem;">
                                     <div>
-                                        <h2 style="font-size:2rem; font-weight:900; margin:0; letter-spacing:-1px;">✨ New on Michu Stays</h2>
+                                        <h2 style="font-size:2rem; font-weight:900; margin:0; letter-spacing:-1px; display:flex; align-items:center; gap:0.6rem;"><svg width="28" height="28" fill="var(--color-primary)" stroke="var(--color-primary)" stroke-width="1.5" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z"/></svg> New on Michu Stays</h2>
                                         <p style="color:#666; margin-top:0.4rem; font-size:1rem;">Discover the newest additions to our collection.</p>
                                     </div>
                                     <div style="background:#e6f4ea; color:#1e7e34; padding:0.4rem 0.8rem; border-radius:10px; font-weight:800; font-size:0.75rem;">Just Arrived</div>
@@ -570,7 +570,7 @@ window.router.addRoute('home', async (container, params) => {
             <!-- Guest Reviews Section (Moved from Footer) -->
             <div class="footer-testimonials" style="margin-top:6rem; background:rgba(255,255,255,0.05); border-radius:32px; padding:4rem 2rem; border:1px solid rgba(0,0,0,0.05); position:relative; overflow:hidden;">
                 <div style="position:absolute; top:-2rem; right:-2rem; font-size:10rem; color:rgba(0,0,0,0.02); pointer-events:none;">"</div>
-                <h3 style="font-size:2.4rem; font-weight:900; margin-bottom:3rem; text-align:center; letter-spacing:-1px;">⭐ Real Stories from our Stays</h3>
+                <h3 style="font-size:2.4rem; font-weight:900; margin-bottom:3rem; text-align:center; letter-spacing:-1px; display:flex; align-items:center; justify-content:center; gap:0.8rem;"><svg width="32" height="32" fill="var(--color-secondary)" stroke="var(--color-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Real Stories from our Stays</h3>
                 <div class="testimonials-grid">
                     <div class="testimonial-card">
                         <div class="testimonial-stars">★★★★★</div>
