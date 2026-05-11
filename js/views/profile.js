@@ -92,6 +92,12 @@ window.router.addRoute('profile', async (container, params) => {
 
         countEl.innerText = `${fullList.length} booking${fullList.length !== 1 ? 's' : ''}`;
 
+        // Sync Account Status card with live data
+        const statTotal = document.getElementById('stat-bookings-count');
+        const statConfirmed = document.getElementById('stat-confirmed-count');
+        if (statTotal) statTotal.innerText = allBookings.length;
+        if (statConfirmed) statConfirmed.innerText = allBookings.filter(b => b.status === 'Confirmed').length;
+
         if (list.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2.5rem;color:var(--color-text-light);">No bookings found.</td></tr>`;
             return;
@@ -214,10 +220,10 @@ window.router.addRoute('profile', async (container, params) => {
                         <h3 style="margin-bottom:1.5rem;">📊 Account Status</h3>
                         <div style="display:grid;gap:0.8rem;">
                             <div style="padding:1rem;background:#f8f9fa;border-radius:12px;display:flex;justify-content:space-between;">
-                                <span>Bookings</span><strong>${allBookings.length}</strong>
+                                <span>Bookings</span><strong id="stat-bookings-count">${allBookings.length}</strong>
                             </div>
                             <div style="padding:1rem;background:#f0f7f2;border-radius:12px;display:flex;justify-content:space-between;color:var(--color-primary);">
-                                <span>Confirmed</span><strong>${allBookings.filter(b=>b.status==='Confirmed').length}</strong>
+                                <span>Confirmed</span><strong id="stat-confirmed-count">${allBookings.filter(b=>b.status==='Confirmed').length}</strong>
                             </div>
                         </div>
                     </div>

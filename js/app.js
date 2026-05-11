@@ -302,10 +302,10 @@ window.showNotifModal = () => {
     unreadCount = 0;
 };
 
-// Close modals when clicking backdrop
+// Close notif modal when clicking backdrop
 document.addEventListener('click', (e) => {
-    if (e.target.id === 'ai-modal')    e.target.style.display = 'none';
-    if (e.target.id === 'notif-modal') e.target.style.display = 'none';
+    if (e.target.id === 'ai-modal') e.target.style.display = 'none';
+    // notif-modal backdrop handled via onclick on element itself
 });
 
 // Premium Global Confirmation Modal (Michu Stays Branded)
@@ -452,27 +452,75 @@ window.showPushNotification = ({ message, details, createdAt, link, params }) =>
 const renderNotifList = () => {
     const list = document.getElementById('notif-list-container');
     const empty = document.getElementById('notif-empty-state');
+    const countLabel = document.getElementById('notif-count-label');
+    const clearBtn = document.getElementById('notif-clear-btn');
     if (!list) return;
 
-    if (notifications.length > 0) {
-        if (empty) empty.style.display = 'none';
-        list.innerHTML = notifications.map(n => `
-            <div onclick="window.router.navigate('${n.link || 'home'}', ${n.params ? JSON.stringify(n.params).replace(/"/g, '&quot;') : '{}'}); document.getElementById('notif-modal').style.display='none';" style="padding:1rem; background:#f8f9fa; border-radius:15px; border:1px solid #edf2f7; cursor:pointer; transition:all 0.2s;">
-                <div style="font-weight:700; color:var(--color-primary); font-size:0.9rem; margin-bottom:0.2rem;">${n.message}</div>
-                <div style="font-size:0.8rem; color:#666; line-height:1.4;">${n.details}</div>
-                <div style="font-size:0.7rem; color:#bbb; margin-top:0.5rem;">${new Date(n.createdAt || Date.now()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-            </div>
-        `).join('');
+    if (notifications.length === 0) {
+        if (empty) empty.style.display = 'flex';
+        if (countLabel) countLabel.innerText = 'No new notifications';
+        if (clearBtn) clearBtn.style.display = 'none';
+        return;
     }
+
+    if (empty) empty.style.display = 'none';
+    if (clearBtn) clearBtn.style.display = 'block';
+    if (countLabel) countLabel.innerText = `${notifications.length} notification${notifications.length !== 1 ? 's' : ''}`;
+
+    const relativeTime = (ts) => {
+        const diff = Math.floor((Date.now() - new Date(ts || Date.now()).getTime()) / 1000);
+        if (diff < 60) return 'Just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+        return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    };
+
+    // Keep the empty-state div in DOM, just render items before it
+    const items = notifications.map((n, i) => `
+        <div class="notif-item" onclick="window.router.navigate('${n.link || 'home'}', ${n.params ? JSON.stringify(n.params).replace(/"/g, '&quot;') : '{}'}); window.showNotifModal(false);"
+            style="padding:1rem 1.1rem; background:#f8faf9; border-radius:16px; border:1px solid #ecf5ef; cursor:pointer; transition:all 0.18s; display:flex; gap:0.9rem; align-items:flex-start;">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+                <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;color:#111;font-size:0.88rem;margin-bottom:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${n.message}</div>
+                <div style="font-size:0.8rem;color:#555;line-height:1.45;">${n.details}</div>
+                <div style="font-size:0.7rem;color:#aaa;margin-top:0.4rem;">${relativeTime(n.createdAt)}</div>
+            </div>
+        </div>
+    `).join('');
+
+    list.innerHTML = items + `<div id="notif-empty-state" style="display:none;"></div>`;
 };
 
-window.showNotifModal = () => {
+window.clearAllNotifications = () => {
+    notifications.length = 0;
     unreadCount = 0;
     const badge = document.getElementById('notif-badge');
     if (badge) badge.style.display = 'none';
-    const modal = document.getElementById('notif-modal');
-    if (modal) modal.style.display = 'flex';
     renderNotifList();
+};
+
+window.showNotifModal = (open = true) => {
+    const modal = document.getElementById('notif-modal');
+    if (!modal) return;
+    if (open) {
+        modal.style.display = 'block';
+        unreadCount = 0;
+        const badge = document.getElementById('notif-badge');
+        if (badge) { badge.style.display = 'none'; badge.classList.remove('notif-pulse'); }
+        renderNotifList();
+    } else {
+        // Animate out then hide
+        const drawer = document.getElementById('notif-drawer');
+        if (drawer) {
+            const isMobile = window.innerWidth <= 768;
+            drawer.style.animation = isMobile ? 'slideUpSheet 0.25s reverse forwards' : 'slideOutRight 0.25s forwards';
+            setTimeout(() => { modal.style.display = 'none'; if (drawer) drawer.style.animation = ''; }, 240);
+        } else {
+            modal.style.display = 'none';
+        }
+    }
 };
 
 window.startNotifications = () => {

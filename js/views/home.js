@@ -559,52 +559,11 @@ window.router.addRoute('home', async (container, params) => {
                                 <div class="property-grid">
                                     ${newHotels.map(p => makeCard(p)).join('')}
                                 </div>
-                            </div>`;
+                                </div>`; 
                         }
                         return sectionsHtml;
                     })()}
 
-                    <!-- Cinematic Entertainment News Slider (Now Below Trendy Stays) -->
-                    <div style="margin-top:6rem; position:relative;">
-                        <h3 style="font-size:1.8rem; font-weight:900; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.6rem; letter-spacing:-0.5px;">
-                            <span style="background:linear-gradient(135deg, var(--color-primary), #2d8a5e); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">✨ News & Entertainment</span>
-                        </h3>
-                        
-                        <div class="news-slider-wrapper">
-                            <div class="news-slider" id="home-news-slider">
-                                ${(() => {
-                                    const items = [
-                                        { card: 'TRADITION', title: 'Netsanet Workneh: A Legacy That Lives On', excerpt: 'Celebrating the life and career of a legend who shaped the sound of a generation.', img: 'images/news_1.jpg' },
-                                        { card: 'FESTIVAL', title: 'Unity in Rhythm: Shashamane Reggae 2026', excerpt: 'A soulful gathering of music and culture as Ethiopia celebrates its deep-rooted Rastafarian heritage.', img: 'images/news_2.jpg' },
-                                        { card: 'CREATIVE', title: 'Kezira Hub: The Future of Dire Dawa Art', excerpt: 'Step inside the new historic-meets-modern creative district turning heads across the Horn of Africa.', img: 'images/news_3.jpg' },
-                                        { card: 'LIFESTYLE', title: 'A Taste of Dire: Street Food Festival', excerpt: 'From aromatic coffee to the perfect Basha bread—discover the flavors of Ethiopia\'s crossroad city.', img: 'images/news_4.jpg' }
-                                    ];
-                                    return items.map((n, i) => `
-                                        <div class="news-slide" style="flex: 0 0 100%;">
-                                            <img src="${n.img}" class="news-image" alt="${n.title}" loading="lazy">
-                                            <div class="news-overlay"></div>
-                                            <div class="news-content-box">
-                                                <span class="news-badge">${n.card}</span>
-                                                <h4 class="news-title">${n.title}</h4>
-                                                <p class="news-excerpt">${n.excerpt}</p>
-                                                <button class="btn-primary" style="padding:0.7rem 1.5rem; font-size:0.85rem; border-radius:99px;" onclick="window.showToast('Full story coming soon!')">Read Full Story</button>
-                                            </div>
-                                        </div>
-                                    `).join('');
-                                })()}
-                            </div>
-
-                            <button class="news-control prev" onclick="window.slideNews(-1)">❮</button>
-                            <button class="news-control next" onclick="window.slideNews(1)">❯</button>
-                            
-                            <div class="news-nav" id="news-dots">
-                                <span class="nav-dot active" onclick="window.goToSlide(0)"></span>
-                                <span class="nav-dot" onclick="window.goToSlide(1)"></span>
-                                <span class="nav-dot" onclick="window.goToSlide(2)"></span>
-                                <span class="nav-dot" onclick="window.goToSlide(3)"></span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
