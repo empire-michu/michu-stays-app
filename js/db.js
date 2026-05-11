@@ -714,56 +714,9 @@ class Database {
 
     async triggerPushNotification(hotelId, title, body, targetUserId = null) {
         try {
-            let tokens = [];
             console.log("🔔 PUSH TRIGGER START - title:", title, "hotelId:", hotelId, "targetUserId:", targetUserId);
 
-            // 1. Get ALL Admin tokens
-            const adminsSnap = await firestore.collection('users').where('role', '==', 'admin').get();
-            adminsSnap.docs.forEach(doc => {
-                const data = doc.data();
-                if (data.fcmTokens && data.fcmTokens.length > 0) {
-                    console.log("  📌 Admin tokens found for:", doc.id, "count:", data.fcmTokens.length);
-                    tokens = tokens.concat(data.fcmTokens);
-                }
-            });
-
-            // 2. Get the specific Hotel Manager's tokens
-            if (hotelId) {
-                const hotelDoc = await firestore.collection('properties').doc(hotelId).get();
-                if (hotelDoc.exists && hotelDoc.data().managerId) {
-                    const managerId = hotelDoc.data().managerId;
-                    const managerDoc = await firestore.collection('users').doc(managerId).get();
-                    if (managerDoc.exists && managerDoc.data().fcmTokens && managerDoc.data().fcmTokens.length > 0) {
-                        console.log("  📌 Manager tokens found for:", managerId, "count:", managerDoc.data().fcmTokens.length);
-                        tokens = tokens.concat(managerDoc.data().fcmTokens);
-                    } else {
-                        console.warn("  ⚠️ Manager has NO fcmTokens:", managerId);
-                    }
-                }
-            }
-
-            // 3. Get the specific Target User's tokens (e.g. for booking confirmations)
-            if (targetUserId) {
-                const userDoc = await firestore.collection('users').doc(targetUserId).get();
-                if (userDoc.exists && userDoc.data().fcmTokens && userDoc.data().fcmTokens.length > 0) {
-                    console.log("  📌 Target user tokens found for:", targetUserId, "count:", userDoc.data().fcmTokens.length);
-                    tokens = tokens.concat(userDoc.data().fcmTokens);
-                } else {
-                    console.warn("  ⚠️ Target user has NO fcmTokens:", targetUserId);
-                }
-            }
-
-            // Remove duplicates
-            tokens = [...new Set(tokens)];
-
-            if (tokens.length === 0) {
-                console.warn("🚨 PUSH ABORTED: No FCM tokens found for any target user. Nobody is subscribed!");
-                return;
-            }
-            
-            console.log("📤 Sending push to", tokens.length, "device(s)...");
-
-            // Send to Render push server with retry (free tier may be sleeping)
+            // Send to Cloud Function with retry
             const sendPush = async () => {
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
@@ -771,7 +724,12 @@ class Database {
                     const response = await fetch('https://us-central1-michu-stays.cloudfunctions.net/sendPush', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ tokens, title, body }),
+                        body: JSON.stringify({ 
+                            hotelId, 
+                            targetUserId, 
+                            title, 
+                            body 
+                        }),
                         signal: controller.signal
                     });
                     clearTimeout(timeout);
@@ -786,7 +744,7 @@ class Database {
                 const result = await sendPush();
                 console.log("✅ Push Server Response:", JSON.stringify(result));
             } catch(firstErr) {
-                console.warn("⚠️ First push attempt failed (server may be waking up), retrying in 3s...");
+                console.warn("⚠️ First push attempt failed, retrying in 3s...");
                 await new Promise(r => setTimeout(r, 3000));
                 try {
                     const result = await sendPush();

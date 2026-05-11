@@ -1,5 +1,5 @@
 window.router.addRoute('home', async (container, params) => {
-    container.innerHTML = `<div class="container" style="text-align:center; padding-top:4rem;"><div style="font-size:2rem; margin-bottom:1rem;">🏨</div>Loading Stays...</div>`;
+    container.innerHTML = `<div class="container" style="text-align:center; padding-top:4rem;"><div style="font-size:2rem; margin-bottom:1rem;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0e442c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M3 7h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path><path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4"></path><path d="M10 9h4"></path><path d="M10 13h4"></path></svg></div>Loading Stays...</div>`;
     let allProperties = [];
     let allBookings = [];
     let propertyRatings = {};
@@ -146,7 +146,7 @@ window.router.addRoute('home', async (container, params) => {
                 ${p.packages && p.packages.length > 0 ? `
                 <div style="margin:0.5rem 0; display:flex;">
                     <div style="background:#0b6646; color:#e0b246; font-size:0.65rem; font-weight:900; padding:0.3rem 0.7rem; border-radius:8px; border:1px solid #c59d3f; display:inline-flex; align-items:center; gap:0.4rem; box-shadow:0 0 12px rgba(197,157,63,0.35); text-transform:uppercase; letter-spacing:0.05em; animation: pulse-glow 2.5s infinite alternate;">
-                        <span style="font-size:0.8rem;">🎁</span> ${p.badgeText || 'SPECIAL OFFERS INSIDE'}
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"></path><path d="M2 7h20v5H2z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg> ${p.badgeText || 'SPECIAL OFFERS INSIDE'}
                     </div>
                 </div>` : ''}
                 
@@ -155,7 +155,7 @@ window.router.addRoute('home', async (container, params) => {
                         ${isEvent ? `
                             <div style="display:flex; flex-direction:column;">
                                 <div style="display:flex; align-items:center; gap:0.3rem; margin-bottom:0.1rem;">
-                                    <span style="font-size:0.6rem; background:#fff4e5; color:#d97706; padding:0.1rem 0.4rem; border-radius:4px; font-weight:900; text-transform:uppercase;">🎉 Event active</span>
+                                    <span style="font-size:0.6rem; background:#fff4e5; color:#d97706; padding:0.1rem 0.4rem; border-radius:4px; font-weight:900; text-transform:uppercase; display:flex; align-items:center; gap:0.2rem;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg> Event active</span>
                                 </div>
                                 <div style="display:flex; align-items:baseline; gap:0.25rem;">
                                     <span style="font-weight:900; font-size:1.45rem; color: #0b6646; letter-spacing:-0.03em;">${effectiveRate.toLocaleString()} Birr</span>
@@ -303,7 +303,9 @@ window.router.addRoute('home', async (container, params) => {
                 grid.innerHTML = filtered.length > 0
                     ? pageItems.map(makeCard).join('')
                     : `<div style="padding:4rem; text-align:center; color:var(--color-text-light); grid-column:1/-1;">
-                        <p style="font-size:3.5rem; margin-bottom:1.5rem;">🔎</p>
+                        <div style="width:80px; height:80px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem;">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        </div>
                         <h3 style="margin-bottom:0.5rem; color:#1a1a1a;">0 stays found</h3>
                         <p style="margin-bottom:1.5rem; font-size:0.95rem;">Try adjusting your filters or clearing them to see more options.</p>
                         <button class="btn-primary" onclick="window.clearAllFilters()" style="padding:0.7rem 1.5rem; border-radius:99px;">Clear All Filters</button>
@@ -360,6 +362,7 @@ window.router.addRoute('home', async (container, params) => {
             <section class="hero-section">
                 <div class="hero-overlay"></div>
                 <div class="hero-content">
+                    <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 8px;"><path d="M20 12v10H4V12"></path><path d="M2 7h20v5H2z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>Special Offers</h3>
                     <h1 class="hero-title">Experience the Spirit of <br><span style="color:var(--color-secondary); font-weight: 800; border-bottom: 3px solid var(--color-secondary);">Dire Dawa</span></h1>
                     <p class="hero-subtitle">Premium stays in Ethiopia's iconic railway gateway.</p>
                 </div>
@@ -449,6 +452,7 @@ window.router.addRoute('home', async (container, params) => {
                 <div style="min-width:0;">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom:2rem;">
                          <div>
+                            <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 8px;"><path d="m21 7-3 3-2-3 3-3 2 3z"></path><path d="M9 11 3 5"></path><path d="m9 6 2 3"></path><path d="M16 16c0-3 3-3 3-3"></path><path d="m13 21 3-3"></path><path d="m15 6 2 2"></path><path d="m5 15 2 2"></path><path d="m4 9 3 3-3 3"></path></svg>Recommended for You</h3>
                             <h3 id="results-count" style="font-size:1.6rem; font-weight:900; margin:0; letter-spacing:-1px;">Exploring Ethiopian Stays</h3>
                             <div style="display:flex; gap:0.6rem; margin-top:0.6rem;">
                                 <button id="toggle-list" class="active" onclick="window.setViewMode('grid')" style="display:flex; align-items:center; gap:0.4rem; padding:0.5rem 1rem; border-radius:30px; border:1px solid #ddd; background:white; cursor:pointer; font-weight:700; font-size:0.8rem; height:36px; transition:all 0.2s;">
@@ -535,7 +539,10 @@ window.router.addRoute('home', async (container, params) => {
                             <div style="margin-top:4rem;">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:2rem;">
                                     <div>
-                                        <h2 style="font-size:2rem; font-weight:900; margin:0; letter-spacing:-1px;">📈 Trendy Stays</h2>
+                                        <h2 style="font-size:2rem; font-weight:900; margin:0; letter-spacing:-1px; display:flex; align-items:center; gap:0.6rem;">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                                            Trendy Stays
+                                        </h2>
                                         <p style="color:#666; margin-top:0.4rem; font-size:1rem;">${hasActiveBookings ? 'Most booked properties in Dire Dawa this week.' : 'Handpicked favorites gaining popularity.'}</p>
                                     </div>
                                     <div style="background:#fff4e5; color:#b45309; padding:0.4rem 0.8rem; border-radius:10px; font-weight:800; font-size:0.75rem;">Hot Pick</div>
@@ -551,7 +558,10 @@ window.router.addRoute('home', async (container, params) => {
                             <div style="margin-top:4rem;">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:2rem;">
                                     <div>
-                                        <h2 style="font-size:2rem; font-weight:900; margin:0; letter-spacing:-1px;">✨ New on Michu Stays</h2>
+                                        <h2 style="font-size:2rem; font-weight:900; margin:0; letter-spacing:-1px; display:flex; align-items:center; gap:0.6rem;">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                            New on Michu Stays
+                                        </h2>
                                         <p style="color:#666; margin-top:0.4rem; font-size:1rem;">Discover the newest additions to our collection.</p>
                                     </div>
                                     <div style="background:#e6f4ea; color:#1e7e34; padding:0.4rem 0.8rem; border-radius:10px; font-weight:800; font-size:0.75rem;">Just Arrived</div>
@@ -564,54 +574,17 @@ window.router.addRoute('home', async (container, params) => {
                         return sectionsHtml;
                     })()}
 
-                    <!-- Cinematic Entertainment News Slider (Now Below Trendy Stays) -->
-                    <div style="margin-top:6rem; position:relative;">
-                        <h3 style="font-size:1.8rem; font-weight:900; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.6rem; letter-spacing:-0.5px;">
-                            <span style="background:linear-gradient(135deg, var(--color-primary), #2d8a5e); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">✨ News & Entertainment</span>
-                        </h3>
-                        
-                        <div class="news-slider-wrapper">
-                            <div class="news-slider" id="home-news-slider">
-                                ${(() => {
-                                    const items = [
-                                        { card: 'TRADITION', title: 'Netsanet Workneh: A Legacy That Lives On', excerpt: 'Celebrating the life and career of a legend who shaped the sound of a generation.', img: 'images/news_1.jpg' },
-                                        { card: 'FESTIVAL', title: 'Unity in Rhythm: Shashamane Reggae 2026', excerpt: 'A soulful gathering of music and culture as Ethiopia celebrates its deep-rooted Rastafarian heritage.', img: 'images/news_2.jpg' },
-                                        { card: 'CREATIVE', title: 'Kezira Hub: The Future of Dire Dawa Art', excerpt: 'Step inside the new historic-meets-modern creative district turning heads across the Horn of Africa.', img: 'images/news_3.jpg' },
-                                        { card: 'LIFESTYLE', title: 'A Taste of Dire: Street Food Festival', excerpt: 'From aromatic coffee to the perfect Basha bread—discover the flavors of Ethiopia\'s crossroad city.', img: 'images/news_4.jpg' }
-                                    ];
-                                    return items.map((n, i) => `
-                                        <div class="news-slide" style="flex: 0 0 100%;">
-                                            <img src="${n.img}" class="news-image" alt="${n.title}" loading="lazy">
-                                            <div class="news-overlay"></div>
-                                            <div class="news-content-box">
-                                                <span class="news-badge">${n.card}</span>
-                                                <h4 class="news-title">${n.title}</h4>
-                                                <p class="news-excerpt">${n.excerpt}</p>
-                                                <button class="btn-primary" style="padding:0.7rem 1.5rem; font-size:0.85rem; border-radius:99px;" onclick="window.showToast('Full story coming soon!')">Read Full Story</button>
-                                            </div>
-                                        </div>
-                                    `).join('');
-                                })()}
-                            </div>
 
-                            <button class="news-control prev" onclick="window.slideNews(-1)">❮</button>
-                            <button class="news-control next" onclick="window.slideNews(1)">❯</button>
-                            
-                            <div class="news-nav" id="news-dots">
-                                <span class="nav-dot active" onclick="window.goToSlide(0)"></span>
-                                <span class="nav-dot" onclick="window.goToSlide(1)"></span>
-                                <span class="nav-dot" onclick="window.goToSlide(2)"></span>
-                                <span class="nav-dot" onclick="window.goToSlide(3)"></span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
             <!-- Guest Reviews Section (Moved from Footer) -->
             <div class="footer-testimonials" style="margin-top:6rem; background:rgba(255,255,255,0.05); border-radius:32px; padding:4rem 2rem; border:1px solid rgba(0,0,0,0.05); position:relative; overflow:hidden;">
                 <div style="position:absolute; top:-2rem; right:-2rem; font-size:10rem; color:rgba(0,0,0,0.02); pointer-events:none;">"</div>
-                <h3 style="font-size:2.4rem; font-weight:900; margin-bottom:3rem; text-align:center; letter-spacing:-1px;">⭐ Real Stories from our Stays</h3>
+                <h3 style="font-size:2.4rem; font-weight:900; margin-bottom:3rem; text-align:center; letter-spacing:-1px; display:flex; align-items:center; justify-content:center; gap:0.8rem;">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                    Real Stories from our Stays
+                </h3>
                 <div class="testimonials-grid">
                     <div class="testimonial-card">
                         <div class="testimonial-stars">★★★★★</div>
@@ -832,37 +805,7 @@ window.router.addRoute('home', async (container, params) => {
     // Load reviews in background (non-blocking) — ratings appear after cards
     loadReviewsInBackground();
 
-    // --- News Slider Controller ---
-    let currentSlide = 0;
-    const totalSlides = 4;
-    const sliderEl = document.getElementById('home-news-slider');
-    const dots = document.querySelectorAll('.nav-dot');
 
-    window.slideNews = (dir) => {
-        currentSlide = (currentSlide + dir + totalSlides) % totalSlides;
-        window.updateSlider();
-    };
-
-    window.goToSlide = (n) => {
-        currentSlide = n;
-        window.updateSlider();
-    };
-
-    window.updateSlider = () => {
-        if(!sliderEl) return;
-        sliderEl.style.transform = `translateX(-${currentSlide * 100}%)`;
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === currentSlide);
-        });
-    };
-
-    let slideInterval = setInterval(() => window.slideNews(1), 5000);
-    // Pause on hover
-    document.querySelector('.news-slider-wrapper')?.addEventListener('mouseenter', () => clearInterval(slideInterval));
-    document.querySelector('.news-slider-wrapper')?.addEventListener('mouseleave', () => {
-        clearInterval(slideInterval);
-        slideInterval = setInterval(() => window.slideNews(1), 5000);
-    });
 
     if (window.renderAnnouncementBanner) {
         window.renderAnnouncementBanner(document.getElementById('ann-banner-container'));

@@ -255,7 +255,7 @@ class AuthEngine {
 
     // Admin-only: create a manager account without logging out the admin
     // Uses Firebase Auth REST API instead of SDK (SDK auto-signs-in the new user)
-    async createManagerAccount(email, password, hotelId = '') {
+    async createManagerAccount(email, password, hotelId = '', phone = '') {
         const apiKey = "AIzaSyAvX4GF0ZTaW9O0rTNiugGH_aKYpVROq4Y";
         let managerUid = null;
 
@@ -272,18 +272,7 @@ class AuthEngine {
 
         if (data.error) {
             if (data.error.message === 'EMAIL_EXISTS') {
-                // User exists in Auth but Firestore doc was deleted — look up existing UID
-                const lookupResp = await fetch(
-                    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ idToken: (await firebase.auth().currentUser.getIdToken()) })
-                    }
-                );
-                // Use a different approach: sign in with email/pass won't work.
-                // Instead list users — but REST API needs admin SDK.
-                // Best fallback: use the signInWithPassword to get their UID
+                // Sign in to get the UID if user already exists in Auth
                 const signInResp = await fetch(
                     `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
                     {
@@ -294,28 +283,22 @@ class AuthEngine {
                 );
                 const signInData = await signInResp.json();
                 if (signInData.error) {
-                    // Password changed or unknown — still re-create with a known approach:
-                    // Try to fetch the UID from existing Firestore record
                     const snapshot = await firestore.collection('users').where('email', '==', email).get();
-                    if (!snapshot.empty) {
-                        managerUid = snapshot.docs[0].id;
-                    } else {
-                        throw new Error('Account exists but password is wrong. Reset their password first, or use a different email.');
-                    }
+                    if (!snapshot.empty) managerUid = snapshot.docs[0].id;
+                    else throw new Error('Account exists but password is wrong.');
                 } else {
                     managerUid = signInData.localId;
                 }
-            } else {
-                throw new Error(data.error.message);
-            }
-        } else {
-            managerUid = data.localId;
-        }
+            } else throw new Error(data.error.message);
+        } else managerUid = data.localId;
 
-        // Step 2: Write/overwrite manager Firestore document
+        // Step 2: Write/overwrite manager Firestore document with phone
         await firestore.collection('users').doc(managerUid).set({
-            email, role: 'manager', hotelId: hotelId || ''
-        });
+            email, 
+            role: 'manager', 
+            hotelId: hotelId || '',
+            phone: phone || ''
+        }, { merge: true });
 
         // Step 3: Link manager to hotel
         if (hotelId) {

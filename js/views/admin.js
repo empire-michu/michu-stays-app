@@ -30,6 +30,7 @@ window.router.addRoute('admin', async (container, params) => {
         filterFrom = document.getElementById('adm-book-from')?.value || '';
         filterTo = document.getElementById('adm-book-to')?.value || '';
         filterHotel = document.getElementById('adm-book-hotel')?.value || '';
+        window._admFilterStatus = document.getElementById('adm-book-status')?.value || '';
         bookingsPage = 1;
         renderAdmin();
     };
@@ -64,7 +65,7 @@ window.router.addRoute('admin', async (container, params) => {
                 email: email,
                 message: "This is a SYSTEM TEST email. If you see this, your Email Service is working perfectly!",
                 link: "Michustays.com/verify-test-link",
-                subject: `Michu Stays: ${templateId} Sync Test 📧`
+                subject: `Michu Stays: ${templateId} Sync Test`
             });
             window.showToast(`✅ ${templateId} SENT to ${email}`);
         } catch (e) {
@@ -115,7 +116,9 @@ window.router.addRoute('admin', async (container, params) => {
     window.syncData = async () => {
         isSyncing = true;
         container.innerHTML = `<div class="container" style="text-align:center;padding-top:4rem;">
-            <div style="font-size:3rem; margin-bottom:1rem;">⏳</div>
+            <div style="width:60px; height:60px; margin:0 auto 1.5rem; display:flex; align-items:center; justify-content:center; background:#fff8e1; border-radius:50%;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f57f17" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="spin"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+            </div>
             <h2 style="color:var(--color-primary);">Synchronizing Admin Data...</h2>
             <p style="color:#666;">Establishing live connection to properties, bookings, and users.</p>
         </div>`;
@@ -158,7 +161,7 @@ window.router.addRoute('admin', async (container, params) => {
 
     window.admSaveAnnouncement = async () => {
         const btn = document.querySelector('[onclick="window.admSaveAnnouncement()"]');
-        if (btn) { btn.disabled = true; btn.textContent = '⏳ Publishing...'; }
+        if (btn) { btn.disabled = true; btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="spin" style="margin-right:0.5rem;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg> Publishing...'; }
         try {
             const title = document.getElementById('ann-title').value.trim();
             const body = document.getElementById('ann-body').value.trim();
@@ -166,7 +169,7 @@ window.router.addRoute('admin', async (container, params) => {
 
             if (!title && !body && !fileInput.files[0]) {
                 window.showToast('❌ Please provide at least an image/video or a message.');
-                if (btn) { btn.disabled = false; btn.textContent = '📢 Publish Announcement'; }
+                if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:0.5rem;"><path d="M11 5L6 9H2V15H6L11 19V5Z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> Publish Announcement'; }
                 return;
             }
 
@@ -203,12 +206,12 @@ window.router.addRoute('admin', async (container, params) => {
             if (document.getElementById('ann-link')) document.getElementById('ann-link').value = '';
             document.getElementById('ann-media').value = '';
             
-            if (btn) { btn.disabled = false; btn.textContent = '📢 Publish Announcement'; }
+            if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:0.5rem;"><path d="M11 5L6 9H2V15H6L11 19V5Z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> Publish Announcement'; }
             if (!isSyncing) renderAdmin();
         } catch(e) {
             console.error('admSaveAnnouncement error:', e);
             window.showToast('❌ Failed: ' + (e.code || e.message));
-            if (btn) { btn.disabled = false; btn.textContent = '📢 Publish Announcement'; }
+            if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:0.5rem;"><path d="M11 5L6 9H2V15H6L11 19V5Z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> Publish Announcement'; }
         }
     };
 
@@ -498,8 +501,9 @@ window.router.addRoute('admin', async (container, params) => {
         const e = document.getElementById('adm-new-mgr-email').value;
         const p = document.getElementById('adm-new-mgr-pass').value;
         const h = document.getElementById('adm-new-mgr-hotel').value;
+        const ph = document.getElementById('adm-new-mgr-phone').value;
         if (!e || p.length < 6) return window.showToast("⚠️ Email and 6+ character password required.");
-        await window.auth.createManagerAccount(e, p, h);
+        await window.auth.createManagerAccount(e, p, h, ph);
         window.showToast("✅ Manager account created!"); window.syncData();
     };
 
@@ -586,21 +590,42 @@ window.router.addRoute('admin', async (container, params) => {
                     <h2 style="color:var(--color-primary);margin:0;font-weight:800;">Admin Console</h2>
                     <div style="display:flex; gap:0.5rem;">
                         ${(userData.fcmTokens && userData.fcmTokens.length > 0) 
-                            ? `<button class="btn-outline" style="border-radius:12px; border-color:green; color:green; font-weight:700; cursor:pointer;" onclick="window.enableAdminPush(this)">✅ Push Enabled</button>`
-                            : `<button class="btn-outline" style="border-radius:12px; border-color:#f59e0b; color:#d97706; font-weight:700; cursor:pointer;" onclick="window.enableAdminPush(this)">🔔 Enable Push Alerts</button>`
+                            ? `<button class="btn-outline" style="border-radius:12px; border-color:green; color:green; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.5rem;" onclick="window.enableAdminPush(this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Push Enabled</button>`
+                            : `<button class="btn-outline" style="border-radius:12px; border-color:#f59e0b; color:#d97706; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.5rem;" onclick="window.enableAdminPush(this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Enable Push Alerts</button>`
                         }
-                        <button class="btn-outline" style="border-radius:12px;" onclick="window.syncData()">🔄 Sync Data</button>
+                        <button class="btn-outline" style="border-radius:12px; display:flex; align-items:center; gap:0.5rem;" onclick="window.syncData()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Sync Data</button>
                     </div>
                 </div>
 
                 <div style="background:#eee; border-radius:99px; padding:0.3rem; display:inline-flex; gap:0.2rem; margin-bottom:2.5rem; flex-wrap:wrap;">
-                    <button style="${tabStyle('analytics')}" onclick="window.fastTab('analytics')">📊 Analytics</button>
-                    <button style="${tabStyle('hotels')}" onclick="window.fastTab('hotels')">Properties</button>
-                    <button style="${tabStyle('bookings')}" onclick="window.fastTab('bookings')">Bookings</button>
-                    <button style="${tabStyle('managers')}" onclick="window.fastTab('managers')">Managers</button>
-                    <button style="${tabStyle('announcements')}" onclick="window.fastTab('announcements')">Announcements</button>
-                    <button style="${tabStyle('add-hotel')}" onclick="window.fastTab('add-hotel')">Add Stay</button>
-                    <button style="${tabStyle('account')}" onclick="window.fastTab('account')">My Account</button>
+                    <button style="${tabStyle('analytics')}; display:flex; align-items:center; gap:0.5rem;" onclick="window.fastTab('analytics')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        Analytics
+                    </button>
+                    <button style="${tabStyle('hotels')}; display:flex; align-items:center; gap:0.5rem;" onclick="window.fastTab('hotels')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        Properties
+                    </button>
+                    <button style="${tabStyle('bookings')}; display:flex; align-items:center; gap:0.5rem;" onclick="window.fastTab('bookings')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        Bookings
+                    </button>
+                    <button style="${tabStyle('managers')}; display:flex; align-items:center; gap:0.5rem;" onclick="window.fastTab('managers')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        Managers
+                    </button>
+                    <button style="${tabStyle('announcements')}; display:flex; align-items:center; gap:0.5rem;" onclick="window.fastTab('announcements')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        Broadcast
+                    </button>
+                    <button style="${tabStyle('add-hotel')}; display:flex; align-items:center; gap:0.5rem;" onclick="window.fastTab('add-hotel')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Add Stay
+                    </button>
+                    <button style="${tabStyle('account')}; display:flex; align-items:center; gap:0.5rem;" onclick="window.fastTab('account')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        Settings
+                    </button>
                 </div>
 
                 <!-- ANALYTICS TAB -->
@@ -654,17 +679,26 @@ window.router.addRoute('admin', async (container, params) => {
 
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:2rem; margin-bottom:2.5rem;">
                         <div style="background:white; padding:2rem; border-radius:24px; box-shadow:var(--shadow-sm); border:1px solid #eee;">
-                            <h4 style="margin-top:0; margin-bottom:1.5rem; font-size:1rem; font-weight:800;">📈 Revenue Trends</h4>
+                            <h4 style="margin-top:0; margin-bottom:1.5rem; font-size:1rem; font-weight:800; display:flex; align-items:center; gap:0.6rem;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                                Revenue Trends
+                            </h4>
                             <canvas id="chart-revenue" height="250"></canvas>
                         </div>
                         <div style="background:white; padding:2rem; border-radius:24px; box-shadow:var(--shadow-sm); border:1px solid #eee;">
-                            <h4 style="margin-top:0; margin-bottom:1.5rem; font-size:1rem; font-weight:800;">🔥 Performance Leaderboard</h4>
+                            <h4 style="margin-top:0; margin-bottom:1.5rem; font-size:1rem; font-weight:800; display:flex; align-items:center; gap:0.6rem;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                                Performance Leaderboard
+                            </h4>
                             <canvas id="chart-popular" height="250"></canvas>
                         </div>
                     </div>
 
                     <div style="background:white; padding:2rem; border-radius:24px; box-shadow:var(--shadow-sm); border:1px solid #eee;">
-                        <h4 style="margin-top:0; margin-bottom:1.5rem; font-size:1rem; font-weight:800;">🛤️ Volume Timeline (New Bookings)</h4>
+                        <h4 style="margin-top:0; margin-bottom:1.5rem; font-size:1rem; font-weight:800; display:flex; align-items:center; gap:0.6rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                            Volume Timeline (New Bookings)
+                        </h4>
                         <canvas id="chart-trends" height="120"></canvas>
                     </div>
                 </div>
@@ -690,7 +724,7 @@ window.router.addRoute('admin', async (container, params) => {
                                             <td data-label="No." style="font-weight:800; color:#888;">${rowNum}</td>
                                             <td data-label="Name" style="font-weight:700;">
                                                 ${p.title}
-                                                ${p.displaySequence > 0 ? `<span style="background:#fff8e1; color:#f57f17; border:1px solid #ffe082; padding:0.1rem 0.4rem; border-radius:6px; font-size:0.65rem; margin-left:8px; vertical-align:middle; font-weight:800; box-shadow:0 2px 4px rgba(245,127,23,0.1);">📍 #${p.displaySequence}</span>` : ''}
+                                                ${p.displaySequence > 0 ? `<span style="background:#fff8e1; color:#f57f17; border:1px solid #ffe082; padding:0.1rem 0.4rem; border-radius:6px; font-size:0.65rem; margin-left:8px; vertical-align:middle; font-weight:800; box-shadow:0 2px 4px rgba(245,127,23,0.1); display:inline-flex; align-items:center; gap:0.2rem;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> #${p.displaySequence}</span>` : ''}
                                             </td>
                                             <td data-label="Type">${p.type || 'Stay'}</td>
                                             <td data-label="Price">${p.price} Birr</td>
@@ -735,12 +769,17 @@ window.router.addRoute('admin', async (container, params) => {
                                 <input type="date" id="adm-book-from" value="${filterFrom}" style="width:100%; padding:0.7rem; border-radius:10px; border:1.5px solid #eee; font-weight:600;" onchange="window.setAdmFilter()">
                             </div>
                             <div style="min-width:130px;">
-                                <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.4rem; text-transform:uppercase;">To Date</label>
-                                <input type="date" id="adm-book-to" value="${filterTo}" style="width:100%; padding:0.7rem; border-radius:10px; border:1.5px solid #eee; font-weight:600;" onchange="window.setAdmFilter()">
+                                <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.4rem; text-transform:uppercase;">Status</label>
+                                <select id="adm-book-status" style="width:100%; padding:0.7rem; border-radius:10px; border:1.5px solid #eee; font-weight:600; background:white;" onchange="window.setAdmFilter()">
+                                    <option value="">All Statuses</option>
+                                    <option value="Awaiting Verification" ${window._admFilterStatus==='Awaiting Verification'?'selected':''}>Awaiting Verification</option>
+                                    <option value="Confirmed" ${window._admFilterStatus==='Confirmed'?'selected':''}>Confirmed</option>
+                                    <option value="Denied" ${window._admFilterStatus==='Denied'?'selected':''}>Denied</option>
+                                </select>
                             </div>
-                            <button style="padding:0.7rem 1.2rem; border-radius:10px; border:1.5px solid #e74c3c; background:white; color:#e74c3c; font-weight:700; cursor:pointer; white-space:nowrap; transition:all 0.2s;" onmouseover="this.style.background='#e74c3c';this.style.color='white'" onmouseout="this.style.background='white';this.style.color='#e74c3c'" onclick="filterFrom=''; filterTo=''; filterHotel=''; window.setAdmFilter()">✕ Clear All</button>
+                            <button style="padding:0.7rem 1.2rem; border-radius:10px; border:1.5px solid #e74c3c; background:white; color:#e74c3c; font-weight:700; cursor:pointer; white-space:nowrap; transition:all 0.2s;" onmouseover="this.style.background='#e74c3c';this.style.color='white'" onmouseout="this.style.background='white';this.style.color='#e74c3c'" onclick="filterFrom=''; filterTo=''; filterHotel=''; window._admFilterStatus=''; window.setAdmFilter()">✕ Clear All</button>
                         </div>
-                        ${(filterFrom || filterTo || filterHotel) ? `<div style="margin-top:0.8rem; padding:0.6rem 1rem; background:#f8f9fa; border-radius:10px; font-size:0.8rem; color:#666; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">🔍 Filtering: ${filterHotel ? '<strong>' + filterHotel + '</strong>' : ''} ${filterFrom ? 'from <strong>' + filterFrom + '</strong>' : ''} ${filterTo ? 'to <strong>' + filterTo + '</strong>' : ''}</div>` : ''}
+                        ${(filterFrom || filterTo || filterHotel || window._admFilterStatus) ? `<div style="margin-top:0.8rem; padding:0.6rem 1rem; background:#f8f9fa; border-radius:10px; font-size:0.8rem; color:#666; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">🔍 Filtering: ${filterHotel ? '<strong>' + filterHotel + '</strong>' : ''} ${window._admFilterStatus ? 'status: <strong>' + window._admFilterStatus + '</strong>' : ''} ${filterFrom ? 'from <strong>' + filterFrom + '</strong>' : ''} ${filterTo ? 'to <strong>' + filterTo + '</strong>' : ''}</div>` : ''}
                     </div>
 
                     <div style="background:white; border-radius:20px; box-shadow:var(--shadow-sm); overflow-x:auto;">
@@ -750,6 +789,7 @@ window.router.addRoute('admin', async (container, params) => {
                                 ${(() => {
                                     const filtered = cachedBookings.filter(b => {
                                         if(filterHotel && b.propertyTitle !== filterHotel) return false;
+                                        if(window._admFilterStatus && b.status !== window._admFilterStatus) return false;
                                         if(!b.createdAt) return true;
                                         const bDate = new Date(b.createdAt);
                                         if(filterFrom) {
@@ -869,9 +909,12 @@ window.router.addRoute('admin', async (container, params) => {
                     })()}
                     <div style="background:white; padding:2rem; border-radius:20px; border:2px dashed #eee;">
                         <h4 style="margin-top:0;">Create Manager</h4>
-                        <div class="responsive-grid-2" style="margin-bottom:1rem;">
+                        <div class="responsive-grid-2" style="margin-bottom:1rem; gap:1rem;">
                             <input type="email" id="adm-new-mgr-email" placeholder="Email" style="width:100%; padding:0.8rem; border:1px solid #ddd; border-radius:12px;">
                             <input type="text" id="adm-new-mgr-pass" placeholder="Initial Password" style="width:100%; padding:0.8rem; border:1px solid #ddd; border-radius:12px;">
+                        </div>
+                        <div style="margin-bottom:1rem;">
+                            <input type="text" id="adm-new-mgr-phone" placeholder="Phone Number (+251...)" style="width:100%; padding:0.8rem; border:1px solid #ddd; border-radius:12px;">
                         </div>
                         <select id="adm-new-mgr-hotel" style="width:100%; padding:0.8rem; border:1px solid #ddd; border-radius:12px; margin-bottom:1rem;">
                             <option value="">-- No Hotel Assigned --</option>

@@ -19,6 +19,7 @@ window.router.addRoute('manager', async (container, params) => {
     window.setMgrFilter = () => {
         filterFrom = document.getElementById('mgr-book-from')?.value || '';
         filterTo = document.getElementById('mgr-book-to')?.value || '';
+        window._mgrFilterStatus = document.getElementById('mgr-book-status')?.value || '';
         bookingsPage = 1;
         renderManagerUI();
     };
@@ -480,17 +481,29 @@ window.router.addRoute('manager', async (container, params) => {
                     </div>
                     <div id="mgr-push-status">
                          ${(userData.fcmTokens && userData.fcmTokens.length > 0)
-                            ? `<button class="btn-outline" style="padding:0.6rem 1.2rem; border-radius:12px; border-color:green; color:green; font-weight:700; cursor:pointer;" onclick="window.enableManagerPush(this)">✅ Alerts On</button>`
-                            : `<button class="btn-outline" style="padding:0.6rem 1.2rem; border-radius:12px; border-color:#f59e0b; color:#d97706; font-weight:700; cursor:pointer;" onclick="window.enableManagerPush(this)">🔔 Enable Alerts</button>`
+                            ? `<button class="btn-outline" style="padding:0.6rem 1.2rem; border-radius:12px; border-color:green; color:green; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.5rem;" onclick="window.enableManagerPush(this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Alerts On</button>`
+                            : `<button class="btn-outline" style="padding:0.6rem 1.2rem; border-radius:12px; border-color:#f59e0b; color:#d97706; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.5rem;" onclick="window.enableManagerPush(this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Enable Alerts</button>`
                         }
                     </div>
                 </div>
 
                 <div class="mgr-tab-bar">
-                    <button style="${tabStyle('bookings')}" onclick="window.setMgrTab('bookings')">📅 Bookings</button>
-                    <button style="${tabStyle('property')}" onclick="window.setMgrTab('property')">🏨 My Property</button>
-                    <button style="${tabStyle('reviews')}" onclick="window.setMgrTab('reviews')">💬 Reviews</button>
-                    <button style="${tabStyle('account')}" onclick="window.setMgrTab('account')">👤 My Account</button>
+                    <button style="${tabStyle('bookings')}; display:flex; align-items:center; gap:0.5rem;" onclick="window.setMgrTab('bookings')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        Bookings
+                    </button>
+                    <button style="${tabStyle('property')}; display:flex; align-items:center; gap:0.5rem;" onclick="window.setMgrTab('property')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        My Property
+                    </button>
+                    <button style="${tabStyle('reviews')}; display:flex; align-items:center; gap:0.5rem;" onclick="window.setMgrTab('reviews')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        Reviews
+                    </button>
+                    <button style="${tabStyle('account')}; display:flex; align-items:center; gap:0.5rem;" onclick="window.setMgrTab('account')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        My Account
+                    </button>
                 </div>
 
                 <div class="manager-content">
@@ -550,7 +563,16 @@ window.router.addRoute('manager', async (container, params) => {
                         <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">To Date</label>
                         <input type="date" id="mgr-book-to" value="${filterTo}" style="padding:0.6rem; border-radius:8px; border:1.5px solid #eee; font-size:0.85rem;" onchange="window.setMgrFilter()">
                     </div>
-                    <button class="btn-outline" style="padding:0.6rem 1rem; border-radius:8px; font-size:0.8rem;" onclick="filterFrom=''; filterTo=''; window.setMgrFilter()">✕ Reset</button>
+                    <div style="min-width:150px;">
+                        <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">Status</label>
+                        <select id="mgr-book-status" style="width:100%; padding:0.6rem; border-radius:8px; border:1.5px solid #eee; font-size:0.85rem; background:white; font-weight:600;" onchange="window.setMgrFilter()">
+                            <option value="">All Statuses</option>
+                            <option value="Awaiting Verification" ${window._mgrFilterStatus==='Awaiting Verification'?'selected':''}>Awaiting Verification</option>
+                            <option value="Confirmed" ${window._mgrFilterStatus==='Confirmed'?'selected':''}>Confirmed</option>
+                            <option value="Denied" ${window._mgrFilterStatus==='Denied'?'selected':''}>Denied</option>
+                        </select>
+                    </div>
+                    <button class="btn-outline" style="padding:0.6rem 1rem; border-radius:8px; font-size:0.8rem;" onclick="filterFrom=''; filterTo=''; window._mgrFilterStatus=''; window.setMgrFilter()">✕ Reset</button>
                 </div>
 
                 <div class="table-responsive">
@@ -571,6 +593,7 @@ window.router.addRoute('manager', async (container, params) => {
                         <tbody>
                             ${(() => {
                                 const filtered = allBookings.filter(b => {
+                                    if(window._mgrFilterStatus && b.status !== window._mgrFilterStatus) return false;
                                     if(!b.createdAt) return true;
                                     const bDate = new Date(b.createdAt);
                                     if(filterFrom) {
@@ -877,8 +900,9 @@ window.router.addRoute('manager', async (container, params) => {
 
                         <!-- Stay Packages Section -->
                         <div style="background:#f0f7ff; padding:1.5rem; border-radius:24px; border:1px solid #c9e2ff; margin-bottom:1.5rem;">
-                            <h4 style="margin:0 0 1rem; font-size:0.9rem; color:#0056b3; display:flex; align-items:center; gap:0.5rem;">
-                                <span style="font-size:1.4rem;">🎁</span> STAY PACKAGES & DEALS
+                            <h4 style="margin:0 0 1rem; font-size:0.9rem; color:#0056b3; display:flex; align-items:center; gap:0.6rem;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"></path><path d="M2 7h20v5H2z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+                                STAY PACKAGES & DEALS
                             </h4>
                             <p style="font-size:0.8rem; color:#666; margin-bottom:1.2rem;">Create special offers for longer stays (e.g., 3 nights for 15% off). Guests see these prominentely on your listing.</p>
                             
@@ -890,7 +914,10 @@ window.router.addRoute('manager', async (container, params) => {
 
                             <div style="margin-bottom:1.5rem; background:#fff4e5; padding:1.2rem; border-radius:18px; border:1px solid #ffe0b2; display:flex; align-items:center; justify-content:space-between; gap:1rem;">
                                 <div>
-                                    <h5 style="margin:0; font-size:0.85rem; color:#e65100;">🎉 Event Mode (Packages Only)</h5>
+                                    <h5 style="margin:0; font-size:0.85rem; color:#e65100; display:flex; align-items:center; gap:0.5rem;">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                                        Event Mode (Packages Only)
+                                    </h5>
                                     <p style="margin:0.3rem 0 0; font-size:0.7rem; color:#666; line-height:1.4;">Enable this during festivals or events to hide normal nightly rates and <b>only</b> allow guests to book your special stay packages.</p>
                                 </div>
                                 <label class="switch">
@@ -909,7 +936,9 @@ window.router.addRoute('manager', async (container, params) => {
                                         <div>
                                             <input type="number" placeholder="Disc %" value="${pkg.discount||''}" class="mg-pkg-discount" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.85rem;">
                                         </div>
-                                        <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800;">✕</button>
+                                        <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800; display:flex; align-items:center; justify-content:center;">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                        </button>
                                         <div style="grid-column: 1 / -1;">
                                             <input type="text" placeholder="Included Services (e.g. Free Massage, Airport Shuttle)" value="${pkg.services||''}" class="mg-pkg-services" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.8rem; background:#fcfcfc;">
                                         </div>
@@ -922,7 +951,10 @@ window.router.addRoute('manager', async (container, params) => {
 
                         <!-- Amenities -->
                         <div>
-                            <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:1rem; color:var(--color-primary);">✨ AMENITIES</label>
+                            <label style="display:flex; align-items:center; gap:0.6rem; font-weight:700; font-size:0.8rem; margin-bottom:1rem; color:var(--color-primary);">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                AMENITIES
+                            </label>
                             <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:1rem; background:#f9f9f9; padding:1.5rem; border-radius:20px;">
                                 ${['WiFi', 'Pool', 'Spa', 'Breakfast', 'Parking', 'Gym', 'AC', 'Bar'].map(a => `
                                     <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-weight:600; font-size:0.85rem;">
@@ -934,17 +966,23 @@ window.router.addRoute('manager', async (container, params) => {
 
                         <!-- Video Tour -->
                         <div>
-                            <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.5rem; color:var(--color-primary);">🎥 VIDEO TOUR (MP4)</label>
+                            <label style="display:flex; align-items:center; gap:0.6rem; font-weight:700; font-size:0.8rem; margin-bottom:0.5rem; color:var(--color-primary);">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+                                VIDEO TOUR (MP4)
+                            </label>
                             <div style="display:flex; gap:1rem; align-items:center; background:#f0f7f4; padding:1rem; border-radius:14px; border:1px solid #d4e8e0;">
                                 <input type="file" id="mg-video-file" accept="video/mp4" style="flex:1; padding:0.5rem; border-radius:8px; border:1.5px solid #ccc;" onchange="const c=document.getElementById('mg-video-cancel'); if(c) c.style.display=this.value?'block':'none'">
-                                <button id="mg-video-cancel" style="display:${myHotel.videoTour?'block':'none'}; color:#d9534f; font-weight:800; font-size:0.8rem; background:none; border:none; cursor:pointer;" onclick="document.getElementById('mg-video-file').value=''; this.style.display='none'; const s=document.getElementById('mg-video-status'); if(s) s.style.display='none'">✕ CLEAR</button>
-                                <span id="mg-video-status" style="display:${myHotel.videoTour?'block':'none'}; color:#28a745; font-weight:800; font-size:0.9rem;">✅ UPLOADED</span>
+                                <button id="mg-video-cancel" style="display:${myHotel.videoTour?'flex':'none'}; color:#d9534f; font-weight:800; font-size:0.8rem; background:none; border:none; cursor:pointer; align-items:center; gap:0.3rem;" onclick="document.getElementById('mg-video-file').value=''; this.style.display='none'; const s=document.getElementById('mg-video-status'); if(s) s.style.display='none'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> CLEAR</button>
+                                <span id="mg-video-status" style="display:${myHotel.videoTour?'flex':'none'}; color:#28a745; font-weight:800; font-size:0.9rem; align-items:center; gap:0.3rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> UPLOADED</span>
                             </div>
                         </div>
 
                         <div id="mg-save-status" style="text-align:center; font-weight:700; min-height:1.5rem; padding:0.5rem; border-radius:10px;"></div>
                         <div class="mobile-sticky-save">
-                            <button id="mg-save-btn" class="btn-primary" style="padding:1.2rem; font-size:1.1rem; border-radius:16px; box-shadow:var(--shadow-md); width:100%;" onclick="window.mgSaveHotel()">💾 Save All Property Changes</button>
+                            <button id="mg-save-btn" class="btn-primary" style="padding:1.2rem; font-size:1.1rem; border-radius:16px; box-shadow:var(--shadow-md); width:100%; display:flex; align-items:center; justify-content:center; gap:0.6rem;" onclick="window.mgSaveHotel()">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                                Save All Property Changes
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -956,7 +994,7 @@ window.router.addRoute('manager', async (container, params) => {
                         <img src="${myHotel.image || ''}" style="width:100%; height:180px; object-fit:cover;">
                         <div style="padding:1.5rem;">
                             <div style="font-weight:800; font-size:1.25rem; color:var(--color-primary); margin-bottom:0.3rem;">${myHotel.title}</div>
-                            <div style="font-size:0.85rem; color:#666; margin-bottom:1rem; display:flex; align-items:center; gap:0.4rem;">📍 ${myHotel.address || 'Location Pending'}</div>
+                            <div style="font-size:0.85rem; color:#666; margin-bottom:1rem; display:flex; align-items:center; gap:0.4rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${myHotel.address || 'Location Pending'}</div>
                             <div style="display:flex; justify-content:space-between; align-items:flex-end;">
                                 <div style="font-weight:900; font-size:1.4rem;">${myHotel.price} <span style="font-size:0.8rem; font-weight:500;">BR / night</span></div>
                                 <div style="color:${myHotel.availableRooms > 0 ? '#28a745':'#dc3545'}; font-weight:800; font-size:0.85rem;">
@@ -966,8 +1004,8 @@ window.router.addRoute('manager', async (container, params) => {
                         </div>
                     </div>
                     <div style="margin-top:1.5rem; background:#fff8e1; border-radius:16px; padding:1.2rem; border:1px solid #ffe082; display:flex; align-items:center; gap:0.8rem;">
-                         <span style="font-size:1.5rem;">💡</span>
-                         <p style="margin:0; font-size:0.8rem; color:#856404; font-weight:600; line-height:1.4;">Keep your <b>Available Rooms</b> updated to ensure guests can book successfully.</p>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#f57f17; flex-shrink:0;"><path d="M9.663 17h4.674"></path><path d="M10 20h4"></path><path d="M9 22h6"></path><path d="M12 2a8 8 0 0 0-8 8c0 2.21.896 4.21 2.344 5.656C7.792 17.104 9 18 9 18h6s1.208-.896 2.656-2.344A7.947 7.947 0 0 0 20 10a8 8 0 0 0-8-8z"></path></svg>
+                          <p style="margin:0; font-size:0.8rem; color:#856404; font-weight:600; line-height:1.4;">Keep your <b>Available Rooms</b> updated to ensure guests can book successfully.</p>
                     </div>
                 </div>
             </div>

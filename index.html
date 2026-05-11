@@ -14,8 +14,8 @@
     <link rel="apple-touch-icon" href="images/icon-192.png">
     <title>Michu Stays - Ethiopian Booking Platform</title>
     <link rel="stylesheet" href="css/variables.css?v=1190">
-    <link rel="stylesheet" href="css/style.css?v=1190">
     <link rel="stylesheet" href="css/components.css?v=1190">
+    <link rel="stylesheet" href="css/notifications.css?v=1190">
     <style>
         :root {
             --safe-top: env(safe-area-inset-top, 0px);
@@ -98,7 +98,7 @@
                 <button id="lang-toggle-btn"
                     onclick="event.stopPropagation(); var dd=document.getElementById('lang-dropdown'); dd.style.display = dd.style.display === 'block' ? 'none' : 'block';"
                     style="display:flex; align-items:center; gap:0.3rem; background:white; border:1px solid #e2e8f0; padding:0.3rem 0.6rem; border-radius:99px; font-weight:700; font-size:0.75rem; cursor:pointer; color:#1e293b; box-shadow:0 2px 5px rgba(0,0,0,0.02); height: 100%;">
-                    <span id="current-lang-flag">🇬🇧</span>
+                    <span id="current-lang-flag" style="display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></span>
                     <span id="current-lang-code" style="margin-left: 2px;">EN</span>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         style="margin-left: -2px;">
@@ -109,13 +109,13 @@
                     style="display:none; position:absolute; top:120%; right:0; background:white; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid #e2e8f0; width:140px; z-index:15000; overflow:hidden; animation:michuPop 0.2s ease-out;">
                     <div onclick="event.stopPropagation(); setMichuLang('en')"
                         style="padding:0.75rem 1rem; display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.85rem; font-weight:700; color:#1e293b; border-bottom:1px solid #f1f5f9;">
-                        <span>🇬🇧</span> English</div>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg> English</div>
                     <div onclick="event.stopPropagation(); setMichuLang('am')"
                         style="padding:0.75rem 1rem; display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.85rem; font-weight:700; color:#1e293b; border-bottom:1px solid #f1f5f9;">
-                        <span>🇪🇹</span> አማርኛ</div>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg> አማርኛ</div>
                     <div onclick="event.stopPropagation(); setMichuLang('om')"
                         style="padding:0.75rem 1rem; display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.85rem; font-weight:700; color:#1e293b;">
-                        <span>🇪🇹</span> Oromiffa</div>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg> Oromiffa</div>
                 </div>
             </div>
             <script>
@@ -148,10 +148,10 @@
                 <div
                     style="background:white;border-radius:24px;padding:2rem;max-width:400px;width:95%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.3);animation:aiSlide 0.25s cubic-bezier(.34,1.56,.64,1);">
                     <div
-                        style="width:56px;height:56px;border-radius:50%;background:#e3f2fd;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
-                        <span style="font-size:2rem;">🤖</span>
+                        style="width:56px;height:56px;border-radius:50%;background:#e0f2fe;display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;color:#0284c7;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
                     </div>
-                    <h3 style="margin:0 0 0.4rem;color:#1a1a1a;font-size:1.1rem;font-weight:800;">Ask Michu A.I</h3>
+                    <h3 style="margin:0 0 0.5rem;color:#0f172a;font-size:1.25rem;font-weight:800;">Ask Michu A.I</h3>
                     <p style="color:#666;font-size:0.88rem;margin:0 0 1.5rem;line-height:1.5;">Our smart assistant is
                         currently learning how to help you find the best stays. This feature is coming very soon!</p>
                     <button onclick="document.getElementById('ai-modal').style.display='none'"
@@ -164,31 +164,30 @@
                 function showAIModal() {
                     document.getElementById('ai-modal').style.display = 'flex';
                 }
-                function showNotifModal() {
-                    document.getElementById('notif-modal').style.display = 'flex';
+                function showNotifTray() {
+                    document.getElementById('notif-tray').classList.add('active');
+                    if (window.renderNotifList) window.renderNotifList();
+                }
+                function closeNotifTray() {
+                    document.getElementById('notif-tray').classList.remove('active');
                 }
             </script>
 
-            <div id="notif-modal"
-                style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;">
-                <div
-                    style="background:white;border-radius:24px;padding:2rem;max-width:400px;width:95%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.3);animation:aiSlide 0.25s cubic-bezier(.34,1.56,.64,1);">
-                    <div
-                        style="width:56px;height:56px;border-radius:50%;background:#fff8e1;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
-                        <img src="images/logo.png" style="width:32px;height:32px;object-fit:contain;">
+            <div id="notif-tray" class="notif-tray-overlay" onclick="closeNotifTray()">
+                <div class="notif-tray-panel" onclick="event.stopPropagation()">
+                    <div class="notif-tray-header">
+                        <h3>Notifications</h3>
+                        <button class="notif-tray-close" onclick="closeNotifTray()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
                     </div>
-                    <h3 style="margin:0 0 0.4rem;color:#1a1a1a;font-size:1.1rem;font-weight:800;">Notification Center
-                    </h3>
-
-                    <div id="notif-list-container"
-                        style="max-height:300px; overflow-y:auto; margin:1rem 0; text-align:left; display:flex; flex-direction:column; gap:0.8rem; padding:0.5rem;">
-                        <p id="notif-empty-state" style="color:#999;font-size:0.88rem;margin:1rem 0;text-align:center;">
-                            You're all caught up — no new notifications.</p>
+                    <div class="notif-tray-content" id="notif-list-container">
+                        <div id="notif-empty-state" style="text-align:center; padding:4rem 1rem; color:#94a3b8;">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:1rem; opacity:0.5;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                            <p style="font-weight:600; font-size:0.95rem; margin:0;">All caught up!</p>
+                            <p style="font-size:0.8rem; margin-top:0.4rem;">No new notifications at the moment.</p>
+                        </div>
                     </div>
-
-                    <button onclick="document.getElementById('notif-modal').style.display='none'"
-                        style="width:100%;padding:0.9rem;border-radius:99px;border:1.5px solid #e0e0e0;background:white;font-weight:700;font-size:0.9rem;cursor:pointer;color:#444;margin-top:0.5rem;">Close
-                        Tray</button>
                 </div>
             </div>
 
@@ -226,6 +225,11 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
+    <!-- Cropper.js for photo adjustment -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
     <script type="text/javascript">
         (function () {
             emailjs.init("OQ-6hZ4MFw_jIL6LJ");
@@ -295,8 +299,8 @@
         <div class="footer-grid">
             <!-- Brand Column -->
             <div class="footer-brand footer-col">
-                <h2>🏠 Michu Stays</h2>
-                <p>Your trusted platform for finding premium accommodations across Ethiopia. We connect travelers with
+                <h2 style="display:flex;align-items:center;gap:0.6rem;color:white;font-weight:800;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg> Michu Stays</h2>
+                <p style="color:#94a3b8;line-height:1.6;">Your trusted platform for finding premium accommodations across Ethiopia. We connect travelers with
                     authentic, comfortable homes in the heart of Dire Dawa and beyond.</p>
 
                 <div class="footer-contact-item">
@@ -333,26 +337,26 @@
             <!-- Services Column -->
             <div class="footer-col">
                 <h3>Our Services</h3>
-                <ul>
-                    <li><span onclick="router.navigate('home')">🏨 Hotel Bookings</span></li>
-                    <li><span>🏡 Apartment Rentals</span></li>
-                    <li><span>🏘 Guesthouse Stays</span></li>
-                    <li><span>📋 Verified Listings</span></li>
-                    <li><span>⭐ Guest Reviews</span></li>
-                    <li><span>🌍 Local Experiences</span></li>
-                    <li><span>📞 24/7 Support</span></li>
+                <ul class="footer-links-styled">
+                    <li onclick="router.navigate('home')">Hotel Bookings</li>
+                    <li>Apartment Rentals</li>
+                    <li>Guesthouse Stays</li>
+                    <li>Verified Listings</li>
+                    <li>Guest Reviews</li>
+                    <li>Local Experiences</li>
+                    <li>24/7 Support</li>
                 </ul>
             </div>
 
             <!-- Legal Column -->
             <div class="footer-col">
                 <h3>Legal &amp; Policies</h3>
-                <ul>
-                    <li><span onclick="openLegalModal('terms')">📄 Terms &amp; Conditions</span></li>
-                    <li><span onclick="openLegalModal('privacy')">🔒 Privacy Policy</span></li>
-                    <li><span onclick="openLegalModal('booking')">📑 Booking Policy</span></li>
-                    <li><span onclick="openLegalModal('refund')">💰 Refund Policy</span></li>
-                    <li><span onclick="openLegalModal('compliance')">⚖️ Compliance &amp; Ethics</span></li>
+                <ul class="footer-links-styled">
+                    <li onclick="openLegalModal('terms')">Terms &amp; Conditions</li>
+                    <li onclick="openLegalModal('privacy')">Privacy Policy</li>
+                    <li onclick="openLegalModal('booking')">Booking Policy</li>
+                    <li onclick="openLegalModal('refund')">Refund Policy</li>
+                    <li onclick="openLegalModal('compliance')">Compliance &amp; Ethics</li>
                 </ul>
             </div>
 
@@ -369,11 +373,11 @@
 
                 <div style="margin-top:1.5rem;">
                     <h3>Quick Links</h3>
-                    <ul>
-                        <li><span onclick="router.navigate('home')">🏠 Home</span></li>
-                        <li><span onclick="router.navigate('login')">🔑 Login</span></li>
-                        <li><span onclick="router.navigate('signup')">✍️ Sign Up</span></li>
-                        <li><span onclick="router.navigate('profile')">👤 My Bookings</span></li>
+                    <ul class="footer-links-styled">
+                        <li onclick="router.navigate('home')">Home</li>
+                        <li onclick="router.navigate('login')">Login</li>
+                        <li onclick="router.navigate('signup')">Sign Up</li>
+                        <li onclick="router.navigate('profile')">My Bookings</li>
                     </ul>
                 </div>
             </div>
@@ -441,7 +445,7 @@
     <script>
         const _legalContent = {
             terms: {
-                title: '📄 Terms & Conditions',
+                title: 'Terms & Conditions',
                 body: `
                 <h3>1. Acceptance of Terms</h3>
                 <p>By accessing and using Michu Stays ("the Platform"), you agree to be bound by these Terms and Conditions. If you do not agree, please do not use our services. Michu Stays reserves the right to update these terms at any time with notice to registered users.</p>
@@ -462,7 +466,7 @@
             `
             },
             privacy: {
-                title: '🔒 Privacy Policy',
+                title: 'Privacy Policy',
                 body: `
                 <h3>1. Information We Collect</h3>
                 <p>We collect personal information you provide at registration (name, email, phone number) and booking details. We also collect usage data such as pages visited, filters applied, and search queries to improve our services.</p>
@@ -479,7 +483,7 @@
             `
             },
             booking: {
-                title: '📑 Booking Policy',
+                title: 'Booking Policy',
                 body: `
                 <h3>1. How to Book</h3>
                 <p>Select your preferred property, choose your check-in and check-out dates, and submit a booking request with proof of payment. Your booking will be listed as "Awaiting Verification" until confirmed by the property manager.</p>
@@ -494,7 +498,7 @@
             `
             },
             refund: {
-                title: '💰 Refund Policy',
+                title: 'Refund Policy',
                 body: `
                 <h3>1. No Refund Policy</h3>
                 <p>At the moment, Michu Stays does not issue any refunds for confirmed bookings. We are committed to providing the best service possible and apologize for any inconvenience this may cause.</p>
@@ -505,7 +509,7 @@
             `
             },
             compliance: {
-                title: '⚖️ Legal & Compliance',
+                title: 'Legal & Compliance',
                 body: `
                 <h3>1. Regulatory Compliance</h3>
                 <p>Michu Stays operates in full compliance with the laws and regulations of the Federal Democratic Republic of Ethiopia, including applicable consumer protection, data privacy, and e-commerce regulations.</p>
