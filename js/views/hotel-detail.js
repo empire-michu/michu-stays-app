@@ -126,6 +126,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         gap:1rem; 
                         border-top:1px solid rgba(0,0,0,0.05);
                         animation: slideUpIn 0.5s ease-out;
+                        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
                     }
                     @keyframes slideUpIn { from{transform:translateY(100%)} to{transform:translateY(0)} }
                     .mobile-book-pulse { animation: mobilePulse 2s infinite; }
@@ -560,7 +561,9 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     // Smart Trigger for Mobile Book Now
     window.michuMobileBookTrigger = () => {
         const dIn = document.getElementById('book-in');
+        const stickyBar = document.getElementById('mobile-book-bar');
         if (dIn) {
+            if (stickyBar) stickyBar.style.transform = 'translateY(100%)'; // Slide out
             dIn.scrollIntoView({ behavior: 'smooth', block: 'center' });
             setTimeout(() => {
                 dIn.focus();
@@ -568,4 +571,24 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
             }, 600);
         }
     };
+
+    // Auto-hide sticky bar when main button is in view
+    setTimeout(() => {
+        const stickyBar = document.getElementById('mobile-book-bar');
+        const mainReserveBtn = document.getElementById('final-reserve-trigger');
+        if (stickyBar && mainReserveBtn) {
+            const obs = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        stickyBar.style.transform = 'translateY(100%)';
+                        stickyBar.style.pointerEvents = 'none';
+                    } else {
+                        stickyBar.style.transform = 'translateY(0)';
+                        stickyBar.style.pointerEvents = 'auto';
+                    }
+                });
+            }, { threshold: 0.1 });
+            obs.observe(mainReserveBtn);
+        }
+    }, 1000);
 });
