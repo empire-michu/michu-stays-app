@@ -428,9 +428,7 @@ window.showPushNotification = ({ message, details, createdAt, link, params }) =>
             @keyframes _pushIn { from{transform: translateX(120%); opacity:0} to{transform: translateX(0); opacity:1} }
             @keyframes _pushOut { from{transform: translateX(0); opacity:1} to{transform: translateX(120%); opacity:0} }
         </style>
-        <div style="width:40px; height:40px; border-radius:12px; background:var(--color-primary); color:white; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-        </div>
+        <div style="font-size: 1.8rem;">🔔</div>
         <div style="flex: 1;">
             <div style="font-weight: 800; color: var(--color-primary); font-size: 0.95rem; margin-bottom: 0.3rem;">${message}</div>
             <div style="color: #555; font-size: 0.82rem; line-height:1.5;">${details}</div>
@@ -459,21 +457,21 @@ const renderNotifList = () => {
     if (notifications.length > 0) {
         if (empty) empty.style.display = 'none';
         list.innerHTML = notifications.map(n => `
-            <div class="notif-item" onclick="window.router.navigate('${n.link || 'home'}', ${n.params ? JSON.stringify(n.params).replace(/"/g, '&quot;') : '{}'}); window.closeNotifTray();">
-                <div class="notif-item-title">${n.message}</div>
-                <div class="notif-item-desc">${n.details}</div>
-                <span class="notif-item-time">${new Date(n.createdAt || Date.now()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            <div onclick="window.router.navigate('${n.link || 'home'}', ${n.params ? JSON.stringify(n.params).replace(/"/g, '&quot;') : '{}'}); document.getElementById('notif-modal').style.display='none';" style="padding:1rem; background:#f8f9fa; border-radius:15px; border:1px solid #edf2f7; cursor:pointer; transition:all 0.2s;">
+                <div style="font-weight:700; color:var(--color-primary); font-size:0.9rem; margin-bottom:0.2rem;">${n.message}</div>
+                <div style="font-size:0.8rem; color:#666; line-height:1.4;">${n.details}</div>
+                <div style="font-size:0.7rem; color:#bbb; margin-top:0.5rem;">${new Date(n.createdAt || Date.now()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
             </div>
         `).join('');
     }
 };
 
-window.showNotifTray = () => {
+window.showNotifModal = () => {
     unreadCount = 0;
     const badge = document.getElementById('notif-badge');
     if (badge) badge.style.display = 'none';
-    const tray = document.getElementById('notif-tray');
-    if (tray) tray.classList.add('active');
+    const modal = document.getElementById('notif-modal');
+    if (modal) modal.style.display = 'flex';
     renderNotifList();
 };
 

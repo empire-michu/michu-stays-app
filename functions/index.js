@@ -14,49 +14,8 @@ const brevoClient = new BrevoClient({
 exports.sendPush = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
-    const { tokens: passedTokens, title, body, hotelId, targetUserId } = req.body;
-    
-    let tokens = passedTokens || [];
-
-    // If no tokens provided, or if hotelId is provided, lookup tokens automatically
-    if (tokens.length === 0 || hotelId || targetUserId) {
-      const tokenSet = new Set(tokens);
-      
-      try {
-        // 1. Get ALL Admin tokens (always notify admins of new bookings/messages)
-        const adminsSnap = await admin.firestore().collection('users').where('role', '==', 'admin').get();
-        adminsSnap.docs.forEach(doc => {
-          const data = doc.data();
-          if (data.fcmTokens) data.fcmTokens.forEach(t => tokenSet.add(t));
-        });
-
-        // 2. Get Hotel Manager tokens if hotelId is provided
-        if (hotelId) {
-          const hotelDoc = await admin.firestore().collection('properties').doc(hotelId).get();
-          if (hotelDoc.exists && hotelDoc.data().managerId) {
-            const managerId = hotelDoc.data().managerId;
-            const managerDoc = await admin.firestore().collection('users').doc(managerId).get();
-            if (managerDoc.exists && managerDoc.data().fcmTokens) {
-              managerDoc.data().fcmTokens.forEach(t => tokenSet.add(t));
-            }
-          }
-        }
-
-        // 3. Get specific target user tokens
-        if (targetUserId) {
-          const userDoc = await admin.firestore().collection('users').doc(targetUserId).get();
-          if (userDoc.exists && userDoc.data().fcmTokens) {
-            userDoc.data().fcmTokens.forEach(t => tokenSet.add(t));
-          }
-        }
-
-        tokens = Array.from(tokenSet);
-      } catch (err) {
-        console.error('Error fetching tokens:', err);
-      }
-    }
-
-    if (tokens.length === 0) return res.status(200).send({ success: true, note: 'No tokens found, skipped.' });
+    const { tokens, title, body } = req.body;
+    if (!tokens || tokens.length === 0) return res.status(400).send({ error: 'No FCM tokens provided.' });
 
     const message = {
       notification: { title: title || 'Michu Stays', body: body || 'You have a new update.' },

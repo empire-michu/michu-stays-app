@@ -55,7 +55,6 @@ window.router.addRoute('profile', async (container, params) => {
         if (window.filterFrom) filtered = filtered.filter(b => b.createdAt && new Date(b.createdAt) >= new Date(window.filterFrom));
         if (window.filterTo)   filtered = filtered.filter(b => b.createdAt && new Date(b.createdAt) <= new Date(window.filterTo + 'T23:59:59'));
         if (window.filterHotel && window.filterHotel !== 'all') filtered = filtered.filter(b => b.propertyTitle === window.filterHotel);
-        if (window.filterStatus && window.filterStatus !== 'all') filtered = filtered.filter(b => b.status === window.filterStatus);
         return filtered;
     };
 
@@ -92,12 +91,6 @@ window.router.addRoute('profile', async (container, params) => {
         if (!tbody) return;
 
         countEl.innerText = `${fullList.length} booking${fullList.length !== 1 ? 's' : ''}`;
-        
-        // Update Account Status Metrics
-        const totalStat = document.getElementById('stat-total-bookings');
-        const confirmedStat = document.getElementById('stat-confirmed-bookings');
-        if (totalStat) totalStat.innerText = allBookings.length;
-        if (confirmedStat) confirmedStat.innerText = allBookings.filter(b => b.status === 'Confirmed').length;
 
         if (list.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2.5rem;color:var(--color-text-light);">No bookings found.</td></tr>`;
@@ -207,10 +200,7 @@ window.router.addRoute('profile', async (container, params) => {
 
             <div class="profile-grid" style="display:grid;grid-template-columns:1.5fr 1fr;gap:2rem;margin-bottom:2rem;">
                 <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);">
-                    <h3 style="margin-bottom:1.5rem; display:flex; align-items:center; gap:0.6rem;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                        Profile Details
-                    </h3>
+                    <h3 style="margin-bottom:1.5rem;">✏ Profile Details</h3>
                     <div style="display:grid;gap:1.2rem;">
                         <div><label style="font-weight:700;font-size:0.8rem;display:block;margin-bottom:0.4rem;">Full Name</label><input id="p-fullname" type="text" value="${userData.fullName||''}" style="width:100%;padding:0.8rem;border:1.5px solid #eee;border-radius:12px;"></div>
                         <div><label style="font-weight:700;font-size:0.8rem;display:block;margin-bottom:0.4rem;">Phone</label><input id="p-phone" type="text" value="${userData.phone||''}" style="width:100%;padding:0.8rem;border:1.5px solid #eee;border-radius:12px;"></div>
@@ -221,26 +211,20 @@ window.router.addRoute('profile', async (container, params) => {
                 <div style="display:flex;flex-direction:column;gap:2rem;">
                     ${!['manager', 'admin'].includes(userData.role) ? `
                     <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);">
-                        <h3 style="margin-bottom:1.5rem; display:flex; align-items:center; gap:0.6rem;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                            Account Status
-                        </h3>
+                        <h3 style="margin-bottom:1.5rem;">📊 Account Status</h3>
                         <div style="display:grid;gap:0.8rem;">
                             <div style="padding:1rem;background:#f8f9fa;border-radius:12px;display:flex;justify-content:space-between;">
-                                <span>Bookings</span><strong id="stat-total-bookings">${allBookings.length}</strong>
+                                <span>Bookings</span><strong>${allBookings.length}</strong>
                             </div>
                             <div style="padding:1rem;background:#f0f7f2;border-radius:12px;display:flex;justify-content:space-between;color:var(--color-primary);">
-                                <span>Confirmed</span><strong id="stat-confirmed-bookings">${allBookings.filter(b=>b.status==='Confirmed').length}</strong>
+                                <span>Confirmed</span><strong>${allBookings.filter(b=>b.status==='Confirmed').length}</strong>
                             </div>
                         </div>
                     </div>
                     ` : ''}
                     
                     <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);">
-                        <h3 style="margin-bottom:1.5rem; display:flex; align-items:center; gap:0.6rem;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                            Change Password
-                        </h3>
+                        <h3 style="margin-bottom:1.5rem;">🔐 Change Password</h3>
                         <div style="display:grid;gap:1.2rem;">
                             <div><label style="font-weight:700;font-size:0.8rem;display:block;margin-bottom:0.4rem;">Current Password</label><input id="p-currpass" type="password" style="width:100%;padding:0.8rem;border:1.5px solid #eee;border-radius:12px;"></div>
                             <div><label style="font-weight:700;font-size:0.8rem;display:block;margin-bottom:0.4rem;">New Password</label><input id="p-newpass" type="password" style="width:100%;padding:0.8rem;border:1.5px solid #eee;border-radius:12px;"></div>
@@ -254,23 +238,13 @@ window.router.addRoute('profile', async (container, params) => {
             ${!['manager', 'admin'].includes(userData.role) ? `
             <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);margin-bottom:2rem;">
                 <div class="booking-history-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
-                    <h3 style="margin:0; display:flex; align-items:center; gap:0.6rem;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        Booking History <span id="booking-count" style="font-size:0.8rem;font-weight:400;color:#888;"></span>
-                    </h3>
-                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
-                         <select id="filter-status" style="padding:0.4rem 0.8rem;border:1px solid #ddd;border-radius:8px;font-size:0.85rem;font-family:inherit;background:white;font-weight:700;" onchange="window.filterStatus=this.value; window.renderBookings()">
-                             <option value="all">All Statuses</option>
-                             <option value="Awaiting Verification" ${window.filterStatus==='Awaiting Verification'?'selected':''}>Pending Approval</option>
-                             <option value="Confirmed" ${window.filterStatus==='Confirmed'?'selected':''}>Confirmed</option>
-                             <option value="Denied" ${window.filterStatus==='Denied'?'selected':''}>Denied</option>
-                         </select>
+                    <h3 style="margin:0;">📜 Booking History <span id="booking-count" style="font-size:0.8rem;font-weight:400;color:#888;"></span></h3>
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
                          <select id="filter-hotel" style="padding:0.4rem 0.8rem;border:1px solid #ddd;border-radius:8px;font-size:0.85rem;font-family:inherit;background:white;" onchange="window.filterHotel=this.value; window.renderBookings()">
                              <option value="all">All Hotels</option>
                          </select>
                          <input id="filter-from" type="date" value="${window.filterFrom}" style="padding:0.4rem;border:1px solid #ddd;border-radius:8px;" onchange="window.filterFrom=this.value; window.renderBookings()">
                          <input id="filter-to" type="date" value="${window.filterTo}" style="padding:0.4rem;border:1px solid #ddd;border-radius:8px;" onchange="window.filterTo=this.value; window.renderBookings()">
-                         <button class="btn-outline" style="padding:0.4rem 0.8rem; border-radius:8px; font-size:0.75rem; border:none; background:#f5f5f5;" onclick="window.filterFrom=''; window.filterTo=''; window.filterHotel='all'; window.filterStatus='all'; window.renderBookings(); document.getElementById('filter-from').value=''; document.getElementById('filter-to').value=''; document.getElementById('filter-hotel').value='all'; document.getElementById('filter-status').value='all';">✕ Reset</button>
                     </div>
                 </div>
                 <div style="overflow-x:auto;">
@@ -285,20 +259,14 @@ window.router.addRoute('profile', async (container, params) => {
 
             <!-- Danger Zone -->
             <div style="background:#fff5f5;border-radius:20px;padding:2rem;border:1px solid #ffcfcf;">
-                <h3 style="color:#c53030; margin:0 0 0.5rem; display:flex; align-items:center; gap:0.6rem;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                    ${window.t('Private Zone')}
-                </h3>
+                <h3 style="color:#c53030;margin:0 0 0.5rem;">🔒 ${window.t('Private Zone')}</h3>
                 <p style="color:#822727;font-size:0.9rem;margin-bottom:1.5rem;">${window.t('Deleting your account will remove all booking history and personal data permanently.')}</p>
                 
                 <div style="display:grid;gap:1rem;margin-bottom:1.5rem;">
                     <!-- Clear Profile Data -->
                     <div style="background:white;border-radius:14px;padding:1.2rem;border:1px solid #fed7d7;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
                         <div>
-                            <div style="font-weight:700; color:#744210; font-size:0.95rem; display:flex; align-items:center; gap:0.5rem;">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9.58V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                                ${window.t('Reset Profile Details')}
-                            </div>
+                            <div style="font-weight:700;color:#744210;font-size:0.95rem;">🧹 ${window.t('Reset Profile Details')}</div>
                             <div style="font-size:0.8rem;color:#975a16;margin-top:0.2rem;">${window.t('Clears your name, phone, city, and profile photo.')}</div>
                         </div>
                         <button class="btn-outline" style="border-color:#fbd38d;color:#744210;background:white;padding:0.6rem 1.4rem;font-weight:700;white-space:nowrap;flex-shrink:0;" onclick="window.confirmResetProfile()">${window.t('Reset Profile')}</button>
@@ -307,10 +275,7 @@ window.router.addRoute('profile', async (container, params) => {
                     <!-- Delete Booking History -->
                     <div style="background:white;border-radius:14px;padding:1.2rem;border:1px solid #fed7d7;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
                         <div>
-                            <div style="font-weight:700; color:#822727; font-size:0.95rem; display:flex; align-items:center; gap:0.5rem;">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                ${window.t('Delete Booking History')}
-                            </div>
+                            <div style="font-weight:700;color:#822727;font-size:0.95rem;">📋 ${window.t('Delete Booking History')}</div>
                             <div style="font-size:0.8rem;color:#9b2c2c;margin-top:0.2rem;">${window.t('Permanently removes all your booking records.')}</div>
                         </div>
                         <button class="btn-outline" style="border-color:#fc8181;color:#c53030;background:white;padding:0.6rem 1.4rem;font-weight:700;white-space:nowrap;flex-shrink:0;" onclick="window.confirmClearBookings()">${window.t('Clear History')}</button>
@@ -390,72 +355,21 @@ window.router.addRoute('profile', async (container, params) => {
                 </div>
             </div>
         </div>
-        
-        <!-- Cropping Modal -->
-        <div id="crop-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:10002;align-items:center;justify-content:center;backdrop-filter:blur(10px);">
-            <div style="background:white;border-radius:28px;padding:1.5rem;max-width:500px;width:95%;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.4);">
-                <h3 style="margin-top:0; color:var(--color-primary); font-size:1.4rem;">Adjust Your Photo</h3>
-                <p style="color:#666; font-size:0.85rem; margin-bottom:1.5rem;">Drag and scale to frame your profile picture perfectly.</p>
-                <div style="width:100%; aspect-ratio:1/1; background:#f0f0f0; border-radius:16px; overflow:hidden; margin-bottom:1.5rem;">
-                    <img id="crop-image-target" style="max-width:100%; display:block;">
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-                    <button class="btn-outline" style="border-radius:14px; padding:0.9rem; font-weight:700;" onclick="window.closeCropModal()">Cancel</button>
-                    <button class="btn-primary" style="border-radius:14px; padding:0.9rem; font-weight:700;" onclick="window.applyCrop()">Save & Adjust</button>
-                </div>
-            </div>
-        </div>
     `;
 
     // --- Profile Scripts ---
     let selectedProfilePic = userData.profilePic || null;
 
-    let cropper = null;
     window.handleProfilePicSelect = (input) => {
         const file = input.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                const modal = document.getElementById('crop-modal');
-                const image = document.getElementById('crop-image-target');
-                image.src = e.target.result;
-                modal.style.display = 'flex';
-                
-                if (cropper) cropper.destroy();
-                cropper = new Cropper(image, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    guides: false,
-                    center: true,
-                    highlight: false,
-                    cropBoxMovable: true,
-                    cropBoxResizable: true,
-                    toggleDragModeOnDblclick: false,
-                });
+                selectedProfilePic = e.target.result;
+                document.getElementById('profile-pic-container').innerHTML = `<img src="${selectedProfilePic}" style="width:100%;height:100%;object-fit:cover;">`;
             };
             reader.readAsDataURL(file);
         }
-    };
-
-    window.closeCropModal = () => {
-        document.getElementById('crop-modal').style.display = 'none';
-        if (cropper) {
-            cropper.destroy();
-            cropper = null;
-        }
-    };
-
-    window.applyCrop = () => {
-        if (!cropper) return;
-        const canvas = cropper.getCroppedCanvas({
-            width: 400,
-            height: 400,
-        });
-        selectedProfilePic = canvas.toDataURL('image/jpeg', 0.85);
-        document.getElementById('profile-pic-container').innerHTML = `<img src="${selectedProfilePic}" style="width:100%;height:100%;object-fit:cover;">`;
-        window.closeCropModal();
-        window.showToast("✨ Photo adjusted! Don't forget to Save Profile Settings below.");
     };
 
     window.saveGuestProfile = async () => {

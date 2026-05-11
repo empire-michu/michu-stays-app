@@ -531,7 +531,14 @@ const translations = {
         "Great service and very responsive support team. The guesthouse I booked was clean and affordable. I appreciate that the platform is built specifically for Ethiopian travelers.": "ግሩም አገልግሎት እና ምላሽ ሰጪ ድጋፍ ቡድን። ያስያዝኩት እንግዳ ማረፊያ ንፁህ እና ተመጣጣኝ ነበር። መድረኩ በተለይ ለኢትዮጵያ ተጓዦች የተዘጋጀ መሆኑ ያስመሰግናል።",
         "Harar · Guesthouse": "ሀረር · የእንግዳ ማረፊያ",
 
-
+        // News & Entertainment
+        "✨ News & Entertainment": "✨ ዜና እና መዝናኛ",
+        "Read Full Story": "ሙሉ ታሪኩን ያንብቡ",
+        "TRADITION": "ባህል",
+        "FESTIVAL": "ፌስቲቫል",
+        "CREATIVE": "ፈጠራ",
+        "LIFESTYLE": "የአኗኗር ዘይቤ",
+        "Full story coming soon!": "ሙሉ ታሪኩ በቅርቡ ይመጣል!",
 
         // Manager Property Editor labels
         "🏨 Basic Identity": "🏨 መሰረታዊ ማንነት",
@@ -1104,7 +1111,14 @@ const translations = {
         "Great service and very responsive support team. The guesthouse I booked was clean and affordable. I appreciate that the platform is built specifically for Ethiopian travelers.": "Tajaajilli gaarii fi gareen deeggarsa deebii hatattamaa kennan. Manni keessummaa ani qabadhe qulqulluu fi gatii madaalawaa ture. Madaalliin kun addatti imaltota Itoophiyaatiif akka ijaarameef nan dinqisiifadha.",
         "Harar · Guesthouse": "Harar · Mana Keessummaa",
 
-
+        // News & Entertainment
+        "✨ News & Entertainment": "✨ Oduu fi Bashannana",
+        "Read Full Story": "Seenaa Guutuu Dubbisuuf",
+        "TRADITION": "AADAA",
+        "FESTIVAL": "AYYAANA",
+        "CREATIVE": "KALAQAA",
+        "LIFESTYLE": "JIRUU FI JIREENYA",
+        "Full story coming soon!": "Seenaan guutuun dhihootti ni dhufa!",
 
         // Manager Property Editor labels
         "🏨 Basic Identity": "🏨 Eenyummaa Bu'uuraa",
