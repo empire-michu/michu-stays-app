@@ -500,18 +500,33 @@ window.router.addRoute('manager', async (container, params) => {
                     </div>
                     <div id="mgr-push-status">
                          ${(userData.fcmTokens && userData.fcmTokens.length > 0)
-                            ? `<button class="btn-outline" style="padding:0.6rem 1.2rem; border-radius:12px; border-color:green; color:green; font-weight:700; cursor:pointer;" onclick="window.enableManagerPush(this)">✅ Alerts On</button>`
-                            : `<button class="btn-outline" style="padding:0.6rem 1.2rem; border-radius:12px; border-color:#f59e0b; color:#d97706; font-weight:700; cursor:pointer;" onclick="window.enableManagerPush(this)">🔔 Enable Alerts</button>`
+                            ? `<button class="btn-outline" style="padding:0.6rem 1.2rem; border-radius:12px; border-color:green; color:green; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.4rem;" onclick="window.enableManagerPush(this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Alerts On</button>`
+                            : `<button class="btn-outline" style="padding:0.6rem 1.2rem; border-radius:12px; border-color:#f59e0b; color:#d97706; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.4rem;" onclick="window.enableManagerPush(this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Enable Alerts</button>`
                         }
                     </div>
                 </div>
 
-                <div class="mgr-tab-bar">
-                    <button style="${tabStyle('analytics')}" onclick="window.setMgrTab('analytics')">📊 Analytics</button>
-                    <button style="${tabStyle('bookings')}" onclick="window.setMgrTab('bookings')">📅 Bookings</button>
-                    <button style="${tabStyle('property')}" onclick="window.setMgrTab('property')">🏨 My Property</button>
-                    <button style="${tabStyle('reviews')}" onclick="window.setMgrTab('reviews')">💬 Reviews</button>
-                    <button style="${tabStyle('account')}" onclick="window.setMgrTab('account')">👤 My Account</button>
+                <div class="mgr-tab-bar" style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.5rem; border-bottom:1px solid #f1f5f9; padding-bottom:1rem;">
+                    <button style="${tabStyle('analytics')} display:flex; align-items:center; gap:0.4rem;" onclick="window.setMgrTab('analytics')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        Analytics
+                    </button>
+                    <button style="${tabStyle('bookings')} display:flex; align-items:center; gap:0.4rem;" onclick="window.setMgrTab('bookings')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        Bookings
+                    </button>
+                    <button style="${tabStyle('property')} display:flex; align-items:center; gap:0.4rem;" onclick="window.setMgrTab('property')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        My Property
+                    </button>
+                    <button style="${tabStyle('reviews')} display:flex; align-items:center; gap:0.4rem;" onclick="window.setMgrTab('reviews')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        Reviews
+                    </button>
+                    <button style="${tabStyle('account')} display:flex; align-items:center; gap:0.4rem;" onclick="window.setMgrTab('account')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        My Account
+                    </button>
                 </div>
 
                 <div class="manager-content">

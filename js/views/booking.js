@@ -107,14 +107,14 @@ window.router.addRoute('booking', async (container, params) => {
                             <label class="payment-option" style="cursor:pointer;">
                                 <input type="radio" name="payMethod" value="CBE" checked style="display:none;">
                                 <div class="pay-card active" id="card-cbe" onclick="selectPay('CBE')">
-                                    <span style="font-size:1.5rem; margin-bottom:0.5rem;">🏦</span>
+                                    <span style="font-size:1.5rem; margin-bottom:0.5rem;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M3 7v1a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V7"></path><path d="M12 2L3 7h18z"></path><path d="M6 11v6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M18 11v6"></path></svg></span>
                                     <span style="font-weight:600;">CBE Bank</span>
                                 </div>
                             </label>
                             <label class="payment-option" style="cursor:pointer;">
                                 <input type="radio" name="payMethod" value="telebirr" style="display:none;">
                                 <div class="pay-card" id="card-tele" onclick="selectPay('telebirr')">
-                                    <span style="font-size:1.5rem; margin-bottom:0.5rem;">📱</span>
+                                    <span style="font-size:1.5rem; margin-bottom:0.5rem;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg></span>
                                     <span style="font-weight:600;">telebirr</span>
                                 </div>
                             </label>
