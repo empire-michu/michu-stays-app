@@ -1027,7 +1027,7 @@ window.router.addRoute('manager', async (container, params) => {
                         <!-- Stay Packages Section -->
                         <div style="background:#f0f7ff; padding:1.5rem; border-radius:24px; border:1px solid #c9e2ff; margin-bottom:1.5rem;">
                             <h4 style="margin:0 0 1rem; font-size:0.9rem; color:#0056b3; display:flex; align-items:center; gap:0.5rem;">
-                                <span style="font-size:1.4rem;">🎁</span> STAY PACKAGES & DEALS
+                                <span style="font-size:1.4rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg></span> STAY PACKAGES & DEALS
                             </h4>
                             <p style="font-size:0.8rem; color:#666; margin-bottom:1.2rem;">Create special offers for longer stays (e.g., 3 nights for 15% off). Guests see these prominentely on your listing.</p>
                             
@@ -1039,7 +1039,7 @@ window.router.addRoute('manager', async (container, params) => {
 
                             <div style="margin-bottom:1.5rem; background:#fff4e5; padding:1.2rem; border-radius:18px; border:1px solid #ffe0b2; display:flex; align-items:center; justify-content:space-between; gap:1rem;">
                                 <div>
-                                    <h5 style="margin:0; font-size:0.85rem; color:#e65100;">🎉 Event Mode (Packages Only)</h5>
+                                    <h5 style="margin:0; font-size:0.85rem; color:#e65100;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; margin-bottom:-2px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Event Mode (Packages Only)</h5>
                                     <p style="margin:0.3rem 0 0; font-size:0.7rem; color:#666; line-height:1.4;">Enable this during festivals or events to hide normal nightly rates and <b>only</b> allow guests to book your special stay packages.</p>
                                 </div>
                                 <label class="switch">
@@ -1101,11 +1101,11 @@ window.router.addRoute('manager', async (container, params) => {
                 <!-- Preview Card (hidden on mobile) -->
                 <div class="mgr-prop-preview" style="position:sticky; top:2rem;">
                     <h4 style="margin-top:0; color:#666; font-size:0.9rem;">LIVE PREVIEW</h4>
-                    <div style="background:white; border-radius:24px; overflow:hidden; box-shadow:var(--shadow-lg); border:1px solid #eee;">
+                    <div style="background:white; border-radius:24px; overflow:hidden; box-shadow:var(--shadow-lg); border:1px solid #eee; max-width:400px; margin:0 auto;">
                         <img src="${myHotel.image || ''}" style="width:100%; height:180px; object-fit:cover;">
                         <div style="padding:1.5rem;">
                             <div style="font-weight:800; font-size:1.25rem; color:var(--color-primary); margin-bottom:0.3rem;">${myHotel.title}</div>
-                            <div style="font-size:0.85rem; color:#666; margin-bottom:1rem; display:flex; align-items:center; gap:0.4rem;">📍 ${myHotel.address || 'Location Pending'}</div>
+                            <div style="font-size:0.85rem; color:#666; margin-bottom:1rem; display:flex; align-items:center; gap:0.4rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${myHotel.address || 'Location Pending'}</div>
                             <div style="display:flex; justify-content:space-between; align-items:flex-end;">
                                 <div style="font-weight:900; font-size:1.4rem;">${myHotel.price} <span style="font-size:0.8rem; font-weight:500;">BR / night</span></div>
                                 <div style="color:${myHotel.availableRooms > 0 ? '#28a745':'#dc3545'}; font-weight:800; font-size:0.85rem;">
@@ -1115,7 +1115,7 @@ window.router.addRoute('manager', async (container, params) => {
                         </div>
                     </div>
                     <div style="margin-top:1.5rem; background:#fff8e1; border-radius:16px; padding:1.2rem; border:1px solid #ffe082; display:flex; align-items:center; gap:0.8rem;">
-                         <span style="font-size:1.5rem;">💡</span>
+                         <span style="font-size:1.5rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg></span>
                          <p style="margin:0; font-size:0.8rem; color:#856404; font-weight:600; line-height:1.4;">Keep your <b>Available Rooms</b> updated to ensure guests can book successfully.</p>
                     </div>
                 </div>

@@ -607,17 +607,22 @@ window.router.addRoute('admin', async (container, params) => {
 
                 <!-- ANALYTICS TAB -->
                 <div id="adm-tab-analytics" style="display:${activeTab==='analytics'?'block':'none'}">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; background:#f9f9f9; padding:1.2rem; border-radius:20px; border:1px solid #eee;">
-                         <div style="display:flex; align-items:center; gap:1.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; background:#f9f9f9; padding:1.2rem; border-radius:20px; border:1px solid #eee; flex-wrap:wrap; gap:1rem;">
+                        <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
                             <h4 style="margin:0; font-size:0.85rem; font-weight:800; text-transform:uppercase; color:#666;">Filter Range:</h4>
-                            <div style="display:flex; gap:0.5rem; align-items:center;">
+                            <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
                                 <input type="date" id="ana-start" value="${analyticsStart}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #eee; font-size:0.85rem; font-weight:700;">
                                 <span>to</span>
                                 <input type="date" id="ana-end" value="${analyticsEnd}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #eee; font-size:0.85rem; font-weight:700;">
                                 <button class="btn-primary" style="padding:0.6rem 1.2rem; border-radius:10px; font-size:0.8rem;" onclick="window.applyAnaFilter()">Filter</button>
                             </div>
-                         </div>
-                         <button class="btn-outline" style="font-size:0.75rem; border-radius:10px;" onclick="window.resetAnaFilter()">Reset</button>
+                        </div>
+                        <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                            <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setAnaPreset('daily')">Daily</button>
+                            <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setAnaPreset('weekly')">Weekly</button>
+                            <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setAnaPreset('monthly')">Monthly</button>
+                            <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem; margin-left:0.5rem; border-color:#e2e8f0; color:#64748b;" onclick="window.resetAnaFilter()">Reset</button>
+                        </div>
                     </div>
 
                     ${(() => {
@@ -1217,6 +1222,24 @@ window.router.addRoute('admin', async (container, params) => {
             data: { labels: trdLabels, datasets: [{ label: 'Bookings', data: trdData, backgroundColor: '#d4af37', borderRadius: 4 }] },
             options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
         });
+    };
+
+    window.setAnaPreset = (preset) => {
+        const today = new Date();
+        const end = today.toISOString().split('T')[0];
+        let start = new Date(today);
+        if (preset === 'daily') {
+            start.setDate(today.getDate() - 1);
+        } else if (preset === 'weekly') {
+            start.setDate(today.getDate() - 7);
+        } else if (preset === 'monthly') {
+            start.setMonth(today.getMonth() - 1);
+        }
+        analyticsStart = start.toISOString().split('T')[0];
+        analyticsEnd = end;
+        document.getElementById('ana-start').value = analyticsStart;
+        document.getElementById('ana-end').value = analyticsEnd;
+        renderAdmin();
     };
 
     window.applyAnaFilter = () => {
