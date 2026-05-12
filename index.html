@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="css/variables.css?v=1190">
     <link rel="stylesheet" href="css/style.css?v=1190">
     <link rel="stylesheet" href="css/components.css?v=1190">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <style>
         :root {
             --safe-top: env(safe-area-inset-top, 0px);
@@ -141,9 +143,9 @@
                 <div id="notif-modal" onclick="event.stopPropagation()" style="display:none; position:fixed; top:4.5rem; right:1rem; width:calc(100vw - 2rem); max-width:380px; background:white; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.15); border:1px solid #e2e8f0; z-index:15000; overflow:hidden; animation:michuPop 0.2s ease-out; flex-direction:column;">
                     <!-- Header -->
                     <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem;border-bottom:1px solid #f0f0f0;background:#f8f9fa;">
-                        <button style="display:flex; align-items:center; gap:0.4rem; background:white; border:1px solid #c9d2db; border-radius:99px; padding:0.4rem 0.8rem; font-size:0.75rem; font-weight:700; color:#1a73e8; cursor:pointer;">
+                        <button id="notif-filter-btn" onclick="window.toggleNotifFilter()" style="display:flex; align-items:center; gap:0.4rem; background:white; border:1px solid #c9d2db; border-radius:99px; padding:0.4rem 0.8rem; font-size:0.75rem; font-weight:700; color:#1a73e8; cursor:pointer; transition:0.2s;">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 01-3.46 0"></path></svg>
-                            Unread notifications
+                            <span id="notif-filter-text">Unread notifications</span>
                         </button>
                         <button id="notif-clear-btn" onclick="window.clearAllNotifications()" style="display:none;background:none;border:none;color:#5f6368;font-weight:700;font-size:0.8rem;cursor:pointer;">Clear All</button>
                     </div>
@@ -562,20 +564,28 @@
         }
     </style>
 
-    <!-- Cropper Modal -->
-    <div id="cropper-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:20000;align-items:center;justify-content:center;flex-direction:column;padding:1rem;">
-        <div style="width:100%;max-width:500px;height:60vh;background:#000;position:relative;">
-            <img id="cropper-image" style="display:block;max-width:100%;">
-        </div>
-        <div style="margin-top:1.5rem;display:flex;gap:1rem;">
-            <button onclick="window.cancelCrop()" style="padding:0.8rem 1.5rem;border-radius:99px;border:1px solid #555;background:transparent;color:#fff;font-weight:700;cursor:pointer;">Cancel</button>
-            <button onclick="window.applyCrop()" style="padding:0.8rem 2rem;border-radius:99px;border:none;background:var(--color-primary, #0B6E4F);color:#fff;font-weight:700;cursor:pointer;">Crop & Save</button>
+    <!-- Professional Cropper Modal -->
+    <div id="cropper-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:30000; align-items:center; justify-content:center; padding:1.5rem; backdrop-filter:blur(8px);">
+        <div style="background:white; border-radius:28px; width:100%; max-width:500px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 30px 60px rgba(0,0,0,0.5); animation:michuPop 0.3s ease-out;">
+            <div style="padding:1.5rem; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; background:#f8fafc;">
+                <div>
+                    <h3 style="margin:0; font-size:1.1rem; color:#1e293b; font-weight:800;">Adjust Profile Picture</h3>
+                    <p style="margin:0.2rem 0 0; font-size:0.75rem; color:#64748b; font-weight:500;">Drag or zoom to center your photo</p>
+                </div>
+                <button onclick="window.cancelCrop()" style="background:#f1f5f9; border:none; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#94a3b8; font-size:1.2rem; transition:0.2s;">&times;</button>
+            </div>
+            <div style="padding:1rem; background:#0f172a; display:flex; align-items:center; justify-content:center; height:350px; overflow:hidden;">
+                <img id="cropper-image" style="max-width:100%; display:block;">
+            </div>
+            <div style="padding:1.5rem; display:grid; grid-template-columns:1fr 1.5fr; gap:1rem; background:white;">
+                <button class="btn-outline" onclick="window.cancelCrop()" style="padding:1rem; border-radius:16px; font-weight:700; font-size:0.9rem;">Cancel</button>
+                <button class="btn-primary" onclick="window.applyCrop()" style="padding:1rem; border-radius:16px; font-weight:700; font-size:0.9rem; box-shadow:0 10px 20px rgba(11, 110, 79, 0.2);">Save & Apply</button>
+            </div>
         </div>
     </div>
 
-    <div
-        style="text-align:center; padding:1rem; background:#1e293b; color:rgba(255,255,255,0.3); font-size:0.6rem; font-weight:800;">
-        BUILD: V1214.I18N.UPDATE</div>
+    <div style="text-align:center; padding:1rem; background:#1e293b; color:rgba(255,255,255,0.3); font-size:0.6rem; font-weight:800;">
+        BUILD: V1214.PRO.CROP.FIX</div>
 </body>
 
 </html>

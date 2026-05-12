@@ -79,15 +79,21 @@ window.router.addRoute('manager', async (container, params) => {
         if(cancel) cancel.style.display = 'none';
     };
 
-    window.previewMgAccPic = (input) => {
+    window.previewMgAccPic = async (input) => {
         const file = input.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById('mg-acc-pic-box').innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">`;
-                window.newMgAccPic = e.target.result;
-            };
-            reader.readAsDataURL(file);
+            try {
+                const croppedDataUrl = await window.cropImage(file);
+                if (croppedDataUrl) {
+                    const box = document.getElementById('mg-acc-pic-box');
+                    if (box) {
+                        box.innerHTML = `<img src="${croppedDataUrl}" style="width:100%; height:100%; object-fit:cover;">`;
+                    }
+                    window.newMgAccPic = croppedDataUrl;
+                }
+            } catch (e) {
+                console.warn('Crop failed:', e);
+            }
         }
     };
 

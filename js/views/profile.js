@@ -377,18 +377,15 @@ window.router.addRoute('profile', async (container, params) => {
         const file = input.files[0];
         if (file) {
             try {
-                // Show cropper modal (aspect ratio 1:1 for profile pics)
-                const croppedBlob = await window.cropImage(file, 1);
-                
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    selectedProfilePic = e.target.result;
+                // Show cropper modal (returns base64 string)
+                const croppedDataUrl = await window.cropImage(file);
+                if (croppedDataUrl) {
+                    selectedProfilePic = croppedDataUrl;
                     const container = document.getElementById('profile-pic-container');
                     if (container) {
                         container.innerHTML = `<img src="${selectedProfilePic}" style="width:100%;height:100%;object-fit:cover;">`;
                     }
-                };
-                reader.readAsDataURL(croppedBlob);
+                }
             } catch(e) {
                 console.log('Crop cancelled or failed:', e);
             }

@@ -416,8 +416,8 @@ window.showPushNotification = ({ message, details, createdAt, link, params }) =>
         audio.play().catch(e => console.log('Audio autoplay blocked until user interacts with page.'));
     } catch(e) { console.warn('Audio play failed:', e); }
 
-    // Add to internal list (prevent duplicates by ID if possible, but Firestore 'added' type handles it)
-    notifications.unshift({ message, details, createdAt, link, params });
+    // Add to internal list
+    notifications.unshift({ ...arguments[0], isNew: true });
     renderNotifList();
 
     const container = document.createElement('div');
@@ -460,51 +460,55 @@ const renderNotifList = () => {
     const list = document.getElementById('notif-list-container');
     const empty = document.getElementById('notif-empty-state');
     const countLabel = document.getElementById('notif-count-label');
-    const clearBtn = document.getElementById('notif-clear-btn');
     if (!list) return;
 
-    if (notifications.length === 0) {
-        if (empty) empty.style.display = 'flex';
-        if (countLabel) countLabel.innerText = 'No new notifications';
-        if (clearBtn) clearBtn.style.display = 'none';
+    const displayList = notifFilterNewOnly ? notifications.filter(n => n.isNew) : notifications;
+    
+    // Show/hide Clear All
+    const clearBtn = document.getElementById('notif-clear-btn');
+    if (clearBtn) clearBtn.style.display = notifications.length > 0 ? 'block' : 'none';
+
+    if (displayList.length === 0) {
+        list.innerHTML = `
+            <div id="notif-empty-state" style="text-align:center;padding:3rem 1rem;color:#999;background:white;border-radius:8px;display:flex;flex-direction:column;align-items:center;">
+                <svg width="32" height="32" style="margin-bottom:0.5rem; color:#cbd5e1;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <p style="font-weight:700;margin:0;">${notifFilterNewOnly ? 'No new notifications' : 'No notifications yet'}</p>
+            </div>
+        `;
         return;
     }
 
-    if (empty) empty.style.display = 'none';
-    if (clearBtn) clearBtn.style.display = 'block';
-    if (countLabel) countLabel.innerText = `${notifications.length} notification${notifications.length !== 1 ? 's' : ''}`;
-
     const relativeTime = (ts) => {
-        const diff = Math.floor((Date.now() - new Date(ts || Date.now()).getTime()) / 1000);
+        if (!ts) return '';
+        const diff = (Date.now() - new Date(ts).getTime()) / 1000;
         if (diff < 60) return 'Just now';
         if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
         if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
         return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     };
 
-    // Keep the empty-state div in DOM, just render items before it
-    const items = notifications.map((n, i) => `
+    const items = displayList.map((n, i) => `
         <div class="notif-item" onclick="window.router.navigate('${n.link || 'home'}', ${n.params ? JSON.stringify(n.params).replace(/"/g, '&quot;') : '{}'}); window.showNotifModal(false);"
-            style="padding:1rem 1.1rem; background:var(--color-neutral, #f8faf9); border-radius:16px; border:1px solid var(--color-border, #ecf5ef); cursor:pointer; transition:all 0.18s; display:flex; gap:0.9rem; align-items:flex-start;">
-            <div style="width:36px;height:36px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
-                <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            style="padding:1rem 1.1rem; background:white; border-radius:16px; border:1px solid #eee; cursor:pointer; transition:all 0.18s; display:flex; gap:0.9rem; align-items:flex-start; margin-bottom:0.5rem;">
+            <div style="width:36px;height:36px;border-radius:50%;background:${n.isNew ? 'var(--color-primary)' : '#f1f5f9'};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+                <svg width="16" height="16" fill="none" stroke="${n.isNew ? 'white' : '#64748b'}" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
             </div>
             <div style="flex:1;min-width:0;">
-                <div style="font-weight:700;color:var(--color-text-dark, #111);font-size:0.88rem;margin-bottom:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${n.message}</div>
-                <div style="font-size:0.8rem;color:var(--color-text-light, #555);line-height:1.45;">${n.details}</div>
-                <div style="font-size:0.7rem;color:var(--color-text-light, #aaa);margin-top:0.4rem;opacity:0.8;">${relativeTime(n.createdAt)}</div>
+                <div style="font-weight:700;color:#1e293b;font-size:0.88rem;margin-bottom:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${n.message}</div>
+                <div style="font-size:0.8rem;color:#64748b;line-height:1.45;">${n.details}</div>
+                <div style="font-size:0.7rem;color:#94a3b8;margin-top:0.4rem;opacity:0.8;">${relativeTime(n.createdAt)}</div>
             </div>
         </div>
     `).join('');
 
-    list.innerHTML = items + `<div id="notif-empty-state" style="display:none;"></div>`;
+    list.innerHTML = items;
 };
 
 window.clearAllNotifications = () => {
     notifications.length = 0;
     unreadCount = 0;
     const badge = document.getElementById('notif-badge');
-    if (badge) badge.style.display = 'none';
+    if (badge) { badge.style.display = 'none'; badge.classList.remove('notif-pulse'); }
     renderNotifList();
 };
 
@@ -516,9 +520,93 @@ window.showNotifModal = (open = true) => {
         unreadCount = 0;
         const badge = document.getElementById('notif-badge');
         if (badge) { badge.style.display = 'none'; badge.classList.remove('notif-pulse'); }
+        
+        // Mark all as "seen" (not isNew) when opening the modal
+        notifications.forEach(n => n.isNew = false);
         renderNotifList();
     } else {
         modal.style.display = 'none';
+    }
+};
+
+// --- Professional Cropper Logic ---
+let globalCropperInstance = null;
+let cropperResolve = null;
+
+window.cropImage = function(imageFile) {
+    return new Promise((resolve, reject) => {
+        const modal = document.getElementById('cropper-modal');
+        const img = document.getElementById('cropper-image');
+        
+        if (!modal || !img) {
+            reject("Cropper elements missing");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            img.src = e.target.result;
+            modal.style.display = 'flex';
+            
+            if (globalCropperInstance) {
+                globalCropperInstance.destroy();
+            }
+            
+            globalCropperInstance = new Cropper(img, {
+                aspectRatio: 1, // Square for profiles
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 1,
+                restore: false,
+                guides: true,
+                center: true,
+                highlight: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false,
+            });
+            
+            cropperResolve = resolve;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(imageFile);
+    });
+};
+
+window.cancelCrop = function() {
+    const modal = document.getElementById('cropper-modal');
+    if(modal) modal.style.display = 'none';
+    if (globalCropperInstance) {
+        globalCropperInstance.destroy();
+        globalCropperInstance = null;
+    }
+    if (cropperResolve) {
+        cropperResolve(null);
+        cropperResolve = null;
+    }
+};
+
+window.applyCrop = function() {
+    if (!globalCropperInstance) return;
+    
+    const canvas = globalCropperInstance.getCroppedCanvas({
+        width: 512,
+        height: 512,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high',
+    });
+    
+    const base64Image = canvas.toDataURL('image/jpeg', 0.9);
+    
+    const modal = document.getElementById('cropper-modal');
+    if(modal) modal.style.display = 'none';
+    
+    globalCropperInstance.destroy();
+    globalCropperInstance = null;
+    
+    if (cropperResolve) {
+        cropperResolve(base64Image);
+        cropperResolve = null;
     }
 };
 
