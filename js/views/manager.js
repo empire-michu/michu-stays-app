@@ -7,6 +7,9 @@ window.router.addRoute('manager', async (container, params) => {
     let activeTab = params?.tab || 'bookings'; // bookings, property, account, reviews
     let filterFrom = '';
     let filterTo = '';
+    let filterStatus = '';
+    let analyticsStart = '';
+    let analyticsEnd = '';
     const uid = window.auth?.currentUser?.uid;
     let userData = window.auth?.userData || {};
     let myHotel = null;
@@ -19,7 +22,17 @@ window.router.addRoute('manager', async (container, params) => {
     window.setMgrFilter = () => {
         filterFrom = document.getElementById('mgr-book-from')?.value || '';
         filterTo = document.getElementById('mgr-book-to')?.value || '';
+        filterStatus = document.getElementById('mgr-book-status')?.value || '';
         bookingsPage = 1;
+        renderManagerUI();
+    };
+    window.applyMgrAnaFilter = () => {
+        analyticsStart = document.getElementById('mgr-ana-start')?.value || '';
+        analyticsEnd = document.getElementById('mgr-ana-end')?.value || '';
+        renderManagerUI();
+    };
+    window.resetMgrAnaFilter = () => {
+        analyticsStart = ''; analyticsEnd = '';
         renderManagerUI();
     };
     window.setMgrBookingPage = (page) => {
@@ -487,6 +500,7 @@ window.router.addRoute('manager', async (container, params) => {
                 </div>
 
                 <div class="mgr-tab-bar">
+                    <button style="${tabStyle('analytics')}" onclick="window.setMgrTab('analytics')">📊 Analytics</button>
                     <button style="${tabStyle('bookings')}" onclick="window.setMgrTab('bookings')">📅 Bookings</button>
                     <button style="${tabStyle('property')}" onclick="window.setMgrTab('property')">🏨 My Property</button>
                     <button style="${tabStyle('reviews')}" onclick="window.setMgrTab('reviews')">💬 Reviews</button>
@@ -531,10 +545,113 @@ window.router.addRoute('manager', async (container, params) => {
     `;
 
     const renderActiveTab = () => {
+        if (activeTab === 'analytics') return renderAnalyticsTab();
         if (activeTab === 'bookings') return renderBookingsTab();
         if (activeTab === 'property') return renderPropertyTab();
         if (activeTab === 'reviews') return renderReviewsTab();
         if (activeTab === 'account') return renderAccountTab();
+    };
+
+    const renderAnalyticsTab = () => {
+        if (allBookings.length === 0) return `<div style="text-align:center; padding:5rem; background:white; border-radius:24px; box-shadow:var(--shadow-sm);"><h3>No data available</h3><p style="color:#666;">Once guests book your property, analytics will appear here.</p></div>`;
+
+        const start = analyticsStart ? new Date(analyticsStart) : null;
+        const end = analyticsEnd ? new Date(analyticsEnd) : null;
+        const filtered = allBookings.filter(b => {
+            if (b.status === 'Denied') return false; // Usually don't count denied in revenue
+            const d = new Date(b.createdAt);
+            if (start && d < start) return false;
+            if (end && d > end) return false;
+            return true;
+        });
+
+        const totalRev = filtered.reduce((s, b) => s + (b.totalAmount || 0), 0);
+        const avgValue = Math.round(totalRev / (filtered.length || 1));
+        const confirmedBookings = filtered.filter(b => b.status === 'Confirmed').length;
+
+        // Trends data processing
+        const recentDays = 7;
+        const trendsData = new Array(recentDays).fill(0);
+        const trendsLabels = [];
+        for (let i = recentDays - 1; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            trendsLabels.push(d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+        }
+
+        filtered.forEach(b => {
+            const bDate = new Date(b.createdAt);
+            const now = new Date();
+            const diffTime = Math.abs(now - bDate);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays < recentDays) {
+                trendsData[recentDays - 1 - diffDays]++;
+            }
+        });
+
+        setTimeout(() => {
+            const ctxTrends = document.getElementById('mgr-chart-trends')?.getContext('2d');
+            if (ctxTrends && window.Chart) {
+                new window.Chart(ctxTrends, {
+                    type: 'line',
+                    data: {
+                        labels: trendsLabels,
+                        datasets: [{
+                            label: 'New Bookings',
+                            data: trendsData,
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+        }, 100);
+
+        return \`
+        <div style="animation: fadeIn 0.4s ease;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; background:#f9f9f9; padding:1.2rem; border-radius:20px; border:1px solid #eee; flex-wrap:wrap; gap:1rem;">
+                <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+                    <h4 style="margin:0; font-size:0.85rem; font-weight:800; text-transform:uppercase; color:#666;">Filter Range:</h4>
+                    <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                        <input type="date" id="mgr-ana-start" value="\${analyticsStart}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #eee; font-size:0.85rem; font-weight:700;">
+                        <span>to</span>
+                        <input type="date" id="mgr-ana-end" value="\${analyticsEnd}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #eee; font-size:0.85rem; font-weight:700;">
+                        <button class="btn-primary" style="padding:0.6rem 1.2rem; border-radius:10px; font-size:0.8rem;" onclick="window.applyMgrAnaFilter()">Filter</button>
+                    </div>
+                </div>
+                <button class="btn-outline" style="font-size:0.75rem; border-radius:10px;" onclick="window.resetMgrAnaFilter()">Reset</button>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1.2rem; margin-bottom:2rem;">
+                <div style="background:white; padding:1.2rem; border-radius:16px; box-shadow:var(--shadow-sm); border-left:5px solid var(--color-primary);">
+                    <p style="color:#888; font-size:0.65rem; font-weight:800; text-transform:uppercase; margin:0 0 0.4rem;">Total Revenue</p>
+                    <h3 style="margin:0; font-size:1.4rem; color:var(--color-primary);">\${totalRev.toLocaleString()} Birr</h3>
+                </div>
+                <div style="background:white; padding:1.2rem; border-radius:16px; box-shadow:var(--shadow-sm); border-left:5px solid #d4af37;">
+                    <p style="color:#888; font-size:0.65rem; font-weight:800; text-transform:uppercase; margin:0 0 0.4rem;">Avg. Booking Value</p>
+                    <h3 style="margin:0; font-size:1.4rem; color:#d97706;">\${avgValue.toLocaleString()} Birr</h3>
+                </div>
+                <div style="background:white; padding:1.2rem; border-radius:16px; box-shadow:var(--shadow-sm); border-left:5px solid #1c2e4a;">
+                    <p style="color:#888; font-size:0.65rem; font-weight:800; text-transform:uppercase; margin:0 0 0.4rem;">Total Bookings</p>
+                    <h3 style="margin:0; font-size:1.4rem; color:#1c2e4a;">\${filtered.length}</h3>
+                </div>
+                <div style="background:white; padding:1.2rem; border-radius:16px; box-shadow:var(--shadow-sm); border-left:5px solid #27ae60;">
+                    <p style="color:#888; font-size:0.65rem; font-weight:800; text-transform:uppercase; margin:0 0 0.4rem;">Confirmed</p>
+                    <h3 style="margin:0; font-size:1.4rem; color:#27ae60;">\${confirmedBookings}</h3>
+                </div>
+            </div>
+
+            <div style="background:white; padding:2rem; border-radius:24px; box-shadow:var(--shadow-sm); border:1px solid #eee;">
+                <h4 style="margin-top:0; margin-bottom:1.5rem; font-size:1rem; font-weight:800;">🛤️ Volume Timeline (Past 7 Days)</h4>
+                <div style="height: 250px; position:relative;">
+                    <canvas id="mgr-chart-trends"></canvas>
+                </div>
+            </div>
+        </div>\`;
     };
 
     const renderBookingsTab = () => {
@@ -550,7 +667,16 @@ window.router.addRoute('manager', async (container, params) => {
                         <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">To Date</label>
                         <input type="date" id="mgr-book-to" value="${filterTo}" style="padding:0.6rem; border-radius:8px; border:1.5px solid #eee; font-size:0.85rem;" onchange="window.setMgrFilter()">
                     </div>
-                    <button class="btn-outline" style="padding:0.6rem 1rem; border-radius:8px; font-size:0.8rem;" onclick="filterFrom=''; filterTo=''; window.setMgrFilter()">✕ Reset</button>
+                    <div>
+                        <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">Status</label>
+                        <select id="mgr-book-status" style="padding:0.6rem; border-radius:8px; border:1.5px solid #eee; font-size:0.85rem; font-weight:700; background:white; cursor:pointer;" onchange="window.setMgrFilter()">
+                            <option value="">All Statuses</option>
+                            <option value="Awaiting Confirmation" ${filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>Awaiting Confirmation</option>
+                            <option value="Confirmed" ${filterStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                            <option value="Denied" ${filterStatus === 'Denied' ? 'selected' : ''}>Denied</option>
+                        </select>
+                    </div>
+                    <button class="btn-outline" style="padding:0.6rem 1rem; border-radius:8px; font-size:0.8rem;" onclick="filterFrom=''; filterTo=''; filterStatus=''; window.setMgrFilter()">✕ Reset</button>
                 </div>
 
                 <div class="table-responsive">
@@ -571,6 +697,7 @@ window.router.addRoute('manager', async (container, params) => {
                         <tbody>
                             ${(() => {
                                 const filtered = allBookings.filter(b => {
+                                    if(filterStatus && b.status !== filterStatus) return false;
                                     if(!b.createdAt) return true;
                                     const bDate = new Date(b.createdAt);
                                     if(filterFrom) {

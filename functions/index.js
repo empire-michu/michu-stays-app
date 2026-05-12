@@ -14,38 +14,85 @@ const brevoClient = new BrevoClient({
 exports.sendPush = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
-    const { tokens, title, body } = req.body;
-    if (!tokens || tokens.length === 0) return res.status(400).send({ error: 'No FCM tokens provided.' });
-
-    const message = {
-      notification: { title: title || 'Michu Stays', body: body || 'You have a new update.' },
-      data: {
-        type: (title && title.toLowerCase().includes('booking')) ? 'booking' : 'general',
-        title: title || 'Michu Stays',
-        body: body || 'You have a new update.'
-      },
-      android: {
-        priority: 'high',
-        notification: {
-          channelId: 'michu_urgent_v3',
-          priority: 'max',
-          visibility: 'public',
-          sound: 'default',
-          defaultVibrateTimings: true,
-          defaultLightSettings: true
-        }
-      },
-      apns: {
-        payload: {
-          aps: { sound: 'default', contentAvailable: true, mutableContent: true }
-        }
-      },
-      tokens: tokens
-    };
+    let { tokens, title, body, hotelId, targetRoles } = req.body;
+    if (!tokens) tokens = [];
+    if (!Array.isArray(tokens)) tokens = [tokens];
 
     try {
+      // 1. Fetch tokens for Roles (e.g. 'admin')
+      if (targetRoles && Array.isArray(targetRoles)) {
+        for (const role of targetRoles) {
+          const snap = await admin.firestore().collection('users').where('role', '==', role).get();
+          snap.forEach(doc => {
+            const t = doc.data().fcmToken;
+            if (t) tokens.push(t);
+          });
+        }
+      }
+
+      // 2. Fetch token for Hotel Manager
+      if (hotelId) {
+        const hotelDoc = await admin.firestore().collection('properties').doc(hotelId).get();
+        if (hotelDoc.exists) {
+          const managerId = hotelDoc.data().managerId;
+          if (managerId) {
+            const managerDoc = await admin.firestore().collection('users').doc(managerId).get();
+            if (managerDoc.exists && managerDoc.data().fcmToken) {
+              tokens.push(managerDoc.data().fcmToken);
+            }
+          }
+        }
+      }
+
+      // Unique and valid tokens only
+      const finalTokens = [...new Set(tokens)].filter(t => t && typeof t === 'string' && t.length > 10);
+
+      if (finalTokens.length === 0) {
+        return res.status(200).send({ success: true, message: 'No tokens found to send to.' });
+      }
+
+      // 3. Build aggressive payload for background delivery
+      const message = {
+        notification: { 
+          title: title || 'Michu Stays', 
+          body: body || 'You have a new update.' 
+        },
+        data: {
+          type: (title && title.toLowerCase().includes('booking')) ? 'booking' : 'general',
+          title: title || 'Michu Stays',
+          body: body || 'You have a new update.',
+          click_action: 'FLUTTER_NOTIFICATION_CLICK', // Legacy but helpful for some wrappers
+          sound: 'default'
+        },
+        android: {
+          priority: 'high',
+          ttl: 3600 * 1000, // 1 hour
+          notification: {
+            channelId: 'michu_urgent_v3',
+            priority: 'max',
+            visibility: 'public',
+            sound: 'default',
+            defaultVibrateTimings: true,
+            defaultLightSettings: true,
+            sticky: false,
+            localOnly: false
+          }
+        },
+        apns: {
+          payload: {
+            aps: { 
+              sound: 'default', 
+              contentAvailable: true, 
+              mutableContent: true,
+              category: 'MICHU_MESSAGE'
+            }
+          }
+        },
+        tokens: finalTokens.slice(0, 500) // FCM limit
+      };
+
       const response = await admin.messaging().sendEachForMulticast(message);
-      res.status(200).send({ success: true, response });
+      res.status(200).send({ success: true, sentCount: response.successCount, failureCount: response.failureCount });
     } catch (error) {
       console.error('Error sending message:', error);
       res.status(500).send({ success: false, error: error.message });

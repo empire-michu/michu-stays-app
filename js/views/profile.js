@@ -48,13 +48,14 @@ window.router.addRoute('profile', async (container, params) => {
 
     // NOTE: Reviews are loaded AFTER the page renders (see bottom of this route)
 
-    window.filterFrom = ''; window.filterTo = ''; window.filterHotel = 'all';
+    window.filterFrom = ''; window.filterTo = ''; window.filterHotel = 'all'; window.filterStatus = 'all';
 
     const applyFilter = () => {
         let filtered = [...allBookings];
         if (window.filterFrom) filtered = filtered.filter(b => b.createdAt && new Date(b.createdAt) >= new Date(window.filterFrom));
         if (window.filterTo)   filtered = filtered.filter(b => b.createdAt && new Date(b.createdAt) <= new Date(window.filterTo + 'T23:59:59'));
         if (window.filterHotel && window.filterHotel !== 'all') filtered = filtered.filter(b => b.propertyTitle === window.filterHotel);
+        if (window.filterStatus && window.filterStatus !== 'all') filtered = filtered.filter(b => b.status === window.filterStatus);
         return filtered;
     };
 
@@ -246,6 +247,12 @@ window.router.addRoute('profile', async (container, params) => {
                 <div class="booking-history-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
                     <h3 style="margin:0;">📜 Booking History <span id="booking-count" style="font-size:0.8rem;font-weight:400;color:#888;"></span></h3>
                     <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                         <select id="filter-status" style="padding:0.4rem 0.8rem;border:1px solid #ddd;border-radius:8px;font-size:0.85rem;font-family:inherit;background:white;" onchange="window.filterStatus=this.value; window.renderBookings()">
+                             <option value="all">All Statuses</option>
+                             <option value="Awaiting Confirmation" ${window.filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>Awaiting Confirmation</option>
+                             <option value="Confirmed" ${window.filterStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                             <option value="Denied" ${window.filterStatus === 'Denied' ? 'selected' : ''}>Denied</option>
+                         </select>
                          <select id="filter-hotel" style="padding:0.4rem 0.8rem;border:1px solid #ddd;border-radius:8px;font-size:0.85rem;font-family:inherit;background:white;" onchange="window.filterHotel=this.value; window.renderBookings()">
                              <option value="all">All Hotels</option>
                          </select>
@@ -366,15 +373,25 @@ window.router.addRoute('profile', async (container, params) => {
     // --- Profile Scripts ---
     let selectedProfilePic = userData.profilePic || null;
 
-    window.handleProfilePicSelect = (input) => {
+    window.handleProfilePicSelect = async (input) => {
         const file = input.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                selectedProfilePic = e.target.result;
-                document.getElementById('profile-pic-container').innerHTML = `<img src="${selectedProfilePic}" style="width:100%;height:100%;object-fit:cover;">`;
-            };
-            reader.readAsDataURL(file);
+            try {
+                // Show cropper modal (aspect ratio 1:1 for profile pics)
+                const croppedBlob = await window.cropImage(file, 1);
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    selectedProfilePic = e.target.result;
+                    const container = document.getElementById('profile-pic-container');
+                    if (container) {
+                        container.innerHTML = `<img src="${selectedProfilePic}" style="width:100%;height:100%;object-fit:cover;">`;
+                    }
+                };
+                reader.readAsDataURL(croppedBlob);
+            } catch(e) {
+                console.log('Crop cancelled or failed:', e);
+            }
         }
     };
 

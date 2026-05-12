@@ -478,14 +478,14 @@ const renderNotifList = () => {
     // Keep the empty-state div in DOM, just render items before it
     const items = notifications.map((n, i) => `
         <div class="notif-item" onclick="window.router.navigate('${n.link || 'home'}', ${n.params ? JSON.stringify(n.params).replace(/"/g, '&quot;') : '{}'}); window.showNotifModal(false);"
-            style="padding:1rem 1.1rem; background:#f8faf9; border-radius:16px; border:1px solid #ecf5ef; cursor:pointer; transition:all 0.18s; display:flex; gap:0.9rem; align-items:flex-start;">
+            style="padding:1rem 1.1rem; background:var(--color-neutral, #f8faf9); border-radius:16px; border:1px solid var(--color-border, #ecf5ef); cursor:pointer; transition:all 0.18s; display:flex; gap:0.9rem; align-items:flex-start;">
             <div style="width:36px;height:36px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
                 <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
             </div>
             <div style="flex:1;min-width:0;">
-                <div style="font-weight:700;color:#111;font-size:0.88rem;margin-bottom:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${n.message}</div>
-                <div style="font-size:0.8rem;color:#555;line-height:1.45;">${n.details}</div>
-                <div style="font-size:0.7rem;color:#aaa;margin-top:0.4rem;">${relativeTime(n.createdAt)}</div>
+                <div style="font-weight:700;color:var(--color-text-dark, #111);font-size:0.88rem;margin-bottom:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${n.message}</div>
+                <div style="font-size:0.8rem;color:var(--color-text-light, #555);line-height:1.45;">${n.details}</div>
+                <div style="font-size:0.7rem;color:var(--color-text-light, #aaa);margin-top:0.4rem;opacity:0.8;">${relativeTime(n.createdAt)}</div>
             </div>
         </div>
     `).join('');
@@ -687,4 +687,99 @@ document.addEventListener('click', (e) => {
         }
     }
 });
+
+// --- Global Theme Logic ---
+window.toggleTheme = function() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('michu_theme', newTheme);
+    const themeIcon = document.getElementById('theme-icon');
+    if(themeIcon) themeIcon.innerText = newTheme === 'dark' ? '☀️' : '🌙';
+};
+
+// Initialize Theme
+const savedTheme = localStorage.getItem('michu_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+if (savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+}
+window.addEventListener('DOMContentLoaded', () => {
+    const themeIcon = document.getElementById('theme-icon');
+    if (themeIcon) {
+        themeIcon.innerText = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+});
+
+// --- Global Cropper Logic ---
+let globalCropperInstance = null;
+let cropperResolve = null;
+
+window.openCropper = function(imageFile) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('cropper-modal');
+        const img = document.getElementById('cropper-image');
+        
+        if (!modal || !img) {
+            resolve(null);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            img.src = e.target.result;
+            modal.style.display = 'flex';
+            
+            if (globalCropperInstance) {
+                globalCropperInstance.destroy();
+            }
+            
+            globalCropperInstance = new Cropper(img, {
+                aspectRatio: 1, // Square for profiles
+                viewMode: 1,
+                autoCropArea: 1,
+            });
+            
+            cropperResolve = resolve;
+        };
+        reader.readAsDataURL(imageFile);
+    });
+};
+
+window.cancelCrop = function() {
+    const modal = document.getElementById('cropper-modal');
+    if(modal) modal.style.display = 'none';
+    if (globalCropperInstance) {
+        globalCropperInstance.destroy();
+        globalCropperInstance = null;
+    }
+    if (cropperResolve) {
+        cropperResolve(null);
+        cropperResolve = null;
+    }
+};
+
+window.applyCrop = function() {
+    if (!globalCropperInstance) return;
+    
+    // Get cropped canvas
+    const canvas = globalCropperInstance.getCroppedCanvas({
+        width: 400,
+        height: 400,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high',
+    });
+    
+    const base64Image = canvas.toDataURL('image/jpeg', 0.85);
+    
+    const modal = document.getElementById('cropper-modal');
+    if(modal) modal.style.display = 'none';
+    
+    globalCropperInstance.destroy();
+    globalCropperInstance = null;
+    
+    if (cropperResolve) {
+        cropperResolve(base64Image);
+        cropperResolve = null;
+    }
+};
 

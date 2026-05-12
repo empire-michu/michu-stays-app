@@ -20,3 +20,17 @@
   --radius-md: 16px;
   --radius-lg: 28px;
 }
+
+[data-theme="dark"] {
+  --color-primary: #12A171;    /* Lighter green for contrast */
+  --color-secondary: #FFD54F;  /* Lighter gold */
+  --color-bg: #121212;         /* Very dark background */
+  --color-neutral: #1E1E1E;    /* Dark cards */
+  --color-text-dark: #F5F5F5;  /* Light text */
+  --color-text-light: #AAAAAA; /* Grayish text */
+  --color-border: #333333;     /* Dark borders */
+  
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
+}

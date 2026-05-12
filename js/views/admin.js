@@ -10,6 +10,7 @@ window.router.addRoute('admin', async (container, params) => {
     let filterFrom = '';
     let filterTo = '';
     let filterHotel = '';
+    let filterStatus = '';
     let bookingsPage = 1;
     let totalBookingsPages = 1;
     let hotelsPage = 1;
@@ -30,6 +31,7 @@ window.router.addRoute('admin', async (container, params) => {
         filterFrom = document.getElementById('adm-book-from')?.value || '';
         filterTo = document.getElementById('adm-book-to')?.value || '';
         filterHotel = document.getElementById('adm-book-hotel')?.value || '';
+        filterStatus = document.getElementById('adm-book-status')?.value || '';
         bookingsPage = 1;
         renderAdmin();
     };
@@ -738,9 +740,18 @@ window.router.addRoute('admin', async (container, params) => {
                                 <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.4rem; text-transform:uppercase;">To Date</label>
                                 <input type="date" id="adm-book-to" value="${filterTo}" style="width:100%; padding:0.7rem; border-radius:10px; border:1.5px solid #eee; font-weight:600;" onchange="window.setAdmFilter()">
                             </div>
-                            <button style="padding:0.7rem 1.2rem; border-radius:10px; border:1.5px solid #e74c3c; background:white; color:#e74c3c; font-weight:700; cursor:pointer; white-space:nowrap; transition:all 0.2s;" onmouseover="this.style.background='#e74c3c';this.style.color='white'" onmouseout="this.style.background='white';this.style.color='#e74c3c'" onclick="filterFrom=''; filterTo=''; filterHotel=''; window.setAdmFilter()">✕ Clear All</button>
+                            <div style="min-width:130px;">
+                                <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.4rem; text-transform:uppercase;">Status</label>
+                                <select id="adm-book-status" style="width:100%; padding:0.7rem; border-radius:10px; border:1.5px solid #eee; font-weight:600; background:white; cursor:pointer;" onchange="window.setAdmFilter()">
+                                    <option value="">All Statuses</option>
+                                    <option value="Awaiting Confirmation" ${filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>Awaiting Confirmation</option>
+                                    <option value="Confirmed" ${filterStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                    <option value="Denied" ${filterStatus === 'Denied' ? 'selected' : ''}>Denied</option>
+                                </select>
+                            </div>
+                            <button style="padding:0.7rem 1.2rem; border-radius:10px; border:1.5px solid #e74c3c; background:white; color:#e74c3c; font-weight:700; cursor:pointer; white-space:nowrap; transition:all 0.2s;" onmouseover="this.style.background='#e74c3c';this.style.color='white'" onmouseout="this.style.background='white';this.style.color='#e74c3c'" onclick="filterFrom=''; filterTo=''; filterHotel=''; filterStatus=''; window.setAdmFilter()">✕ Clear All</button>
                         </div>
-                        ${(filterFrom || filterTo || filterHotel) ? `<div style="margin-top:0.8rem; padding:0.6rem 1rem; background:#f8f9fa; border-radius:10px; font-size:0.8rem; color:#666; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">🔍 Filtering: ${filterHotel ? '<strong>' + filterHotel + '</strong>' : ''} ${filterFrom ? 'from <strong>' + filterFrom + '</strong>' : ''} ${filterTo ? 'to <strong>' + filterTo + '</strong>' : ''}</div>` : ''}
+                        ${(filterFrom || filterTo || filterHotel || filterStatus) ? `<div style="margin-top:0.8rem; padding:0.6rem 1rem; background:#f8f9fa; border-radius:10px; font-size:0.8rem; color:#666; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">🔍 Filtering: ${filterHotel ? '<strong>' + filterHotel + '</strong>' : ''} ${filterFrom ? 'from <strong>' + filterFrom + '</strong>' : ''} ${filterTo ? 'to <strong>' + filterTo + '</strong>' : ''} ${filterStatus ? 'status: <strong>' + filterStatus + '</strong>' : ''}</div>` : ''}
                     </div>
 
                     <div style="background:white; border-radius:20px; box-shadow:var(--shadow-sm); overflow-x:auto;">
@@ -749,6 +760,7 @@ window.router.addRoute('admin', async (container, params) => {
                             <tbody>
                                 ${(() => {
                                     const filtered = cachedBookings.filter(b => {
+                                        if(filterStatus && b.status !== filterStatus) return false;
                                         if(filterHotel && b.propertyTitle !== filterHotel) return false;
                                         if(!b.createdAt) return true;
                                         const bDate = new Date(b.createdAt);
