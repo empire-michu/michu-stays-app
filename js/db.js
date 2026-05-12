@@ -491,8 +491,8 @@ class Database {
         const role = window.auth?.role || window.auth?.userData?.role;
         if (!user) return;
 
-        // Look for notifications created in the last 10 minutes
-        const startTime = new Date(Date.now() - 600000).toISOString();
+        // Look for notifications created in the last 24 hours
+        const startTime = new Date(Date.now() - 86400000).toISOString();
         
         return firestore.collection('notifications')
             .where('createdAt', '>', startTime)

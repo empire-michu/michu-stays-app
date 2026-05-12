@@ -417,7 +417,7 @@ window.showPushNotification = ({ message, details, createdAt, link, params }) =>
     } catch(e) { console.warn('Audio play failed:', e); }
 
     // Add to internal list
-    notifications.unshift({ ...arguments[0], isNew: true });
+    notifications.unshift({ message, details, createdAt, link, params, isNew: true });
     renderNotifList();
 
     const container = document.createElement('div');
@@ -519,10 +519,10 @@ window.showNotifModal = (open = true) => {
         modal.style.display = 'flex';
         unreadCount = 0;
         const badge = document.getElementById('notif-badge');
-        if (badge) { badge.style.display = 'none'; badge.classList.remove('notif-pulse'); }
-        
-        // Mark all as "seen" (not isNew) when opening the modal
-        notifications.forEach(n => n.isNew = false);
+        if (badge) { 
+            badge.style.display = 'none'; 
+            badge.classList.remove('notif-pulse'); 
+        }
         renderNotifList();
     } else {
         modal.style.display = 'none';
