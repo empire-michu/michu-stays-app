@@ -305,7 +305,14 @@ window.showNotifModal = () => {
 // Close notif modal when clicking backdrop
 document.addEventListener('click', (e) => {
     if (e.target.id === 'ai-modal') e.target.style.display = 'none';
-    // notif-modal backdrop handled via onclick on element itself
+    
+    // Close lang dropdown
+    const ld = document.getElementById('lang-dropdown');
+    if (ld) ld.style.display = 'none';
+
+    // Close notif modal dropdown
+    const nm = document.getElementById('notif-modal');
+    if (nm && !nm.contains(e.target)) nm.style.display = 'none';
 });
 
 // Premium Global Confirmation Modal (Michu Stays Branded)
@@ -505,21 +512,13 @@ window.showNotifModal = (open = true) => {
     const modal = document.getElementById('notif-modal');
     if (!modal) return;
     if (open) {
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
         unreadCount = 0;
         const badge = document.getElementById('notif-badge');
         if (badge) { badge.style.display = 'none'; badge.classList.remove('notif-pulse'); }
         renderNotifList();
     } else {
-        // Animate out then hide
-        const drawer = document.getElementById('notif-drawer');
-        if (drawer) {
-            const isMobile = window.innerWidth <= 768;
-            drawer.style.animation = isMobile ? 'slideUpSheet 0.25s reverse forwards' : 'slideOutRight 0.25s forwards';
-            setTimeout(() => { modal.style.display = 'none'; if (drawer) drawer.style.animation = ''; }, 240);
-        } else {
-            modal.style.display = 'none';
-        }
+        modal.style.display = 'none';
     }
 };
 

@@ -432,6 +432,7 @@ window.router.addRoute('manager', async (container, params) => {
             }, uid);
 
             // Fetch property info
+            const userData = window.auth.userData || {};
             if (userData?.hotelId) {
                 myHotel = await window.db.getPropertyById(userData.hotelId);
             } else {
@@ -617,7 +618,7 @@ window.router.addRoute('manager', async (container, params) => {
             }
         }, 100);
 
-        return \`
+        return `
         <div style="animation: fadeIn 0.4s ease;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; background:#f9f9f9; padding:1.2rem; border-radius:20px; border:1px solid #eee; flex-wrap:wrap; gap:1rem;">
                 <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
@@ -635,19 +636,19 @@ window.router.addRoute('manager', async (container, params) => {
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1.2rem; margin-bottom:2rem;">
                 <div style="background:white; padding:1.2rem; border-radius:16px; box-shadow:var(--shadow-sm); border-left:5px solid var(--color-primary);">
                     <p style="color:#888; font-size:0.65rem; font-weight:800; text-transform:uppercase; margin:0 0 0.4rem;">Total Revenue</p>
-                    <h3 style="margin:0; font-size:1.4rem; color:var(--color-primary);">\${totalRev.toLocaleString()} Birr</h3>
+                    <h3 style="margin:0; font-size:1.4rem; color:var(--color-primary);">${totalRev.toLocaleString()} Birr</h3>
                 </div>
                 <div style="background:white; padding:1.2rem; border-radius:16px; box-shadow:var(--shadow-sm); border-left:5px solid #d4af37;">
                     <p style="color:#888; font-size:0.65rem; font-weight:800; text-transform:uppercase; margin:0 0 0.4rem;">Avg. Booking Value</p>
-                    <h3 style="margin:0; font-size:1.4rem; color:#d97706;">\${avgValue.toLocaleString()} Birr</h3>
+                    <h3 style="margin:0; font-size:1.4rem; color:#d97706;">${avgValue.toLocaleString()} Birr</h3>
                 </div>
                 <div style="background:white; padding:1.2rem; border-radius:16px; box-shadow:var(--shadow-sm); border-left:5px solid #1c2e4a;">
                     <p style="color:#888; font-size:0.65rem; font-weight:800; text-transform:uppercase; margin:0 0 0.4rem;">Total Bookings</p>
-                    <h3 style="margin:0; font-size:1.4rem; color:#1c2e4a;">\${filtered.length}</h3>
+                    <h3 style="margin:0; font-size:1.4rem; color:#1c2e4a;">${filtered.length}</h3>
                 </div>
                 <div style="background:white; padding:1.2rem; border-radius:16px; box-shadow:var(--shadow-sm); border-left:5px solid #27ae60;">
                     <p style="color:#888; font-size:0.65rem; font-weight:800; text-transform:uppercase; margin:0 0 0.4rem;">Confirmed</p>
-                    <h3 style="margin:0; font-size:1.4rem; color:#27ae60;">\${confirmedBookings}</h3>
+                    <h3 style="margin:0; font-size:1.4rem; color:#27ae60;">${confirmedBookings}</h3>
                 </div>
             </div>
 
@@ -657,7 +658,7 @@ window.router.addRoute('manager', async (container, params) => {
                     <canvas id="mgr-chart-trends"></canvas>
                 </div>
             </div>
-        </div>\`;
+        </div>`;
     };
 
     const renderBookingsTab = () => {
