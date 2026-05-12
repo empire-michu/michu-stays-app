@@ -400,6 +400,88 @@ document.addEventListener('focusin', (e) => {
 let unreadCount = 0;
 const notifications = [];
 let notifUnsub = null;
+let notifFilterNewOnly = false;
+
+window.toggleNotifFilter = () => {
+    notifFilterNewOnly = !notifFilterNewOnly;
+    const btn = document.getElementById('notif-filter-btn');
+    const text = document.getElementById('notif-filter-text');
+    if (btn && text) {
+        if (notifFilterNewOnly) {
+            btn.style.background = 'var(--color-primary)';
+            btn.style.color = 'white';
+            btn.style.borderColor = 'var(--color-primary)';
+            text.textContent = 'Showing: Unread Only';
+        } else {
+            btn.style.background = 'white';
+            btn.style.color = '#1a73e8';
+            btn.style.borderColor = '#c9d2db';
+            text.textContent = 'Unread notifications';
+        }
+    }
+    renderNotifList();
+};
+
+window.clearAllNotifications = () => {
+    notifications.length = 0;
+    unreadCount = 0;
+    notifFilterNewOnly = false;
+    const badge = document.getElementById('notif-badge');
+    if (badge) { badge.style.display = 'none'; badge.classList.remove('notif-pulse'); }
+    // Reset filter button
+    const btn = document.getElementById('notif-filter-btn');
+    const text = document.getElementById('notif-filter-text');
+    if (btn && text) {
+        btn.style.background = 'white';
+        btn.style.color = '#1a73e8';
+        btn.style.borderColor = '#c9d2db';
+        text.textContent = 'Unread notifications';
+    }
+    renderNotifList();
+};
+
+const renderNotifList = () => {
+    const list = document.getElementById('notif-list-container');
+    if (!list) return;
+
+    const displayList = notifFilterNewOnly ? notifications.filter(n => n.isNew) : notifications;
+
+    // Show/hide Clear All button
+    const clearBtn = document.getElementById('notif-clear-btn');
+    if (clearBtn) clearBtn.style.display = notifications.length > 0 ? 'block' : 'none';
+
+    if (displayList.length === 0) {
+        list.innerHTML = `
+            <div style="text-align:center;padding:3rem 1rem;color:#999;background:white;border-radius:8px;display:flex;flex-direction:column;align-items:center;">
+                <svg width="32" height="32" style="margin-bottom:0.5rem;color:#cbd5e1;" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <p style="font-weight:700;margin:0;font-size:0.9rem;">${notifFilterNewOnly ? 'No unread notifications' : 'No notifications yet'}</p>
+            </div>`;
+        return;
+    }
+
+    const relativeTime = (ts) => {
+        if (!ts) return 'Just now';
+        const diff = (Date.now() - new Date(ts).getTime()) / 1000;
+        if (diff < 60) return 'Just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+        return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    };
+
+    list.innerHTML = displayList.map(n => `
+        <div class="notif-item" onclick="window.router.navigate('${n.link || 'home'}', ${JSON.stringify(n.params || {}).replace(/"/g, '&quot;')}); window.showNotifModal(false);"
+            style="padding:1rem;background:white;border-radius:12px;border:1px solid ${n.isNew ? '#dbeafe' : '#f1f5f9'};cursor:pointer;transition:all 0.18s;display:flex;gap:0.8rem;align-items:flex-start;margin-bottom:0.4rem;${n.isNew ? 'border-left:3px solid var(--color-primary);' : ''}">
+            <div style="width:34px;height:34px;border-radius:50%;background:${n.isNew ? 'var(--color-primary)' : '#f1f5f9'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="15" height="15" fill="none" stroke="${n.isNew ? 'white' : '#64748b'}" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;color:#1e293b;font-size:0.85rem;margin-bottom:0.2rem;">${n.message || ''}</div>
+                <div style="font-size:0.78rem;color:#64748b;line-height:1.4;">${n.details || ''}</div>
+                <div style="font-size:0.68rem;color:#94a3b8;margin-top:0.3rem;">${relativeTime(n.createdAt)}</div>
+            </div>
+        </div>
+    `).join('');
+};
 
 window.showPushNotification = ({ message, details, createdAt, link, params }) => {
     unreadCount++;
@@ -413,103 +495,30 @@ window.showPushNotification = ({ message, details, createdAt, link, params }) =>
     try {
         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
         audio.volume = 0.5;
-        audio.play().catch(e => console.log('Audio autoplay blocked until user interacts with page.'));
-    } catch(e) { console.warn('Audio play failed:', e); }
+        audio.play().catch(() => {});
+    } catch(e) {}
 
-    // Add to internal list
+    // Add to in-memory list
     notifications.unshift({ message, details, createdAt, link, params, isNew: true });
     renderNotifList();
 
+    // Show toast popup
     const container = document.createElement('div');
-    container.style.cssText = `
-        position: fixed; top: 20px; right: 20px; width: 330px;
-        background: white; border-left: 5px solid var(--color-primary);
-        box-shadow: 0 20px 50px rgba(0,0,0,0.2); border-radius: 20px;
-        padding: 1.25rem; z-index: 20000; display: flex; gap: 1rem;
-        animation: _pushIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        cursor: pointer;
-        max-width: calc(100vw - 2rem);
-    `;
+    container.style.cssText = `position:fixed;top:20px;right:20px;width:330px;background:white;border-left:5px solid var(--color-primary);box-shadow:0 20px 50px rgba(0,0,0,0.2);border-radius:20px;padding:1.25rem;z-index:20000;display:flex;gap:1rem;animation:_pushIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275);cursor:pointer;max-width:calc(100vw - 2rem);`;
     container.innerHTML = `
-        <style>
-            @keyframes _pushIn { from{transform: translateX(120%); opacity:0} to{transform: translateX(0); opacity:1} }
-            @keyframes _pushOut { from{transform: translateX(0); opacity:1} to{transform: translateX(120%); opacity:0} }
-        </style>
-        <div style="font-size: 1.8rem;">🔔</div>
-        <div style="flex: 1;">
-            <div style="font-weight: 800; color: var(--color-primary); font-size: 0.95rem; margin-bottom: 0.3rem;">${message}</div>
-            <div style="color: #555; font-size: 0.82rem; line-height:1.5;">${details}</div>
-            <div style="color: #aaa; font-size: 0.7rem; margin-top: 0.4rem;">Just now</div>
+        <style>@keyframes _pushIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}} @keyframes _pushOut{from{transform:translateX(0);opacity:1}to{transform:translateX(120%);opacity:0}}</style>
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         </div>
-    `;
+        <div style="flex:1;">
+            <div style="font-weight:800;color:var(--color-primary);font-size:0.95rem;margin-bottom:0.3rem;">${message || 'New notification'}</div>
+            <div style="color:#555;font-size:0.82rem;line-height:1.5;">${details || ''}</div>
+            <div style="color:#aaa;font-size:0.7rem;margin-top:0.4rem;">Just now</div>
+        </div>`;
     document.body.appendChild(container);
-
-    const close = () => {
-        container.style.animation = '_pushOut 0.4s ease forwards';
-        setTimeout(() => container.remove(), 400);
-    };
-
-    container.onclick = () => {
-        if (link) window.router.navigate(link, params || {});
-        close();
-    };
+    const close = () => { container.style.animation = '_pushOut 0.4s ease forwards'; setTimeout(() => container.remove(), 400); };
+    container.onclick = () => { if (link) window.router.navigate(link, params || {}); close(); };
     setTimeout(close, 8000);
-};
-
-const renderNotifList = () => {
-    const list = document.getElementById('notif-list-container');
-    const empty = document.getElementById('notif-empty-state');
-    const countLabel = document.getElementById('notif-count-label');
-    if (!list) return;
-
-    const displayList = notifFilterNewOnly ? notifications.filter(n => n.isNew) : notifications;
-    
-    // Show/hide Clear All
-    const clearBtn = document.getElementById('notif-clear-btn');
-    if (clearBtn) clearBtn.style.display = notifications.length > 0 ? 'block' : 'none';
-
-    if (displayList.length === 0) {
-        list.innerHTML = `
-            <div id="notif-empty-state" style="text-align:center;padding:3rem 1rem;color:#999;background:white;border-radius:8px;display:flex;flex-direction:column;align-items:center;">
-                <svg width="32" height="32" style="margin-bottom:0.5rem; color:#cbd5e1;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                <p style="font-weight:700;margin:0;">${notifFilterNewOnly ? 'No new notifications' : 'No notifications yet'}</p>
-            </div>
-        `;
-        return;
-    }
-
-    const relativeTime = (ts) => {
-        if (!ts) return '';
-        const diff = (Date.now() - new Date(ts).getTime()) / 1000;
-        if (diff < 60) return 'Just now';
-        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-        return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-    };
-
-    const items = displayList.map((n, i) => `
-        <div class="notif-item" onclick="window.router.navigate('${n.link || 'home'}', ${n.params ? JSON.stringify(n.params).replace(/"/g, '&quot;') : '{}'}); window.showNotifModal(false);"
-            style="padding:1rem 1.1rem; background:white; border-radius:16px; border:1px solid #eee; cursor:pointer; transition:all 0.18s; display:flex; gap:0.9rem; align-items:flex-start; margin-bottom:0.5rem;">
-            <div style="width:36px;height:36px;border-radius:50%;background:${n.isNew ? 'var(--color-primary)' : '#f1f5f9'};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
-                <svg width="16" height="16" fill="none" stroke="${n.isNew ? 'white' : '#64748b'}" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-            </div>
-            <div style="flex:1;min-width:0;">
-                <div style="font-weight:700;color:#1e293b;font-size:0.88rem;margin-bottom:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${n.message}</div>
-                <div style="font-size:0.8rem;color:#64748b;line-height:1.45;">${n.details}</div>
-                <div style="font-size:0.7rem;color:#94a3b8;margin-top:0.4rem;opacity:0.8;">${relativeTime(n.createdAt)}</div>
-            </div>
-        </div>
-    `).join('');
-
-    list.innerHTML = items;
-};
-
-window.clearAllNotifications = () => {
-    notifications.length = 0;
-    unreadCount = 0;
-    const badge = document.getElementById('notif-badge');
-    if (badge) { badge.style.display = 'none'; badge.classList.remove('notif-pulse'); }
-    renderNotifList();
 };
 
 window.showNotifModal = (open = true) => {
@@ -519,10 +528,7 @@ window.showNotifModal = (open = true) => {
         modal.style.display = 'flex';
         unreadCount = 0;
         const badge = document.getElementById('notif-badge');
-        if (badge) { 
-            badge.style.display = 'none'; 
-            badge.classList.remove('notif-pulse'); 
-        }
+        if (badge) { badge.style.display = 'none'; badge.classList.remove('notif-pulse'); }
         renderNotifList();
     } else {
         modal.style.display = 'none';
