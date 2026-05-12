@@ -24,8 +24,12 @@ exports.sendPush = functions.https.onRequest((req, res) => {
         for (const role of targetRoles) {
           const snap = await admin.firestore().collection('users').where('role', '==', role).get();
           snap.forEach(doc => {
-            const t = doc.data().fcmToken;
-            if (t) tokens.push(t);
+            const data = doc.data();
+            if (data.fcmTokens && Array.isArray(data.fcmTokens)) {
+              data.fcmTokens.forEach(t => tokens.push(t));
+            } else if (data.fcmToken) {
+              tokens.push(data.fcmToken);
+            }
           });
         }
       }
@@ -37,8 +41,13 @@ exports.sendPush = functions.https.onRequest((req, res) => {
           const managerId = hotelDoc.data().managerId;
           if (managerId) {
             const managerDoc = await admin.firestore().collection('users').doc(managerId).get();
-            if (managerDoc.exists && managerDoc.data().fcmToken) {
-              tokens.push(managerDoc.data().fcmToken);
+            if (managerDoc.exists) {
+              const data = managerDoc.data();
+              if (data.fcmTokens && Array.isArray(data.fcmTokens)) {
+                data.fcmTokens.forEach(t => tokens.push(t));
+              } else if (data.fcmToken) {
+                tokens.push(data.fcmToken);
+              }
             }
           }
         }

@@ -688,39 +688,19 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// --- Global Theme Logic ---
-window.toggleTheme = function() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('michu_theme', newTheme);
-    const themeIcon = document.getElementById('theme-icon');
-    if(themeIcon) themeIcon.innerText = newTheme === 'dark' ? '☀️' : '🌙';
-};
 
-// Initialize Theme
-const savedTheme = localStorage.getItem('michu_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-if (savedTheme === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-}
-window.addEventListener('DOMContentLoaded', () => {
-    const themeIcon = document.getElementById('theme-icon');
-    if (themeIcon) {
-        themeIcon.innerText = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
-    }
-});
 
 // --- Global Cropper Logic ---
 let globalCropperInstance = null;
 let cropperResolve = null;
 
-window.openCropper = function(imageFile) {
-    return new Promise((resolve) => {
+window.cropImage = function(imageFile) {
+    return new Promise((resolve, reject) => {
         const modal = document.getElementById('cropper-modal');
         const img = document.getElementById('cropper-image');
         
         if (!modal || !img) {
-            resolve(null);
+            reject("Cropper elements missing");
             return;
         }
 
@@ -741,6 +721,7 @@ window.openCropper = function(imageFile) {
             
             cropperResolve = resolve;
         };
+        reader.onerror = reject;
         reader.readAsDataURL(imageFile);
     });
 };

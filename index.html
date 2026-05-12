@@ -95,12 +95,8 @@
             <span>Michu Stays</span>
         </div>
 
-        <div class="header-actions" style="gap:0.5rem;">
-            <!-- Theme Switcher -->
-            <button id="theme-toggle-btn" onclick="window.toggleTheme()" style="display:flex; align-items:center; justify-content:center; background:var(--color-bg, white); border:1px solid var(--color-border, #e2e8f0); width:34px; height:34px; border-radius:50%; cursor:pointer; color:var(--color-text-dark, #1e293b); box-shadow:0 2px 5px rgba(0,0,0,0.02); font-size:1.1rem; flex-shrink:0; transition: background 0.3s, color 0.3s;">
-                <span id="theme-icon">🌙</span>
-            </button>
 
+        <div class="header-actions" style="gap:0.5rem;">
             <!-- Language Switcher -->
             <div style="position:relative;" id="lang-switcher-container">
                 <button id="lang-toggle-btn"
@@ -126,22 +122,10 @@
                         <span>🇪🇹</span> Oromiffa</div>
                 </div>
             </div>
-            <script>
-                // Close language dropdown when tapping anywhere else
-                document.addEventListener('click', function (e) {
-                    var dd = document.getElementById('lang-dropdown');
-                    var container = document.getElementById('lang-switcher-container');
-                    if (dd && container && !container.contains(e.target)) {
-                        dd.style.display = 'none';
-                    }
-                });
-            </script>
-
-
 
             <div id="header-notif-btn"
                 style="display:none; cursor:pointer; position:relative; background:#f0f4f1; width:34px; height:34px; border-radius:50%; align-items:center; justify-content:center;"
-                onclick="showNotifModal()">
+                onclick="window.showNotifModal(true)">
                 <svg width="18" height="18" fill="none" stroke="#1a6032" stroke-width="2.5" viewBox="0 0 24 24">
                     <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                     <path d="M13.73 21a2 2 0 01-3.46 0"></path>
@@ -151,62 +135,25 @@
                 </div>
             </div>
 
-            <div id="ai-modal"
-                style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;">
-                <div
-                    style="background:white;border-radius:24px;padding:2rem;max-width:400px;width:95%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.3);animation:aiSlide 0.25s cubic-bezier(.34,1.56,.64,1);">
-                    <div
-                        style="width:56px;height:56px;border-radius:50%;background:#e3f2fd;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
-                        <span style="font-size:2rem;">🤖</span>
-                    </div>
-                    <h3 style="margin:0 0 0.4rem;color:#1a1a1a;font-size:1.1rem;font-weight:800;">Ask Michu A.I</h3>
-                    <p style="color:#666;font-size:0.88rem;margin:0 0 1.5rem;line-height:1.5;">Our smart assistant is
-                        currently learning how to help you find the best stays. This feature is coming very soon!</p>
-                    <button onclick="document.getElementById('ai-modal').style.display='none'"
-                        style="width:100%;padding:0.9rem;border-radius:99px;border:none;background:var(--color-primary);color:white;font-weight:700;font-size:0.9rem;cursor:pointer;box-shadow:0 4px 12px rgba(26,96,50,0.2);">Got
-                        It!</button>
-                </div>
-            </div>
-
-            <script>
-                function showAIModal() {
-                    document.getElementById('ai-modal').style.display = 'flex';
-                }
-                function showNotifModal() {
-                    document.getElementById('notif-modal').style.display = 'flex';
-                }
-            </script>
-
-            <!-- NOTIFICATION TRAY: Slide-in drawer (right on desktop, bottom sheet on mobile) -->
-            <div id="notif-modal" onclick="if(event.target===this){window.showNotifModal(false)}" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:10000;backdrop-filter:blur(4px);">
-                <div id="notif-drawer" style="position:absolute;top:0;right:0;height:100%;width:min(400px,100vw);background:white;display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,0.18);animation:slideInRight 0.32s cubic-bezier(0.4,0,0.2,1);">
-
+            <!-- NOTIFICATION TRAY: Slide-in drawer -->
+            <div id="notif-modal" onclick="if(event.target===this){window.showNotifModal(false)}" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:20000;backdrop-filter:blur(3px);">
+                <div id="notif-drawer" style="position:absolute;top:0;right:0;height:100%;width:min(380px,100vw);background:white;display:flex;flex-direction:column;box-shadow:-5px 0 25px rgba(0,0,0,0.1);transition:transform 0.3s ease;">
                     <!-- Header -->
-                    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.4rem 1.5rem 1.2rem;border-bottom:1px solid #f0f0f0;flex-shrink:0;">
-                        <div style="display:flex;align-items:center;gap:0.7rem;">
-                            <div style="width:38px;height:38px;border-radius:50%;background:#f0f7f2;display:flex;align-items:center;justify-content:center;">
-                                <svg width="18" height="18" fill="none" stroke="#1a6032" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-                            </div>
-                            <div>
-                                <div style="font-weight:800;font-size:1rem;color:#111;">Notifications</div>
-                                <div id="notif-count-label" style="font-size:0.72rem;color:#888;margin-top:1px;">No new notifications</div>
-                            </div>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:0.6rem;">
-                            <button id="notif-clear-btn" onclick="window.clearAllNotifications()" style="display:none;padding:0.35rem 0.8rem;border-radius:99px;border:1px solid #e2e8f0;background:white;color:#666;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">Clear all</button>
-                            <button onclick="window.showNotifModal(false)" style="width:34px;height:34px;border-radius:50%;border:1px solid #eee;background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:#666;font-size:1.2rem;line-height:1;transition:all 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">✕</button>
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.5rem;border-bottom:1px solid #f0f0f0;">
+                        <h3 style="margin:0;font-size:1.2rem;font-weight:800;color:#1a1a1a;">Notifications</h3>
+                        <div style="display:flex;align-items:center;gap:0.8rem;">
+                             <button id="notif-clear-btn" onclick="window.clearAllNotifications()" style="display:none;background:none;border:none;color:#ff385c;font-weight:700;font-size:0.85rem;cursor:pointer;">Clear All</button>
+                             <button onclick="window.showNotifModal(false)" style="background:#f5f5f5;border:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;">✕</button>
                         </div>
                     </div>
-
-                    <!-- Scrollable notification list -->
-                    <div id="notif-list-container" style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;padding:0.8rem;display:flex;flex-direction:column;gap:0.6rem;-webkit-overflow-scrolling:touch;">
-                        <div id="notif-empty-state" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:3rem 1rem;gap:1rem;color:#aaa;">
-                            <svg width="52" height="52" fill="none" stroke="#ddd" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-                            <div style="font-weight:700;font-size:0.9rem;color:#bbb;">You're all caught up!</div>
-                            <div style="font-size:0.8rem;color:#ccc;text-align:center;">No new notifications right now.</div>
+                    <!-- List -->
+                    <div id="notif-list-container" style="flex:1;overflow-y:auto;padding:1rem;-webkit-overflow-scrolling:touch;">
+                        <div id="notif-empty-state" style="text-align:center;padding:4rem 1rem;color:#999;">
+                            <div style="font-size:3rem;margin-bottom:1rem;">🔔</div>
+                            <p style="font-weight:700;margin:0;">No notifications yet</p>
+                            <p style="font-size:0.8rem;opacity:0.7;">We'll notify you here when something happens.</p>
                         </div>
                     </div>
-
                 </div>
             </div>
 

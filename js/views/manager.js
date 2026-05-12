@@ -422,22 +422,28 @@ window.router.addRoute('manager', async (container, params) => {
 
     let bookingUnsub = null;
     const syncManagerData = async () => {
-        if (bookingUnsub) bookingUnsub(); // Cleanup old listener
-        
-        // Start Live Listener
-        bookingUnsub = window.db.listenToBookings((data) => {
-            allBookings = data;
-            renderManagerUI();
-        }, uid);
+        try {
+            if (bookingUnsub) bookingUnsub(); // Cleanup old listener
+            
+            // Start Live Listener
+            bookingUnsub = window.db.listenToBookings((data) => {
+                allBookings = data;
+                renderManagerUI();
+            }, uid);
 
-        // Fetch property info (one-time is fine for now, or we could listen to this too)
-        if (userData?.hotelId) {
-            myHotel = await window.db.getPropertyById(userData.hotelId);
-        } else {
-            const props = await window.db.getProperties(uid);
-            myHotel = props[0] || null;
+            // Fetch property info
+            if (userData?.hotelId) {
+                myHotel = await window.db.getPropertyById(userData.hotelId);
+            } else {
+                const props = await window.db.getProperties(uid);
+                myHotel = props[0] || null;
+            }
+        } catch (err) {
+            console.error("Manager Sync Error:", err);
+            // Don't throw, just let it render empty/fallback
+        } finally {
+            renderManagerUI();
         }
-        renderManagerUI();
     };
 
     const renderManagerUI = () => {
