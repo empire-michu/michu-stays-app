@@ -540,7 +540,7 @@ window.router.addRoute('home', async (container, params) => {
                                     </div>
                                     <div style="background:#fff4e5; color:#b45309; padding:0.4rem 0.8rem; border-radius:10px; font-weight:800; font-size:0.75rem;">Hot Pick</div>
                                 </div>
-                                <div class="property-grid">
+                                <div class="property-grid discovery-carousel">
                                     ${finalTrendy.map(p => makeCard(p)).join('')}
                                 </div>
                             </div>`;
@@ -556,7 +556,7 @@ window.router.addRoute('home', async (container, params) => {
                                     </div>
                                     <div style="background:#e6f4ea; color:#1e7e34; padding:0.4rem 0.8rem; border-radius:10px; font-weight:800; font-size:0.75rem;">Just Arrived</div>
                                 </div>
-                                <div class="property-grid">
+                                <div class="property-grid discovery-carousel">
                                     ${newHotels.map(p => makeCard(p)).join('')}
                                 </div>
                                 </div>`; 

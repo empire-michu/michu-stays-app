@@ -241,7 +241,7 @@
 
 @media (max-width: 600px) {
   .property-image-container {
-    height: 200px;
+    height: 170px;
   }
 }
 
@@ -298,6 +298,22 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 0.25rem;
+}
+
+@media (max-width: 600px) {
+  .property-info {
+    padding: 0.8rem;
+  }
+  .property-title {
+    font-size: 1rem;
+  }
+  .property-address {
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+  }
+  .property-price {
+    margin-top: 0.5rem;
+  }
 }
 
 .property-title {

@@ -178,7 +178,27 @@ input:focus, select:focus, textarea:focus {
 @media (max-width: 600px) {
   .property-grid { 
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1.2rem;
+  }
+  
+  /* Horizontal Peek Carousel for Discovery Sections */
+  .discovery-carousel {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory;
+    gap: 1rem !important;
+    padding: 0.5rem 0.2rem 1.5rem 0.2rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin: 0 -1rem;
+    padding-left: 1rem;
+  }
+  .discovery-carousel::-webkit-scrollbar {
+    display: none;
+  }
+  .discovery-carousel .property-card {
+    flex: 0 0 85%;
+    scroll-snap-align: start;
   }
 }
 
