@@ -1726,3 +1726,52 @@ input:focus, select:focus, textarea:focus {
   user-select: none;
   -webkit-user-select: none;
 }
+
+/* ═══════════════════════════════════════════
+   MOBILE HORIZONTAL CAROUSELS (FINAL OVERRIDES)
+   Must be at end of file to win CSS cascade
+   ═══════════════════════════════════════════ */
+@media (max-width: 600px) {
+  /* Discovery Sections: Trendy Stays / New on Michu */
+  .property-grid.discovery-carousel {
+    display: flex !important;
+    grid-template-columns: none !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 1rem !important;
+    padding: 0.5rem 0 1.5rem 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .property-grid.discovery-carousel::-webkit-scrollbar {
+    display: none;
+  }
+  .property-grid.discovery-carousel > .property-card {
+    flex: 0 0 80% !important;
+    min-width: 80% !important;
+    max-width: 80% !important;
+    scroll-snap-align: start;
+  }
+
+  /* Testimonials: Real Stories horizontal carousel */
+  .testimonials-grid {
+    display: flex !important;
+    grid-template-columns: none !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 1rem !important;
+    padding-bottom: 1rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .testimonials-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .testimonials-grid > .testimonial-card {
+    flex: 0 0 85% !important;
+    min-width: 85% !important;
+    scroll-snap-align: start;
+  }
+}
