@@ -198,8 +198,8 @@ class Database {
         await this.createNotification({
             message: '🛎️ New Booking!',
             details: `${newBooking.customerName} booked ${property.title}${newBooking.packageInfo ? ' (Package: ' + newBooking.packageInfo.title + ')' : ''}. Amount: ${newBooking.totalAmount} Birr. Reference: ${referenceCode}`,
-            targetUserId: property.managerId || 'admin', // target manager
-            targetRole: 'admin', // also target all admins
+            targetUserId: property.managerId || null, 
+            targetRole: 'admin', 
             type: 'booking_new',
             link: 'manager',
             params: { tab: 'bookings' }
@@ -245,11 +245,22 @@ class Database {
         this.clearCache('bookings');
 
         // NOTIFY CLIENT
+        let message = '📢 Booking Update';
+        let details = `Your booking for ${booking.propertyTitle} (${booking.referenceCode}) is now: ${status}`;
+        
+        if (status === 'Confirmed') {
+            message = `🎉 Booking Confirmed!`;
+            details = `Your stay at ${booking.propertyTitle} is ready. See you soon!`;
+        } else if (status === 'Denied') {
+            message = `❌ Booking Denied`;
+            details = `We regret to inform you that your booking for ${booking.propertyTitle} was denied.`;
+        }
+
         await this.createNotification({
-            message: '📢 Booking Update',
-            details: `Your booking for ${booking.propertyTitle} (${booking.referenceCode}) is now: ${status}`,
+            message,
+            details,
             targetUserId: booking.customerId,
-            type: 'booking_update',
+            type: status === 'Confirmed' ? 'booking_confirmed' : 'booking_update',
             link: 'profile',
             params: { tab: 'bookings' }
         });
@@ -467,6 +478,8 @@ class Database {
     // ─── NOTIFICATIONS ─────────────────────────────────────────
     async createNotification(data) {
         const payload = {
+            targetUserId: null,
+            targetRole: null,
             ...data,
             createdAt: new Date().toISOString()
         };
@@ -493,31 +506,43 @@ class Database {
 
         // Look for notifications created in the last 24 hours
         const startTime = new Date(Date.now() - 86400000).toISOString();
-        
-        return firestore.collection('notifications')
-            .where('createdAt', '>', startTime)
-            .onSnapshot(snapshot => {
-                const changes = snapshot.docChanges();
-                const filtered = changes
-                    .filter(c => c.type === 'added')
-                    .map(c => ({ id: c.doc.id, ...c.doc.data() }))
-                    .filter(n => {
-                        // Filter for current user:
-                        // 1. Specifically targeted at this user by UID
-                        // 2. Targeted at their role (admin/manager broadcasts)
-                        // 3. No targetRole set = broadcast to all authenticated users
-                        const matchesUser = n.targetUserId === user.uid;
-                        const matchesRole = n.targetRole && n.targetRole === role;
-                        const isGlobalBroadcast = !n.targetUserId && !n.targetRole;
-                        return matchesUser || matchesRole || isGlobalBroadcast;
-                    })
-                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                
-                filtered.forEach(notif => callback(notif));
-            }, err => {
-                if (onError) onError(err);
-                else console.warn('Notification listener error:', err);
+        const seenIds = new Set();
+
+        const handleSnapshot = (snapshot) => {
+            snapshot.docChanges().forEach(change => {
+                if (change.type === 'added') {
+                    const data = change.doc.data();
+                    const id = change.doc.id;
+                    if (!seenIds.has(id)) {
+                        seenIds.add(id);
+                        callback({ id, ...data });
+                    }
+                }
             });
+        };
+
+        const base = firestore.collection('notifications').where('createdAt', '>', startTime);
+        let unsubs = [];
+
+        try {
+            if (role === 'admin') {
+                // Admins can query everything
+                unsubs.push(base.onSnapshot(handleSnapshot, onError));
+            } else {
+                // Targeted queries for privacy rule compliance
+                unsubs.push(base.where('targetUserId', '==', user.uid).onSnapshot(handleSnapshot, onError));
+                if (role) {
+                    unsubs.push(base.where('targetRole', '==', role).onSnapshot(handleSnapshot, onError));
+                }
+                // Global/Broadcast notifications
+                unsubs.push(base.where('targetUserId', '==', null).where('targetRole', '==', null).onSnapshot(handleSnapshot, onError));
+            }
+        } catch (e) {
+            console.warn("Failed to setup notification listeners:", e);
+            if (onError) onError(e);
+        }
+
+        return () => unsubs.forEach(u => u && u());
     }
 
     // ─── PUSH NOTIFICATIONS (FCM) ───────────────────────────

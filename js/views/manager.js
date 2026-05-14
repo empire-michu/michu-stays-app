@@ -345,14 +345,6 @@ window.router.addRoute('manager', async (container, params) => {
                 console.warn("Skipping email: No guest email found for booking", id);
             }
 
-            // Send global broadcast notification
-            await window.db.createNotification({
-                type: 'booking_confirmed',
-                message: `🎉 Booking Confirmed at ${myHotel?.title || 'a property'}!`,
-                details: `Guest ${booking?.customerName || ''} is ready for their stay.`,
-                hotelId: myHotel?.id
-            });
-
             // Deduct available room instantly
             if (myHotel && myHotel.id) {
                 const current = myHotel.availableRooms ?? myHotel.totalRooms ?? 0;
@@ -371,15 +363,6 @@ window.router.addRoute('manager', async (container, params) => {
         try {
             await window.db.updateBookingStatus(id, 'Denied');
             
-            // Send global broadcast notification
-            const booking = allBookings.find(b => b.id === id);
-            await window.db.createNotification({
-                type: 'booking_denied',
-                message: `❌ Booking Denied at ${myHotel?.title || 'a property'}!`,
-                details: `Guest ${booking?.customerName || ''}'s stay request was denied.`,
-                hotelId: myHotel?.id
-            });
-
             window.showAlert("❌ Booking Denied! The guest has been notified.");
             syncManagerData(); 
         } catch (e) {

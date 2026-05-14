@@ -444,11 +444,18 @@ const renderNotifList = () => {
     const list = document.getElementById('notif-list-container');
     if (!list) return;
 
-    const displayList = notifFilterNewOnly ? notifications.filter(n => n.isNew) : notifications;
+    // Filter for last 24 hours only
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const recentNotifications = notifications.filter(n => {
+        const time = n.createdAt ? new Date(n.createdAt).getTime() : Date.now();
+        return time > oneDayAgo;
+    });
+
+    const displayList = notifFilterNewOnly ? recentNotifications.filter(n => n.isNew) : recentNotifications;
 
     // Show/hide Clear All button
     const clearBtn = document.getElementById('notif-clear-btn');
-    if (clearBtn) clearBtn.style.display = notifications.length > 0 ? 'block' : 'none';
+    if (clearBtn) clearBtn.style.display = recentNotifications.length > 0 ? 'block' : 'none';
 
     if (displayList.length === 0) {
         list.innerHTML = `
@@ -521,9 +528,15 @@ window.showPushNotification = ({ message, details, createdAt, link, params }) =>
     setTimeout(close, 8000);
 };
 
-window.showNotifModal = (open = true) => {
+window.showNotifModal = (open) => {
     const modal = document.getElementById('notif-modal');
     if (!modal) return;
+
+    // Toggle logic if no argument provided
+    if (open === undefined) {
+        open = (modal.style.display !== 'flex');
+    }
+
     if (open) {
         modal.style.display = 'flex';
         unreadCount = 0;
@@ -532,6 +545,8 @@ window.showNotifModal = (open = true) => {
         renderNotifList();
     } else {
         modal.style.display = 'none';
+        // Mark all as read when closing the modal
+        notifications.forEach(n => n.isNew = false);
     }
 };
 

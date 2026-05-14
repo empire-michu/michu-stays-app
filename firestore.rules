@@ -60,9 +60,14 @@ service cloud.firestore {
     }
 
     // ─── NOTIFICATIONS ────────────────────────────────────────────────────
-    // Only authenticated users can read notifications
     match /notifications/{notifId} {
-      allow read:   if isSignedIn();
+      allow read: if isSignedIn() && (
+        resource.data.targetUserId == request.auth.uid ||
+        (resource.data.targetRole == 'admin' && isAdmin()) ||
+        (resource.data.targetRole == 'manager' && isManager()) ||
+        (!resource.data.targetUserId && !resource.data.targetRole) || // global broadcast
+        isAdmin() // admins can read all
+      );
       allow create: if isSignedIn();
       allow update: if isAdmin();
       allow delete: if isAdmin();
