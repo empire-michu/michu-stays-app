@@ -178,26 +178,49 @@ input:focus, select:focus, textarea:focus {
 @media (max-width: 600px) {
   .property-grid { 
     grid-template-columns: 1fr;
-    gap: 1.2rem;
+    gap: 1rem;
   }
   
   /* Horizontal Peek Carousel for Discovery Sections */
-  .discovery-carousel {
+  .property-grid.discovery-carousel {
     display: flex !important;
+    grid-template-columns: none !important;
     overflow-x: auto !important;
     scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
     gap: 1rem !important;
-    padding: 0.5rem 0.2rem 1.5rem 0.2rem;
+    padding: 0.5rem 0 1.5rem 0;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    margin: 0 -1rem;
-    padding-left: 1rem;
   }
-  .discovery-carousel::-webkit-scrollbar {
+  .property-grid.discovery-carousel::-webkit-scrollbar {
     display: none;
   }
-  .discovery-carousel .property-card {
+  .property-grid.discovery-carousel > .property-card {
+    flex: 0 0 80%;
+    min-width: 80%;
+    max-width: 80%;
+    scroll-snap-align: start;
+  }
+
+  /* Horizontal Testimonials Carousel */
+  .testimonials-grid {
+    display: flex !important;
+    grid-template-columns: none !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 1rem !important;
+    padding-bottom: 1rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .testimonials-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .testimonials-grid > .testimonial-card {
     flex: 0 0 85%;
+    min-width: 85%;
     scroll-snap-align: start;
   }
 }
@@ -1087,6 +1110,7 @@ input:focus, select:focus, textarea:focus {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
+  /* Note: On smaller mobile, testimonials-grid is overridden to flex carousel above */
 }
 
 @media (max-width: 600px) {
