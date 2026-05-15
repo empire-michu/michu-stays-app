@@ -198,24 +198,26 @@ class Database {
         await this.createNotification({
             message: '🛎️ New Booking!',
             details: `${newBooking.customerName} booked ${property.title}${newBooking.packageInfo ? ' (Package: ' + newBooking.packageInfo.title + ')' : ''}. Amount: ${newBooking.totalAmount} Birr. Reference: ${referenceCode}`,
-            targetUserId: property.managerId || null, 
-            targetRole: 'admin', 
-            type: 'booking_new',
-            link: 'manager',
+            targetRole: 'admin',
+            category: 'bookings',
+            status: 'confirmed',
+            link: 'admin_panel',
             params: { tab: 'bookings' }
         });
 
-        // SEND HARD NOTIFICATION (PUSH) - MUST await to prevent fetch from being aborted
-        // Pass the guest's own UID so they also receive a push confirmation
-        await this.triggerPushNotification(
-            propertyId,
-            '🛎️ New Booking!',
-            `${newBooking.customerName} booked ${property.title}. Ref: ${referenceCode}`,
-            user?.uid || null
-        );
+        if (property.managerId) {
+            await this.createNotification({
+                message: '🛎️ New Booking!',
+                details: `${newBooking.customerName} booked ${property.title}. Please verify the payment.`,
+                targetUserId: property.managerId,
+                category: 'bookings',
+                status: 'confirmed',
+                link: 'manager_panel',
+                params: { tab: 'bookings' }
+            });
+        }
 
         this.clearCache('bookings');
-        this.clearCache('properties'); // Just in case rooms changed
         return { id: ref.id, ...newBooking };
     }
 
@@ -533,6 +535,9 @@ class Database {
         const user = window.auth?.currentUser;
         const role = window.auth?.role || window.auth?.userData?.role;
         if (!user) return;
+
+        // Run background cleanup (7-day rule & 100-item limit)
+        this.cleanupOldNotifications(user.uid);
 
         // CRITICAL: We only show popups for notifications created AFTER the app loaded.
         // This prevents old notifications from popping up every time you refresh.
@@ -1013,6 +1018,58 @@ class Database {
     async getGuestChatThreads(guestId) {
         const snap = await firestore.collection('chatThreads').where('guestId', '==', guestId).get();
         return snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => (b.lastMessageAt||'') > (a.lastMessageAt||'') ? 1 : -1);
+    }
+    async createNotification(notif) {
+        const payload = {
+            message: notif.message,
+            details: notif.details || '',
+            createdAt: new Date().toISOString(),
+            isRead: false,
+            targetUserId: notif.targetUserId || null,
+            targetRole: notif.targetRole || null,
+            category: notif.category || 'system',
+            status: notif.status || 'info',
+            link: notif.link || null,
+            params: notif.params || null,
+            actions: notif.actions || []
+        };
+        const ref = await firestore.collection('notifications').add(payload);
+        return { id: ref.id, ...payload };
+    }
+
+    async cleanupOldNotifications(userId) {
+        if (!userId) return;
+        const sevenDaysAgo = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000)).toISOString();
+        
+        try {
+            // 1. Delete notifications older than 7 days
+            const oldOnes = await firestore.collection('notifications')
+                .where('targetUserId', '==', userId)
+                .where('createdAt', '<', sevenDaysAgo)
+                .get();
+            
+            if (!oldOnes.empty) {
+                const batch = firestore.batch();
+                oldOnes.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+            }
+            
+            // 2. Enforce 100-notification limit (Keep only the latest 100)
+            const allNotifs = await firestore.collection('notifications')
+                .where('targetUserId', '==', userId)
+                .orderBy('createdAt', 'desc')
+                .get();
+            
+            if (allNotifs.size > 100) {
+                const batch = firestore.batch();
+                allNotifs.docs.slice(100).forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+            }
+            
+            console.log(`🧹 Notification cleanup complete for user ${userId}`);
+        } catch(e) {
+            console.warn("Notification cleanup issue (may need index):", e.message);
+        }
     }
 }
 

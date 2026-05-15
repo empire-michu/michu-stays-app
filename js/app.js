@@ -402,6 +402,9 @@ let notifUnsub = null;
 let notifCategoryFilter = 'all';
 let notifSearchQuery = '';
 let unreadCount = 0;
+let showAllNotifs = false; // For "See older" logic
+const NOTIF_INITIAL_LIMIT = 7;
+
 
 window.setNotifFilter = (filter) => {
     notifCategoryFilter = filter;
@@ -470,6 +473,13 @@ const renderNotifList = () => {
             (n.message || '').toLowerCase().includes(notifSearchQuery) || 
             (n.details || '').toLowerCase().includes(notifSearchQuery)
         );
+    }
+
+    const totalCount = displayList.length;
+    const hasMore = totalCount > NOTIF_INITIAL_LIMIT;
+    
+    if (hasMore && !showAllNotifs) {
+        displayList = displayList.slice(0, NOTIF_INITIAL_LIMIT);
     }
 
     if (displayList.length === 0) {
@@ -546,7 +556,23 @@ const renderNotifList = () => {
             });
         }
     });
+
+    if (hasMore && !showAllNotifs) {
+        html += `
+            <div style="padding:1.5rem; text-align:center; background:white;">
+                <button onclick="window.expandNotifications()" style="width:100%; padding:0.8rem; border-radius:12px; border:1.5px solid #f1f5f9; background:#f8fafc; color:#1e73e8; font-weight:700; font-size:0.85rem; cursor:pointer; transition:all 0.2s;">
+                    See ${totalCount - NOTIF_INITIAL_LIMIT} older notifications
+                </button>
+            </div>
+        `;
+    }
+
     list.innerHTML = html;
+};
+
+window.expandNotifications = () => {
+    showAllNotifs = true;
+    renderNotifList();
 };
 
 window.updateNotifPanelOnly = (notif) => {
