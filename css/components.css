@@ -563,7 +563,7 @@
         scroll-snap-type: x mandatory;
     }
     .mobile-package-carousel > div {
-        flex: 0 0 76% !important; /* Slightly smaller than main cards (80%) */
+        flex: 0 0 70% !important; /* Smaller than main cards for distinct peek */
         scroll-snap-align: center;
     }
     .mobile-package-carousel::-webkit-scrollbar {
@@ -578,10 +578,10 @@
 @media (max-width: 768px) {
     /* Sidebar booking card (Reserve Now) — compact on mobile */
     .sidebar-card {
-        padding: 1rem 1rem !important;
+        padding: 0.8rem 1rem !important;
         border-radius: 18px !important;
         box-shadow: 0 8px 20px rgba(0,0,0,0.04) !important;
-        width: 94% !important;
+        width: 75% !important;
         margin-left: auto !important;
         margin-right: auto !important;
     }
@@ -613,10 +613,10 @@
 
     /* Special Packages section — compact on mobile */
     .mobile-order-4 {
-        padding: 1.5rem !important;
+        padding: 1.2rem !important;
         border-radius: 22px !important;
         margin-bottom: 2rem !important;
-        width: 96% !important;
+        width: 75% !important;
         margin-left: auto !important;
         margin-right: auto !important;
     }
