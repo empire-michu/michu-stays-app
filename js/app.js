@@ -607,6 +607,11 @@ window.showPushNotification = ({ message, details, createdAt, link, params, cate
     const container = document.createElement('div');
     container.className = 'michu-push-toast';
     container.style.top = '20px';
+    container.style.width = '300px'; // Smaller width
+    container.style.background = 'white'; // White background
+    container.style.color = '#1e293b'; // Dark text
+    container.style.border = '1px solid #e2e8f0';
+    container.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
     
     container.innerHTML = `
         <style>
@@ -616,13 +621,13 @@ window.showPushNotification = ({ message, details, createdAt, link, params, cate
             .michu-push-toast:hover .toast-close-btn { opacity:1; }
         </style>
         <button class="toast-close-btn" onclick="event.stopPropagation(); this.parentElement.closeToast();">✕</button>
-        <div style="width:36px;height:36px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
-            <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
+            <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         </div>
         <div style="flex:1; min-width:0;">
-            <div style="font-weight:800;color:#1e293b;font-size:0.9rem;margin-bottom:0.15rem; padding-right:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${message || 'New notification'}</div>
-            <div style="color:#64748b;font-size:0.8rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${details || ''}</div>
-            <div style="color:#94a3b8;font-size:0.65rem;margin-top:0.3rem;">Just now</div>
+            <div style="font-weight:800;color:#1e293b;font-size:0.85rem;margin-bottom:0.15rem; padding-right:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${message || 'New notification'}</div>
+            <div style="color:#64748b;font-size:0.75rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${details || ''}</div>
+            <div style="color:#94a3b8;font-size:0.6rem;margin-top:0.3rem;">Just now</div>
         </div>`;
     
     // Slide in from top
