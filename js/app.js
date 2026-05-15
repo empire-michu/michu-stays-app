@@ -519,17 +519,20 @@ const renderNotifList = () => {
             html += `<div class="notif-group-header">${label}</div>`;
             groups[label].forEach(n => {
                 const s = statusMap[n.status] || statusMap.info;
+                const isUnread = !n.isRead;
                 html += `
-                <div class="notif-item-pro ${n.isRead ? '' : 'unread'}" onclick="window.router.navigate('${n.link || 'home'}', ${JSON.stringify(n.params || {}).replace(/"/g, '&quot;')}); window.showNotifModal(false);">
-                    ${n.isRead ? '' : '<div class="notif-unread-dot"></div>'}
+                <div class="notif-item-pro ${isUnread ? 'unread' : ''}" 
+                     onclick="window.router.navigate('${n.link || 'home'}', ${JSON.stringify(n.params || {}).replace(/"/g, '&quot;')}); window.showNotifModal(false);"
+                     style="background: white !important; color: #1e293b !important; border-bottom: 1px solid #f1f5f9 !important;">
+                    ${isUnread ? '<div class="notif-unread-dot"></div>' : ''}
                     <div class="notif-avatar ${s.class}">${s.icon}</div>
                     <div class="notif-content-pro">
                         <div class="notif-title-row-pro">
-                            <div class="notif-title-pro">${n.message}</div>
+                            <div class="notif-title-pro" style="color: #0f172a !important; font-weight: 700 !important;">${n.message}</div>
                             <div class="notif-status-tag ${s.class}">${s.label}</div>
                         </div>
-                        <div class="notif-subtitle-pro">${n.details || ''}</div>
-                        <div class="notif-meta-pro">${relativeTime(n.createdAt)}</div>
+                        <div class="notif-subtitle-pro" style="color: #475569 !important;">${n.details || ''}</div>
+                        <div class="notif-meta-pro" style="color: #94a3b8 !important;">${relativeTime(n.createdAt)}</div>
                         
                         ${n.actions && n.actions.length > 0 ? `
                             <div class="notif-actions-pro">
