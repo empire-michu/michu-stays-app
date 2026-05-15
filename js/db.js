@@ -1098,32 +1098,33 @@ class Database {
     }
 
     async markAllNotificationsAsRead(userId, role = null) {
-        let query = firestore.collection('notifications')
-            .where('isRead', '==', false);
-        
-        // Fetch personal and role-based separately or use an OR-like approach
-        const personalSnap = await query.where('targetUserId', '==', userId).get();
-        let roleSnap = { empty: true, docs: [] };
-        if (role && role !== 'customer') {
-            roleSnap = await query.where('targetRole', '==', role).get();
+        // Broadly fetch all notifications that might belong to this user
+        const personalSnap = await firestore.collection('notifications').where('targetUserId', '==', userId).get();
+        const allRoleSnap = await firestore.collection('notifications').where('targetRole', '==', 'all').get();
+        let specificRoleSnap = { empty: true, docs: [] };
+        if (role) {
+            specificRoleSnap = await firestore.collection('notifications').where('targetRole', '==', role).get();
         }
-        
-        const allDocs = [...personalSnap.docs, ...roleSnap.docs];
-        if (allDocs.length > 0) {
+
+        const allDocs = [...personalSnap.docs, ...allRoleSnap.docs, ...specificRoleSnap.docs];
+        const unreadDocs = allDocs.filter(d => !d.data().isRead);
+
+        if (unreadDocs.length > 0) {
             const batch = firestore.batch();
-            allDocs.forEach(doc => batch.update(doc.ref, { isRead: true }));
+            unreadDocs.forEach(doc => batch.update(doc.ref, { isRead: true }));
             await batch.commit();
         }
     }
 
     async deleteAllNotifications(userId, role = null) {
         const personalSnap = await firestore.collection('notifications').where('targetUserId', '==', userId).get();
-        let roleSnap = { empty: true, docs: [] };
-        if (role && role !== 'customer') {
-            roleSnap = await firestore.collection('notifications').where('targetRole', '==', role).get();
+        const allRoleSnap = await firestore.collection('notifications').where('targetRole', '==', 'all').get();
+        let specificRoleSnap = { empty: true, docs: [] };
+        if (role) {
+            specificRoleSnap = await firestore.collection('notifications').where('targetRole', '==', role).get();
         }
 
-        const allDocs = [...personalSnap.docs, ...roleSnap.docs];
+        const allDocs = [...personalSnap.docs, ...allRoleSnap.docs, ...specificRoleSnap.docs];
         if (allDocs.length > 0) {
             const batch = firestore.batch();
             allDocs.forEach(doc => batch.delete(doc.ref));
