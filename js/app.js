@@ -475,28 +475,19 @@ const renderNotifList = () => {
         return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     };
 
-    list.innerHTML = displayList.map((n, i) => {
-        const detailsId = `notif-details-${i}`;
-        const hasDetails = !!n.details;
-        
-        return `
-        <div class="notif-item" onclick="if(event.target.closest('.notif-toggle-btn')) return; window.router.navigate('${n.link || 'home'}', ${JSON.stringify(n.params || {}).replace(/"/g, '&quot;')}); window.showNotifModal(false);"
+    list.innerHTML = displayList.map(n => `
+        <div class="notif-item" onclick="window.router.navigate('${n.link || 'home'}', ${JSON.stringify(n.params || {}).replace(/"/g, '&quot;')}); window.showNotifModal(false);"
             style="padding:1rem;background:white;border-radius:12px;border:1px solid ${n.isNew ? '#dbeafe' : '#f1f5f9'};cursor:pointer;transition:all 0.18s;display:flex;gap:0.8rem;align-items:flex-start;margin-bottom:0.4rem;${n.isNew ? 'border-left:3px solid var(--color-primary);' : ''}">
             <div style="width:34px;height:34px;border-radius:50%;background:${n.isNew ? 'var(--color-primary)' : '#f1f5f9'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <svg width="15" height="15" fill="none" stroke="${n.isNew ? 'white' : '#64748b'}" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
             </div>
             <div style="flex:1;min-width:0;">
                 <div style="font-weight:700;color:#1e293b;font-size:0.85rem;margin-bottom:0.2rem;">${n.message || ''}</div>
-                <div id="${detailsId}" style="font-size:0.78rem;color:#64748b;line-height:1.4;max-height:40px;overflow:hidden;transition:max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);">${n.details || ''}</div>
-                ${hasDetails ? `
-                    <button class="notif-toggle-btn" style="background:none;border:none;color:var(--color-primary);font-size:0.7rem;font-weight:800;cursor:pointer;padding:0;margin-top:0.3rem;display:flex;align-items:center;gap:3px;" 
-                            onclick="event.stopPropagation(); const d=document.getElementById('${detailsId}'); const isOpening=d.style.maxHeight==='40px' || !d.style.maxHeight; d.style.maxHeight=isOpening?'300px':'40px'; this.innerText=isOpening?'Hide details':'See details';">See details</button>
-                ` : ''}
+                <div style="font-size:0.78rem;color:#64748b;line-height:1.4;">${n.details || ''}</div>
                 <div style="font-size:0.68rem;color:#94a3b8;margin-top:0.3rem;">${relativeTime(n.createdAt)}</div>
             </div>
         </div>
-    `;
-    }).join('');
+    `).join('');
 };
 
 window.showPushNotification = ({ message, details, createdAt, link, params }) => {
@@ -518,56 +509,23 @@ window.showPushNotification = ({ message, details, createdAt, link, params }) =>
     notifications.unshift({ message, details, createdAt, link, params, isNew: true });
     renderNotifList();
 
-    // Calculate stack offset to prevent "black shadow" overlapping
-    const existingToasts = document.querySelectorAll('.michu-push-toast');
-    const offset = 20 + (existingToasts.length * 105);
-
     // Show toast popup
     const container = document.createElement('div');
-    container.className = 'michu-push-toast';
-    container.style.cssText = `position:fixed; top:${offset}px; right:20px; width:330px; background:white; border-left:5px solid var(--color-primary); box-shadow:0 15px 40px rgba(0,0,0,0.15); border-radius:20px; padding:1.25rem; z-index:20000; display:flex; gap:1rem; animation:_pushIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275); cursor:pointer; max-width:calc(100vw - 2rem); transition: top 0.3s ease;`;
-    
-    const hasDetails = !!details;
-    
+    container.style.cssText = `position:fixed;top:20px;right:20px;width:330px;background:white;border-left:5px solid var(--color-primary);box-shadow:0 20px 50px rgba(0,0,0,0.2);border-radius:20px;padding:1.25rem;z-index:20000;display:flex;gap:1rem;animation:_pushIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275);cursor:pointer;max-width:calc(100vw - 2rem);`;
     container.innerHTML = `
-        <style>
-            @keyframes _pushIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}} 
-            @keyframes _pushOut{from{transform:translateX(0);opacity:1}to{transform:translateX(120%);opacity:0}}
-            .toast-close-btn { position:absolute; top:8px; right:8px; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#f1f5f9; color:#94a3b8; border:none; cursor:pointer; font-size:14px; opacity:0; transition:opacity 0.2s; }
-            .michu-push-toast:hover .toast-close-btn { opacity:1; }
-            .toast-expand-btn { background:none; border:none; color:var(--color-primary); font-size:0.75rem; font-weight:800; cursor:pointer; padding:0; margin-top:0.4rem; display:flex; align-items:center; gap:3px; }
-            .toast-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; color:#555; font-size:0.82rem; line-height:1.5; }
-            .toast-details.open { max-height: 200px; margin-top:0.4rem; }
-        </style>
-        <button class="toast-close-btn" onclick="event.stopPropagation(); this.parentElement.closeToast();">✕</button>
-        <div style="width:36px;height:36px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
+        <style>@keyframes _pushIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}} @keyframes _pushOut{from{transform:translateX(0);opacity:1}to{transform:translateX(120%);opacity:0}}</style>
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         </div>
-        <div style="flex:1; min-width:0;">
-            <div style="font-weight:800;color:var(--color-primary);font-size:0.95rem;margin-bottom:0.2rem; padding-right:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${message || 'New notification'}</div>
-            <div id="toast-details-content" class="toast-details">
-                ${details || ''}
-            </div>
-            ${hasDetails ? `<button class="toast-expand-btn" id="toast-toggle-btn" onclick="event.stopPropagation(); this.previousElementSibling.classList.toggle('open'); this.innerText = this.previousElementSibling.classList.contains('open') ? 'Hide Details' : 'See Details';">See Details</button>` : ''}
+        <div style="flex:1;">
+            <div style="font-weight:800;color:var(--color-primary);font-size:0.95rem;margin-bottom:0.3rem;">${message || 'New notification'}</div>
+            <div style="color:#555;font-size:0.82rem;line-height:1.5;">${details || ''}</div>
             <div style="color:#aaa;font-size:0.7rem;margin-top:0.4rem;">Just now</div>
         </div>`;
-    
     document.body.appendChild(container);
-    
-    container.closeToast = () => { 
-        container.style.animation = '_pushOut 0.4s ease forwards'; 
-        setTimeout(() => {
-            container.remove();
-            // Re-stack remaining toasts
-            const remaining = document.querySelectorAll('.michu-push-toast');
-            remaining.forEach((t, i) => {
-                t.style.top = (20 + (i * 105)) + 'px';
-            });
-        }, 400); 
-    };
-    
-    container.onclick = () => { if (link) window.router.navigate(link, params || {}); container.closeToast(); };
-    setTimeout(() => { if (container.parentElement) container.closeToast(); }, 12000); 
+    const close = () => { container.style.animation = '_pushOut 0.4s ease forwards'; setTimeout(() => container.remove(), 400); };
+    container.onclick = () => { if (link) window.router.navigate(link, params || {}); close(); };
+    setTimeout(close, 8000);
 };
 
 window.showNotifModal = (open) => {
