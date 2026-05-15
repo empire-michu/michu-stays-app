@@ -506,7 +506,15 @@ class Database {
 
         // Look for notifications created in the last 24 hours
         const startTime = new Date(Date.now() - 86400000).toISOString();
+        
+        // Load seen IDs from localStorage to prevent duplicates across refreshes
         const seenIds = new Set();
+        try {
+            const stored = localStorage.getItem('michu_seen_notifs');
+            if (stored) {
+                JSON.parse(stored).forEach(id => seenIds.add(id));
+            }
+        } catch(e) { console.warn("Failed to load seen notifications:", e); }
 
         const handleSnapshot = (snapshot) => {
             snapshot.docChanges().forEach(change => {
@@ -515,6 +523,12 @@ class Database {
                     const id = change.doc.id;
                     if (!seenIds.has(id)) {
                         seenIds.add(id);
+                        // Persist seen IDs (keep last 100 to avoid localStorage bloat)
+                        try {
+                            const idsToSave = Array.from(seenIds).slice(-100);
+                            localStorage.setItem('michu_seen_notifs', JSON.stringify(idsToSave));
+                        } catch(e) {}
+                        
                         callback({ id, ...data });
                     }
                 }
