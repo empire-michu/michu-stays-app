@@ -1,3 +1,7 @@
+.filter-mobile-toggle {
+    display: none;
+}
+
 /* Main Search Bar */
 .search-container {
   display: flex;
@@ -700,11 +704,11 @@
     height: 24px;
     border-radius: 50%;
     background: white;
-    border: 3px solid var(--color-primary);
-    box-shadow: 0 2px 8px rgba(11, 110, 79, 0.3);
+    border: 3px solid var(--color-secondary);
+    box-shadow: 0 2px 10px rgba(244, 180, 0, 0.3);
     cursor: pointer;
     pointer-events: auto;
-    transition: box-shadow 0.2s, transform 0.2s;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .price-range-dual input[type="range"]::-webkit-slider-thumb:hover {
@@ -722,8 +726,8 @@
     height: 24px;
     border-radius: 50%;
     background: white;
-    border: 3px solid var(--color-primary);
-    box-shadow: 0 2px 8px rgba(11, 110, 79, 0.3);
+    border: 3px solid var(--color-secondary);
+    box-shadow: 0 2px 10px rgba(244, 180, 0, 0.3);
     cursor: pointer;
     pointer-events: auto;
 }

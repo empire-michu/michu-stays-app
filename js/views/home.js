@@ -411,7 +411,7 @@ window.router.addRoute('home', async (container, params) => {
             <!-- Main Layout with Sidebar -->
             <div class="main-layout" style="margin-top:2rem;">
                 <!-- Filter Toggle for Mobile -->
-                <button class="filter-mobile-toggle" onclick="document.querySelector('.filters-sidebar').classList.toggle('active')" style="display:none; width:100%; padding:1rem; background:white; border:1px solid #eee; border-radius:12px; margin-bottom:1rem; font-weight:700; align-items:center; justify-content:center; gap:0.5rem;">
+                <button class="filter-mobile-toggle" onclick="document.querySelector('.filters-sidebar').classList.toggle('active')">
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 4h18M6 10h12M9 16h6"></path></svg>
                     <span>Filter Stays</span>
                 </button>
