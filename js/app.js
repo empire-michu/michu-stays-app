@@ -900,8 +900,16 @@ window.applyCrop = function() {
     }
 };
 
-window.startNotifications = () => {
+window.startNotifications = async () => {
     if (notifUnsub) return; // already listening
+
+    // Wait for auth to be truly ready with role data (up to 5 seconds)
+    let retries = 25;
+    while (!window.auth?.userData?.role && retries > 0) {
+        await new Promise(r => setTimeout(r, 200));
+        retries--;
+    }
+
     if (window.db && window.db.listenForNotifications) {
         try {
             notifUnsub = window.db.listenForNotifications((notif) => {
