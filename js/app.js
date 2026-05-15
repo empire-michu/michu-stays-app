@@ -568,7 +568,6 @@ window.showPushNotification = ({ message, details, createdAt, link, params, cate
     const updateToastDeck = () => {
         const all = document.querySelectorAll('.michu-push-toast');
         if (all.length > 0 && all[0].dataset.expanded === "true") {
-            // If already expanded, just ensure vertical spacing is correct
             all.forEach((t, i) => {
                 t.style.top = (20 + (i * 95)) + 'px';
             });
@@ -577,7 +576,7 @@ window.showPushNotification = ({ message, details, createdAt, link, params, cate
 
         const toasts = Array.from(all).reverse();
         toasts.forEach((t, i) => {
-            t.className = 'michu-push-toast'; // reset
+            t.className = 'michu-push-toast';
             if (i === 0) {
                 t.style.top = '20px';
                 t.style.zIndex = '20000';
@@ -592,8 +591,10 @@ window.showPushNotification = ({ message, details, createdAt, link, params, cate
                 t.style.top = '20px';
             }
             
-            // Add/update counter on top toast
+            // Add/update counter and "Dismiss all" on top toast
             let badge = t.querySelector('.toast-badge-count');
+            let dismissAll = t.querySelector('.toast-dismiss-all');
+
             if (i === 0 && toasts.length > 1) {
                 if (!badge) {
                     badge = document.createElement('div');
@@ -601,9 +602,30 @@ window.showPushNotification = ({ message, details, createdAt, link, params, cate
                     t.appendChild(badge);
                 }
                 badge.textContent = `+${toasts.length - 1}`;
-            } else if (badge) {
-                badge.remove();
+
+                if (!dismissAll) {
+                    dismissAll = document.createElement('button');
+                    dismissAll.className = 'toast-dismiss-all';
+                    dismissAll.style.cssText = 'position:absolute; bottom:8px; right:12px; background:none; border:none; color:var(--color-primary); font-size:10px; font-weight:800; cursor:pointer; padding:4px; opacity:0.8;';
+                    dismissAll.innerText = 'Dismiss all';
+                    dismissAll.onclick = (e) => {
+                        e.stopPropagation();
+                        window.dismissAllToasts();
+                    };
+                    t.appendChild(dismissAll);
+                }
+            } else {
+                if (badge) badge.remove();
+                if (dismissAll) dismissAll.remove();
             }
+        });
+    };
+
+    window.dismissAllToasts = () => {
+        const all = document.querySelectorAll('.michu-push-toast');
+        all.forEach(t => {
+            t.style.animation = '_pushOut 0.4s ease forwards';
+            setTimeout(() => t.remove(), 400);
         });
     };
 
