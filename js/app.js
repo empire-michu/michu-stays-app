@@ -532,7 +532,7 @@ const renderNotifList = () => {
                 const isUnread = !n.isRead;
                 html += `
                 <div class="notif-item-pro ${isUnread ? 'unread' : ''}" 
-                     onclick="window.router.navigate('${n.link || 'home'}', ${JSON.stringify(n.params || {}).replace(/"/g, '&quot;')}); window.showNotifModal(false);"
+                     onclick="window.handleNotifClick('${n.id}')"
                      style="background: white !important; color: #1e293b !important; border-bottom: 1px solid #f1f5f9 !important;">
                     ${isUnread ? '<div class="notif-unread-dot"></div>' : ''}
                     <div class="notif-avatar ${s.class}">${s.icon}</div>
@@ -546,8 +546,8 @@ const renderNotifList = () => {
                         
                         ${n.actions && n.actions.length > 0 ? `
                             <div class="notif-actions-pro">
-                                ${n.actions.map(act => `
-                                    <button class="notif-btn-cta" onclick="event.stopPropagation(); window.router.navigate('${act.link}', ${JSON.stringify(act.params || {})}); window.showNotifModal(false);">${act.label}</button>
+                                ${n.actions.map((act, i) => `
+                                    <button class="notif-btn-cta" onclick="event.stopPropagation(); window.handleNotifAction('${n.id}', ${i})">${act.label}</button>
                                 `).join('')}
                             </div>
                         ` : ''}
@@ -573,6 +573,39 @@ const renderNotifList = () => {
 window.expandNotifications = () => {
     showAllNotifs = true;
     renderNotifList();
+};
+
+window.handleNotifClick = (notifId) => {
+    const n = notifications.find(notif => notif.id === notifId);
+    if (!n) return;
+
+    // Navigate to the intended destination
+    if (n.link) {
+        window.router.navigate(n.link, n.params || {});
+    } else {
+        window.router.navigate('home');
+    }
+
+    // Close the panel
+    window.showNotifModal(false);
+
+    // Mark as read locally and in DB
+    if (!n.isRead) {
+        n.isRead = true;
+        if (unreadCount > 0) unreadCount--;
+        updateNotifBadge();
+        renderNotifList();
+        window.db.markNotificationAsRead(n.id).catch(e => console.warn("Failed to mark read on server:", e));
+    }
+};
+
+window.handleNotifAction = (notifId, actionIndex) => {
+    const n = notifications.find(notif => notif.id === notifId);
+    if (!n || !n.actions || !n.actions[actionIndex]) return;
+
+    const act = n.actions[actionIndex];
+    window.router.navigate(act.link, act.params || {});
+    window.showNotifModal(false);
 };
 
 window.updateNotifPanelOnly = (notif) => {

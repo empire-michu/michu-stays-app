@@ -542,8 +542,8 @@ class Database {
         // This prevents old notifications from popping up every time you refresh.
         const sessionStartTime = Date.now(); 
         
-        // However, we still fetch the last 24 hours so the panel shows recent history.
-        const historyStartTime = new Date(Date.now() - 86400000).toISOString();
+        // Fetch the last 7 days of history to ensure users don't miss anything.
+        const historyStartTime = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000)).toISOString();
         const seenIds = new Set();
 
         const handleSnapshot = (snapshot) => {
@@ -559,9 +559,6 @@ class Database {
                         if (createdAt >= sessionStartTime) {
                             callback({ id, ...data });
                         } else {
-                            // Still update the local UI/Panel with the historical data
-                            // but do NOT trigger the popup.
-                            // (We could pass a flag here if the callback handles both)
                             if (window.updateNotifPanelOnly) window.updateNotifPanelOnly({ id, ...data });
                         }
                     }
@@ -574,18 +571,25 @@ class Database {
 
         try {
             if (role === 'admin') {
-                // Admins see everything, but filtered by time above
                 unsubs.push(base.onSnapshot(handleSnapshot, onError));
             } else {
-                // STRICT PRIVACY: Only fetch notifications where the user is the explicit target.
+                // 1. Personal Notifications
                 unsubs.push(base.where('targetUserId', '==', user.uid).onSnapshot(handleSnapshot, onError));
                 
-                // If they have a role (Manager), fetch role-based alerts (e.g. "New Booking for Manager")
+                // 2. Role-based Alerts (Manager/etc)
                 if (role && role !== 'customer') {
                     unsubs.push(base.where('targetRole', '==', role).onSnapshot(handleSnapshot, onError));
                 }
                 
-                // Global announcements are handled by a separate collection/mechanism to keep personal alerts private.
+                // 3. Global Announcements (To all users or specifically to customers)
+                unsubs.push(base.where('targetRole', '==', 'all').onSnapshot(handleSnapshot, onError));
+                
+                if (role === 'customer') {
+                    unsubs.push(base.where('targetRole', '==', 'customer').onSnapshot(handleSnapshot, onError));
+                }
+                
+                // 4. Fallback for untargeted system alerts
+                unsubs.push(base.where('targetUserId', '==', null).where('targetRole', '==', null).onSnapshot(handleSnapshot, onError));
             }
         } catch (e) {
             console.warn("Failed to setup notification listeners:", e);
@@ -759,7 +763,11 @@ class Database {
             // Use a small delay to ensure the app/router is fully loaded after cold start
             setTimeout(() => {
                 if (data.link) {
-                    if (window.router) window.router.navigate(data.link, data.params || {});
+                    let parsedParams = data.params || {};
+                    if (typeof parsedParams === 'string') {
+                        try { parsedParams = JSON.parse(parsedParams); } catch(e) { console.warn("Failed to parse push params:", e); }
+                    }
+                    if (window.router) window.router.navigate(data.link, parsedParams);
                 } else {
                     // Fallback for legacy notifications
                     const title = notification.notification?.title || '';
@@ -806,7 +814,7 @@ class Database {
                 targetRoles: ['admin'], // Always notify admins
                 data: {
                     link: link || null,
-                    params: params || null
+                    params: params ? JSON.stringify(params) : null
                 }
             };
 
@@ -1083,6 +1091,31 @@ class Database {
         };
         const ref = await firestore.collection('notifications').add(payload);
         return { id: ref.id, ...payload };
+    }
+
+    async markNotificationAsRead(id) {
+        await firestore.collection('notifications').doc(id).update({ isRead: true });
+    }
+
+    async markAllNotificationsAsRead(userId) {
+        const snap = await firestore.collection('notifications')
+            .where('targetUserId', '==', userId)
+            .where('isRead', '==', false)
+            .get();
+        if (!snap.empty) {
+            const batch = firestore.batch();
+            snap.docs.forEach(doc => batch.update(doc.ref, { isRead: true }));
+            await batch.commit();
+        }
+    }
+
+    async deleteAllNotifications(userId) {
+        const snap = await firestore.collection('notifications').where('targetUserId', '==', userId).get();
+        if (!snap.empty) {
+            const batch = firestore.batch();
+            snap.docs.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+        }
     }
 
     async cleanupOldNotifications(userId) {
