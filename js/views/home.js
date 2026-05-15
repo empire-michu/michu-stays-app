@@ -568,40 +568,43 @@ window.router.addRoute('home', async (container, params) => {
             </div>
 
             <!-- Guest Reviews Section (Moved from Footer) -->
-            <div class="footer-testimonials" style="margin-top:6rem; background:rgba(255,255,255,0.05); border-radius:32px; padding:4rem 2rem; border:1px solid rgba(0,0,0,0.05); position:relative; overflow:hidden;">
-                <div style="position:absolute; top:-2rem; right:-2rem; font-size:10rem; color:rgba(0,0,0,0.02); pointer-events:none;">"</div>
-                <h3 style="font-size:2.4rem; font-weight:900; margin-bottom:3rem; text-align:center; letter-spacing:-1px; display:flex; align-items:center; justify-content:center; gap:0.8rem;"><svg width="32" height="32" fill="var(--color-secondary)" stroke="var(--color-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Real Stories from our Stays</h3>
+            <div class="footer-testimonials" style="margin-top:4rem; border-radius:32px; position:relative; overflow:hidden;">
+                <div class="testimonial-quote-bg">"</div>
+                <h3 class="section-title testimonials-title">
+                    <svg width="24" height="24" fill="var(--color-secondary)" stroke="var(--color-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> 
+                    Real Stories from our Stays
+                </h3>
                 <div class="testimonials-grid">
                     <div class="testimonial-card">
                         <div class="testimonial-stars">★★★★★</div>
-                        <p>Michu Stays made finding a comfortable room in Dire Dawa so easy. The booking was confirmed instantly and everything was just as described. I will definitely be coming back!</p>
+                        <p class="testimonial-text">Michu Stays made finding a comfortable room in Dire Dawa so easy. The booking was confirmed instantly and everything was just as described. I will definitely be coming back!</p>
                         <div class="testimonial-author">
                             <div class="testimonial-avatar" style="background: linear-gradient(135deg, #1a6032, #2d8a4e);">HA</div>
                             <div class="testimonial-author-info">
-                                <strong>Helina Alemayehu</strong>
-                                <span>Dire Dawa · Hotel Stay</span>
+                                <strong class="author-name">Helina Alemayehu</strong>
+                                <span class="author-meta">Dire Dawa · Hotel Stay</span>
                             </div>
                         </div>
                     </div>
                     <div class="testimonial-card">
                         <div class="testimonial-stars">★★★★★</div>
-                        <p>Excellent platform! I booked an apartment for my business trip and the process was seamless. The payment options are very convenient — used TeleBirr and it worked perfectly.</p>
+                        <p class="testimonial-text">Excellent platform! I booked an apartment for my business trip and the process was seamless. The payment options are very convenient — used TeleBirr and it worked perfectly.</p>
                         <div class="testimonial-author">
                             <div class="testimonial-avatar" style="background: linear-gradient(135deg, #d97706, #f59e0b);">BT</div>
                             <div class="testimonial-author-info">
-                                <strong>Biruk Tesfaye</strong>
-                                <span>Addis Ababa · Business Trip</span>
+                                <strong class="author-name">Biruk Tesfaye</strong>
+                                <span class="author-meta">Addis Ababa · Business Trip</span>
                             </div>
                         </div>
                     </div>
                     <div class="testimonial-card">
                         <div class="testimonial-stars">★★★★☆</div>
-                        <p>Great service and very responsive support team. The guesthouse I booked was clean and affordable. I appreciate that the platform is built specifically for Ethiopian travelers.</p>
+                        <p class="testimonial-text">Great service and very responsive support team. The guesthouse I booked was clean and affordable. I appreciate that the platform is built specifically for Ethiopian travelers.</p>
                         <div class="testimonial-author">
                             <div class="testimonial-avatar" style="background: linear-gradient(135deg, #4b5563, #6b7280);">SM</div>
                             <div class="testimonial-author-info">
-                                <strong>Selamawit Mekonen</strong>
-                                <span>Harar · Guesthouse</span>
+                                <strong class="author-name">Selamawit Mekonen</strong>
+                                <span class="author-meta">Harar · Guesthouse</span>
                             </div>
                         </div>
                     </div>

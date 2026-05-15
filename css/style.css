@@ -1770,8 +1770,119 @@ input:focus, select:focus, textarea:focus {
     display: none;
   }
   .testimonials-grid > .testimonial-card {
-    flex: 0 0 85% !important;
-    min-width: 85% !important;
+    flex: 0 0 80% !important; /* Smaller cards for better peek */
+    min-width: 80% !important;
+    padding: 1rem !important; /* Tighter padding */
+    border-radius: 20px;
     scroll-snap-align: start;
   }
+
+  .testimonials-title {
+    font-size: 1.5rem !important; /* Professional compact size */
+    margin-bottom: 1.5rem !important;
+    letter-spacing: -0.5px !important;
+  }
+
+  .testimonial-text {
+    font-size: 0.85rem !important;
+    line-height: 1.5 !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .testimonial-avatar {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .author-name {
+    font-size: 0.85rem !important;
+  }
+
+  .author-meta {
+    font-size: 0.7rem !important;
+  }
+}
+
+/* Base Testimonial Styles (Desktop & Global) */
+.section-title {
+  text-align: center;
+  font-weight: 900;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-bottom: 3rem;
+}
+
+.testimonials-title {
+  font-size: 2.4rem;
+  letter-spacing: -1px;
+}
+
+.testimonial-quote-bg {
+  position: absolute;
+  top: -2rem;
+  right: -2rem;
+  font-size: 10rem;
+  color: rgba(0,0,0,0.02);
+  pointer-events: none;
+}
+
+.testimonial-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 24px;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  transition: transform 0.3s ease;
+}
+
+.testimonial-stars {
+  color: #f59e0b;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.testimonial-text {
+  font-size: 1rem;
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+}
+
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.testimonial-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.testimonial-author-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.author-name {
+  font-size: 1rem;
+  color: #111827;
+  font-weight: 800;
+}
+
+.author-meta {
+  font-size: 0.8rem;
+  color: #6b7280;
 }
