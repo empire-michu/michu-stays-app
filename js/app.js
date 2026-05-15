@@ -459,7 +459,37 @@ const updateNotifBadge = () => {
     }
 };
 
-const renderNotifList = () => {
+window.markAllNotifsRead = async () => {
+    if (!window.auth?.currentUser) return;
+    try {
+        await window.db.markAllNotificationsAsRead(window.auth.currentUser.uid);
+        notifications.forEach(n => n.isRead = true);
+        unreadCount = 0;
+        updateNotifBadge();
+        window.renderNotifList();
+    } catch(e) { console.warn("Failed to mark all read:", e); }
+};
+
+window.clearAllNotifs = async () => {
+    const ok = await window.showConfirm({
+        title: 'Clear Notifications',
+        message: 'Are you sure you want to permanently delete all notifications?',
+        confirmText: 'Delete All',
+        type: 'danger'
+    });
+    if (!ok) return;
+
+    if (!window.auth?.currentUser) return;
+    try {
+        await window.db.deleteAllNotifications(window.auth.currentUser.uid);
+        notifications = [];
+        unreadCount = 0;
+        updateNotifBadge();
+        window.renderNotifList();
+    } catch(e) { console.warn("Failed to clear notifications:", e); }
+};
+
+window.renderNotifList = () => {
     const list = document.getElementById('notif-list-container');
     if (!list) return;
 
@@ -508,6 +538,7 @@ const renderNotifList = () => {
 
     const statusMap = {
         confirmed: { class: 'status-confirmed', label: 'Confirmed', icon: '✓' },
+        pending: { class: 'status-failed', label: 'Pending', icon: '!' },
         failed: { class: 'status-failed', label: 'Action needed', icon: '!' },
         upcoming: { class: 'status-upcoming', label: 'Upcoming', icon: '⏲' },
         review: { class: 'status-info', label: 'Review', icon: '★' },

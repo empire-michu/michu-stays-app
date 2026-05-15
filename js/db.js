@@ -200,7 +200,7 @@ class Database {
             details: `${newBooking.customerName} booked ${property.title}${newBooking.packageInfo ? ' (Package: ' + newBooking.packageInfo.title + ')' : ''}. Amount: ${newBooking.totalAmount} Birr. Reference: ${referenceCode}`,
             targetRole: 'admin',
             category: 'bookings',
-            status: 'confirmed',
+            status: 'pending',
             link: 'admin',
             params: { tab: 'bookings' }
         });
@@ -214,7 +214,7 @@ class Database {
                 details: `${newBooking.customerName} booked ${property.title}. Please verify the payment.`,
                 targetUserId: property.managerId,
                 category: 'bookings',
-                status: 'confirmed',
+                status: 'pending',
                 link: 'manager',
                 params: { tab: 'bookings' }
             });
