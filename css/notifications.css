@@ -93,6 +93,7 @@
     border-bottom: 1px solid #f1f5f9;
     transition: background 0.2s;
     cursor: pointer;
+    background: white; /* Explicitly white */
 }
 
 .notif-item-pro:hover {
@@ -100,7 +101,7 @@
 }
 
 .notif-item-pro.unread {
-    background: rgba(11, 110, 79, 0.03);
+    background: rgba(11, 110, 79, 0.04);
 }
 
 .notif-unread-dot {
@@ -145,8 +146,8 @@
 
 .notif-title-pro {
     font-weight: 700;
-    font-size: 0.85rem;
-    color: #1e293b;
+    font-size: 0.9rem;
+    color: #0f172a; /* Darker for better contrast */
 }
 
 .notif-status-tag {
@@ -158,14 +159,14 @@
 }
 
 .notif-subtitle-pro {
-    font-size: 0.78rem;
-    color: #64748b;
-    line-height: 1.4;
+    font-size: 0.82rem;
+    color: #475569; /* Clearer gray */
+    line-height: 1.5;
     margin-bottom: 0.4rem;
 }
 
 .notif-meta-pro {
-    font-size: 0.65rem;
+    font-size: 0.68rem;
     color: #94a3b8;
 }
 
