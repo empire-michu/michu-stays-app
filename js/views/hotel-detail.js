@@ -155,20 +155,27 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 <div id="main-side">
                     ${videoUrl ? `<video class="mobile-order-1" controls style="width:100%; border-radius:20px; margin-bottom:2rem; box-shadow:0 10px 30px rgba(0,0,0,0.1);"><source src="${videoUrl}" type="video/mp4"></video>` : ''}
                     
-                    <section class="mobile-order-2" style="margin-bottom:2.5rem; padding-bottom:2rem; border-bottom:1px solid #f1f5f9;">
-                         <h2 style="margin-bottom:1rem; font-size:1.5rem;">The Experience</h2>
-                         <p style="line-height:1.7; color:#334155; white-space:pre-wrap; font-size:1.05rem;">${hotel.description}</p>
+                    <section class="mobile-order-2" style="margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid #f1f5f9;">
+                         <h2 style="margin-bottom:0.8rem; font-size:1.5rem;">The Experience</h2>
+                         <div id="hotel-desc-container" class="collapsible-text">
+                            <p style="line-height:1.7; color:#334155; white-space:pre-wrap; font-size:1.05rem; margin:0;">${hotel.description}</p>
+                            <div class="collapsible-overlay"></div>
+                         </div>
+                         <div id="read-more-trigger" class="read-more-btn" onclick="window.toggleMichuDesc()">
+                            <span>Read More</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
+                         </div>
                     </section>
 
                     <!-- SPECIAL PACKAGES (Premium Revamp) -->
                     ${hotel.packages && hotel.packages.length > 0 ? `
                     <section class="mobile-order-4" style="margin-bottom:3.5rem; background: linear-gradient(135deg, #ffffff 0%, #fffbf2 100%); padding:2.5rem; border-radius:32px; border:2px solid rgba(217,119,6,0.15); box-shadow: 0 20px 50px rgba(217,119,6,0.08); position:relative; overflow:hidden;">
                         <div style="position:absolute; top:-50px; right:-50px; width:150px; height:150px; background:rgba(217,119,6,0.03); border-radius:50%;"></div>
-                        <h2 style="margin-bottom:2rem; display:flex; align-items:center; gap:0.8rem; color:#d97706; font-size:1.6rem; font-weight:950; text-transform:uppercase; letter-spacing:0.5px;">
-                            <span style="background:#d97706; color:white; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(217,119,6,0.3);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg></span> 
-                            Special Stay Packages
+                        <h2 style="margin-bottom:1.5rem; display:flex; align-items:center; gap:0.8rem; color:#d97706; font-size:1.4rem; font-weight:950; text-transform:uppercase; letter-spacing:0.5px;">
+                            <span style="background:#d97706; color:white; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(217,119,6,0.3);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg></span> 
+                            Exclusive Offers
                         </h2>
-                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:2rem;">
+                        <div class="mobile-package-carousel" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:2rem;">
                             ${hotel.packages.map((pkg, idx) => `
                                 <div class="pkg-card" onclick="window.applyMichuPkg(${idx})" 
                                      style="background:white; border:1px solid rgba(217,119,6,0.1); border-radius:26px; padding:1.8rem; cursor:pointer; position:relative; transition:all 0.4s ease; box-shadow:0 10px 20px rgba(0,0,0,0.03);">
@@ -202,8 +209,17 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 </div>
 
                 <div class="desktop-sidebar mobile-order-3" style="position: sticky; top: 2rem;">
-                    <div style="background:white; padding:2rem; border:1px solid #eee; border-radius:32px; box-shadow:0 20px 40px rgba(0,0,0,0.06);">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                    <div class="sidebar-card" style="background:white; padding:1.8rem; border:1px solid #eee; border-radius:28px; box-shadow:0 20px 40px rgba(0,0,0,0.06);">
+                        <style>
+                            @media(max-width: 768px) {
+                                .sidebar-card { padding: 1.2rem !important; border-radius: 20px !important; }
+                                .sidebar-price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem !important; }
+                                .sidebar-dates-grid { display: grid !important; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem !important; }
+                                .sidebar-dates-grid > div { padding: 0.6rem !important; }
+                                #final-reserve-trigger { padding: 1rem !important; font-size: 1.1rem !important; border-radius: 14px !important; }
+                            }
+                        </style>
+                        <div class="sidebar-price-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
                              <div>
                                 <span style="font-size:1.9rem; font-weight:950; color:#d97706;">${currentPrice.toLocaleString()} Birr</span>
                                 <span style="color:#64748b; font-weight:600;">/ night</span>
@@ -211,7 +227,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                              <div style="background:#fff7ed; color:#ea580c; padding:0.5rem 0.9rem; border-radius:14px; font-weight:900;">★ ${avgRating || 'New'}</div>
                         </div>
 
-                        <div style="border:2px solid #f1f5f9; border-radius:18px; overflow:hidden; margin-bottom:1.8rem;">
+                        <div class="sidebar-dates-grid" style="border:2px solid #f1f5f9; border-radius:18px; overflow:hidden; margin-bottom:1.8rem;">
                              <div style="display:grid; grid-template-columns:1fr 1fr;">
                                 <div style="padding:1rem; border-right:1px solid #f1f5f9;">
                                     <label style="display:block; font-size:0.65rem; font-weight:900; color:#94a3b8; text-transform:uppercase;">Check-in</label>
@@ -600,4 +616,15 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
             obs.observe(mainReserveBtn);
         }
     }, 1000);
+
+    window.toggleMichuDesc = () => {
+        const container = document.getElementById('hotel-desc-container');
+        const trigger = document.getElementById('read-more-trigger');
+        if (!container || !trigger) return;
+        
+        container.classList.toggle('expanded');
+        const isExpanded = container.classList.contains('expanded');
+        trigger.querySelector('span').innerText = isExpanded ? 'Read Less' : 'Read More';
+        trigger.querySelector('svg').style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+    };
 });
