@@ -538,9 +538,9 @@ class Database {
         // Run background cleanup (7-day rule & 100-item limit)
         this.cleanupOldNotifications(user.uid);
 
-        // CRITICAL: We only show popups for notifications created AFTER the app loaded.
-        // This prevents old notifications from popping up every time you refresh.
-        const sessionStartTime = Date.now(); 
+        // CRITICAL: We show popups for notifications created AFTER the app loaded.
+        // We add a 30s grace period to account for server/client clock drift.
+        const sessionStartTime = Date.now() - 30000; 
         
         // Fetch the last 7 days of history to ensure users don't miss anything.
         const historyStartTime = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000)).toISOString();
