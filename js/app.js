@@ -474,7 +474,7 @@ const renderNotifList = () => {
 
     if (displayList.length === 0) {
         list.innerHTML = `
-            <div style="text-align:center;padding:5rem 2rem;color:#64748b;display:flex;flex-direction:column;align-items:center;gap:1rem;">
+            <div style="text-align:center;padding:5rem 2rem;color:#64748b;display:flex;flex-direction:column;align-items:center;gap:1rem;background:white !important;">
                 <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
                 <div style="font-weight:700;font-size:1rem;color:#94a3b8;">${notifSearchQuery ? 'No matching notifications' : 'All caught up!'}</div>
                 <div style="font-size:0.85rem;opacity:0.7;">${notifSearchQuery ? 'Try a different search term' : 'New notifications will appear here.'}</div>
