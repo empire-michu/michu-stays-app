@@ -534,8 +534,12 @@ class Database {
         const role = window.auth?.role || window.auth?.userData?.role;
         if (!user) return;
 
-        // Look for notifications created in the last 24 hours
-        const startTime = new Date(Date.now() - 86400000).toISOString();
+        // CRITICAL: We only show popups for notifications created AFTER the app loaded.
+        // This prevents old notifications from popping up every time you refresh.
+        const sessionStartTime = Date.now(); 
+        
+        // However, we still fetch the last 24 hours so the panel shows recent history.
+        const historyStartTime = new Date(Date.now() - 86400000).toISOString();
         const seenIds = new Set();
 
         const handleSnapshot = (snapshot) => {
@@ -545,27 +549,39 @@ class Database {
                     const id = change.doc.id;
                     if (!seenIds.has(id)) {
                         seenIds.add(id);
-                        callback({ id, ...data });
+                        
+                        // ONLY trigger the popup callback if the notification is brand new (created after session start)
+                        const createdAt = data.createdAt ? new Date(data.createdAt).getTime() : 0;
+                        if (createdAt >= sessionStartTime) {
+                            callback({ id, ...data });
+                        } else {
+                            // Still update the local UI/Panel with the historical data
+                            // but do NOT trigger the popup.
+                            // (We could pass a flag here if the callback handles both)
+                            if (window.updateNotifPanelOnly) window.updateNotifPanelOnly({ id, ...data });
+                        }
                     }
                 }
             });
         };
 
-        const base = firestore.collection('notifications').where('createdAt', '>', startTime);
+        const base = firestore.collection('notifications').where('createdAt', '>', historyStartTime);
         let unsubs = [];
 
         try {
             if (role === 'admin') {
-                // Admins can query everything
+                // Admins see everything, but filtered by time above
                 unsubs.push(base.onSnapshot(handleSnapshot, onError));
             } else {
-                // Targeted queries for privacy rule compliance
+                // STRICT PRIVACY: Only fetch notifications where the user is the explicit target.
                 unsubs.push(base.where('targetUserId', '==', user.uid).onSnapshot(handleSnapshot, onError));
-                if (role) {
+                
+                // If they have a role (Manager), fetch role-based alerts (e.g. "New Booking for Manager")
+                if (role && role !== 'customer') {
                     unsubs.push(base.where('targetRole', '==', role).onSnapshot(handleSnapshot, onError));
                 }
-                // Global/Broadcast notifications
-                unsubs.push(base.where('targetUserId', '==', null).where('targetRole', '==', null).onSnapshot(handleSnapshot, onError));
+                
+                // Global announcements are handled by a separate collection/mechanism to keep personal alerts private.
             }
         } catch (e) {
             console.warn("Failed to setup notification listeners:", e);

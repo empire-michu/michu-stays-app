@@ -549,11 +549,40 @@ const renderNotifList = () => {
     list.innerHTML = html;
 };
 
-window.showPushNotification = ({ message, details, createdAt, link, params, category, status, actions }) => {
+window.updateNotifPanelOnly = (notif) => {
+    // This function handles historical notifications silently (no popup/sound)
+    // but ensures they appear in the notification panel and update the badge.
+    if (!notif.isRead) unreadCount++;
+    updateNotifBadge();
+
+    // Add to in-memory list if not already there
+    if (!notifications.find(n => n.id === notif.id)) {
+        notifications.unshift({ 
+            id: notif.id,
+            message: notif.message, 
+            details: notif.details, 
+            createdAt: notif.createdAt, 
+            link: notif.link, 
+            params: notif.params, 
+            isRead: !!notif.isRead, 
+            category: notif.category || 'system', 
+            status: notif.status || 'info', 
+            actions: notif.actions || [] 
+        });
+        // Sort by date to ensure history is correct
+        notifications.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+        renderNotifList();
+    }
+};
+
+window.showPushNotification = ({ message, details, createdAt, link, params, category, status, actions, id }) => {
+    // Check if we already have this notification to avoid duplicates
+    if (id && notifications.find(n => n.id === id)) return;
+
     unreadCount++;
     updateNotifBadge();
 
-    // Play notification sound
+    // Play notification sound for LIVE notifications
     try {
         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
         audio.volume = 0.5;
@@ -561,7 +590,18 @@ window.showPushNotification = ({ message, details, createdAt, link, params, cate
     } catch(e) {}
 
     // Add to in-memory list
-    notifications.unshift({ message, details, createdAt, link, params, isRead: false, category: category || 'system', status: status || 'info', actions: actions || [] });
+    notifications.unshift({ 
+        id,
+        message, 
+        details, 
+        createdAt, 
+        link, 
+        params, 
+        isRead: false, 
+        category: category || 'system', 
+        status: status || 'info', 
+        actions: actions || [] 
+    });
     renderNotifList();
 
     // --- DECK STACKING LOGIC ---
@@ -801,6 +841,7 @@ window.startNotifications = () => {
         try {
             notifUnsub = window.db.listenForNotifications((notif) => {
                 window.showPushNotification({
+                    id: notif.id,
                     message: notif.message,
                     details: notif.details,
                     createdAt: notif.createdAt,
