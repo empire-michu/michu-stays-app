@@ -201,9 +201,12 @@ class Database {
             targetRole: 'admin',
             category: 'bookings',
             status: 'confirmed',
-            link: 'admin_panel',
+            link: 'admin',
             params: { tab: 'bookings' }
         });
+
+        // Trigger Push for Admin/Manager
+        this.triggerPushNotification(property.id, '🛎️ New Booking!', `${newBooking.customerName} booked ${property.title}.`, null, 'admin', { tab: 'bookings' });
 
         if (property.managerId) {
             await this.createNotification({
@@ -212,9 +215,10 @@ class Database {
                 targetUserId: property.managerId,
                 category: 'bookings',
                 status: 'confirmed',
-                link: 'manager_panel',
+                link: 'manager',
                 params: { tab: 'bookings' }
             });
+            this.triggerPushNotification(property.id, '🛎️ New Booking!', `New stay booked at ${property.title}.`, property.managerId, 'manager', { tab: 'bookings' });
         }
 
         this.clearCache('bookings');
@@ -267,22 +271,15 @@ class Database {
             params: { tab: 'bookings' }
         });
 
-        // SEND HARD NOTIFICATION (PUSH) to all users (guest, admin, manager) if confirmed
-        if (status === 'Confirmed') {
-            await this.triggerPushNotification(
-                booking.propertyId,
-                '✅ Booking Confirmed!',
-                `Booking ${booking.referenceCode} at ${booking.propertyTitle} has been confirmed.`,
-                booking.customerId
-            );
-        } else if (status === 'Denied') {
-            await this.triggerPushNotification(
-                booking.propertyId,
-                '❌ Booking Denied',
-                `Booking ${booking.referenceCode} at ${booking.propertyTitle} was denied.`,
-                booking.customerId
-            );
-        }
+        // SEND HARD NOTIFICATION (PUSH)
+        await this.triggerPushNotification(
+            booking.propertyId,
+            message,
+            details,
+            booking.customerId,
+            'profile',
+            { tab: 'bookings' }
+        );
     }
 
     // ─── USERS ────────────────────────────────────────────────
@@ -404,10 +401,12 @@ class Database {
                 });
                 // Send push notification
                 this.triggerPushNotification(
-                    null, 
+                    reviewData.propertyId, 
                     'New Reply to Your Review! 💬', 
                     `${managerName} replied: "${replyText.substring(0, 50)}..."`,
-                    reviewData.userId
+                    reviewData.userId,
+                    'hotel_detail_view',
+                    { id: reviewData.propertyId }
                 );
             }
         } catch (e) {
@@ -756,18 +755,23 @@ class Database {
         PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
             console.log('👆 Push notification tapped:', JSON.stringify(notification));
             const data = notification.notification?.data || {};
-            const title = notification.notification?.title || '';
-            const body = notification.notification?.body || '';
-
-            const isBooking = data.type === 'booking' || title.toLowerCase().includes('booking') || body.toLowerCase().includes('booking');
-
+            
             // Use a small delay to ensure the app/router is fully loaded after cold start
             setTimeout(() => {
-                if (isBooking && window.mobileBookings) {
-                    window.mobileBookings();
+                if (data.link) {
+                    if (window.router) window.router.navigate(data.link, data.params || {});
                 } else {
-                    if (window.router) window.router.navigate('home');
-                    else window.location.hash = '#home';
+                    // Fallback for legacy notifications
+                    const title = notification.notification?.title || '';
+                    const body = notification.notification?.body || '';
+                    const isBooking = data.type === 'booking' || title.toLowerCase().includes('booking') || body.toLowerCase().includes('booking');
+                    
+                    if (isBooking && window.mobileBookings) {
+                        window.mobileBookings();
+                    } else {
+                        if (window.router) window.router.navigate('home');
+                        else window.location.hash = '#home';
+                    }
                 }
             }, 500);
         });
@@ -788,8 +792,8 @@ class Database {
         }
     }
 
-    async triggerPushNotification(hotelId, title, body, targetUserId = null) {
-        console.log("🚀 Triggering Push (v2):", title, { hotelId, targetUserId });
+    async triggerPushNotification(hotelId, title, body, targetUserId = null, link = null, params = null) {
+        console.log("🚀 Triggering Push (v2):", title, { hotelId, targetUserId, link });
 
         try {
             // Heartbeat for Render server (if used for other things)
@@ -799,7 +803,11 @@ class Database {
                 title,
                 body,
                 hotelId: hotelId || null,
-                targetRoles: ['admin'] // Always notify admins
+                targetRoles: ['admin'], // Always notify admins
+                data: {
+                    link: link || null,
+                    params: params || null
+                }
             };
 
             // If we have a specific target user (like the guest themselves), get their tokens if possible
@@ -940,9 +948,49 @@ class Database {
             text, readAt: null, createdAt: new Date().toISOString()
         });
         const update = { lastMessage: text.length > 100 ? text.slice(0,100)+'…' : text, lastMessageAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-        if (senderRole === 'guest') { update.unreadByManager = firebase.firestore.FieldValue.increment(1); update.unreadByGuest = 0; }
-        else { update.unreadByGuest = firebase.firestore.FieldValue.increment(1); update.unreadByManager = 0; }
+        if (senderRole === 'guest') { 
+            update.unreadByManager = firebase.firestore.FieldValue.increment(1); 
+            update.unreadByGuest = 0; 
+        } else { 
+            update.unreadByGuest = firebase.firestore.FieldValue.increment(1); 
+            update.unreadByManager = 0; 
+        }
         await firestore.collection('chatThreads').doc(threadId).update(update);
+
+        // --- NEW: NOTIFY RECIPIENT ---
+        try {
+            const threadSnap = await firestore.collection('chatThreads').doc(threadId).get();
+            if (threadSnap.exists) {
+                const thread = threadSnap.data();
+                const recipientId = senderRole === 'guest' ? thread.managerId : thread.guestId;
+                
+                if (recipientId) {
+                    const messageTitle = `💬 New Message from ${senderName}`;
+                    const messageBody = text.length > 60 ? text.slice(0, 60) + '...' : text;
+
+                    // In-App
+                    await this.createNotification({
+                        message: messageTitle,
+                        details: messageBody,
+                        targetUserId: recipientId,
+                        category: 'system',
+                        status: 'info',
+                        link: 'chat',
+                        params: { threadId: threadId }
+                    });
+
+                    // Push
+                    this.triggerPushNotification(
+                        thread.propertyId,
+                        messageTitle,
+                        messageBody,
+                        recipientId,
+                        'chat',
+                        { threadId: threadId }
+                    );
+                }
+            }
+        } catch(e) { console.warn('Chat notification trigger failed:', e); }
     }
 
     async editChatMessage(threadId, messageId, newText) {

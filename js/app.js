@@ -740,22 +740,26 @@ window.showPushNotification = ({ message, details, createdAt, link, params, cate
     
     container.onclick = () => { 
         const all = document.querySelectorAll('.michu-push-toast');
-        if (all.length > 1 && !container.dataset.expanded) {
+        if (all.length > 1 && container.dataset.expanded !== "true") {
             // Fan out vertically
-            all.forEach((t, i) => {
+            Array.from(all).reverse().forEach((t, i) => {
                 t.dataset.expanded = "true";
-                t.className = 'michu-push-toast'; // remove deck classes
+                t.className = 'michu-push-toast'; 
                 t.style.top = (20 + (i * 95)) + 'px';
                 t.style.transform = 'none';
                 t.style.opacity = '1';
                 t.style.pointerEvents = 'auto';
-                // Remove the badge counter when expanded
                 const b = t.querySelector('.toast-badge-count');
                 if (b) b.remove();
             });
             return;
         }
-        if (link) window.router.navigate(link, params || {}); 
+        
+        if (link) {
+            window.router.navigate(link, params || {}); 
+        } else {
+            window.router.navigate('home');
+        }
         container.closeToast(); 
     };
     
