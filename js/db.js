@@ -480,10 +480,40 @@ class Database {
         const payload = {
             targetUserId: null,
             targetRole: null,
+            isRead: false,
+            category: 'system',
+            status: 'info',
             ...data,
             createdAt: new Date().toISOString()
         };
         return await firestore.collection('notifications').add(payload);
+    }
+
+    async markAllNotificationsAsRead(userId) {
+        if (!userId) return;
+        const snapshot = await firestore.collection('notifications')
+            .where('targetUserId', '==', userId)
+            .where('isRead', '==', false)
+            .get();
+        
+        const batch = firestore.batch();
+        snapshot.docs.forEach(doc => {
+            batch.update(doc.ref, { isRead: true });
+        });
+        return await batch.commit();
+    }
+
+    async deleteAllNotifications(userId) {
+        if (!userId) return;
+        const snapshot = await firestore.collection('notifications')
+            .where('targetUserId', '==', userId)
+            .get();
+        
+        const batch = firestore.batch();
+        snapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        return await batch.commit();
     }
 
     listenToBookings(callback, managerId = null, customerId = null) {

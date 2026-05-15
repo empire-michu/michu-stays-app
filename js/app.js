@@ -396,75 +396,113 @@ document.addEventListener('focusin', (e) => {
     }
 }, true);
 
-// ─── GLOBAL REAL-TIME NOTIFICATIONS ─────────────────────────────────
-let unreadCount = 0;
-const notifications = [];
+// ─── GLOBAL REAL-TIME NOTIFICATIONS ───
+let notifications = [];
 let notifUnsub = null;
-let notifFilterNewOnly = false;
+let notifCategoryFilter = 'all';
+let notifSearchQuery = '';
+let unreadCount = 0;
 
-window.toggleNotifFilter = () => {
-    notifFilterNewOnly = !notifFilterNewOnly;
-    const btn = document.getElementById('notif-filter-btn');
-    const text = document.getElementById('notif-filter-text');
-    if (btn && text) {
-        if (notifFilterNewOnly) {
-            btn.style.background = 'var(--color-primary)';
-            btn.style.color = 'white';
-            btn.style.borderColor = 'var(--color-primary)';
-            text.textContent = 'Showing: Unread Only';
-        } else {
-            btn.style.background = 'white';
-            btn.style.color = '#1a73e8';
-            btn.style.borderColor = '#c9d2db';
-            text.textContent = 'Unread notifications';
-        }
-    }
+window.setNotifFilter = (filter) => {
+    notifCategoryFilter = filter;
+    document.querySelectorAll('.notif-tab').forEach(t => {
+        t.classList.toggle('active', t.getAttribute('data-filter') === filter);
+    });
     renderNotifList();
 };
 
-window.clearAllNotifications = () => {
-    notifications.length = 0;
-    unreadCount = 0;
-    notifFilterNewOnly = false;
-    const badge = document.getElementById('notif-badge');
-    if (badge) { badge.style.display = 'none'; badge.classList.remove('notif-pulse'); }
-    // Reset filter button
-    const btn = document.getElementById('notif-filter-btn');
-    const text = document.getElementById('notif-filter-text');
-    if (btn && text) {
-        btn.style.background = 'white';
-        btn.style.color = '#1a73e8';
-        btn.style.borderColor = '#c9d2db';
-        text.textContent = 'Unread notifications';
-    }
+window.setNotifSearch = (query) => {
+    notifSearchQuery = query.toLowerCase();
     renderNotifList();
+};
+
+window.markAllRead = async () => {
+    const user = window.auth?.currentUser;
+    if (!user) return;
+    try {
+        await window.db.markAllNotificationsAsRead(user.uid);
+        notifications.forEach(n => n.isRead = true);
+        unreadCount = 0;
+        updateNotifBadge();
+        renderNotifList();
+    } catch(e) { console.error(e); }
+};
+
+window.clearAllNotifications = async () => {
+    const user = window.auth?.currentUser;
+    if (!user) return;
+    const confirmed = await window.showConfirm({title: 'Clear all', message: 'Delete all notifications permanently?'});
+    if (!confirmed) return;
+    try {
+        await window.db.deleteAllNotifications(user.uid);
+        notifications = [];
+        unreadCount = 0;
+        updateNotifBadge();
+        renderNotifList();
+    } catch(e) { console.error(e); }
+};
+
+const updateNotifBadge = () => {
+    const badge = document.getElementById('notif-badge');
+    const headerBadge = document.getElementById('notif-header-badge');
+    if (badge) {
+        badge.textContent = unreadCount;
+        badge.style.display = unreadCount > 0 ? 'block' : 'none';
+        if (unreadCount > 0) badge.classList.add('notif-pulse');
+    }
+    if (headerBadge) {
+        headerBadge.textContent = unreadCount;
+        headerBadge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+    }
 };
 
 const renderNotifList = () => {
     const list = document.getElementById('notif-list-container');
     if (!list) return;
 
-    // Filter for last 24 hours only
-    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
-    const recentNotifications = notifications.filter(n => {
-        const time = n.createdAt ? new Date(n.createdAt).getTime() : Date.now();
-        return time > oneDayAgo;
-    });
-
-    const displayList = notifFilterNewOnly ? recentNotifications.filter(n => n.isNew) : recentNotifications;
-
-    // Show/hide Clear All button
-    const clearBtn = document.getElementById('notif-clear-btn');
-    if (clearBtn) clearBtn.style.display = recentNotifications.length > 0 ? 'block' : 'none';
+    // Apply Filter & Search
+    let displayList = [...notifications];
+    if (notifCategoryFilter !== 'all') {
+        displayList = displayList.filter(n => n.category === notifCategoryFilter);
+    }
+    if (notifSearchQuery) {
+        displayList = displayList.filter(n => 
+            (n.message || '').toLowerCase().includes(notifSearchQuery) || 
+            (n.details || '').toLowerCase().includes(notifSearchQuery)
+        );
+    }
 
     if (displayList.length === 0) {
         list.innerHTML = `
-            <div style="text-align:center;padding:3rem 1rem;color:#999;background:white;border-radius:8px;display:flex;flex-direction:column;align-items:center;">
-                <svg width="32" height="32" style="margin-bottom:0.5rem;color:#cbd5e1;" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                <p style="font-weight:700;margin:0;font-size:0.9rem;">${notifFilterNewOnly ? 'No unread notifications' : 'No notifications yet'}</p>
+            <div style="text-align:center;padding:5rem 2rem;color:#64748b;display:flex;flex-direction:column;align-items:center;gap:1rem;">
+                <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                <div style="font-weight:700;font-size:1rem;color:#94a3b8;">${notifSearchQuery ? 'No matching notifications' : 'All caught up!'}</div>
+                <div style="font-size:0.85rem;opacity:0.7;">${notifSearchQuery ? 'Try a different search term' : 'New notifications will appear here.'}</div>
             </div>`;
         return;
     }
+
+    // Grouping Logic
+    const groups = { 'TODAY': [], 'YESTERDAY': [], 'OLDER': [] };
+    const now = new Date();
+    const todayStr = now.toDateString();
+    const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+    const yesterdayStr = yesterday.toDateString();
+
+    displayList.forEach(n => {
+        const d = new Date(n.createdAt);
+        if (d.toDateString() === todayStr) groups['TODAY'].push(n);
+        else if (d.toDateString() === yesterdayStr) groups['YESTERDAY'].push(n);
+        else groups['OLDER'].push(n);
+    });
+
+    const statusMap = {
+        confirmed: { class: 'status-confirmed', label: 'Confirmed', icon: '✓' },
+        failed: { class: 'status-failed', label: 'Action needed', icon: '!' },
+        upcoming: { class: 'status-upcoming', label: 'Upcoming', icon: '⏲' },
+        review: { class: 'status-info', label: 'Review', icon: '★' },
+        info: { class: 'status-info', label: 'Info', icon: 'i' }
+    };
 
     const relativeTime = (ts) => {
         if (!ts) return 'Just now';
@@ -475,28 +513,42 @@ const renderNotifList = () => {
         return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     };
 
-    list.innerHTML = displayList.map(n => `
-        <div class="notif-item" onclick="window.router.navigate('${n.link || 'home'}', ${JSON.stringify(n.params || {}).replace(/"/g, '&quot;')}); window.showNotifModal(false);"
-            style="padding:1rem;background:white;border-radius:12px;border:1px solid ${n.isNew ? '#dbeafe' : '#f1f5f9'};cursor:pointer;transition:all 0.18s;display:flex;gap:0.8rem;align-items:flex-start;margin-bottom:0.4rem;${n.isNew ? 'border-left:3px solid var(--color-primary);' : ''}">
-            <div style="width:34px;height:34px;border-radius:50%;background:${n.isNew ? 'var(--color-primary)' : '#f1f5f9'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <svg width="15" height="15" fill="none" stroke="${n.isNew ? 'white' : '#64748b'}" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-            </div>
-            <div style="flex:1;min-width:0;">
-                <div style="font-weight:700;color:#1e293b;font-size:0.85rem;margin-bottom:0.2rem;">${n.message || ''}</div>
-                <div style="font-size:0.78rem;color:#64748b;line-height:1.4;">${n.details || ''}</div>
-                <div style="font-size:0.68rem;color:#94a3b8;margin-top:0.3rem;">${relativeTime(n.createdAt)}</div>
-            </div>
-        </div>
-    `).join('');
+    let html = '';
+    Object.keys(groups).forEach(label => {
+        if (groups[label].length > 0) {
+            html += `<div class="notif-group-header">${label}</div>`;
+            groups[label].forEach(n => {
+                const s = statusMap[n.status] || statusMap.info;
+                html += `
+                <div class="notif-item-pro ${n.isRead ? '' : 'unread'}" onclick="window.router.navigate('${n.link || 'home'}', ${JSON.stringify(n.params || {}).replace(/"/g, '&quot;')}); window.showNotifModal(false);">
+                    ${n.isRead ? '' : '<div class="notif-unread-dot"></div>'}
+                    <div class="notif-avatar ${s.class}">${s.icon}</div>
+                    <div class="notif-content-pro">
+                        <div class="notif-title-row-pro">
+                            <div class="notif-title-pro">${n.message}</div>
+                            <div class="notif-status-tag ${s.class}">${s.label}</div>
+                        </div>
+                        <div class="notif-subtitle-pro">${n.details || ''}</div>
+                        <div class="notif-meta-pro">${relativeTime(n.createdAt)}</div>
+                        
+                        ${n.actions && n.actions.length > 0 ? `
+                            <div class="notif-actions-pro">
+                                ${n.actions.map(act => `
+                                    <button class="notif-btn-cta" onclick="event.stopPropagation(); window.router.navigate('${act.link}', ${JSON.stringify(act.params || {})}); window.showNotifModal(false);">${act.label}</button>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>`;
+            });
+        }
+    });
+    list.innerHTML = html;
 };
 
-window.showPushNotification = ({ message, details, createdAt, link, params }) => {
+window.showPushNotification = ({ message, details, createdAt, link, params, category, status, actions }) => {
     unreadCount++;
-    const badge = document.getElementById('notif-badge');
-    if (badge) {
-        badge.style.display = 'block';
-        badge.classList.add('notif-pulse');
-    }
+    updateNotifBadge();
 
     // Play notification sound
     try {
@@ -506,42 +558,59 @@ window.showPushNotification = ({ message, details, createdAt, link, params }) =>
     } catch(e) {}
 
     // Add to in-memory list
-    notifications.unshift({ message, details, createdAt, link, params, isNew: true });
+    notifications.unshift({ message, details, createdAt, link, params, isRead: false, category: category || 'system', status: status || 'info', actions: actions || [] });
     renderNotifList();
 
-    // Show toast popup
+    // Show toast popup (Stacking logic included)
+    const existingToasts = document.querySelectorAll('.michu-push-toast');
+    const offset = 20 + (existingToasts.length * 105);
+
     const container = document.createElement('div');
-    container.style.cssText = `position:fixed;top:20px;right:20px;width:330px;background:white;border-left:5px solid var(--color-primary);box-shadow:0 20px 50px rgba(0,0,0,0.2);border-radius:20px;padding:1.25rem;z-index:20000;display:flex;gap:1rem;animation:_pushIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275);cursor:pointer;max-width:calc(100vw - 2rem);`;
+    container.className = 'michu-push-toast';
+    container.style.cssText = `position:fixed; top:${offset}px; right:20px; width:330px; background:#1a1c1e; border-left:5px solid var(--color-primary); box-shadow:0 15px 40px rgba(0,0,0,0.4); border-radius:20px; padding:1.25rem; z-index:20000; display:flex; gap:1rem; animation:_pushIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275); cursor:pointer; max-width:calc(100vw - 2rem); transition: top 0.3s ease; border:1px solid rgba(255,255,255,0.1); color:white;`;
+    
     container.innerHTML = `
-        <style>@keyframes _pushIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}} @keyframes _pushOut{from{transform:translateX(0);opacity:1}to{transform:translateX(120%);opacity:0}}</style>
-        <div style="width:36px;height:36px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <style>
+            @keyframes _pushIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}} 
+            @keyframes _pushOut{from{transform:translateX(0);opacity:1}to{transform:translateX(120%);opacity:0}}
+            .toast-close-btn { position:absolute; top:8px; right:8px; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.1); color:#94a3b8; border:none; cursor:pointer; font-size:14px; opacity:0; transition:opacity 0.2s; }
+            .michu-push-toast:hover .toast-close-btn { opacity:1; }
+        </style>
+        <button class="toast-close-btn" onclick="event.stopPropagation(); this.parentElement.closeToast();">✕</button>
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
             <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         </div>
-        <div style="flex:1;">
-            <div style="font-weight:800;color:var(--color-primary);font-size:0.95rem;margin-bottom:0.3rem;">${message || 'New notification'}</div>
-            <div style="color:#555;font-size:0.82rem;line-height:1.5;">${details || ''}</div>
-            <div style="color:#aaa;font-size:0.7rem;margin-top:0.4rem;">Just now</div>
+        <div style="flex:1; min-width:0;">
+            <div style="font-weight:800;color:white;font-size:0.95rem;margin-bottom:0.2rem; padding-right:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${message || 'New notification'}</div>
+            <div style="color:#94a3b8;font-size:0.82rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${details || ''}</div>
+            <div style="color:#64748b;font-size:0.7rem;margin-top:0.4rem;">Just now</div>
         </div>`;
+    
     document.body.appendChild(container);
-    const close = () => { container.style.animation = '_pushOut 0.4s ease forwards'; setTimeout(() => container.remove(), 400); };
-    container.onclick = () => { if (link) window.router.navigate(link, params || {}); close(); };
-    setTimeout(close, 8000);
+    
+    container.closeToast = () => { 
+        container.style.animation = '_pushOut 0.4s ease forwards'; 
+        setTimeout(() => {
+            container.remove();
+            const remaining = document.querySelectorAll('.michu-push-toast');
+            remaining.forEach((t, i) => { t.style.top = (20 + (i * 105)) + 'px'; });
+        }, 400); 
+    };
+    
+    container.onclick = () => { if (link) window.router.navigate(link, params || {}); container.closeToast(); };
+    setTimeout(() => { if (container.parentElement) container.closeToast(); }, 10000); 
 };
 
 window.showNotifModal = (open) => {
     const modal = document.getElementById('notif-modal');
     if (!modal) return;
 
-    // Toggle logic if no argument provided
     if (open === undefined) {
         open = (modal.style.display !== 'flex');
     }
 
     if (open) {
         modal.style.display = 'flex';
-        unreadCount = 0;
-        const badge = document.getElementById('notif-badge');
-        if (badge) { badge.style.display = 'none'; badge.classList.remove('notif-pulse'); }
         renderNotifList();
     } else {
         modal.style.display = 'none';
@@ -641,7 +710,10 @@ window.startNotifications = () => {
                     details: notif.details,
                     createdAt: notif.createdAt,
                     link: notif.link,
-                    params: notif.params
+                    params: notif.params,
+                    category: notif.category,
+                    status: notif.status,
+                    actions: notif.actions
                 });
             }, (err) => {
                 if(!err.message?.includes('permission')) {
