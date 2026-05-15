@@ -561,19 +561,58 @@ window.showPushNotification = ({ message, details, createdAt, link, params, cate
     notifications.unshift({ message, details, createdAt, link, params, isRead: false, category: category || 'system', status: status || 'info', actions: actions || [] });
     renderNotifList();
 
-    // Show toast popup (Stacking logic included)
-    const existingToasts = document.querySelectorAll('.michu-push-toast');
-    const offset = 20 + (existingToasts.length * 105);
+    // --- DECK STACKING LOGIC ---
+    const updateToastDeck = () => {
+        const all = document.querySelectorAll('.michu-push-toast');
+        if (all.length > 0 && all[0].dataset.expanded === "true") {
+            // If already expanded, just ensure vertical spacing is correct
+            all.forEach((t, i) => {
+                t.style.top = (20 + (i * 95)) + 'px';
+            });
+            return;
+        }
+
+        const toasts = Array.from(all).reverse();
+        toasts.forEach((t, i) => {
+            t.className = 'michu-push-toast'; // reset
+            if (i === 0) {
+                t.style.top = '20px';
+                t.style.zIndex = '20000';
+            } else if (i === 1) {
+                t.classList.add('deck-1');
+                t.style.top = '20px';
+            } else if (i === 2) {
+                t.classList.add('deck-2');
+                t.style.top = '20px';
+            } else {
+                t.classList.add('hidden-stack');
+                t.style.top = '20px';
+            }
+            
+            // Add/update counter on top toast
+            let badge = t.querySelector('.toast-badge-count');
+            if (i === 0 && toasts.length > 1) {
+                if (!badge) {
+                    badge = document.createElement('div');
+                    badge.className = 'toast-badge-count';
+                    t.appendChild(badge);
+                }
+                badge.textContent = `+${toasts.length - 1}`;
+            } else if (badge) {
+                badge.remove();
+            }
+        });
+    };
 
     const container = document.createElement('div');
     container.className = 'michu-push-toast';
-    container.style.cssText = `position:fixed; top:${offset}px; right:20px; width:330px; background:#1a1c1e; border-left:5px solid var(--color-primary); box-shadow:0 15px 40px rgba(0,0,0,0.4); border-radius:20px; padding:1.25rem; z-index:20000; display:flex; gap:1rem; animation:_pushIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275); cursor:pointer; max-width:calc(100vw - 2rem); transition: top 0.3s ease; border:1px solid rgba(255,255,255,0.1); color:white;`;
+    container.style.top = '20px';
     
     container.innerHTML = `
         <style>
-            @keyframes _pushIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}} 
+            @keyframes _pushIn{from{transform:translateY(-100%) translateX(0);opacity:0}to{transform:translateY(0) translateX(0);opacity:1}} 
             @keyframes _pushOut{from{transform:translateX(0);opacity:1}to{transform:translateX(120%);opacity:0}}
-            .toast-close-btn { position:absolute; top:8px; right:8px; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.1); color:#94a3b8; border:none; cursor:pointer; font-size:14px; opacity:0; transition:opacity 0.2s; }
+            .toast-close-btn { position:absolute; top:8px; right:8px; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#f1f5f9; color:#94a3b8; border:none; cursor:pointer; font-size:12px; opacity:0; transition:opacity 0.2s; }
             .michu-push-toast:hover .toast-close-btn { opacity:1; }
         </style>
         <button class="toast-close-btn" onclick="event.stopPropagation(); this.parentElement.closeToast();">✕</button>
@@ -581,24 +620,50 @@ window.showPushNotification = ({ message, details, createdAt, link, params, cate
             <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         </div>
         <div style="flex:1; min-width:0;">
-            <div style="font-weight:800;color:white;font-size:0.95rem;margin-bottom:0.2rem; padding-right:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${message || 'New notification'}</div>
-            <div style="color:#94a3b8;font-size:0.82rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${details || ''}</div>
-            <div style="color:#64748b;font-size:0.7rem;margin-top:0.4rem;">Just now</div>
+            <div style="font-weight:800;color:#1e293b;font-size:0.9rem;margin-bottom:0.15rem; padding-right:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${message || 'New notification'}</div>
+            <div style="color:#64748b;font-size:0.8rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${details || ''}</div>
+            <div style="color:#94a3b8;font-size:0.65rem;margin-top:0.3rem;">Just now</div>
         </div>`;
     
+    // Slide in from top
+    container.style.animation = '_pushIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    
     document.body.appendChild(container);
+    updateToastDeck();
     
     container.closeToast = () => { 
         container.style.animation = '_pushOut 0.4s ease forwards'; 
         setTimeout(() => {
             container.remove();
-            const remaining = document.querySelectorAll('.michu-push-toast');
-            remaining.forEach((t, i) => { t.style.top = (20 + (i * 105)) + 'px'; });
+            updateToastDeck();
         }, 400); 
     };
+
+    // Expand behavior: if clicking a stacked toast, or top toast with others behind, maybe fan them?
+    // For now, clicking top toast just navigates.
     
-    container.onclick = () => { if (link) window.router.navigate(link, params || {}); container.closeToast(); };
-    setTimeout(() => { if (container.parentElement) container.closeToast(); }, 10000); 
+    container.onclick = () => { 
+        const all = document.querySelectorAll('.michu-push-toast');
+        if (all.length > 1 && !container.dataset.expanded) {
+            // Fan out vertically
+            all.forEach((t, i) => {
+                t.dataset.expanded = "true";
+                t.className = 'michu-push-toast'; // remove deck classes
+                t.style.top = (20 + (i * 95)) + 'px';
+                t.style.transform = 'none';
+                t.style.opacity = '1';
+                t.style.pointerEvents = 'auto';
+                // Remove the badge counter when expanded
+                const b = t.querySelector('.toast-badge-count');
+                if (b) b.remove();
+            });
+            return;
+        }
+        if (link) window.router.navigate(link, params || {}); 
+        container.closeToast(); 
+    };
+    
+    setTimeout(() => { if (container.parentElement) container.closeToast(); }, 12000); 
 };
 
 window.showNotifModal = (open) => {
