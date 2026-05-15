@@ -566,3 +566,196 @@
         display: none;
     }
 }
+
+/* ═══════════════════════════════════════════
+   MOBILE: Compact Reserve & Package Cards
+   Make these slightly smaller than hotel cards
+   ═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+    /* Sidebar booking card (Reserve Now) — compact on mobile */
+    .sidebar-card {
+        padding: 1rem 1rem !important;
+        border-radius: 18px !important;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.04) !important;
+        transform: scale(0.95);
+        transform-origin: top center;
+    }
+    .sidebar-card .sidebar-price-row {
+        margin-bottom: 0.8rem !important;
+    }
+    .sidebar-card .sidebar-price-row > div:first-child span:first-child {
+        font-size: 1.5rem !important;
+    }
+    .sidebar-card .sidebar-dates-grid {
+        margin-bottom: 1rem !important;
+        border-radius: 14px !important;
+    }
+    .sidebar-card #final-reserve-trigger {
+        padding: 0.85rem !important;
+        font-size: 1.05rem !important;
+        border-radius: 14px !important;
+    }
+    .sidebar-card #price-summary-area {
+        margin-top: 1rem !important;
+    }
+    .sidebar-card #price-summary-area > div {
+        padding: 1rem !important;
+        border-radius: 16px !important;
+    }
+    .sidebar-card #price-summary-area .final-total-val {
+        font-size: 1.2rem !important;
+    }
+
+    /* Special Packages section — compact on mobile */
+    .mobile-order-4 {
+        padding: 1.5rem !important;
+        border-radius: 22px !important;
+        margin-bottom: 2rem !important;
+        transform: scale(0.95);
+        transform-origin: top center;
+    }
+    .mobile-order-4 h2 {
+        font-size: 1.15rem !important;
+        margin-bottom: 1rem !important;
+    }
+    .mobile-order-4 .pkg-card {
+        padding: 1.2rem !important;
+        border-radius: 18px !important;
+    }
+    .mobile-order-4 .pkg-card h3 {
+        font-size: 1.1rem !important;
+    }
+    .mobile-order-4 .pkg-card .btn-primary {
+        padding: 0.6rem 1.2rem !important;
+        font-size: 0.8rem !important;
+        border-radius: 12px !important;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   DUAL RANGE PRICE SLIDER
+   ═══════════════════════════════════════════ */
+.price-range-dual {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    margin: 1rem 0 0.8rem;
+}
+
+.price-range-dual .slider-track {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 6px;
+    border-radius: 99px;
+    background: #e8ecef;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.price-range-dual .slider-range {
+    position: absolute;
+    top: 50%;
+    height: 6px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--color-primary) 0%, #15803d 100%);
+    transform: translateY(-50%);
+    z-index: 2;
+    transition: left 0.05s, right 0.05s;
+}
+
+.price-range-dual input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    height: 6px;
+    background: transparent;
+    pointer-events: none;
+    z-index: 3;
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+}
+
+.price-range-dual input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid var(--color-primary);
+    box-shadow: 0 2px 8px rgba(11, 110, 79, 0.3);
+    cursor: pointer;
+    pointer-events: auto;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.price-range-dual input[type="range"]::-webkit-slider-thumb:hover {
+    box-shadow: 0 4px 14px rgba(11, 110, 79, 0.45);
+    transform: scale(1.12);
+}
+
+.price-range-dual input[type="range"]::-webkit-slider-thumb:active {
+    box-shadow: 0 2px 16px rgba(11, 110, 79, 0.5);
+    transform: scale(1.18);
+}
+
+.price-range-dual input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid var(--color-primary);
+    box-shadow: 0 2px 8px rgba(11, 110, 79, 0.3);
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.price-range-dual input[type="range"]::-moz-range-thumb:hover {
+    box-shadow: 0 4px 14px rgba(11, 110, 79, 0.45);
+}
+
+.price-range-dual input[type="range"]::-moz-range-track {
+    background: transparent;
+    border: none;
+}
+
+.price-range-values {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-top: 0.6rem;
+}
+
+.price-range-values .price-val-box {
+    flex: 1;
+    text-align: center;
+    background: white;
+    border: 1.5px solid #e8ecef;
+    border-radius: 10px;
+    padding: 0.45rem 0.5rem;
+    font-weight: 800;
+    font-size: 0.82rem;
+    color: var(--color-primary);
+    transition: border-color 0.2s;
+}
+
+.price-range-values .price-val-box:focus-within {
+    border-color: var(--color-primary);
+}
+
+.price-range-values .price-val-label {
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    margin-top: 0.15rem;
+    letter-spacing: 0.3px;
+}

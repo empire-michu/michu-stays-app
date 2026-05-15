@@ -65,8 +65,10 @@ service cloud.firestore {
         resource.data.targetUserId == request.auth.uid ||
         (resource.data.targetRole == 'admin' && isAdmin()) ||
         (resource.data.targetRole == 'manager' && isManager()) ||
-        (!resource.data.targetUserId && !resource.data.targetRole) || // global broadcast
-        isAdmin() // admins can read all
+        (resource.data.targetRole == 'customer') || // All customers can read customer alerts
+        (resource.data.targetRole == 'all') ||      // Everyone can read 'all' alerts
+        (!resource.data.targetUserId && !resource.data.targetRole) || // legacy global
+        isAdmin()
       );
       allow create: if isSignedIn();
       allow update: if isAdmin();

@@ -43,6 +43,7 @@ window.router.addRoute('home', async (container, params) => {
     let filterState = {
         city: 'All Cities',
         category: 'all',
+        priceMin: 100,
         priceMax: 5000,
         bedrooms: 'any',
         searchQuery: window.globalSearchQuery || '',
@@ -220,7 +221,8 @@ window.router.addRoute('home', async (container, params) => {
                 if (filterState.category === 'apartment' && !type.includes('apart')) return false;
             }
 
-            if (Number(String(p.price || 0).replace(/[^\d.-]/g, '')) > filterState.priceMax) return false;
+            const pVal = Number(String(p.price || 0).replace(/[^\d.-]/g, ''));
+            if (pVal > filterState.priceMax || pVal < filterState.priceMin) return false;
 
             // Rating filter
             if (filterState.minRating > 0) {
@@ -246,7 +248,8 @@ window.router.addRoute('home', async (container, params) => {
             filterState.sortOrder !== 'default' || 
             filterState.city !== 'All Cities' || 
             filterState.minRating > 0 || 
-            filterState.priceMax < 5000 || 
+            filterState.priceMax < maxPrice || 
+            filterState.priceMin > 100 || 
             filterState.searchQuery !== '' ||
             filterState.onlyFavorites;
 
@@ -338,8 +341,11 @@ window.router.addRoute('home', async (container, params) => {
     };
 
     const maxPriceFromProps = allProperties.length > 0 ? Math.max(...allProperties.map(p => Number(String(p.price||0).replace(/[^\d.-]/g, '')) || 0)) : 5000;
+    const minPriceFromProps = allProperties.length > 0 ? Math.min(...allProperties.map(p => Number(String(p.price||0).replace(/[^\d.-]/g, '')) || 0).filter(v => v > 0)) : 100;
     const maxPrice = Math.max(maxPriceFromProps, 5000);
+    const minPrice = Math.max(Math.min(minPriceFromProps, 100), 100);
     filterState.priceMax = maxPrice;
+    filterState.priceMin = minPrice;
 
     // --- Render Page Shell ---
     container.innerHTML = `
@@ -424,9 +430,17 @@ window.router.addRoute('home', async (container, params) => {
                     </div>
 
                     <div class="filter-section" style="margin-bottom:2rem;">
-                        <label style="display:block; font-weight:800; font-size:0.7rem; color:#999; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.5px;">Price: <span id="price-display" style="color:var(--color-primary);">${filterState.priceMax.toLocaleString()}</span> Birr</label>
-                        <input type="range" id="price-slider" class="price-range-slider" min="100" max="${maxPrice}" value="${filterState.priceMax}" step="100" style="width:100%;">
-                        <div style="display:flex; justify-content:space-between; margin-top:0.5rem; font-size:0.75rem; color:#888; font-weight:600;"><span>100</span><span>${maxPrice.toLocaleString()}</span></div>
+                        <label style="display:block; font-weight:800; font-size:0.7rem; color:#999; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.5px;">Price range</label>
+                        <div class="price-range-dual" id="price-range-dual">
+                            <div class="slider-track"></div>
+                            <div class="slider-range" id="price-slider-range"></div>
+                            <input type="range" id="price-slider-min" min="${minPrice}" max="${maxPrice}" value="${filterState.priceMin}" step="100">
+                            <input type="range" id="price-slider-max" min="${minPrice}" max="${maxPrice}" value="${filterState.priceMax}" step="100">
+                        </div>
+                        <div class="price-range-values">
+                            <div class="price-val-box"><span id="price-min-display">${filterState.priceMin.toLocaleString()}</span> ETB<span class="price-val-label">Minimum</span></div>
+                            <div class="price-val-box"><span id="price-max-display">${filterState.priceMax.toLocaleString()}</span> ETB<span class="price-val-label">Maximum</span></div>
+                        </div>
                     </div>
 
                     <div class="filter-section" style="margin-bottom:2rem;">
@@ -655,6 +669,7 @@ window.router.addRoute('home', async (container, params) => {
             ...filterState,
             city: 'All Cities',
             category: 'all',
+            priceMin: minPrice,
             priceMax: maxPrice,
             bedrooms: 'any',
             searchQuery: '',
@@ -670,6 +685,12 @@ window.router.addRoute('home', async (container, params) => {
         if (typeEl) typeEl.value = 'all';
         if (bedEl) bedEl.value = 'any';
         if (searchEl) searchEl.value = '';
+        // Reset dual sliders
+        const sliderMin = document.getElementById('price-slider-min');
+        const sliderMax = document.getElementById('price-slider-max');
+        if (sliderMin) sliderMin.value = minPrice;
+        if (sliderMax) sliderMax.value = maxPrice;
+        window.updateDualSliderUI && window.updateDualSliderUI();
         renderRatingFilter();
         const catAll = document.getElementById('cat-all');
         if (catAll) catAll.click();
@@ -706,12 +727,43 @@ window.router.addRoute('home', async (container, params) => {
         applyFilters();
     };
 
-    const slider = document.getElementById('price-slider');
-    const display = document.getElementById('price-display');
-    slider.oninput = () => {
-        filterState.priceMax = parseInt(slider.value); display.textContent = `${filterState.priceMax.toLocaleString()} Birr${filterState.priceMax>=maxPrice?'+':''}`;
+    // --- DUAL RANGE SLIDER LOGIC ---
+    const sliderMin = document.getElementById('price-slider-min');
+    const sliderMax = document.getElementById('price-slider-max');
+    const sliderRange = document.getElementById('price-slider-range');
+    const displayMin = document.getElementById('price-min-display');
+    const displayMax = document.getElementById('price-max-display');
+
+    window.updateDualSliderUI = () => {
+        const minVal = parseInt(sliderMin.value);
+        const maxVal = parseInt(sliderMax.value);
+        const range = parseInt(sliderMax.max) - parseInt(sliderMin.min);
+        const leftPct = ((minVal - parseInt(sliderMin.min)) / range) * 100;
+        const rightPct = ((parseInt(sliderMax.max) - maxVal) / range) * 100;
+        sliderRange.style.left = leftPct + '%';
+        sliderRange.style.right = rightPct + '%';
+        displayMin.textContent = minVal.toLocaleString();
+        displayMax.textContent = maxVal.toLocaleString();
+    };
+
+    sliderMin.oninput = () => {
+        if (parseInt(sliderMin.value) >= parseInt(sliderMax.value)) {
+            sliderMin.value = parseInt(sliderMax.value) - 100;
+        }
+        filterState.priceMin = parseInt(sliderMin.value);
+        window.updateDualSliderUI();
         applyFilters();
     };
+    sliderMax.oninput = () => {
+        if (parseInt(sliderMax.value) <= parseInt(sliderMin.value)) {
+            sliderMax.value = parseInt(sliderMin.value) + 100;
+        }
+        filterState.priceMax = parseInt(sliderMax.value);
+        window.updateDualSliderUI();
+        applyFilters();
+    };
+    // Initialize the slider range highlight
+    window.updateDualSliderUI();
 
     window.goToPage = (page) => {
         filterState.page = page; applyFilters();
@@ -719,14 +771,16 @@ window.router.addRoute('home', async (container, params) => {
     };
 
     window.resetFilters = () => {
-        filterState = { city: 'All Cities', category: 'all', priceMax: maxPrice, entirePlace: true, privateRoom: true, bedrooms: 'any', searchQuery: '', minRating: 0, page: 1, sortOrder: 'default' };
+        filterState = { city: 'All Cities', category: 'all', priceMin: minPrice, priceMax: maxPrice, entirePlace: true, privateRoom: true, bedrooms: 'any', searchQuery: '', minRating: 0, page: 1, sortOrder: 'default' };
         document.getElementById('city-filter').value = 'All Cities';
-        document.getElementById('search-where').value = '';
+        const searchWhereEl = document.getElementById('search-where');
+        if (searchWhereEl) searchWhereEl.value = '';
         const sortDropdown = document.getElementById('user-sort-dropdown');
         if (sortDropdown) sortDropdown.value = 'default';
         document.querySelectorAll('.category-item').forEach(el => el.classList.remove('active'));
         document.getElementById('cat-all').classList.add('active');
-        slider.value = maxPrice; display.textContent = `${maxPrice.toLocaleString()}+ Birr`;
+        sliderMin.value = minPrice; sliderMax.value = maxPrice;
+        window.updateDualSliderUI();
         renderRatingFilter();
         applyFilters();
     };
