@@ -524,8 +524,10 @@ const renderNotifList = () => {
     };
 
     let html = '';
-    Object.keys(groups).forEach(label => {
-        if (groups[label].length > 0) {
+    const sectionOrder = ['TODAY', 'YESTERDAY', 'OLDER'];
+    
+    sectionOrder.forEach(label => {
+        if (groups[label] && groups[label].length > 0) {
             html += `<div class="notif-group-header">${label}</div>`;
             groups[label].forEach(n => {
                 const s = statusMap[n.status] || statusMap.info;
