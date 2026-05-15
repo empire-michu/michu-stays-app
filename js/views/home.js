@@ -675,16 +675,20 @@ window.router.addRoute('home', async (container, params) => {
             searchQuery: '',
             minRating: 0,
             page: 1,
-            onlyFavorites: false
+            onlyFavorites: false,
+            sortOrder: 'default'
         };
         const cityEl = document.getElementById('city-filter');
         const typeEl = document.getElementById('type-filter');
         const bedEl = document.getElementById('bedrooms-filter');
         const searchEl = document.getElementById('search-where');
+        const sortDropdown = document.getElementById('user-sort-dropdown');
         if (cityEl) cityEl.value = 'All Cities';
         if (typeEl) typeEl.value = 'all';
         if (bedEl) bedEl.value = 'any';
         if (searchEl) searchEl.value = '';
+        if (sortDropdown) sortDropdown.value = 'default';
+        
         // Reset dual sliders
         const sliderMin = document.getElementById('price-slider-min');
         const sliderMax = document.getElementById('price-slider-max');
@@ -692,8 +696,11 @@ window.router.addRoute('home', async (container, params) => {
         if (sliderMax) sliderMax.value = maxPrice;
         window.updateDualSliderUI && window.updateDualSliderUI();
         renderRatingFilter();
+        
+        document.querySelectorAll('.category-item').forEach(el => el.classList.remove('active'));
         const catAll = document.getElementById('cat-all');
-        if (catAll) catAll.click();
+        if (catAll) catAll.classList.add('active');
+        
         applyFilters();
     };
 
@@ -771,18 +778,7 @@ window.router.addRoute('home', async (container, params) => {
     };
 
     window.resetFilters = () => {
-        filterState = { city: 'All Cities', category: 'all', priceMin: minPrice, priceMax: maxPrice, entirePlace: true, privateRoom: true, bedrooms: 'any', searchQuery: '', minRating: 0, page: 1, sortOrder: 'default' };
-        document.getElementById('city-filter').value = 'All Cities';
-        const searchWhereEl = document.getElementById('search-where');
-        if (searchWhereEl) searchWhereEl.value = '';
-        const sortDropdown = document.getElementById('user-sort-dropdown');
-        if (sortDropdown) sortDropdown.value = 'default';
-        document.querySelectorAll('.category-item').forEach(el => el.classList.remove('active'));
-        document.getElementById('cat-all').classList.add('active');
-        sliderMin.value = minPrice; sliderMax.value = maxPrice;
-        window.updateDualSliderUI();
-        renderRatingFilter();
-        applyFilters();
+        window.clearAllFilters();
     };
 
     window.setViewMode = (mode) => {
