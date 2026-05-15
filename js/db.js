@@ -1097,23 +1097,36 @@ class Database {
         await firestore.collection('notifications').doc(id).update({ isRead: true });
     }
 
-    async markAllNotificationsAsRead(userId) {
-        const snap = await firestore.collection('notifications')
-            .where('targetUserId', '==', userId)
-            .where('isRead', '==', false)
-            .get();
-        if (!snap.empty) {
+    async markAllNotificationsAsRead(userId, role = null) {
+        let query = firestore.collection('notifications')
+            .where('isRead', '==', false);
+        
+        // Fetch personal and role-based separately or use an OR-like approach
+        const personalSnap = await query.where('targetUserId', '==', userId).get();
+        let roleSnap = { empty: true, docs: [] };
+        if (role && role !== 'customer') {
+            roleSnap = await query.where('targetRole', '==', role).get();
+        }
+        
+        const allDocs = [...personalSnap.docs, ...roleSnap.docs];
+        if (allDocs.length > 0) {
             const batch = firestore.batch();
-            snap.docs.forEach(doc => batch.update(doc.ref, { isRead: true }));
+            allDocs.forEach(doc => batch.update(doc.ref, { isRead: true }));
             await batch.commit();
         }
     }
 
-    async deleteAllNotifications(userId) {
-        const snap = await firestore.collection('notifications').where('targetUserId', '==', userId).get();
-        if (!snap.empty) {
+    async deleteAllNotifications(userId, role = null) {
+        const personalSnap = await firestore.collection('notifications').where('targetUserId', '==', userId).get();
+        let roleSnap = { empty: true, docs: [] };
+        if (role && role !== 'customer') {
+            roleSnap = await firestore.collection('notifications').where('targetRole', '==', role).get();
+        }
+
+        const allDocs = [...personalSnap.docs, ...roleSnap.docs];
+        if (allDocs.length > 0) {
             const batch = firestore.batch();
-            snap.docs.forEach(doc => batch.delete(doc.ref));
+            allDocs.forEach(doc => batch.delete(doc.ref));
             await batch.commit();
         }
     }

@@ -461,8 +461,9 @@ const updateNotifBadge = () => {
 
 window.markAllNotifsRead = async () => {
     if (!window.auth?.currentUser) return;
+    const role = window.auth.userData?.role;
     try {
-        await window.db.markAllNotificationsAsRead(window.auth.currentUser.uid);
+        await window.db.markAllNotificationsAsRead(window.auth.currentUser.uid, role);
         notifications.forEach(n => n.isRead = true);
         unreadCount = 0;
         updateNotifBadge();
@@ -480,8 +481,9 @@ window.clearAllNotifs = async () => {
     if (!ok) return;
 
     if (!window.auth?.currentUser) return;
+    const role = window.auth.userData?.role;
     try {
-        await window.db.deleteAllNotifications(window.auth.currentUser.uid);
+        await window.db.deleteAllNotifications(window.auth.currentUser.uid, role);
         notifications = [];
         unreadCount = 0;
         updateNotifBadge();
