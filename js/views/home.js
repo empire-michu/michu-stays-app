@@ -124,7 +124,7 @@ window.router.addRoute('home', async (container, params) => {
         const distance = p.distanceFromCenter ? parseFloat(p.distanceFromCenter) : 0;
 
         return `
-        <div class="property-card" style="cursor:pointer;" onclick="window.router.navigate('hotel_detail_view', { id: '${p.id}' })">
+        <div class="property-card" style="cursor:pointer;" onclick="window.location.hash = '#hotel_detail_view?id=${p.id}'">
             <div class="property-image-container">
                 <img src="${p.image || ''}" class="property-image" alt="${p.title}" loading="lazy" onerror="this.src='https://placehold.co/400x250/e8f5e2/1a6032?text=Michu+Stays'">
                 <div class="heart-icon ${favorites.includes(p.id) ? 'active' : ''}" onclick="toggleFav(event, '${p.id}')">
@@ -820,7 +820,7 @@ window.router.addRoute('home', async (container, params) => {
 
             const marker = L.marker([p.lat, p.lng], { icon: customIcon })
                 .bindPopup(`
-                    <div style="width:200px; cursor:pointer;" onclick="window.router.navigate('hotel_detail_view', { id: '${p.id}' })">
+                    <div style="width:200px; cursor:pointer;" onclick="window.location.hash = '#hotel_detail_view?id=${p.id}'">
                         <img src="${p.image}" style="width:100%; height:100px; object-fit:cover; border-radius:8px; margin-bottom:8px;" onerror="this.src='https://placehold.co/200x100?text=Property'">
                         <div style="font-weight:800; font-size:14px; margin-bottom:4px;">${p.title}</div>
                         <div style="color:#666; font-size:12px; margin-bottom:8px;">${p.address || ''}</div>
