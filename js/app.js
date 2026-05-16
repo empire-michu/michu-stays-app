@@ -1073,7 +1073,11 @@ window.michuDeleteReviewGlobal = async (reviewId, hotelId) => {
             window.showToast("Deleting review...", "info");
             await window.db.deleteReview(reviewId);
             window.showToast("Review deleted successfully", "success");
-            if (hotelId) window.router.navigate('hotel_detail_view', { id: hotelId });
+            if (window.refreshMichuReviewsUI && hotelId) {
+                await window.refreshMichuReviewsUI(hotelId);
+            } else if (hotelId) {
+                window.router.navigate('hotel_detail_view', { id: hotelId });
+            }
         }
     } catch (err) {
         console.error("Delete review error:", err);
@@ -1089,7 +1093,11 @@ window.michuDeleteReplyGlobal = async (reviewId, hotelId) => {
             window.showToast("Removing reply...", "info");
             await window.db.deleteReviewReply(reviewId);
             window.showToast("Reply removed successfully", "success");
-            if (hotelId) window.router.navigate('hotel_detail_view', { id: hotelId });
+            if (window.refreshMichuReviewsUI && hotelId) {
+                await window.refreshMichuReviewsUI(hotelId);
+            } else if (hotelId) {
+                window.router.navigate('hotel_detail_view', { id: hotelId });
+            }
         }
     } catch (err) {
         console.error("Remove reply error:", err);

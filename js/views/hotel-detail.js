@@ -220,7 +220,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                 <span style="font-size:1.9rem; font-weight:950; color:#d97706;">${currentPrice.toLocaleString()} Birr</span>
                                 <span style="color:#64748b; font-weight:600;">/ night</span>
                              </div>
-                             <div style="background:#fff7ed; color:#ea580c; padding:0.5rem 0.9rem; border-radius:14px; font-weight:900;">★ ${avgRating || 'New'}</div>
+                             <div class="sidebar-rating-badge-update" style="background:#fff7ed; color:#ea580c; padding:0.5rem 0.9rem; border-radius:14px; font-weight:900;">★ ${avgRating || 'New'}</div>
                         </div>
 
                         <div class="sidebar-dates-grid" style="border:2px solid #f1f5f9; border-radius:18px; overflow:hidden; margin-bottom:1.8rem;">
@@ -262,7 +262,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                     <span style="font-size:1.35rem; font-weight:950; color:#d97706;">${currentPrice.toLocaleString()} Birr</span>
                                     <span style="color:#64748b; font-weight:600; font-size:0.85rem;">/ night</span>
                                  </div>
-                                 <div style="background:#fff7ed; color:#ea580c; padding:0.4rem 0.8rem; border-radius:12px; font-weight:900; font-size:0.85rem;">★ ${avgRating || 'New'}</div>
+                                 <div class="sidebar-rating-badge-update" style="background:#fff7ed; color:#ea580c; padding:0.4rem 0.8rem; border-radius:12px; font-weight:900; font-size:0.85rem;">★ ${avgRating || 'New'}</div>
                             </div>
 
                             <div class="sidebar-dates-grid" style="border:1.5px solid #f1f5f9; border-radius:14px; overflow:hidden; margin-bottom:1.2rem;">
@@ -350,45 +350,47 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
 
             <!-- REVIEWS SECTION (Vertical Feed) -->
             <section style="margin-top:4rem; padding-top:3rem; border-top:1px solid #f1f5f9;">
-                 <!-- Rating Summary -->
-                 <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:2rem; flex-wrap:wrap;">
-                    <div style="text-align:center;">
-                        <div style="font-size:3rem; font-weight:950; color:var(--color-primary); line-height:1;">${avgRating || '—'}</div>
-                        <div style="color:#f59e0b; font-size:1.2rem; margin:0.3rem 0;">${'★'.repeat(Math.round(avgRating))}${'☆'.repeat(5-Math.round(avgRating))}</div>
-                        <div style="font-size:0.8rem; color:#94a3b8; font-weight:700;">${reviewCount} review${reviewCount!==1?'s':''}</div>
-                    </div>
-                    <div style="flex:1; min-width:200px;">
-                        ${[5,4,3,2,1].map(s => {
-                            const cnt = reviews.filter(r=>r.rating===s).length;
-                            const pct = reviewCount>0 ? Math.round(cnt/reviewCount*100) : 0;
-                            return `<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:4px;">
-                                <span style="font-size:0.75rem;font-weight:700;color:#64748b;width:12px;">${s}</span>
-                                <div style="flex:1;height:8px;background:#f1f5f9;border-radius:99px;overflow:hidden;">
-                                    <div style="height:100%;width:${pct}%;background:${s>=4?'#f59e0b':s>=3?'#fbbf24':'#fb923c'};border-radius:99px;transition:width 0.6s;"></div>
-                                </div>
-                                <span style="font-size:0.7rem;color:#94a3b8;width:20px;">${cnt}</span>
-                            </div>`;
-                        }).join('')}
-                    </div>
-                 </div>
+                 <div id="reviews-summary-container">
+                     <!-- Rating Summary -->
+                     <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:2rem; flex-wrap:wrap;">
+                        <div style="text-align:center;">
+                            <div style="font-size:3rem; font-weight:950; color:var(--color-primary); line-height:1;">${avgRating || '—'}</div>
+                            <div style="color:#f59e0b; font-size:1.2rem; margin:0.3rem 0;">${'★'.repeat(Math.round(avgRating))}${'☆'.repeat(5-Math.round(avgRating))}</div>
+                            <div style="font-size:0.8rem; color:#94a3b8; font-weight:700;">${reviewCount} review${reviewCount!==1?'s':''}</div>
+                        </div>
+                        <div style="flex:1; min-width:200px;">
+                            ${[5,4,3,2,1].map(s => {
+                                const cnt = reviews.filter(r=>r.rating===s).length;
+                                const pct = reviewCount>0 ? Math.round(cnt/reviewCount*100) : 0;
+                                return `<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:4px;">
+                                    <span style="font-size:0.75rem;font-weight:700;color:#64748b;width:12px;">${s}</span>
+                                    <div style="flex:1;height:8px;background:#f1f5f9;border-radius:99px;overflow:hidden;">
+                                        <div style="height:100%;width:${pct}%;background:${s>=4?'#f59e0b':s>=3?'#fbbf24':'#fb923c'};border-radius:99px;transition:width 0.6s;"></div>
+                                    </div>
+                                    <span style="font-size:0.7rem;color:#94a3b8;width:20px;">${cnt}</span>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                     </div>
 
-                 <!-- Sub-Category Summary Grid -->
-                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.5rem; margin-bottom:2.5rem; background:#f8fafc; padding:1.8rem; border-radius:24px; border:1px solid #e2e8f0;">
-                     <div>
-                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/><path d="M5.4 5.4h.01"/><path d="M10.2 3h.01"/><path d="M3 10.2h.01"/><path d="m14 14 6-6"/></svg> Cleanliness</span><span style="color:var(--color-primary);">${cAvg}</span></div>
-                         <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(cAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
-                     </div>
-                     <div>
-                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Location</span><span style="color:var(--color-primary);">${lAvg}</span></div>
-                         <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(lAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
-                     </div>
-                     <div>
-                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4 12H2"/><path d="M22 12h-2"/><path d="m19.07 4.93-1.41 1.41"/><path d="m6.34 17.66-1.41 1.41"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M12 6a6 6 0 0 0-6 6h12a6 6 0 0 0-6-6Z"/><path d="M6 16h12"/></svg> Service</span><span style="color:var(--color-primary);">${sAvg}</span></div>
-                         <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(sAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
-                     </div>
-                     <div>
-                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13"/><path d="M13 3l3 6-4 13"/><path d="M2 9h20"/></svg> Value</span><span style="color:var(--color-primary);">${vAvg}</span></div>
-                         <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(vAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
+                     <!-- Sub-Category Summary Grid -->
+                     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.5rem; margin-bottom:2.5rem; background:#f8fafc; padding:1.8rem; border-radius:24px; border:1px solid #e2e8f0;">
+                         <div>
+                             <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/><path d="M5.4 5.4h.01"/><path d="M10.2 3h.01"/><path d="M3 10.2h.01"/><path d="m14 14 6-6"/></svg> Cleanliness</span><span style="color:var(--color-primary);">${cAvg}</span></div>
+                             <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(cAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
+                         </div>
+                         <div>
+                             <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Location</span><span style="color:var(--color-primary);">${lAvg}</span></div>
+                             <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(lAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
+                         </div>
+                         <div>
+                             <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4 12H2"/><path d="M22 12h-2"/><path d="m19.07 4.93-1.41 1.41"/><path d="m6.34 17.66-1.41 1.41"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M12 6a6 6 0 0 0-6 6h12a6 6 0 0 0-6-6Z"/><path d="M6 16h12"/></svg> Service</span><span style="color:var(--color-primary);">${sAvg}</span></div>
+                             <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(sAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
+                         </div>
+                         <div>
+                             <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13"/><path d="M13 3l3 6-4 13"/><path d="M2 9h20"/></svg> Value</span><span style="color:var(--color-primary);">${vAvg}</span></div>
+                             <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(vAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
+                         </div>
                      </div>
                  </div>
 
@@ -560,6 +562,91 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         }
     };
 
+    window.refreshMichuReviewsUI = async (hotelId) => {
+        try {
+            const reviews = await window.db.getReviews(hotelId).catch(() => []);
+            window._hotelReviews = reviews;
+            
+            let avgRating = 0, reviewCount = reviews.length;
+            let cAvg = '—', lAvg = '—', sAvg = '—', vAvg = '—';
+            if (reviewCount > 0) {
+                avgRating = Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10;
+                let cSum = 0, lSum = 0, sSum = 0, vSum = 0;
+                reviews.forEach(r => {
+                    const sub = r.subRatings || { cleanliness: r.rating, location: r.rating, service: r.rating, value: r.rating };
+                    cSum += Number(sub.cleanliness || r.rating);
+                    lSum += Number(sub.location || r.rating);
+                    sSum += Number(sub.service || r.rating);
+                    vSum += Number(sub.value || r.rating);
+                });
+                cAvg = (cSum / reviewCount).toFixed(1);
+                lAvg = (lSum / reviewCount).toFixed(1);
+                sAvg = (sSum / reviewCount).toFixed(1);
+                vAvg = (vSum / reviewCount).toFixed(1);
+            }
+
+            // Update Rating Summary Container
+            const summaryContainer = document.getElementById('reviews-summary-container');
+            if (summaryContainer) {
+                summaryContainer.innerHTML = `
+                     <!-- Rating Summary -->
+                     <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:2rem; flex-wrap:wrap;">
+                        <div style="text-align:center;">
+                            <div style="font-size:3rem; font-weight:950; color:var(--color-primary); line-height:1;">${avgRating || '—'}</div>
+                            <div style="color:#f59e0b; font-size:1.2rem; margin:0.3rem 0;">${'★'.repeat(Math.round(avgRating))}${'☆'.repeat(5-Math.round(avgRating))}</div>
+                            <div style="font-size:0.8rem; color:#94a3b8; font-weight:700;">${reviewCount} review${reviewCount!==1?'s':''}</div>
+                        </div>
+                        <div style="flex:1; min-width:200px;">
+                            ${[5,4,3,2,1].map(s => {
+                                const cnt = reviews.filter(r=>r.rating===s).length;
+                                const pct = reviewCount>0 ? Math.round(cnt/reviewCount*100) : 0;
+                                return \`<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:4px;">
+                                    <span style="font-size:0.75rem;font-weight:700;color:#64748b;width:12px;">\${s}</span>
+                                    <div style="flex:1;height:8px;background:#f1f5f9;border-radius:99px;overflow:hidden;">
+                                        <div style="height:100%;width:\${pct}%;background:\${s>=4?'#f59e0b':s>=3?'#fbbf24':'#fb923c'};border-radius:99px;transition:width 0.6s;"></div>
+                                    </div>
+                                    <span style="font-size:0.7rem;color:#94a3b8;width:20px;">\${cnt}</span>
+                                </div>\`;
+                            }).join('')}
+                        </div>
+                     </div>
+
+                     <!-- Sub-Category Summary Grid -->
+                     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.5rem; margin-bottom:2.5rem; background:#f8fafc; padding:1.8rem; border-radius:24px; border:1px solid #e2e8f0;">
+                         <div>
+                             <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/><path d="M5.4 5.4h.01"/><path d="M10.2 3h.01"/><path d="M3 10.2h.01"/><path d="m14 14 6-6"/></svg> Cleanliness</span><span style="color:var(--color-primary);">\${cAvg}</span></div>
+                             <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:\${reviewCount > 0 ? (Number(cAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
+                         </div>
+                         <div>
+                             <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Location</span><span style="color:var(--color-primary);">\${lAvg}</span></div>
+                             <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:\${reviewCount > 0 ? (Number(lAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
+                         </div>
+                         <div>
+                             <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4 12H2"/><path d="M22 12h-2"/><path d="m19.07 4.93-1.41 1.41"/><path d="m6.34 17.66-1.41 1.41"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M12 6a6 6 0 0 0-6 6h12a6 6 0 0 0-6-6Z"/><path d="M6 16h12"/></svg> Service</span><span style="color:var(--color-primary);">\${sAvg}</span></div>
+                             <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:\${reviewCount > 0 ? (Number(sAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
+                         </div>
+                         <div>
+                             <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13"/><path d="M13 3l3 6-4 13"/><path d="M2 9h20"/></svg> Value</span><span style="color:var(--color-primary);">\${vAvg}</span></div>
+                             <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:\${reviewCount > 0 ? (Number(vAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
+                         </div>
+                     </div>
+                `;
+            }
+
+            // Update Sidebar Rating Badges
+            document.querySelectorAll('.sidebar-rating-badge-update').forEach(badge => {
+                badge.innerHTML = `★ ${avgRating || 'New'}`;
+            });
+
+            // Re-render feed in place
+            if (window.renderMichuReviewsFeed) {
+                window.renderMichuReviewsFeed();
+            }
+        } catch (err) {
+            console.error("Error refreshing reviews UI:", err);
+        }
+    };
+
     window.replyToReview = (reviewId) => {
         const modal = document.getElementById('reply-modal');
         const textArea = document.getElementById('reply-text-area');
@@ -585,8 +672,12 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 await window.db.addReviewReply(reviewId, reply, managerName);
                 window.showToast("✅ Reply posted successfully!");
                 modal.style.display = 'none';
-                // Re-render to show the new reply
-                window.router.navigate('hotel_detail_view', { id: hotel.id });
+                // Re-render in place
+                if (window.refreshMichuReviewsUI) {
+                    await window.refreshMichuReviewsUI(hotel.id);
+                } else {
+                    window.router.navigate('hotel_detail_view', { id: hotel.id });
+                }
             } catch (e) {
                 console.error("Firestore Review Reply Error:", e);
                 window.showToast("❌ Failed to post reply.");
@@ -628,7 +719,11 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 await window.db.editReview(reviewId, newText, currentRating);
                 window.showToast("✅ Review updated!");
                 modal.style.display = 'none';
-                window.router.navigate('hotel-detail', {id: hotel.id}); // Refresh
+                if (window.refreshMichuReviewsUI) {
+                    await window.refreshMichuReviewsUI(hotel.id);
+                } else {
+                    window.router.navigate('hotel_detail_view', { id: hotel.id });
+                }
             } catch(e) {
                 window.showToast("❌ Error: " + e.message);
                 submitBtn.innerText = 'Save Changes';
@@ -658,7 +753,11 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 await window.db.editReviewReply(reviewId, newReply);
                 window.showToast("✅ Reply updated!");
                 modal.style.display = 'none';
-                window.router.navigate('hotel-detail', {id: hotel.id});
+                if (window.refreshMichuReviewsUI) {
+                    await window.refreshMichuReviewsUI(hotel.id);
+                } else {
+                    window.router.navigate('hotel_detail_view', { id: hotel.id });
+                }
             } catch(e) {
                 window.showToast("❌ Error: " + e.message);
                 submitBtn.innerText = 'Save Changes';
