@@ -126,20 +126,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     .mobile-order-5 { order: 5; }
                     #header-book-btn { display:none !important; }
                     #mobile-book-bar { 
-                        display:flex !important; 
-                        position:fixed; bottom:0; left:0; right:0; 
-                        background:rgba(255,255,255,0.95); 
-                        backdrop-filter:blur(10px);
-                        padding:0.9rem 1.2rem; 
-                        padding-bottom:calc(0.9rem + env(safe-area-inset-bottom,0px)); 
-                        box-shadow:0 -10px 30px rgba(0,0,0,0.08); 
-                        z-index:11000; /* Higher than other modals if needed */
-                        align-items:center; 
-                        justify-content:space-between; 
-                        gap:1rem; 
-                        border-top:1px solid rgba(0,0,0,0.05);
-                        animation: slideUpIn 0.5s ease-out;
-                        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        display:none !important; 
                     }
                     @keyframes slideUpIn { from{transform:translateY(100%)} to{transform:translateY(0)} }
                     .mobile-book-pulse { animation: mobilePulse 2s infinite; }
@@ -431,17 +418,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
             </section>
         </div>
 
-        <!-- Mobile Sticky Book Now Bar -->
-        <div id="mobile-book-bar">
-            <div style="display:flex; flex-direction:column;">
-                <span style="font-size:1.3rem;font-weight:950;color:var(--color-primary);line-height:1;">${currentPrice.toLocaleString()} Birr</span>
-                <span style="color:#64748b;font-size:0.75rem;font-weight:700;margin-top:2px;">per night</span>
-            </div>
-            <button onclick="window.michuMobileBookTrigger()" 
-                class="btn-primary mobile-book-pulse" style="padding:0.9rem 2.2rem;border-radius:18px;font-weight:800;font-size:1rem;background:linear-gradient(135deg,var(--color-primary),#1e7e34);box-shadow:0 8px 20px rgba(11,102,70,0.3);white-space:nowrap;border:none;color:white;">
-                ${isFullyBooked ? 'Fully Booked' : 'Book Now'}
-            </button>
-        </div>
+        <!-- Mobile Sticky Book Now Bar (Removed per user request) -->
 
         <div id="gallery-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.96); z-index:10000; align-items:center; justify-content:center; flex-direction:column;">
              <button style="position:absolute; top:2rem; right:2rem; background:white; border:none; border-radius:50%; width:44px; height:44px; font-size:1.5rem; cursor:pointer;" onclick="document.getElementById('gallery-modal').style.display='none'">✕</button>
