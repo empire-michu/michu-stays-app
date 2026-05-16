@@ -620,32 +620,7 @@ class Database {
         return await firestore.collection('notifications').add(payload);
     }
 
-    async markAllNotificationsAsRead(userId) {
-        if (!userId) return;
-        const snapshot = await firestore.collection('notifications')
-            .where('targetUserId', '==', userId)
-            .where('isRead', '==', false)
-            .get();
-        
-        const batch = firestore.batch();
-        snapshot.docs.forEach(doc => {
-            batch.update(doc.ref, { isRead: true });
-        });
-        return await batch.commit();
-    }
-
-    async deleteAllNotifications(userId) {
-        if (!userId) return;
-        const snapshot = await firestore.collection('notifications')
-            .where('targetUserId', '==', userId)
-            .get();
-        
-        const batch = firestore.batch();
-        snapshot.docs.forEach(doc => {
-            batch.delete(doc.ref);
-        });
-        return await batch.commit();
-    }
+    // Old duplicate methods removed — using the unified versions at the bottom of this class
 
     listenToBookings(callback, managerId = null, customerId = null) {
         let query = firestore.collection('bookings');
@@ -683,6 +658,15 @@ class Database {
                     const id = change.doc.id;
                     if (!seenIds.has(id)) {
                         seenIds.add(id);
+                        
+                        // Skip notifications this user has dismissed locally
+                        if (this.isNotifDismissed(id)) return;
+                        
+                        // Apply local read state for shared notifications
+                        const isShared = !data.targetUserId;
+                        if (isShared && this.isSharedNotifRead(id)) {
+                            data.isRead = true;
+                        }
                         
                         // ONLY trigger the popup callback if the notification is brand new (created after session start)
                         const createdAt = data.createdAt ? new Date(data.createdAt).getTime() : 0;
@@ -1232,38 +1216,90 @@ class Database {
     }
 
     async markAllNotificationsAsRead(userId, role = null) {
-        // Broadly fetch all notifications that might belong to this user
-        const personalSnap = await firestore.collection('notifications').where('targetUserId', '==', userId).get();
-        const allRoleSnap = await firestore.collection('notifications').where('targetRole', '==', 'all').get();
-        let specificRoleSnap = { empty: true, docs: [] };
-        if (role) {
-            specificRoleSnap = await firestore.collection('notifications').where('targetRole', '==', role).get();
-        }
+        if (!userId) return;
+        // 1. Mark personal notifications as read in Firestore (allowed by security rules)
+        const personalSnap = await firestore.collection('notifications')
+            .where('targetUserId', '==', userId)
+            .where('isRead', '==', false)
+            .get();
 
-        const allDocs = [...personalSnap.docs, ...allRoleSnap.docs, ...specificRoleSnap.docs];
-        const unreadDocs = allDocs.filter(d => !d.data().isRead);
-
-        if (unreadDocs.length > 0) {
+        if (!personalSnap.empty) {
             const batch = firestore.batch();
-            unreadDocs.forEach(doc => batch.update(doc.ref, { isRead: true }));
+            personalSnap.docs.forEach(doc => batch.update(doc.ref, { isRead: true }));
             await batch.commit();
         }
+
+        // 2. For shared/role-based notifications, store read IDs locally
+        //    (we can't update shared docs — Firestore rules block it, and it would affect all users)
+        try {
+            const readSharedIds = JSON.parse(localStorage.getItem('michu_read_shared_notifs') || '[]');
+            const historyStart = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000)).toISOString();
+            const sharedSnaps = [];
+            const allRoleSnap = await firestore.collection('notifications').where('targetRole', '==', 'all').where('createdAt', '>', historyStart).get();
+            sharedSnaps.push(...allRoleSnap.docs);
+            if (role && role !== 'customer') {
+                const roleSnap = await firestore.collection('notifications').where('targetRole', '==', role).where('createdAt', '>', historyStart).get();
+                sharedSnaps.push(...roleSnap.docs);
+            }
+            if (role === 'customer') {
+                const custSnap = await firestore.collection('notifications').where('targetRole', '==', 'customer').where('createdAt', '>', historyStart).get();
+                sharedSnaps.push(...custSnap.docs);
+            }
+            sharedSnaps.forEach(doc => {
+                if (!readSharedIds.includes(doc.id)) readSharedIds.push(doc.id);
+            });
+            localStorage.setItem('michu_read_shared_notifs', JSON.stringify(readSharedIds));
+        } catch(e) { console.warn('Failed to mark shared notifs as read locally:', e); }
     }
 
     async deleteAllNotifications(userId, role = null) {
-        const personalSnap = await firestore.collection('notifications').where('targetUserId', '==', userId).get();
-        const allRoleSnap = await firestore.collection('notifications').where('targetRole', '==', 'all').get();
-        let specificRoleSnap = { empty: true, docs: [] };
-        if (role) {
-            specificRoleSnap = await firestore.collection('notifications').where('targetRole', '==', role).get();
-        }
+        if (!userId) return;
+        // 1. Delete only personal notifications from Firestore (allowed by security rules)
+        const personalSnap = await firestore.collection('notifications')
+            .where('targetUserId', '==', userId)
+            .get();
 
-        const allDocs = [...personalSnap.docs, ...allRoleSnap.docs, ...specificRoleSnap.docs];
-        if (allDocs.length > 0) {
+        if (!personalSnap.empty) {
             const batch = firestore.batch();
-            allDocs.forEach(doc => batch.delete(doc.ref));
+            personalSnap.docs.forEach(doc => batch.delete(doc.ref));
             await batch.commit();
         }
+
+        // 2. For shared/role-based notifications, store dismissed IDs locally
+        //    (deleting shared docs from Firestore would remove them for ALL users)
+        try {
+            const dismissedIds = JSON.parse(localStorage.getItem('michu_dismissed_notifs') || '[]');
+            const historyStart = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000)).toISOString();
+            const sharedSnaps = [];
+            const allRoleSnap = await firestore.collection('notifications').where('targetRole', '==', 'all').where('createdAt', '>', historyStart).get();
+            sharedSnaps.push(...allRoleSnap.docs);
+            if (role && role !== 'customer') {
+                const roleSnap = await firestore.collection('notifications').where('targetRole', '==', role).where('createdAt', '>', historyStart).get();
+                sharedSnaps.push(...roleSnap.docs);
+            }
+            if (role === 'customer') {
+                const custSnap = await firestore.collection('notifications').where('targetRole', '==', 'customer').where('createdAt', '>', historyStart).get();
+                sharedSnaps.push(...custSnap.docs);
+            }
+            sharedSnaps.forEach(doc => {
+                if (!dismissedIds.includes(doc.id)) dismissedIds.push(doc.id);
+            });
+            localStorage.setItem('michu_dismissed_notifs', JSON.stringify(dismissedIds));
+        } catch(e) { console.warn('Failed to dismiss shared notifs locally:', e); }
+    }
+
+    isNotifDismissed(notifId) {
+        try {
+            const dismissed = JSON.parse(localStorage.getItem('michu_dismissed_notifs') || '[]');
+            return dismissed.includes(notifId);
+        } catch(e) { return false; }
+    }
+
+    isSharedNotifRead(notifId) {
+        try {
+            const readIds = JSON.parse(localStorage.getItem('michu_read_shared_notifs') || '[]');
+            return readIds.includes(notifId);
+        } catch(e) { return false; }
     }
 
     async cleanupOldNotifications(userId) {

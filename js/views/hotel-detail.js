@@ -844,6 +844,9 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         }
     }, 1000);
 
+    window._reviewPage = 1;
+    const REVIEWS_PER_PAGE = 10;
+
     window.renderMichuReviewsFeed = () => {
         const feedEl = document.getElementById('reviews-feed');
         if (!feedEl) return;
@@ -859,10 +862,16 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
             filtered = filtered.filter(r => r.images && r.images.length > 0);
         }
 
+        const totalReviews = filtered.length;
+        const totalPages = Math.max(1, Math.ceil(totalReviews / REVIEWS_PER_PAGE));
+        if (window._reviewPage > totalPages) window._reviewPage = totalPages;
+        const startIdx = (window._reviewPage - 1) * REVIEWS_PER_PAGE;
+        const pageReviews = filtered.slice(startIdx, startIdx + REVIEWS_PER_PAGE);
+
         const isManager = window.auth.currentUser && window.auth.currentUser.uid === hotel.managerId;
         const votedObj = JSON.parse(localStorage.getItem('michu_voted_reviews') || '{}');
 
-        feedEl.innerHTML = filtered.length > 0 ? filtered.map(r => {
+        let cardsHtml = pageReviews.length > 0 ? pageReviews.map(r => {
             const rDate = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : 'Recently';
             const isOwner = window.auth.currentUser && window.auth.currentUser.uid === r.userId;
             
@@ -937,10 +946,41 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 })()}
             </div>`;
         }).join('') : '<p style="color:#94a3b8;text-align:center;padding:2rem;">No reviews yet. Be the first to share your experience!</p>';
+
+        // Pagination bar
+        let paginationHtml = '';
+        if (totalPages > 1) {
+            const endIdx = Math.min(startIdx + REVIEWS_PER_PAGE, totalReviews);
+            let pageButtons = '';
+            for (let p = 1; p <= totalPages; p++) {
+                const isActive = p === window._reviewPage;
+                pageButtons += `<button onclick="window.goReviewPage(${p})" style="width:36px;height:36px;border-radius:10px;border:${isActive ? 'none' : '1px solid #e2e8f0'};background:${isActive ? 'var(--color-primary)' : 'white'};color:${isActive ? 'white' : '#475569'};font-weight:800;font-size:0.85rem;cursor:pointer;transition:all 0.2s;">${p}</button>`;
+            }
+            paginationHtml = `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid #f1f5f9;">
+                <div style="font-size:0.8rem;color:#94a3b8;font-weight:700;">Showing ${startIdx+1}–${endIdx} of ${totalReviews} reviews</div>
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;justify-content:center;">
+                    <button onclick="window.goReviewPage(${window._reviewPage - 1})" ${window._reviewPage <= 1 ? 'disabled' : ''} style="padding:0.5rem 1rem;border-radius:10px;border:1px solid #e2e8f0;background:white;color:${window._reviewPage <= 1 ? '#cbd5e1' : 'var(--color-primary)'};font-weight:700;font-size:0.8rem;cursor:${window._reviewPage <= 1 ? 'default' : 'pointer'};display:flex;align-items:center;gap:0.3rem;">← Prev</button>
+                    ${pageButtons}
+                    <button onclick="window.goReviewPage(${window._reviewPage + 1})" ${window._reviewPage >= totalPages ? 'disabled' : ''} style="padding:0.5rem 1rem;border-radius:10px;border:1px solid #e2e8f0;background:white;color:${window._reviewPage >= totalPages ? '#cbd5e1' : 'var(--color-primary)'};font-weight:700;font-size:0.8rem;cursor:${window._reviewPage >= totalPages ? 'default' : 'pointer'};display:flex;align-items:center;gap:0.3rem;">Next →</button>
+                </div>
+            </div>`;
+        }
+
+        feedEl.innerHTML = cardsHtml + paginationHtml;
+    };
+
+    window.goReviewPage = (page) => {
+        if (page < 1) return;
+        window._reviewPage = page;
+        window.renderMichuReviewsFeed();
+        const section = document.getElementById('reviews-feed');
+        if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
     window.filterMichuReviews = (type) => {
         window._currentReviewFilter = type;
+        window._reviewPage = 1;
         document.querySelectorAll('.review-filter-pill').forEach(btn => {
             btn.classList.remove('active');
             btn.style.background = 'white';
