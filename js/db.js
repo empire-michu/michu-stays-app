@@ -202,7 +202,8 @@ class Database {
             category: 'bookings',
             status: 'pending',
             link: 'admin',
-            params: { tab: 'bookings' }
+            params: { tab: 'bookings' },
+            bookingId: ref.id
         });
 
         // Trigger Push for Admin/Manager
@@ -216,7 +217,8 @@ class Database {
                 category: 'bookings',
                 status: 'pending',
                 link: 'manager',
-                params: { tab: 'bookings' }
+                params: { tab: 'bookings' },
+                bookingId: ref.id
             });
             this.triggerPushNotification(property.id, '🛎️ New Booking!', `New stay booked at ${property.title}.`, property.managerId, 'manager', { tab: 'bookings' });
         }
@@ -249,6 +251,30 @@ class Database {
         const booking = (await firestore.collection('bookings').doc(bookingId).get()).data();
         await firestore.collection('bookings').doc(bookingId).update({ status });
         this.clearCache('bookings');
+
+        // Update corresponding manager/admin notifications
+        try {
+            // First try querying by bookingId
+            let notifSnap = await firestore.collection('notifications').where('bookingId', '==', bookingId).get();
+            if (notifSnap.empty && booking.referenceCode) {
+                // Fallback for older notifications created before bookingId was added
+                const fallbackSnap = await firestore.collection('notifications').where('category', '==', 'bookings').get();
+                const matchingDocs = fallbackSnap.docs.filter(doc => {
+                    const data = doc.data();
+                    return data.details && (data.details.includes(booking.referenceCode) || (data.details.includes(booking.customerName) && data.details.includes(booking.propertyTitle)));
+                });
+                notifSnap = { docs: matchingDocs };
+            }
+            
+            const batch = firestore.batch();
+            const newStatus = status === 'Confirmed' ? 'confirmed' : (status === 'Denied' ? 'failed' : 'info');
+            notifSnap.docs.forEach(doc => {
+                batch.update(doc.ref, { status: newStatus });
+            });
+            await batch.commit();
+        } catch(e) {
+            console.warn("Failed to update manager/admin notification status:", e);
+        }
 
         // NOTIFY CLIENT
         let message = '📢 Booking Update';
@@ -595,6 +621,10 @@ class Database {
                             if (window.updateNotifPanelOnly) window.updateNotifPanelOnly({ id, ...data });
                         }
                     }
+                } else if (change.type === 'modified') {
+                    const data = change.doc.data();
+                    const id = change.doc.id;
+                    if (window.updateExistingNotifOnly) window.updateExistingNotifOnly({ id, ...data });
                 }
             });
         };

@@ -669,6 +669,26 @@ window.updateNotifPanelOnly = (notif) => {
     }
 };
 
+window.updateExistingNotifOnly = (notif) => {
+    const existing = notifications.find(n => n.id === notif.id);
+    if (existing) {
+        existing.message = notif.message || existing.message;
+        existing.details = notif.details || existing.details;
+        existing.status = notif.status || existing.status;
+        existing.category = notif.category || existing.category;
+        if (notif.isRead !== undefined) {
+            const wasUnread = !existing.isRead;
+            existing.isRead = !!notif.isRead;
+            if (wasUnread && existing.isRead && unreadCount > 0) {
+                unreadCount--;
+                updateNotifBadge();
+            }
+        }
+        existing.actions = notif.actions || existing.actions;
+        renderNotifList();
+    }
+};
+
 window.showPushNotification = ({ message, details, createdAt, link, params, category, status, actions, id }) => {
     // Check if we already have this notification to avoid duplicates
     if (id && notifications.find(n => n.id === id)) return;
