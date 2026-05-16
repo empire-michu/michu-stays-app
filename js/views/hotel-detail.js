@@ -299,7 +299,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         <div style="margin-top:1rem;">
                             <button onclick="document.getElementById('mobile-packages-modal').classList.add('active')" 
                                     style="width:100%; padding:0.9rem; background:linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border:1px solid rgba(217,119,6,0.3); border-radius:20px; color:#ea580c; font-weight:900; font-size:0.95rem; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 16px rgba(217,119,6,0.15); cursor:pointer;">
-                                <span style="font-size:1.2rem;">🎁</span> View ${hotel.packages.length} Exclusive Packages
+                                <span style="display:inline-flex;align-items:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 8v12"/><path d="M19 8V5c0-1.1-.9-2-2-2H7C5.9 3 5 3.9 5 5v3"/><path d="M12 3h0a3 3 0 0 0-3 3v2h6V6a3 3 0 0 0-3-3Z"/></svg></span> View ${hotel.packages.length} Exclusive Packages
                             </button>
                         </div>
                         ` : ''}
@@ -375,19 +375,19 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                  <!-- Sub-Category Summary Grid -->
                  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.5rem; margin-bottom:2.5rem; background:#f8fafc; padding:1.8rem; border-radius:24px; border:1px solid #e2e8f0;">
                      <div>
-                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span>✨ Cleanliness</span><span style="color:var(--color-primary);">${cAvg}</span></div>
+                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/><path d="M5.4 5.4h.01"/><path d="M10.2 3h.01"/><path d="M3 10.2h.01"/><path d="m14 14 6-6"/></svg> Cleanliness</span><span style="color:var(--color-primary);">${cAvg}</span></div>
                          <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(cAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
                      </div>
                      <div>
-                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span>📍 Location</span><span style="color:var(--color-primary);">${lAvg}</span></div>
+                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Location</span><span style="color:var(--color-primary);">${lAvg}</span></div>
                          <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(lAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
                      </div>
                      <div>
-                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span>🛎️ Service</span><span style="color:var(--color-primary);">${sAvg}</span></div>
+                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4 12H2"/><path d="M22 12h-2"/><path d="m19.07 4.93-1.41 1.41"/><path d="m6.34 17.66-1.41 1.41"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M12 6a6 6 0 0 0-6 6h12a6 6 0 0 0-6-6Z"/><path d="M6 16h12"/></svg> Service</span><span style="color:var(--color-primary);">${sAvg}</span></div>
                          <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(sAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
                      </div>
                      <div>
-                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span>💎 Value</span><span style="color:var(--color-primary);">${vAvg}</span></div>
+                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13"/><path d="M13 3l3 6-4 13"/><path d="M2 9h20"/></svg> Value</span><span style="color:var(--color-primary);">${vAvg}</span></div>
                          <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(vAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
                      </div>
                  </div>
@@ -512,7 +512,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     ${packageActive ? `
                     <div style="display:flex; justify-content:space-between; align-items:center; background:#fef3c7; border:1px solid #f59e0b; padding:0.6rem 1rem; border-radius:14px; margin-bottom:1rem;">
                         <div style="display:flex; align-items:center; gap:0.5rem;">
-                            <span style="font-size:1.1rem;">✨</span>
+                            <span style="display:inline-flex;align-items:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#d97706;"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/><path d="M5.4 5.4h.01"/><path d="M10.2 3h.01"/><path d="M3 10.2h.01"/><path d="m14 14 6-6"/></svg></span>
                             <div>
                                 <div style="color:#d97706; font-weight:950; font-size:0.7rem; text-transform:uppercase;">PACKAGE APPLIED</div>
                                 <div style="color:#92400e; font-weight:800; font-size:0.85rem;">${pName}</div>
@@ -677,18 +677,30 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     window.refreshMichuPricing();
 
     // Gallery Logic
-    const galleryItems = [...allImages.map(url => ({ type: 'image', url })), ...(videoUrl ? [{ type: 'video', url: videoUrl }] : [])];
+    window._currentGalleryItems = [...allImages.map(url => ({ type: 'image', url })), ...(videoUrl ? [{ type: 'video', url: videoUrl }] : [])];
     window.viewFullGallery = (idx) => {
+        window._currentGalleryItems = [...allImages.map(url => ({ type: 'image', url })), ...(videoUrl ? [{ type: 'video', url: videoUrl }] : [])];
         const modal = document.getElementById('gallery-modal');
         const thumbs = document.getElementById('gallery-thumbnails');
         modal.style.display = 'flex';
-        thumbs.innerHTML = galleryItems.map((item, i) => `<div onclick="updateSelection(${i})" style="flex:0 0 100px; height:75px; border-radius:14px; overflow:hidden; cursor:pointer; border:2px solid #fff;">${item.type==='image'?`<img src='${item.url}' style='width:100%;height:100%;object-fit:cover;'>`:'📽️'}</div>`).join('');
+        thumbs.innerHTML = window._currentGalleryItems.map((item, i) => `<div onclick="updateSelection(${i})" style="flex:0 0 100px; height:75px; border-radius:14px; overflow:hidden; cursor:pointer; border:2px solid #fff; display:flex; align-items:center; justify-content:center; background:#1e293b;">${item.type==='image'?`<img src='${item.url}' style='width:100%;height:100%;object-fit:cover;'>`:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:white;"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11v2z"/><rect width="14" height="14" x="2" y="5" rx="2" ry="2"/></svg>'}</div>`).join('');
+        updateSelection(idx);
+    };
+    window.viewReviewGallery = (reviewId, idx) => {
+        const r = window._hotelReviews.find(rev => rev.id === reviewId);
+        if (!r || !r.images) return;
+        window._currentGalleryItems = r.images.map(url => ({ type: 'image', url }));
+        const modal = document.getElementById('gallery-modal');
+        const thumbs = document.getElementById('gallery-thumbnails');
+        modal.style.display = 'flex';
+        thumbs.innerHTML = window._currentGalleryItems.map((item, i) => `<div onclick="updateSelection(${i})" style="flex:0 0 100px; height:75px; border-radius:14px; overflow:hidden; cursor:pointer; border:2px solid #fff; display:flex; align-items:center; justify-content:center; background:#1e293b;">${item.type==='image'?`<img src='${item.url}' style='width:100%;height:100%;object-fit:cover;'>`:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:white;"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11v2z"/><rect width="14" height="14" x="2" y="5" rx="2" ry="2"/></svg>'}</div>`).join('');
         updateSelection(idx);
     };
     window.updateSelection = (idx) => {
         const img = document.getElementById('gallery-main-img');
         const vid = document.getElementById('gallery-main-video');
-        const item = galleryItems[idx];
+        const item = window._currentGalleryItems[idx];
+        if (!item) return;
         img.style.display = 'none'; vid.style.display = 'none';
         if (item.type === 'image') { img.src = item.url; img.style.display = 'block'; }
         else { vid.querySelector('source').src = item.url; vid.load(); vid.style.display = 'block'; vid.play(); }
@@ -774,8 +786,8 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     </div>
                     ${isOwner ? `
                     <div style="display:flex;gap:6px;">
-                        <button onclick="window._editReview('${r.id}','${escapedText}',${r.rating})" style="background:#f0fdf4;color:#16a34a;border:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.95rem;" title="Edit">✏️</button>
-                        <button class="michu-action-btn" data-action="delete-review" data-review-id="${r.id}" data-hotel-id="${hotel.id}" style="background:#fef2f2;color:#ef4444;border:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.95rem;" title="Delete">🗑️</button>
+                        <button onclick="window._editReview('${r.id}','${escapedText}',${r.rating})" style="background:#f0fdf4;color:#16a34a;border:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.95rem;" title="Edit"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+                        <button class="michu-action-btn" data-action="delete-review" data-review-id="${r.id}" data-hotel-id="${hotel.id}" style="background:#fef2f2;color:#ef4444;border:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.95rem;" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
                     </div>` : ''}
                 </div>
 
@@ -785,13 +797,13 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 <!-- Review Images -->
                 ${r.images && r.images.length > 0 ? `
                 <div style="display:flex; gap:0.6rem; overflow-x:auto; padding-bottom:0.4rem;">
-                    ${r.images.map(img => `<img src="${img}" onclick="window.viewFullGallery(0)" style="width:80px; height:80px; object-fit:cover; border-radius:14px; cursor:pointer; border:1px solid #e2e8f0;">`).join('')}
+                    ${r.images.map((img, i) => `<img src="${img}" onclick="window.viewReviewGallery('${r.id}', ${i})" style="width:80px; height:80px; object-fit:cover; border-radius:14px; cursor:pointer; border:1px solid #e2e8f0;">`).join('')}
                 </div>` : ''}
 
                 <!-- Review Actions & Manager Reply -->
                 <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:0.8rem; flex-wrap:wrap; gap:0.8rem;">
-                    <button id="btn-helpful-${r.id}" onclick="window.voteMichuHelpful('${r.id}')" style="background:${votedObj[r.id] ? 'var(--color-primary)' : '#f1f5f9'}; color:${votedObj[r.id] ? 'white' : '#64748b'}; border:none; padding:0.5rem 1rem; border-radius:12px; font-weight:700; font-size:0.8rem; cursor:pointer; transition:all 0.2s; display:inline-flex; align-items:center; gap:0.4rem;">👍 Helpful (${r.helpfulCount || 0})</button>
-                    <button onclick="window.reportMichuReview('${r.id}')" style="background:transparent; color:#94a3b8; border:none; font-size:0.8rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:0.3rem;">⚑ Report</button>
+                    <button id="btn-helpful-${r.id}" onclick="window.voteMichuHelpful('${r.id}')" style="background:${votedObj[r.id] ? 'var(--color-primary)' : '#f1f5f9'}; color:${votedObj[r.id] ? 'white' : '#64748b'}; border:none; padding:0.5rem 1rem; border-radius:12px; font-weight:700; font-size:0.8rem; cursor:pointer; transition:all 0.2s; display:inline-flex; align-items:center; gap:0.4rem;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg> Helpful (${r.helpfulCount || 0})</button>
+                    <button onclick="window.reportMichuReview('${r.id}')" style="background:transparent; color:#94a3b8; border:none; font-size:0.8rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:0.3rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg> Report</button>
                 </div>
 
                 ${(() => {
@@ -801,12 +813,12 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         return `
                         <div style="margin-top:0.5rem;padding:1rem 1.2rem;background:#fff;border-radius:16px;border-left:4px solid #f59e0b;box-shadow:0 2px 8px rgba(0,0,0,0.03);">
                             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
-                                <strong style="color:#1e293b;font-size:0.82rem;">↳ Hotel Response</strong>
+                                <strong style="color:#1e293b;font-size:0.82rem;display:inline-flex;align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#f59e0b; vertical-align:middle; margin-right:6px;"><path d="m15 10-4 4 4 4"/><path d="M4 4v7a4 4 0 0 0 4 4h11"/></svg> Hotel Response</strong>
                                 <div style="display:flex;align-items:center;gap:6px;">
                                     ${(replyDate && replyDate!=='Invalid Date') ? `<span style="font-size:0.65rem;color:#94a3b8;font-weight:700;">${replyDate}${r.managerReply.updatedAt?' · Edited':''}</span>` : ''}
                                     ${isManager ? `
-                                        <button onclick="window._editReply('${r.id}','${replyEscaped}')" style="background:#f0fdf4;color:#16a34a;border:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.8rem;" title="Edit Reply">✏️</button>
-                                        <button class="michu-action-btn" data-action="delete-reply" data-review-id="${r.id}" data-hotel-id="${hotel.id}" style="background:#fef2f2;color:#ef4444;border:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.8rem;" title="Delete Reply">🗑️</button>
+                                        <button onclick="window._editReply('${r.id}','${replyEscaped}')" style="background:#f0fdf4;color:#16a34a;border:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.8rem;" title="Edit Reply"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+                                        <button class="michu-action-btn" data-action="delete-reply" data-review-id="${r.id}" data-hotel-id="${hotel.id}" style="background:#fef2f2;color:#ef4444;border:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.8rem;" title="Delete Reply"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
                                     ` : ''}
                                 </div>
                             </div>
@@ -814,7 +826,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         </div>`;
                     } else if (isManager) {
                         return `<div style="margin-top:0.5rem;">
-                            <button onclick="window.replyToReview('${r.id}')" style="width:100%;background:#f1f5f9;border:1px dashed #cbd5e1;color:#475569;padding:0.7rem;border-radius:14px;font-size:0.8rem;cursor:pointer;font-weight:700;">↩ Reply to Guest</button>
+                            <button onclick="window.replyToReview('${r.id}')" style="width:100%;background:#f1f5f9;border:1px dashed #cbd5e1;color:#475569;padding:0.7rem;border-radius:14px;font-size:0.8rem;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.4rem;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="m15 10-4 4 4 4"/><path d="M4 4v7a4 4 0 0 0 4 4h11"/></svg> Reply to Guest</button>
                         </div>`;
                     }
                     return '';

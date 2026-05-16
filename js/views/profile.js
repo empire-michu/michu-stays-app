@@ -279,7 +279,7 @@ window.router.addRoute('profile', async (container, params) => {
                     <!-- Clear Profile Data -->
                     <div style="background:white;border-radius:14px;padding:1.2rem;border:1px solid #fed7d7;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
                         <div>
-                            <div style="font-weight:700;color:#744210;font-size:0.95rem;">🧹 ${window.t('Reset Profile Details')}</div>
+                            <div style="font-weight:700;color:#744210;font-size:0.95rem;display:flex;align-items:center;gap:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#d69e2e;"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/><path d="M5.4 5.4h.01"/><path d="M10.2 3h.01"/><path d="M3 10.2h.01"/><path d="m14 14 6-6"/></svg> ${window.t('Reset Profile Details')}</div>
                             <div style="font-size:0.8rem;color:#975a16;margin-top:0.2rem;">${window.t('Clears your name, phone, city, and profile photo.')}</div>
                         </div>
                         <button class="btn-outline" style="border-color:#fbd38d;color:#744210;background:white;padding:0.6rem 1.4rem;font-weight:700;white-space:nowrap;flex-shrink:0;" onclick="window.confirmResetProfile()">${window.t('Reset Profile')}</button>
@@ -288,7 +288,7 @@ window.router.addRoute('profile', async (container, params) => {
                     <!-- Delete Booking History -->
                     <div style="background:white;border-radius:14px;padding:1.2rem;border:1px solid #fed7d7;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
                         <div>
-                            <div style="font-weight:700;color:#822727;font-size:0.95rem;">📋 ${window.t('Delete Booking History')}</div>
+                            <div style="font-weight:700;color:#822727;font-size:0.95rem;display:flex;align-items:center;gap:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#e53e3e;"><rect width="14" height="18" x="5" y="4" rx="2"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="M5 10h14"/></svg> ${window.t('Delete Booking History')}</div>
                             <div style="font-size:0.8rem;color:#9b2c2c;margin-top:0.2rem;">${window.t('Permanently removes all your booking records.')}</div>
                         </div>
                         <button class="btn-outline" style="border-color:#fc8181;color:#c53030;background:white;padding:0.6rem 1.4rem;font-weight:700;white-space:nowrap;flex-shrink:0;" onclick="window.confirmClearBookings()">${window.t('Clear History')}</button>
@@ -318,19 +318,19 @@ window.router.addRoute('profile', async (container, params) => {
                     <div style="font-weight:800; font-size:0.85rem; text-transform:uppercase; color:#888; margin-bottom:1rem; text-align:center;">Detailed Category Ratings</div>
                     <div style="display:grid; gap:1rem;">
                         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-                            <span style="font-weight:700; font-size:0.95rem;">✨ Cleanliness</span>
+                            <span style="font-weight:700; font-size:0.95rem; display:inline-flex; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/><path d="M5.4 5.4h.01"/><path d="M10.2 3h.01"/><path d="M3 10.2h.01"/><path d="m14 14 6-6"/></svg> Cleanliness</span>
                             <div id="sub-stars-cleanliness" style="display:flex; gap:0.4rem;"></div>
                         </div>
                         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-                            <span style="font-weight:700; font-size:0.95rem;">📍 Location</span>
+                            <span style="font-weight:700; font-size:0.95rem; display:inline-flex; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Location</span>
                             <div id="sub-stars-location" style="display:flex; gap:0.4rem;"></div>
                         </div>
                         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-                            <span style="font-weight:700; font-size:0.95rem;">🛎️ Service</span>
+                            <span style="font-weight:700; font-size:0.95rem; display:inline-flex; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4 12H2"/><path d="M22 12h-2"/><path d="m19.07 4.93-1.41 1.41"/><path d="m6.34 17.66-1.41 1.41"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M12 6a6 6 0 0 0-6 6h12a6 6 0 0 0-6-6Z"/><path d="M6 16h12"/></svg> Service</span>
                             <div id="sub-stars-service" style="display:flex; gap:0.4rem;"></div>
                         </div>
                         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-                            <span style="font-weight:700; font-size:0.95rem;">💎 Value</span>
+                            <span style="font-weight:700; font-size:0.95rem; display:inline-flex; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13"/><path d="M13 3l3 6-4 13"/><path d="M2 9h20"/></svg> Value</span>
                             <div id="sub-stars-value" style="display:flex; gap:0.4rem;"></div>
                         </div>
                     </div>
@@ -345,7 +345,7 @@ window.router.addRoute('profile', async (container, params) => {
                     <label style="display:block; font-weight:800; font-size:0.8rem; text-transform:uppercase; color:#888; margin-bottom:0.6rem;">Share Photos (Optional)</label>
                     <div id="review-photo-list" style="display:flex; gap:0.8rem; flex-wrap:wrap; margin-bottom:1rem;">
                         <div onclick="document.getElementById('input-review-photos').click()" style="width:80px; height:80px; border-radius:14px; border:2px dashed #ddd; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; color:#aaa; font-size:0.7rem; gap:4px; hover:background:#f9f9f9;">
-                            <span style="font-size:1.5rem;">📸</span>
+                            <span style="display:flex;align-items:center;justify-content:center;margin-bottom:2px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></span>
                             <span>Add Photo</span>
                         </div>
                     </div>
