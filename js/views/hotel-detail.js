@@ -515,9 +515,6 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         if (boutMobile) boutMobile.value = endStr;
         window.refreshMichuPricing();
         window.showToast(`✅ ${pkg.title} Activated! Check the total below.`);
-    };.toISOString().split('T')[0];
-        window.refreshMichuPricing();
-        window.showToast(`✅ ${pkg.title} Activated! Check the total below.`);
     };
 
     window.replyToReview = (reviewId) => {
