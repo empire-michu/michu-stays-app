@@ -85,6 +85,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     // Track fully booked status for reserve button blocking
     const isFullyBooked = (hotel.availableRooms !== undefined && hotel.availableRooms !== null && hotel.availableRooms <= 0);
     window._michuCurrentHotelFullyBooked = isFullyBooked;
+    window._selectedPackageIndex = null;
 
     container.innerHTML = `
         <div class="container" style="padding-top:1.5rem; padding-bottom:5rem;">
@@ -192,7 +193,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                             <span style="color:#d97706; font-weight:950; font-size:1.6rem; line-height:1;">${pkg.discount}% OFF</span>
                                             <span style="font-size:0.65rem; color:#94a3b8; font-weight:700; margin-top:0.3rem;">LIMITED TIME DEAL</span>
                                         </div>
-                                        <span class="btn-primary" style="padding:0.8rem 1.8rem; border-radius:16px; font-size:0.9rem; font-weight:800; background:linear-gradient(135deg, #0b6646 0%, #15803d 100%); box-shadow:0 6px 15px rgba(11,102,70,0.25);">Select Bundle</span>
+                                        <span class="btn-primary pkg-select-btn" id="desktop-pkg-btn-${idx}" style="padding:0.8rem 1.8rem; border-radius:16px; font-size:0.9rem; font-weight:800; background:linear-gradient(135deg, #0b6646 0%, #15803d 100%); box-shadow:0 6px 15px rgba(11,102,70,0.25);">Select Bundle</span>
                                     </div>
                                     <!-- Decorative glow -->
                                     <div style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:60%; height:2px; background:linear-gradient(90deg, transparent, rgba(217,119,6,0.3), transparent); opacity:0.5;"></div>
@@ -329,7 +330,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                             <span style="color:#d97706; font-weight:950; font-size:1.35rem; line-height:1;">${pkg.discount}% OFF</span>
                                             <span style="font-size:0.65rem; color:#94a3b8; font-weight:700; margin-top:0.3rem;">LIMITED TIME DEAL</span>
                                         </div>
-                                        <span class="btn-primary" style="padding:0.7rem 1.4rem; border-radius:14px; font-size:0.85rem; font-weight:800; background:linear-gradient(135deg, #0b6646 0%, #15803d 100%); box-shadow:0 6px 15px rgba(11,102,70,0.25);">Select Bundle</span>
+                                        <span class="btn-primary pkg-select-btn" id="mobile-pkg-btn-${idx}" style="padding:0.7rem 1.4rem; border-radius:14px; font-size:0.85rem; font-weight:800; background:linear-gradient(135deg, #0b6646 0%, #15803d 100%); box-shadow:0 6px 15px rgba(11,102,70,0.25);">Select Bundle</span>
                                     </div>
                                 </div>`).join('')}
                         </div>
@@ -485,6 +486,30 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     const summaries = document.querySelectorAll('.price-summary-area');
     const mainBtns = document.querySelectorAll('.final-reserve-trigger');
 
+    window.updateMichuPkgButtons = () => {
+        (hotel.packages || []).forEach((pkg, idx) => {
+            const dBtn = document.getElementById(`desktop-pkg-btn-${idx}`);
+            const mBtn = document.getElementById(`mobile-pkg-btn-${idx}`);
+            const isSelected = (window._selectedPackageIndex === idx);
+            
+            const activeBg = 'linear-gradient(135deg, #d97706 0%, #b45309 100%)';
+            const activeText = 'Selected (Tap to Unselect)';
+            const normalBg = 'linear-gradient(135deg, #0b6646 0%, #15803d 100%)';
+            const normalText = 'Select Bundle';
+
+            if (dBtn) {
+                dBtn.innerText = isSelected ? activeText : normalText;
+                dBtn.style.background = isSelected ? activeBg : normalBg;
+                dBtn.style.boxShadow = isSelected ? '0 6px 15px rgba(217,119,6,0.3)' : '0 6px 15px rgba(11,102,70,0.25)';
+            }
+            if (mBtn) {
+                mBtn.innerText = isSelected ? activeText : normalText;
+                mBtn.style.background = isSelected ? activeBg : normalBg;
+                mBtn.style.boxShadow = isSelected ? '0 6px 15px rgba(217,119,6,0.3)' : '0 6px 15px rgba(11,102,70,0.25)';
+            }
+        });
+    };
+
     window.refreshMichuPricing = () => {
         const activeBin = bin?.value || binMobile?.value;
         const activeBout = bout?.value || boutMobile?.value;
@@ -498,8 +523,16 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         const nights = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)) || 0;
         
         let packageActive = false, disc = dPct, pName = '';
-        const curPkg = (hotel.packages || []).find(p => parseInt(p.nights) === nights);
-        if (curPkg) { disc = curPkg.discount; packageActive = true; pName = curPkg.title; }
+        if (window._selectedPackageIndex !== null && hotel.packages && hotel.packages[window._selectedPackageIndex]) {
+            const curPkg = hotel.packages[window._selectedPackageIndex];
+            if (nights === parseInt(curPkg.nights)) {
+                disc = curPkg.discount; 
+                packageActive = true; 
+                pName = curPkg.title;
+            } else {
+                window._selectedPackageIndex = null;
+            }
+        }
 
         if (nights > 0) {
             const sub = (origPrice || currentPrice) * nights;
@@ -509,7 +542,17 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
             mainBtns.forEach(btn => btn.innerText = packageActive ? 'Reserve Package' : 'Reserve Now');
             summaries.forEach(summary => summary.innerHTML = `
                 <div style="background:#f8fafc; padding:1.5rem; border-radius:22px; border:1px solid #f1f5f9;">
-                    ${packageActive ? `<div style="color:#d97706; font-weight:950; font-size:0.7rem; margin-bottom:0.8rem; text-transform:uppercase;">✨ ${pName} APPLIED</div>` : ''}
+                    ${packageActive ? `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#fef3c7; border:1px solid #f59e0b; padding:0.6rem 1rem; border-radius:14px; margin-bottom:1rem;">
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <span style="font-size:1.1rem;">✨</span>
+                            <div>
+                                <div style="color:#d97706; font-weight:950; font-size:0.7rem; text-transform:uppercase;">PACKAGE APPLIED</div>
+                                <div style="color:#92400e; font-weight:800; font-size:0.85rem;">${pName}</div>
+                            </div>
+                        </div>
+                        <button onclick="window.applyMichuPkg(${window._selectedPackageIndex})" style="background:#fee2e2; color:#ef4444; border:none; padding:0.4rem 0.8rem; border-radius:10px; font-weight:800; font-size:0.75rem; cursor:pointer; display:flex; align-items:center; gap:0.3rem; box-shadow:0 2px 6px rgba(239,68,68,0.2);">✕ Remove</button>
+                    </div>` : ''}
                     <div style="display:flex; justify-content:space-between; color:#64748b; margin-bottom:0.6rem;">
                         <span>${(origPrice || currentPrice).toLocaleString()} x ${nights} nights</span>
                         <span>${sub.toLocaleString()} Birr</span>
@@ -522,6 +565,8 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
              mainBtns.forEach(btn => btn.innerText = 'Select Dates');
              summaries.forEach(summary => summary.innerHTML = `<p style="text-align:center; color:#94a3b8; font-weight:700; font-size:0.85rem;">Select check-in/out to book</p>`);
         }
+
+        window.updateMichuPkgButtons();
     };
 
     if (bin) bin.onchange = window.refreshMichuPricing;
@@ -530,15 +575,22 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     if (boutMobile) boutMobile.onchange = window.refreshMichuPricing;
 
     window.applyMichuPkg = (idx) => {
-        const pkg = hotel.packages[idx];
-        const start = new Date(bin?.value || binMobile?.value);
-        const end = new Date(start); 
-        end.setDate(start.getDate() + parseInt(pkg.nights));
-        const endStr = end.toISOString().split('T')[0];
-        if (bout) bout.value = endStr;
-        if (boutMobile) boutMobile.value = endStr;
-        window.refreshMichuPricing();
-        window.showToast(`✅ ${pkg.title} Activated! Check the total below.`);
+        if (window._selectedPackageIndex === idx) {
+            window._selectedPackageIndex = null;
+            window.refreshMichuPricing();
+            window.showToast("ℹ️ Package unselected. Showing standard rate.");
+        } else {
+            window._selectedPackageIndex = idx;
+            const pkg = hotel.packages[idx];
+            const start = new Date(bin?.value || binMobile?.value);
+            const end = new Date(start); 
+            end.setDate(start.getDate() + parseInt(pkg.nights));
+            const endStr = end.toISOString().split('T')[0];
+            if (bout) bout.value = endStr;
+            if (boutMobile) boutMobile.value = endStr;
+            window.refreshMichuPricing();
+            window.showToast(`✅ ${pkg.title} Activated! Check the total below.`);
+        }
     };
 
     window.replyToReview = (reviewId) => {
