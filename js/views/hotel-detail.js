@@ -605,13 +605,13 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                             ${[5,4,3,2,1].map(s => {
                                 const cnt = reviews.filter(r=>r.rating===s).length;
                                 const pct = reviewCount>0 ? Math.round(cnt/reviewCount*100) : 0;
-                                return \`<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:4px;">
-                                    <span style="font-size:0.75rem;font-weight:700;color:#64748b;width:12px;">\${s}</span>
+                                return `<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:4px;">
+                                    <span style="font-size:0.75rem;font-weight:700;color:#64748b;width:12px;">${s}</span>
                                     <div style="flex:1;height:8px;background:#f1f5f9;border-radius:99px;overflow:hidden;">
-                                        <div style="height:100%;width:\${pct}%;background:\${s>=4?'#f59e0b':s>=3?'#fbbf24':'#fb923c'};border-radius:99px;transition:width 0.6s;"></div>
+                                        <div style="height:100%;width:${pct}%;background:${s>=4?'#f59e0b':s>=3?'#fbbf24':'#fb923c'};border-radius:99px;transition:width 0.6s;"></div>
                                     </div>
-                                    <span style="font-size:0.7rem;color:#94a3b8;width:20px;">\${cnt}</span>
-                                </div>\`;
+                                    <span style="font-size:0.7rem;color:#94a3b8;width:20px;">${cnt}</span>
+                                </div>`;
                             }).join('')}
                         </div>
                      </div>
