@@ -247,71 +247,95 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                            Reserve Now
                         </button>
                         `}
-                        
                         <div class="price-summary-area" style="margin-top:1.8rem;"></div>
                     </div>
                 </div>
 
-                <!-- MOBILE CAROUSEL WRAPPER (Reserve Now & Exclusive Offers side-by-side) -->
+                <!-- MOBILE CAROUSEL WRAPPER (Reserve Now Card + Packages Trigger Button) -->
                 <div class="booking-offers-mobile-wrapper mobile-order-3">
                     <div class="desktop-sidebar" style="width:100%;">
-                        <div class="sidebar-card" style="background:white; padding:1.8rem; border:1px solid #eee; border-radius:28px; box-shadow:0 20px 40px rgba(0,0,0,0.06);">
-                            <div class="sidebar-price-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                        <div class="sidebar-card" style="background:white; padding:1.2rem; border:1px solid rgba(11,110,79,0.15); border-radius:16px; box-shadow:0 10px 25px rgba(11,110,79,0.08); background:linear-gradient(135deg, #ffffff 0%, #f8fdfa 100%);">
+                            <div class="sidebar-price-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                                  <div>
-                                    <span style="font-size:1.9rem; font-weight:950; color:#d97706;">${currentPrice.toLocaleString()} Birr</span>
-                                    <span style="color:#64748b; font-weight:600;">/ night</span>
+                                    <span style="font-size:1.35rem; font-weight:950; color:#d97706;">${currentPrice.toLocaleString()} Birr</span>
+                                    <span style="color:#64748b; font-weight:600; font-size:0.85rem;">/ night</span>
                                  </div>
-                                 <div style="background:#fff7ed; color:#ea580c; padding:0.5rem 0.9rem; border-radius:14px; font-weight:900;">★ ${avgRating || 'New'}</div>
+                                 <div style="background:#fff7ed; color:#ea580c; padding:0.4rem 0.8rem; border-radius:12px; font-weight:900; font-size:0.85rem;">★ ${avgRating || 'New'}</div>
                             </div>
 
-                            <div class="sidebar-dates-grid" style="border:2px solid #f1f5f9; border-radius:18px; overflow:hidden; margin-bottom:1.8rem;">
+                            <div class="sidebar-dates-grid" style="border:1.5px solid #f1f5f9; border-radius:14px; overflow:hidden; margin-bottom:1.2rem;">
                                  <div style="display:grid; grid-template-columns:1fr 1fr;">
-                                    <div style="padding:1rem; border-right:1px solid #f1f5f9;">
+                                    <div style="padding:0.6rem 0.8rem; border-right:1px solid #f1f5f9;">
                                         <label style="display:block; font-size:0.65rem; font-weight:900; color:#94a3b8; text-transform:uppercase;">Check-in</label>
-                                        <input type="date" id="book-in-mobile" style="border:none; width:100%; font-weight:800; background:transparent; outline:none;">
+                                        <input type="date" id="book-in-mobile" style="border:none; width:100%; font-size:0.85rem; font-weight:800; background:transparent; outline:none;">
                                     </div>
-                                    <div style="padding:1rem;">
+                                    <div style="padding:0.6rem 0.8rem;">
                                         <label style="display:block; font-size:0.65rem; font-weight:900; color:#94a3b8; text-transform:uppercase;">Check-out</label>
-                                        <input type="date" id="book-out-mobile" style="border:none; width:100%; font-weight:800; background:transparent; outline:none;">
+                                        <input type="date" id="book-out-mobile" style="border:none; width:100%; font-size:0.85rem; font-weight:800; background:transparent; outline:none;">
                                     </div>
                                  </div>
                             </div>
 
                             ${isFullyBooked ? `
                             <button class="btn-primary final-reserve-trigger" 
-                                    style="width:100%; padding:1.5rem; font-size:1.3rem; border-radius:20px; font-weight:950; background:#c5221f; box-shadow:0 12px 24px rgba(197,34,31,0.25); cursor:not-allowed; opacity:0.9;"
+                                    style="width:100%; padding:0.85rem; font-size:1.05rem; border-radius:14px; font-weight:950; background:#c5221f; box-shadow:0 6px 15px rgba(197,34,31,0.25); cursor:not-allowed; opacity:0.9;"
                                     onclick="const tEl=document.querySelector('.final-total-val'); window.michuFinalNav('${id}', document.getElementById('book-in-mobile').value || document.getElementById('book-in').value, document.getElementById('book-out-mobile').value || document.getElementById('book-out').value, tEl?tEl.innerText:'')">
-                               Fully Booked
+                                Fully Booked
                             </button>
                             ` : `
                             <button class="btn-primary final-reserve-trigger" 
-                                    style="width:100%; padding:1.5rem; font-size:1.3rem; border-radius:20px; font-weight:950; background:linear-gradient(135deg, var(--color-primary), #1e7e34); box-shadow:0 12px 24px rgba(11,102,70,0.25);"
+                                    style="width:100%; padding:0.85rem; font-size:1.05rem; border-radius:14px; font-weight:950; background:linear-gradient(135deg, var(--color-primary), #1e7e34); box-shadow:0 6px 15px rgba(11,102,70,0.25);"
                                     onclick="const tEl=document.querySelector('.final-total-val'); window.michuFinalNav('${id}', document.getElementById('book-in-mobile').value || document.getElementById('book-in').value, document.getElementById('book-out-mobile').value || document.getElementById('book-out').value, tEl?tEl.innerText:'')">
-                               Reserve Now
+                                Reserve Now
                             </button>
                             `}
                             
-                            <div class="price-summary-area" style="margin-top:1.8rem;"></div>
+                            <div class="price-summary-area" style="margin-top:1.2rem;"></div>
+                        </div>
+
+                        ${hotel.packages && hotel.packages.length > 0 ? `
+                        <div style="margin-top:1rem;">
+                            <button onclick="document.getElementById('mobile-packages-modal').classList.add('active')" 
+                                    style="width:100%; padding:0.9rem; background:linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border:1px solid rgba(217,119,6,0.3); border-radius:20px; color:#ea580c; font-weight:900; font-size:0.95rem; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 16px rgba(217,119,6,0.15); cursor:pointer;">
+                                <span style="font-size:1.2rem;">🎁</span> View ${hotel.packages.length} Exclusive Packages
+                            </button>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <!-- MOBILE PACKAGES MODAL SHEET -->
+                ${hotel.packages && hotel.packages.length > 0 ? `
+                <div id="mobile-packages-modal" class="mobile-packages-sheet" onclick="if(event.target===this) this.classList.remove('active')">
+                    <div class="sheet-content">
+                        <div class="sheet-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid #f1f5f9;">
+                            <div>
+                                <h3 style="margin:0; font-size:1.3rem; font-weight:900; color:#1e293b;">Exclusive Packages</h3>
+                                <span style="font-size:0.75rem; color:#64748b;">Special bundled offers for your stay</span>
+                            </div>
+                            <button onclick="document.getElementById('mobile-packages-modal').classList.remove('active')" style="background:#f1f5f9; border:none; width:36px; height:36px; border-radius:50%; font-size:1.2rem; font-weight:bold; color:#64748b; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+                        </div>
+                        <div class="sheet-body" style="display:flex; flex-direction:column; gap:1rem; max-height:70vh; overflow-y:auto; padding-right:0.5rem;">
+                            ${hotel.packages.map((pkg, idx) => `
+                                <div class="pkg-card-modal" onclick="document.getElementById('mobile-packages-modal').classList.remove('active'); window.applyMichuPkg(${idx})" 
+                                     style="background:linear-gradient(135deg, #ffffff 0%, #fffbf2 100%); border:1px solid rgba(217,119,6,0.2); border-radius:20px; padding:1.2rem; cursor:pointer; position:relative; transition:all 0.3s ease; box-shadow:0 10px 25px rgba(217,119,6,0.08);">
+                                    <div style="background:linear-gradient(90deg, #fff7ed 0%, #ffedd5 100%); color:#ea580c; font-weight:950; font-size:0.7rem; padding:0.4rem 0.8rem; border-radius:99px; display:inline-flex; align-items:center; gap:0.4rem; margin-bottom:0.8rem; text-transform:uppercase; border:1px solid rgba(234,88,12,0.1);">
+                                        <span style="font-size:0.85rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span> ${pkg.nights} Night Bundle
+                                    </div>
+                                    <h4 style="margin:0 0 0.4rem; font-size:1.15rem; font-weight:900; color:#1e293b;">${pkg.title}</h4>
+                                    <p style="font-size:0.85rem; line-height:1.4; color:#64748b; margin-bottom:1.2rem;">${pkg.services || 'Inclusive premium amenities.'}</p>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1.2rem; border-top:1.5px solid #f1f5f9;">
+                                        <div style="display:flex; flex-direction:column;">
+                                            <span style="color:#d97706; font-weight:950; font-size:1.35rem; line-height:1;">${pkg.discount}% OFF</span>
+                                            <span style="font-size:0.65rem; color:#94a3b8; font-weight:700; margin-top:0.3rem;">LIMITED TIME DEAL</span>
+                                        </div>
+                                        <span class="btn-primary" style="padding:0.7rem 1.4rem; border-radius:14px; font-size:0.85rem; font-weight:800; background:linear-gradient(135deg, #0b6646 0%, #15803d 100%); box-shadow:0 6px 15px rgba(11,102,70,0.25);">Select Bundle</span>
+                                    </div>
+                                </div>`).join('')}
                         </div>
                     </div>
-                    ${hotel.packages && hotel.packages.length > 0 ? hotel.packages.map((pkg, idx) => `
-                        <div class="pkg-card" onclick="window.applyMichuPkg(${idx})" 
-                             style="background:white; border:1px solid rgba(217,119,6,0.1); border-radius:26px; padding:1.8rem; cursor:pointer; position:relative; transition:all 0.4s ease; box-shadow:0 10px 20px rgba(0,0,0,0.03);">
-                            <div style="background:linear-gradient(90deg, #fff7ed 0%, #ffedd5 100%); color:#ea580c; font-weight:950; font-size:0.7rem; padding:0.5rem 1rem; border-radius:99px; display:inline-flex; align-items:center; gap:0.4rem; margin-bottom:1.2rem; text-transform:uppercase; border:1px solid rgba(234,88,12,0.1); box-shadow:0 2px 8px rgba(234,88,12,0.05);">
-                                <span style="font-size:0.9rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span> ${pkg.nights} Night Bundle
-                            </div>
-                            <h3 style="margin:0 0 0.6rem; font-size:1.35rem; font-weight:900; color:#1e293b;">${pkg.title}</h3>
-                            <p style="font-size:0.95rem; line-height:1.6; color:#64748b; margin-bottom:1.8rem; height:45px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${pkg.services || 'Inclusive premium amenities.'}</p>
-                            <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1.5rem; border-top:1.5px solid #f1f5f9;">
-                                <div style="display:flex; flex-direction:column;">
-                                    <span style="color:#d97706; font-weight:950; font-size:1.6rem; line-height:1;">${pkg.discount}% OFF</span>
-                                    <span style="font-size:0.65rem; color:#94a3b8; font-weight:700; margin-top:0.3rem;">LIMITED TIME DEAL</span>
-                                </div>
-                                <span class="btn-primary" style="padding:0.8rem 1.8rem; border-radius:16px; font-size:0.9rem; font-weight:800; background:linear-gradient(135deg, #0b6646 0%, #15803d 100%); box-shadow:0 6px 15px rgba(11,102,70,0.25);">Select Bundle</span>
-                            </div>
-                            <div style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:60%; height:2px; background:linear-gradient(90deg, transparent, rgba(217,119,6,0.3), transparent); opacity:0.5;"></div>
-                        </div>`).join('') : ''}
                 </div>
+                ` : ''}
             </div>
 
             <!-- MAP SECTION -->
