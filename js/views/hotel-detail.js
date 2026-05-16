@@ -44,7 +44,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     const id = params.id;
     container.innerHTML = `<div class="container" style="text-align:center;padding-top:4rem;">Loading...</div>`;
     
-    const hotel = await window.db.getPropertyById(id, true);
+    const hotel = await window.db.getPropertyById(id, false);
     if (!hotel) {
         container.innerHTML = `<div class="container" style="padding:4rem;text-align:center;">Property not found.</div>`;
         return;

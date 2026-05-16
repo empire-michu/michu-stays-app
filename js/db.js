@@ -104,12 +104,23 @@ class Database {
     }
 
     async getPropertyById(id, forceRefresh = false) {
+        // Fast path: check in-memory cache first for instant UI responsiveness
+        if (!forceRefresh && this.cache && this.cache.properties) {
+            const found = this.cache.properties.find(p => p.id === id);
+            if (found) return found;
+        }
         try {
             const options = forceRefresh ? { source: 'server' } : {};
-            const doc = await firestore.collection('properties').doc(id).get(options);
+            const fetchPromise = firestore.collection('properties').doc(id).get(options);
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000));
+            const doc = await Promise.race([fetchPromise, timeoutPromise]);
             return doc.exists ? { id: doc.id, ...doc.data() } : null;
         } catch (e) {
-            // Fallback to cache if server fetch fails
+            // Fallback to cache/local if server fetch fails or times out
+            if (this.cache && this.cache.properties) {
+                const found = this.cache.properties.find(p => p.id === id);
+                if (found) return found;
+            }
             const doc = await firestore.collection('properties').doc(id).get();
             return doc.exists ? { id: doc.id, ...doc.data() } : null;
         }
