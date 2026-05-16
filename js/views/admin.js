@@ -158,17 +158,56 @@ window.router.addRoute('admin', async (container, params) => {
         renderAdmin();
     };
 
+    let editAnnouncementId = null;
+
+    window.admEditAnnouncement = (id) => {
+        const ann = (window.cachedAnnouncements || []).find(a => a.id === id);
+        if (!ann) return;
+        editAnnouncementId = id;
+        // Populate form fields
+        document.getElementById('ann-title').value = ann.title || '';
+        document.getElementById('ann-body').value = ann.body || '';
+        document.getElementById('ann-badge').value = ann.badge || '';
+        document.getElementById('ann-cta').value = ann.cta || '';
+        document.getElementById('ann-link').value = ann.ctaLink || '';
+        document.getElementById('ann-type').value = ann.type || 'promo';
+        document.getElementById('ann-active').checked = ann.active !== false;
+        // Update button text
+        const btn = document.getElementById('ann-save-btn');
+        if (btn) btn.textContent = '💾 Save Changes';
+        // Show cancel edit button
+        const cancelBtn = document.getElementById('ann-cancel-edit-btn');
+        if (cancelBtn) cancelBtn.style.display = 'inline-block';
+        // Scroll to form
+        document.getElementById('adm-tab-announcements')?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.admCancelEditAnnouncement = () => {
+        editAnnouncementId = null;
+        document.getElementById('ann-title').value = '';
+        document.getElementById('ann-body').value = '';
+        document.getElementById('ann-badge').value = '';
+        document.getElementById('ann-cta').value = '';
+        document.getElementById('ann-link').value = '';
+        document.getElementById('ann-media').value = '';
+        document.getElementById('ann-active').checked = true;
+        const btn = document.getElementById('ann-save-btn');
+        if (btn) btn.textContent = '📢 Publish Announcement';
+        const cancelBtn = document.getElementById('ann-cancel-edit-btn');
+        if (cancelBtn) cancelBtn.style.display = 'none';
+    };
+
     window.admSaveAnnouncement = async () => {
-        const btn = document.querySelector('[onclick="window.admSaveAnnouncement()"]');
-        if (btn) { btn.disabled = true; btn.textContent = '⏳ Publishing...'; }
+        const btn = document.getElementById('ann-save-btn');
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ Saving...'; }
         try {
             const title = document.getElementById('ann-title').value.trim();
             const body = document.getElementById('ann-body').value.trim();
             const fileInput = document.getElementById('ann-media');
 
-            if (!title && !body && !fileInput.files[0]) {
+            if (!title && !body && !fileInput.files[0] && !editAnnouncementId) {
                 window.showToast('❌ Please provide at least an image/video or a message.');
-                if (btn) { btn.disabled = false; btn.textContent = '📢 Publish Announcement'; }
+                if (btn) { btn.disabled = false; btn.textContent = editAnnouncementId ? '💾 Save Changes' : '📢 Publish Announcement'; }
                 return;
             }
 
@@ -192,12 +231,26 @@ window.router.addRoute('admin', async (container, params) => {
                 }
             }
 
-            await firestore.collection('announcements').add({
-                title, body, active, type, badge, cta, ctaLink: link,
-                mediaUrl, mediaType, createdAt: new Date().toISOString()
-            });
+            if (editAnnouncementId) {
+                // UPDATE existing announcement
+                const updatePayload = { title, body, active, type, badge, cta, ctaLink: link };
+                if (mediaUrl) {
+                    updatePayload.mediaUrl = mediaUrl;
+                    updatePayload.mediaType = mediaType;
+                }
+                updatePayload.updatedAt = new Date().toISOString();
+                await firestore.collection('announcements').doc(editAnnouncementId).update(updatePayload);
+                window.showToast('✅ Announcement updated!');
+                editAnnouncementId = null;
+            } else {
+                // CREATE new announcement
+                await firestore.collection('announcements').add({
+                    title, body, active, type, badge, cta, ctaLink: link,
+                    mediaUrl, mediaType, createdAt: new Date().toISOString()
+                });
+                window.showToast('✅ Announcement published!');
+            }
 
-            window.showToast('✅ Announcement published!');
             document.getElementById('ann-title').value = '';
             document.getElementById('ann-body').value = '';
             if (document.getElementById('ann-badge')) document.getElementById('ann-badge').value = '';
@@ -206,11 +259,13 @@ window.router.addRoute('admin', async (container, params) => {
             document.getElementById('ann-media').value = '';
             
             if (btn) { btn.disabled = false; btn.textContent = '📢 Publish Announcement'; }
+            const cancelBtn = document.getElementById('ann-cancel-edit-btn');
+            if (cancelBtn) cancelBtn.style.display = 'none';
             if (!isSyncing) renderAdmin();
         } catch(e) {
             console.error('admSaveAnnouncement error:', e);
             window.showToast('❌ Failed: ' + (e.code || e.message));
-            if (btn) { btn.disabled = false; btn.textContent = '📢 Publish Announcement'; }
+            if (btn) { btn.disabled = false; btn.textContent = editAnnouncementId ? '💾 Save Changes' : '📢 Publish Announcement'; }
         }
     };
 
@@ -500,9 +555,26 @@ window.router.addRoute('admin', async (container, params) => {
         const e = document.getElementById('adm-new-mgr-email').value;
         const p = document.getElementById('adm-new-mgr-pass').value;
         const h = document.getElementById('adm-new-mgr-hotel').value;
+        const ph = document.getElementById('adm-new-mgr-phone')?.value?.trim() || '';
         if (!e || p.length < 6) return window.showToast("⚠️ Email and 6+ character password required.");
-        await window.auth.createManagerAccount(e, p, h);
+        const uid = await window.auth.createManagerAccount(e, p, h);
+        // Save phone number to the manager's user doc
+        if (ph && uid) {
+            await firestore.collection('users').doc(uid).update({ phone: ph });
+        }
         window.showToast("✅ Manager account created!"); window.syncData();
+    };
+
+    window.admEditManagerPhone = async (managerId) => {
+        const input = document.getElementById(`mgr-phone-${managerId}`);
+        if (!input) return;
+        const newPhone = input.value.trim();
+        try {
+            await firestore.collection('users').doc(managerId).update({ phone: newPhone });
+            window.showToast('✅ Phone number updated!');
+        } catch(e) {
+            window.showToast('❌ Failed to update phone: ' + e.message);
+        }
     };
 
     window.addAdmPackage = () => {
@@ -847,8 +919,8 @@ window.router.addRoute('admin', async (container, params) => {
                 <!-- MANAGERS TAB -->
                 <div id="adm-tab-managers" style="display:${activeTab==='managers'?'block':'none'}">
                     <div style="background:white; border-radius:20px; box-shadow:var(--shadow-sm); padding:1rem; margin-bottom:2rem; overflow-x:auto;">
-                        <table class="manager-table" style="width:100%; min-width:800px;">
-                            <thead><tr><th>No.</th><th>Email</th><th>Assigned Stay / Hotel</th><th>Action</th></tr></thead>
+                        <table class="manager-table" style="width:100%; min-width:900px;">
+                            <thead><tr><th>No.</th><th>Email</th><th>Phone</th><th>Assigned Stay / Hotel</th><th>Action</th></tr></thead>
                             <tbody>${(() => {
                                 totalManagersPages = Math.max(1, Math.ceil(managers.length / 15));
                                 if (managersPage > totalManagersPages) managersPage = totalManagersPages;
@@ -861,6 +933,12 @@ window.router.addRoute('admin', async (container, params) => {
                                     <tr>
                                         <td style="font-weight:800; color:#888;">${rowNum}</td>
                                         <td>${m.email}</td>
+                                        <td>
+                                            <div style="display:flex; align-items:center; gap:0.4rem;">
+                                                <input id="mgr-phone-${m.id}" type="text" value="${m.phone || ''}" placeholder="+251..." style="width:130px; padding:0.4rem 0.6rem; border:1px solid #e2e8f0; border-radius:8px; font-size:0.8rem; font-weight:600;">
+                                                <button onclick="window.admEditManagerPhone('${m.id}')" style="background:none; border:1px solid var(--color-primary); color:var(--color-primary); border-radius:6px; padding:0.3rem 0.5rem; font-size:0.65rem; font-weight:700; cursor:pointer;">Save</button>
+                                            </div>
+                                        </td>
                                         <td>
                                             <div style="font-weight:700; color:var(--color-primary);">${hotel ? hotel.title : '—'}</div>
                                             <div style="font-size:0.65rem; color:#aaa; font-family:monospace;">${m.hotelId || ''}</div>
@@ -890,10 +968,13 @@ window.router.addRoute('admin', async (container, params) => {
                             <input type="email" id="adm-new-mgr-email" placeholder="Email" style="width:100%; padding:0.8rem; border:1px solid #ddd; border-radius:12px;">
                             <input type="text" id="adm-new-mgr-pass" placeholder="Initial Password" style="width:100%; padding:0.8rem; border:1px solid #ddd; border-radius:12px;">
                         </div>
-                        <select id="adm-new-mgr-hotel" style="width:100%; padding:0.8rem; border:1px solid #ddd; border-radius:12px; margin-bottom:1rem;">
-                            <option value="">-- No Hotel Assigned --</option>
-                            ${cachedProperties.map(p => `<option value="${p.id}">${p.title}</option>`).join('')}
-                        </select>
+                        <div class="responsive-grid-2" style="margin-bottom:1rem;">
+                            <input type="tel" id="adm-new-mgr-phone" placeholder="Phone Number (+251...)" style="width:100%; padding:0.8rem; border:1px solid #ddd; border-radius:12px;">
+                            <select id="adm-new-mgr-hotel" style="width:100%; padding:0.8rem; border:1px solid #ddd; border-radius:12px;">
+                                <option value="">-- No Hotel Assigned --</option>
+                                ${cachedProperties.map(p => `<option value="${p.id}">${p.title}</option>`).join('')}
+                            </select>
+                        </div>
                         <button class="btn-primary" onclick="window.adminCreateManager()">Create Account</button>
                     </div>
                 </div>
@@ -1098,7 +1179,10 @@ window.router.addRoute('admin', async (container, params) => {
                                 </div>
                             </div>
                             
-                            <button class="btn-primary" onclick="window.admSaveAnnouncement()" style="padding:1rem; border-radius:12px;">📢 Publish Announcement</button>
+                            <div style="display:flex; gap:0.8rem; align-items:center;">
+                                <button id="ann-save-btn" class="btn-primary" onclick="window.admSaveAnnouncement()" style="padding:1rem; border-radius:12px; flex:1;">📢 Publish Announcement</button>
+                                <button id="ann-cancel-edit-btn" class="btn-outline" onclick="window.admCancelEditAnnouncement()" style="padding:1rem; border-radius:12px; display:none; border-color:#ef4444; color:#ef4444;">Cancel Edit</button>
+                            </div>
                         </div>
                         
                         <div id="adm-ann-list" style="margin-top:2rem; display:grid; gap:1rem;">
@@ -1112,6 +1196,7 @@ window.router.addRoute('admin', async (container, params) => {
                                         </div>
                                     </div>
                                     <div style="display:flex; gap:0.5rem;">
+                                        <button class="btn-outline" onclick="window.admEditAnnouncement('${a.id}')" style="padding:0.5rem 1rem; border-radius:8px; font-size:0.8rem; border-color:var(--color-primary); color:var(--color-primary);">Edit</button>
                                         <button class="btn-outline" onclick="window.admToggleAnnouncement('${a.id}', ${a.active})" style="padding:0.5rem 1rem; border-radius:8px; font-size:0.8rem; border-color:${a.active?'#f59e0b':'#10b981'}; color:${a.active?'#d97706':'#059669'};">${a.active?'Pause':'Activate'}</button>
                                         <button class="btn-outline" onclick="window.admDeleteAnnouncement('${a.id}')" style="padding:0.5rem 1rem; border-radius:8px; font-size:0.8rem; border-color:#ef4444; color:#dc2626;">Delete</button>
                                     </div>
