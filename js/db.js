@@ -352,13 +352,16 @@ class Database {
     }
 
     // ─── REVIEWS / RATINGS ─────────────────────────────────────
-    async addReview(propertyId, userId, userName, rating, bookingId, text = '', images = []) {
+    async addReview(propertyId, userId, userName, rating, bookingId, text = '', images = [], subRatings = null) {
         const existing = await firestore.collection('reviews')
             .where('bookingId', '==', bookingId).get();
+        const payloadUpdates = { rating, text, images, updatedAt: new Date().toISOString() };
+        if (subRatings) payloadUpdates.subRatings = subRatings;
+
         if (!existing.empty) {
             // Update existing review
             const docId = existing.docs[0].id;
-            await firestore.collection('reviews').doc(docId).update({ rating, text, images, updatedAt: new Date().toISOString() });
+            await firestore.collection('reviews').doc(docId).update(payloadUpdates);
             return { id: docId, updated: true };
         }
         const review = {
@@ -369,10 +372,40 @@ class Database {
             rating,
             text,
             images,
+            subRatings: subRatings || { cleanliness: rating, location: rating, service: rating, value: rating },
+            helpfulCount: 0,
+            reported: false,
             createdAt: new Date().toISOString()
         };
         const ref = await firestore.collection('reviews').add(review);
         return { id: ref.id, ...review };
+    }
+
+    async voteReviewHelpful(reviewId) {
+        const voted = JSON.parse(localStorage.getItem('michu_voted_reviews') || '{}');
+        if (voted[reviewId]) {
+            throw new Error('You have already voted this review helpful.');
+        }
+        await firestore.collection('reviews').doc(reviewId).update({
+            helpfulCount: firebase.firestore.FieldValue.increment(1)
+        });
+        voted[reviewId] = true;
+        localStorage.setItem('michu_voted_reviews', JSON.stringify(voted));
+        return true;
+    }
+
+    async reportReview(reviewId) {
+        const reported = JSON.parse(localStorage.getItem('michu_reported_reviews') || '{}');
+        if (reported[reviewId]) {
+            throw new Error('You have already reported this review.');
+        }
+        await firestore.collection('reviews').doc(reviewId).update({
+            reported: true,
+            reportCount: firebase.firestore.FieldValue.increment(1)
+        });
+        reported[reviewId] = true;
+        localStorage.setItem('michu_reported_reviews', JSON.stringify(reported));
+        return true;
     }
 
     async addReviewReply(reviewId, replyText, managerName) {

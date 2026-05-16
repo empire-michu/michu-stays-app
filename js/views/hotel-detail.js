@@ -54,13 +54,27 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     const amenities = hotel.amenities || [];
     const videoUrl = hotel.videoTour || '';
     let reviews = [], avgRating = 0, reviewCount = 0;
+    let cAvg = '—', lAvg = '—', sAvg = '—', vAvg = '—', cSum = 0, lSum = 0, sSum = 0, vSum = 0;
     try {
         reviews = await window.db.getReviews(id).catch(() => []);
         if (reviews.length > 0) {
             avgRating = Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10;
             reviewCount = reviews.length;
+            reviews.forEach(r => {
+                const sub = r.subRatings || { cleanliness: r.rating, location: r.rating, service: r.rating, value: r.rating };
+                cSum += Number(sub.cleanliness || r.rating);
+                lSum += Number(sub.location || r.rating);
+                sSum += Number(sub.service || r.rating);
+                vSum += Number(sub.value || r.rating);
+            });
+            cAvg = (cSum / reviewCount).toFixed(1);
+            lAvg = (lSum / reviewCount).toFixed(1);
+            sAvg = (sSum / reviewCount).toFixed(1);
+            vAvg = (vSum / reviewCount).toFixed(1);
         }
     } catch(e) {}
+    window._hotelReviews = reviews;
+    window._currentReviewFilter = 'all';
 
     const currentPrice = Number(String(hotel.price || 0).replace(/[^\d.-]/g, ''));
     let dPct = Number(hotel.discountPercent || hotel.discount || 0);
@@ -358,62 +372,38 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     </div>
                  </div>
 
-                 <!-- Review Cards (Vertical) -->
-                 <div id="reviews-feed" style="display:flex; flex-direction:column; gap:1.5rem;">
-                    ${reviews.length > 0 ? reviews.map(r => {
-                        const rDate = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : 'Recently';
-                        const isOwner = window.auth.currentUser && window.auth.currentUser.uid === r.userId;
-                        const avatar = (r.userName || 'G').charAt(0).toUpperCase();
-                        const escapedText = (r.text || 'Enjoyed the stay!').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                        
-                        return `
-                        <div id="review-${r.id}" style="background:#f8fafc; padding:1.5rem; border-radius:24px; border:1px solid #f1f5f9;">
-                            <!-- Review Header -->
-                            <div style="display:flex; align-items:center; gap:0.8rem; margin-bottom:1rem;">
-                                <div style="width:42px;height:42px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:1rem;flex-shrink:0;">${avatar}</div>
-                                <div style="flex:1;min-width:0;">
-                                    <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-                                        <strong style="font-size:1rem;">${r.userName || 'Guest'}</strong>
-                                        <span style="color:#f59e0b;font-size:0.9rem;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
-                                    </div>
-                                    <div style="font-size:0.7rem;color:#94a3b8;font-weight:700;">${rDate}${r.updatedAt ? ' · <em>Edited</em>' : ''}</div>
-                                </div>
-                                ${isOwner ? `
-                                <div style="display:flex;gap:6px;">
-                                    <button onclick="window._editReview('${r.id}','${escapedText}',${r.rating})" style="background:#f0fdf4;color:#16a34a;border:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.95rem;" title="Edit">✏️</button>
-                                    <button class="michu-action-btn" data-action="delete-review" data-review-id="${r.id}" data-hotel-id="${hotel.id}" style="background:#fef2f2;color:#ef4444;border:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.95rem;" title="Delete">🗑️</button>
-                                </div>` : ''}
-                            </div>
-                            <!-- Review Text -->
-                            <p style="line-height:1.7;color:#475569;margin:0 0 0.3rem;font-size:0.95rem;">"${r.text || 'Enjoyed the stay!'}"</p>
+                 <!-- Sub-Category Summary Grid -->
+                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.5rem; margin-bottom:2.5rem; background:#f8fafc; padding:1.8rem; border-radius:24px; border:1px solid #e2e8f0;">
+                     <div>
+                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span>✨ Cleanliness</span><span style="color:var(--color-primary);">${cAvg}</span></div>
+                         <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(cAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
+                     </div>
+                     <div>
+                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span>📍 Location</span><span style="color:var(--color-primary);">${lAvg}</span></div>
+                         <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(lAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
+                     </div>
+                     <div>
+                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span>🛎️ Service</span><span style="color:var(--color-primary);">${sAvg}</span></div>
+                         <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(sAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
+                     </div>
+                     <div>
+                         <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; margin-bottom:0.5rem; color:#1e293b;"><span>💎 Value</span><span style="color:var(--color-primary);">${vAvg}</span></div>
+                         <div style="height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden;"><div style="height:100%; width:${reviewCount > 0 ? (Number(vAvg)/5)*100 : 0}%; background:var(--color-primary); border-radius:99px;"></div></div>
+                     </div>
+                 </div>
 
-                            ${(() => {
-                                if (r.managerReply && r.managerReply.text) {
-                                    const replyDate = r.managerReply.createdAt ? new Date(r.managerReply.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-                                    const replyEscaped = r.managerReply.text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                                    return `
-                                    <div style="margin-top:1.2rem;padding:1rem 1.2rem;background:#fff;border-radius:16px;border-left:4px solid #f59e0b;box-shadow:0 2px 8px rgba(0,0,0,0.03);">
-                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
-                                            <strong style="color:#1e293b;font-size:0.82rem;">↳ Hotel Response</strong>
-                                            <div style="display:flex;align-items:center;gap:6px;">
-                                                ${(replyDate && replyDate!=='Invalid Date') ? `<span style="font-size:0.65rem;color:#94a3b8;font-weight:700;">${replyDate}${r.managerReply.updatedAt?' · Edited':''}</span>` : ''}
-                                                ${isManager ? `
-                                                    <button onclick="window._editReply('${r.id}','${replyEscaped}')" style="background:#f0fdf4;color:#16a34a;border:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.8rem;" title="Edit Reply">✏️</button>
-                                                    <button class="michu-action-btn" data-action="delete-reply" data-review-id="${r.id}" data-hotel-id="${hotel.id}" style="background:#fef2f2;color:#ef4444;border:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.8rem;" title="Delete Reply">🗑️</button>
-                                                ` : ''}
-                                            </div>
-                                        </div>
-                                        <p style="color:#64748b;font-style:italic;margin:0;line-height:1.6;font-size:0.88rem;">"${r.managerReply.text}"</p>
-                                    </div>`;
-                                } else if (isManager) {
-                                    return `<div style="margin-top:1rem;">
-                                        <button onclick="window.replyToReview('${r.id}')" style="width:100%;background:#f1f5f9;border:1px dashed #cbd5e1;color:#475569;padding:0.7rem;border-radius:14px;font-size:0.8rem;cursor:pointer;font-weight:700;">↩ Reply to Guest</button>
-                                    </div>`;
-                                }
-                                return '';
-                            })()}
-                        </div>`;
-                    }).join('') : '<p style="color:#94a3b8;text-align:center;padding:2rem;">No reviews yet. Be the first to share your experience!</p>'}
+                 <!-- Sort & Filter Pills -->
+                 <div id="reviews-filter-pills" style="display:flex; gap:0.8rem; margin-bottom:1.5rem; overflow-x:auto; padding-bottom:0.5rem;">
+                     <button class="review-filter-pill active" onclick="window.filterMichuReviews('all')" style="padding:0.6rem 1.2rem; border-radius:99px; font-weight:700; font-size:0.85rem; border:1px solid var(--color-primary); background:var(--color-primary); color:white; cursor:pointer; transition:all 0.2s; white-space:nowrap;">All Reviews</button>
+                     <button class="review-filter-pill" onclick="window.filterMichuReviews('recent')" style="padding:0.6rem 1.2rem; border-radius:99px; font-weight:700; font-size:0.85rem; border:1px solid #cbd5e1; background:white; color:#475569; cursor:pointer; transition:all 0.2s; white-space:nowrap;">Most Recent</button>
+                     <button class="review-filter-pill" onclick="window.filterMichuReviews('high')" style="padding:0.6rem 1.2rem; border-radius:99px; font-weight:700; font-size:0.85rem; border:1px solid #cbd5e1; background:white; color:#475569; cursor:pointer; transition:all 0.2s; white-space:nowrap;">Highest Rated</button>
+                     <button class="review-filter-pill" onclick="window.filterMichuReviews('low')" style="padding:0.6rem 1.2rem; border-radius:99px; font-weight:700; font-size:0.85rem; border:1px solid #cbd5e1; background:white; color:#475569; cursor:pointer; transition:all 0.2s; white-space:nowrap;">Lowest Rated</button>
+                     <button class="review-filter-pill" onclick="window.filterMichuReviews('photos')" style="padding:0.6rem 1.2rem; border-radius:99px; font-weight:700; font-size:0.85rem; border:1px solid #cbd5e1; background:white; color:#475569; cursor:pointer; transition:all 0.2s; white-space:nowrap;">With Photos</button>
+                 </div>
+
+                 <!-- Review Cards (Vertical Feed) -->
+                 <div id="reviews-feed" style="display:flex; flex-direction:column; gap:1.5rem;">
+                     <!-- Dynamically populated by renderMichuReviewsFeed -->
                  </div>
             </section>
         </div>
@@ -737,6 +727,142 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
             obs.observe(mainReserveBtn);
         }
     }, 1000);
+
+    window.renderMichuReviewsFeed = () => {
+        const feedEl = document.getElementById('reviews-feed');
+        if (!feedEl) return;
+        
+        let filtered = [...window._hotelReviews];
+        if (window._currentReviewFilter === 'recent') {
+            filtered.sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        } else if (window._currentReviewFilter === 'high') {
+            filtered.sort((a,b) => b.rating - a.rating);
+        } else if (window._currentReviewFilter === 'low') {
+            filtered.sort((a,b) => a.rating - b.rating);
+        } else if (window._currentReviewFilter === 'photos') {
+            filtered = filtered.filter(r => r.images && r.images.length > 0);
+        }
+
+        const isManager = window.auth.currentUser && window.auth.currentUser.uid === hotel.managerId;
+        const votedObj = JSON.parse(localStorage.getItem('michu_voted_reviews') || '{}');
+
+        feedEl.innerHTML = filtered.length > 0 ? filtered.map(r => {
+            const rDate = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : 'Recently';
+            const isOwner = window.auth.currentUser && window.auth.currentUser.uid === r.userId;
+            
+            let rawName = r.userName || 'Guest';
+            let cleanName = rawName;
+            if (rawName.includes('@')) {
+                const part = rawName.split('@')[0].replace(/[0-9]/g, '');
+                cleanName = part.charAt(0).toUpperCase() + part.slice(1) + '***';
+            }
+            const avatar = cleanName.charAt(0).toUpperCase();
+            const escapedText = (r.text || 'Enjoyed the stay!').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            
+            return `
+            <div id="review-${r.id}" style="background:#f8fafc; padding:1.5rem; border-radius:24px; border:1px solid #f1f5f9; display:flex; flex-direction:column; gap:1rem;">
+                <!-- Review Header -->
+                <div style="display:flex; align-items:center; gap:0.8rem;">
+                    <div style="width:42px;height:42px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:1rem;flex-shrink:0;">${avatar}</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                            <strong style="font-size:1rem; color:#0f172a;">${cleanName}</strong>
+                            <span style="color:#f59e0b;font-size:0.9rem;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+                            <span style="background:#e6f4ea; color:#137333; font-size:0.75rem; font-weight:800; padding:0.2rem 0.6rem; border-radius:10px; display:inline-flex; align-items:center; gap:4px;">✔ Verified stay</span>
+                        </div>
+                        <div style="font-size:0.7rem;color:#94a3b8;font-weight:700;">${rDate}${r.updatedAt ? ' · <em>Edited</em>' : ''}</div>
+                    </div>
+                    ${isOwner ? `
+                    <div style="display:flex;gap:6px;">
+                        <button onclick="window._editReview('${r.id}','${escapedText}',${r.rating})" style="background:#f0fdf4;color:#16a34a;border:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.95rem;" title="Edit">✏️</button>
+                        <button class="michu-action-btn" data-action="delete-review" data-review-id="${r.id}" data-hotel-id="${hotel.id}" style="background:#fef2f2;color:#ef4444;border:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.95rem;" title="Delete">🗑️</button>
+                    </div>` : ''}
+                </div>
+
+                <!-- Review Text -->
+                <p style="line-height:1.7;color:#475569;margin:0;font-size:0.95rem;">"${r.text || 'Enjoyed the stay!'}"</p>
+
+                <!-- Review Images -->
+                ${r.images && r.images.length > 0 ? `
+                <div style="display:flex; gap:0.6rem; overflow-x:auto; padding-bottom:0.4rem;">
+                    ${r.images.map(img => `<img src="${img}" onclick="window.viewFullGallery(0)" style="width:80px; height:80px; object-fit:cover; border-radius:14px; cursor:pointer; border:1px solid #e2e8f0;">`).join('')}
+                </div>` : ''}
+
+                <!-- Review Actions & Manager Reply -->
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:0.8rem; flex-wrap:wrap; gap:0.8rem;">
+                    <button id="btn-helpful-${r.id}" onclick="window.voteMichuHelpful('${r.id}')" style="background:${votedObj[r.id] ? 'var(--color-primary)' : '#f1f5f9'}; color:${votedObj[r.id] ? 'white' : '#64748b'}; border:none; padding:0.5rem 1rem; border-radius:12px; font-weight:700; font-size:0.8rem; cursor:pointer; transition:all 0.2s; display:inline-flex; align-items:center; gap:0.4rem;">👍 Helpful (${r.helpfulCount || 0})</button>
+                    <button onclick="window.reportMichuReview('${r.id}')" style="background:transparent; color:#94a3b8; border:none; font-size:0.8rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:0.3rem;">⚑ Report</button>
+                </div>
+
+                ${(() => {
+                    if (r.managerReply && r.managerReply.text) {
+                        const replyDate = r.managerReply.createdAt ? new Date(r.managerReply.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+                        const replyEscaped = r.managerReply.text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                        return `
+                        <div style="margin-top:0.5rem;padding:1rem 1.2rem;background:#fff;border-radius:16px;border-left:4px solid #f59e0b;box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                                <strong style="color:#1e293b;font-size:0.82rem;">↳ Hotel Response</strong>
+                                <div style="display:flex;align-items:center;gap:6px;">
+                                    ${(replyDate && replyDate!=='Invalid Date') ? `<span style="font-size:0.65rem;color:#94a3b8;font-weight:700;">${replyDate}${r.managerReply.updatedAt?' · Edited':''}</span>` : ''}
+                                    ${isManager ? `
+                                        <button onclick="window._editReply('${r.id}','${replyEscaped}')" style="background:#f0fdf4;color:#16a34a;border:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.8rem;" title="Edit Reply">✏️</button>
+                                        <button class="michu-action-btn" data-action="delete-reply" data-review-id="${r.id}" data-hotel-id="${hotel.id}" style="background:#fef2f2;color:#ef4444;border:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.8rem;" title="Delete Reply">🗑️</button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <p style="color:#64748b;font-style:italic;margin:0;line-height:1.6;font-size:0.88rem;">"${r.managerReply.text}"</p>
+                        </div>`;
+                    } else if (isManager) {
+                        return `<div style="margin-top:0.5rem;">
+                            <button onclick="window.replyToReview('${r.id}')" style="width:100%;background:#f1f5f9;border:1px dashed #cbd5e1;color:#475569;padding:0.7rem;border-radius:14px;font-size:0.8rem;cursor:pointer;font-weight:700;">↩ Reply to Guest</button>
+                        </div>`;
+                    }
+                    return '';
+                })()}
+            </div>`;
+        }).join('') : '<p style="color:#94a3b8;text-align:center;padding:2rem;">No reviews yet. Be the first to share your experience!</p>';
+    };
+
+    window.filterMichuReviews = (type) => {
+        window._currentReviewFilter = type;
+        document.querySelectorAll('.review-filter-pill').forEach(btn => {
+            btn.classList.remove('active');
+            btn.style.background = 'white';
+            btn.style.color = '#475569';
+            btn.style.borderColor = '#cbd5e1';
+        });
+        const activeBtn = document.querySelector(`.review-filter-pill[onclick*="${type}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.style.background = 'var(--color-primary)';
+            activeBtn.style.color = 'white';
+            activeBtn.style.borderColor = 'var(--color-primary)';
+        }
+        window.renderMichuReviewsFeed();
+    };
+
+    window.voteMichuHelpful = async (reviewId) => {
+        try {
+            await window.db.voteReviewHelpful(reviewId);
+            const target = window._hotelReviews.find(r => r.id === reviewId);
+            if (target) target.helpfulCount = (target.helpfulCount || 0) + 1;
+            window.renderMichuReviewsFeed();
+            window.showToast("👍 Thank you for your feedback!");
+        } catch (e) {
+            window.showToast("ℹ️ " + e.message);
+        }
+    };
+
+    window.reportMichuReview = async (reviewId) => {
+        try {
+            await window.db.reportReview(reviewId);
+            window.showToast("🚩 Review reported to moderators for review.");
+        } catch (e) {
+            window.showToast("ℹ️ " + e.message);
+        }
+    };
+
+    window.renderMichuReviewsFeed();
 
     window.toggleMichuDesc = () => {
         const container = document.getElementById('hotel-desc-container');

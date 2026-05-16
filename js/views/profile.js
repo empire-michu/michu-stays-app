@@ -309,8 +309,31 @@ window.router.addRoute('profile', async (container, params) => {
                 <h3 id="rate-hotel-name-header" style="margin:0 0 0.5rem; font-size:1.6rem;">Rate Your Stay</h3>
                 <p id="rate-hotel-name" style="color:#666;margin:0 0 1.5rem;font-size:0.95rem;font-weight:600;"></p>
                 
+                <div style="margin-bottom:0.5rem; font-weight:800; font-size:0.8rem; text-transform:uppercase; color:#888;">Overall Experience</div>
                 <div id="rating-stars" class="star-rating-input" style="display:flex;justify-content:center;gap:0.7rem;margin-bottom:1.5rem;">
                     ${[1,2,3,4,5].map(i => `<span data-value="${i}" style="font-size:2.8rem; cursor:pointer; color:#eee; transition:all 0.2s;" onclick="window.pickStar(${i})">★</span>`).join('')}
+                </div>
+
+                <div style="margin-bottom:1.5rem; background:#f8f9fa; padding:1.5rem; border-radius:20px; text-align:left;">
+                    <div style="font-weight:800; font-size:0.85rem; text-transform:uppercase; color:#888; margin-bottom:1rem; text-align:center;">Detailed Category Ratings</div>
+                    <div style="display:grid; gap:1rem;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+                            <span style="font-weight:700; font-size:0.95rem;">✨ Cleanliness</span>
+                            <div id="sub-stars-cleanliness" style="display:flex; gap:0.4rem;"></div>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+                            <span style="font-weight:700; font-size:0.95rem;">📍 Location</span>
+                            <div id="sub-stars-location" style="display:flex; gap:0.4rem;"></div>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+                            <span style="font-weight:700; font-size:0.95rem;">🛎️ Service</span>
+                            <div id="sub-stars-service" style="display:flex; gap:0.4rem;"></div>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+                            <span style="font-weight:700; font-size:0.95rem;">💎 Value</span>
+                            <div id="sub-stars-value" style="display:flex; gap:0.4rem;"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div style="text-align:left; margin-bottom:1.5rem;">
@@ -537,6 +560,7 @@ window.router.addRoute('profile', async (container, params) => {
 
     // --- Rating System ---
     let ratingBookingId = '', ratingPropertyId = '', selectedRating = 0, reviewPhotos = [];
+    let subRatingsState = { cleanliness: 0, location: 0, service: 0, value: 0 };
 
     window.handleReviewPhotos = (input) => {
         const files = Array.from(input.files);
@@ -584,6 +608,7 @@ window.router.addRoute('profile', async (container, params) => {
         
         const existing = bookingReviews[bookingId];
         selectedRating = isEdit && existing ? existing.rating : 0;
+        subRatingsState = isEdit && existing && existing.subRatings ? { ...existing.subRatings } : { cleanliness: selectedRating, location: selectedRating, service: selectedRating, value: selectedRating };
         
         document.getElementById('rate-hotel-name-header').innerText = isEdit ? 'Update Your Review' : 'Rate Your Stay';
         document.getElementById('rate-hotel-name').innerText = hotelName;
@@ -602,10 +627,31 @@ window.router.addRoute('profile', async (container, params) => {
             html += `<span onclick="window.pickStar(${i})" style="font-size:2.8rem; cursor:pointer; color:${i <= selectedRating ? '#f59e0b' : '#eee'}; transition:all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform='scale(1)'">★</span>`;
         }
         container.innerHTML = html;
+
+        ['cleanliness', 'location', 'service', 'value'].forEach(cat => {
+            const subEl = document.getElementById(`sub-stars-${cat}`);
+            if (subEl) {
+                let subHtml = '';
+                const val = subRatingsState[cat] || 0;
+                for (let i = 1; i <= 5; i++) {
+                    subHtml += `<span onclick="window.pickSubStar('${cat}', ${i})" style="font-size:1.8rem; cursor:pointer; color:${i <= val ? 'var(--color-primary)' : '#eee'}; transition:all 0.2s;">★</span>`;
+                }
+                subEl.innerHTML = subHtml;
+            }
+        });
     };
 
     window.pickStar = (n) => {
         selectedRating = n;
+        subRatingsState = { cleanliness: n, location: n, service: n, value: n };
+        renderStarPicker();
+    };
+
+    window.pickSubStar = (cat, n) => {
+        subRatingsState[cat] = n;
+        const vals = Object.values(subRatingsState);
+        const avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+        selectedRating = avg || 1;
         renderStarPicker();
     };
 
@@ -631,9 +677,9 @@ window.router.addRoute('profile', async (container, params) => {
             }
 
             status.innerText = 'Saving review...';
-            await window.db.addReview(ratingPropertyId, uid, userName, selectedRating, ratingBookingId, textVal, imageUrls);
+            await window.db.addReview(ratingPropertyId, uid, userName, selectedRating, ratingBookingId, textVal, imageUrls, subRatingsState);
             
-            bookingReviews[ratingBookingId] = { rating: selectedRating, text: textVal, images: imageUrls };
+            bookingReviews[ratingBookingId] = { rating: selectedRating, text: textVal, images: imageUrls, subRatings: subRatingsState };
             window.showToast('⭐ Thank you for your feedback!');
             document.getElementById('rating-modal').style.display = 'none';
             renderBookings();
