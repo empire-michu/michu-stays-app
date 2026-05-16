@@ -551,39 +551,58 @@
     letter-spacing: 0.5px;
 }
 
-/* Mobile Package Carousel */
+/* Mobile Package & Reserve Carousel (Aligned with Trendy Stays) */
 @media (max-width: 768px) {
-    .mobile-package-carousel {
+    /* The shared horizontal carousel wrapper */
+    .booking-offers-mobile-wrapper {
         display: flex !important;
+        flex-wrap: nowrap !important;
         overflow-x: auto !important;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
         gap: 1rem !important;
         padding: 0.5rem 1rem 1.5rem 1rem !important;
         margin: 0 -1.5rem !important;
-        -webkit-overflow-scrolling: touch;
-        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        align-items: stretch !important;
+        order: 3;
     }
-    .mobile-package-carousel > div {
-        flex: 0 0 70% !important; /* Smaller than main cards for distinct peek */
-        scroll-snap-align: center;
-    }
-    .mobile-package-carousel::-webkit-scrollbar {
+    .booking-offers-mobile-wrapper::-webkit-scrollbar {
         display: none;
     }
-}
 
-/* ═══════════════════════════════════════════
-   MOBILE: Compact Reserve & Package Cards
-   Make these slightly smaller than hotel cards
-   ═══════════════════════════════════════════ */
-@media (max-width: 768px) {
-    /* Sidebar booking card (Reserve Now) — compact on mobile */
+    /* Unwrap the Exclusive Offers container on mobile */
+    .booking-offers-mobile-wrapper .mobile-order-4,
+    .booking-offers-mobile-wrapper .mobile-package-carousel {
+        display: contents !important;
+    }
+    .offers-desktop-heading { display: none !important; }
+
+    /* Sizing both Reserve Now card and Package cards equally to 80% (Trendy Stays match) */
+    .booking-offers-mobile-wrapper > .desktop-sidebar,
+    .booking-offers-mobile-wrapper .pkg-card {
+        flex: 0 0 80% !important;
+        min-width: 80% !important;
+        max-width: 80% !important;
+        scroll-snap-align: start;
+        margin: 0 !important;
+        box-sizing: border-box;
+    }
+
+    /* Reserve Now Card — Compact Height ("Short Length") */
     .sidebar-card {
-        padding: 0.8rem 1rem !important;
-        border-radius: 18px !important;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.04) !important;
-        width: 75% !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
+        padding: 1.2rem !important;
+        border-radius: 24px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        height: 100% !important;
+        box-sizing: border-box !important;
+        border: 1px solid rgba(11, 110, 79, 0.15) !important;
+        box-shadow: 0 10px 25px rgba(11, 110, 79, 0.08) !important;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fdfa 100%) !important;
+        width: 100% !important;
     }
     .sidebar-card .sidebar-price-row {
         margin-bottom: 0.8rem !important;
@@ -595,51 +614,73 @@
         margin-bottom: 1rem !important;
         border-radius: 14px !important;
     }
-    .sidebar-card #final-reserve-trigger {
+    .sidebar-card .sidebar-dates-grid > div > div {
+        padding: 0.6rem 0.8rem !important;
+    }
+    .sidebar-card .final-reserve-trigger {
         padding: 0.85rem !important;
-        font-size: 1.05rem !important;
+        font-size: 1.1rem !important;
         border-radius: 14px !important;
     }
-    .sidebar-card #price-summary-area {
-        margin-top: 1rem !important;
+    .sidebar-card .price-summary-area {
+        margin-top: 0.8rem !important;
     }
-    .sidebar-card #price-summary-area > div {
-        padding: 1rem !important;
-        border-radius: 16px !important;
-    }
-    .sidebar-card #price-summary-area .final-total-val {
-        font-size: 1.2rem !important;
+    .sidebar-card .price-summary-area > div {
+        padding: 0.8rem !important;
+        border-radius: 14px !important;
+        font-size: 0.85rem !important;
     }
 
-    /* Special Packages section — compact on mobile */
-    .mobile-order-4 {
+    /* Special Packages Card — Compact Height ("Short Length") */
+    .pkg-card {
         padding: 1.2rem !important;
-        border-radius: 22px !important;
-        margin-bottom: 2rem !important;
-        width: 75% !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
+        border-radius: 24px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        height: 100% !important;
+        box-sizing: border-box !important;
+        border: 1px solid rgba(217,119,6,0.2) !important;
+        box-shadow: 0 10px 25px rgba(217,119,6,0.08) !important;
+        background: linear-gradient(135deg, #ffffff 0%, #fffbf2 100%) !important;
+        width: 100% !important;
     }
-    .mobile-order-4 h2 {
-        font-size: 1.15rem !important;
+    .pkg-card > div:first-child {
+        margin-bottom: 0.8rem !important;
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.7rem !important;
+    }
+    .pkg-card h3 {
+        font-size: 1.2rem !important;
+        margin-bottom: 0.4rem !important;
+    }
+    .pkg-card p {
+        font-size: 0.9rem !important;
         margin-bottom: 1rem !important;
+        line-height: 1.4 !important;
+        height: 38px !important;
     }
-    .mobile-order-4 .pkg-card {
-        padding: 1.2rem !important;
-        border-radius: 18px !important;
+    .pkg-card > div:nth-last-child(2) {
+        padding-top: 1rem !important;
     }
-    .mobile-order-4 .pkg-card h3 {
-        font-size: 1.1rem !important;
+    .pkg-card > div:nth-last-child(2) .btn-primary {
+        padding: 0.7rem 1.4rem !important;
+        font-size: 0.85rem !important;
+        border-radius: 14px !important;
     }
-    .mobile-order-4 .pkg-card .btn-primary {
-        padding: 0.6rem 1.2rem !important;
-        font-size: 0.8rem !important;
-        border-radius: 12px !important;
+    .pkg-card > div:nth-last-child(2) span:first-child {
+        font-size: 1.4rem !important;
     }
 
     .filter-mobile-toggle {
         display: flex !important;
         background: var(--color-primary) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 8px 20px rgba(11, 110, 79, 0.25) !important;
+        margin-top: 1rem;
+    }
+}nt;
         color: white !important;
         border: none !important;
         box-shadow: 0 8px 20px rgba(11, 110, 79, 0.25) !important;
