@@ -32,6 +32,7 @@ class Database {
             propertiesLastFetch: 0,
             bookings: null,
             bookingsLastFetch: 0,
+            reviews: {},
             cacheDuration: 1000 * 60 * 30 // Increased to 30 mins for Ethiopia
         };
 
@@ -69,6 +70,16 @@ class Database {
         if (type === 'bookings' || type === 'all') {
             this.cache.bookings = null;
             this.cache.bookingsLastFetch = 0;
+        }
+        if (type === 'reviews' || type === 'all') {
+            this.cache.reviews = {};
+            try {
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('michu_reviews_cache_')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+            } catch(e) {}
         }
     }
 
@@ -399,6 +410,7 @@ class Database {
             // Update existing review
             const docId = existing.docs[0].id;
             await firestore.collection('reviews').doc(docId).update(payloadUpdates);
+            this.clearCache('reviews');
             return { id: docId, updated: true };
         }
         const review = {
@@ -415,6 +427,7 @@ class Database {
             createdAt: new Date().toISOString()
         };
         const ref = await firestore.collection('reviews').add(review);
+        this.clearCache('reviews');
         return { id: ref.id, ...review };
     }
 
@@ -428,6 +441,7 @@ class Database {
         });
         voted[reviewId] = true;
         localStorage.setItem('michu_voted_reviews', JSON.stringify(voted));
+        this.clearCache('reviews');
         return true;
     }
 
@@ -442,6 +456,7 @@ class Database {
         });
         reported[reviewId] = true;
         localStorage.setItem('michu_reported_reviews', JSON.stringify(reported));
+        this.clearCache('reviews');
         return true;
     }
 
@@ -483,44 +498,89 @@ class Database {
             console.warn("Notification for review reply failed:", e);
         }
 
+        this.clearCache('reviews');
         return reply;
     }
 
     async deleteReview(reviewId) {
-        return await firestore.collection('reviews').doc(reviewId).delete();
+        const res = await firestore.collection('reviews').doc(reviewId).delete();
+        this.clearCache('reviews');
+        return res;
     }
 
     async deleteReviewReply(reviewId) {
-        return await firestore.collection('reviews').doc(reviewId).update({
+        const res = await firestore.collection('reviews').doc(reviewId).update({
             managerReply: firebase.firestore.FieldValue.delete()
         });
+        this.clearCache('reviews');
+        return res;
     }
 
     async editReview(reviewId, newText, newRating) {
-        return await firestore.collection('reviews').doc(reviewId).update({
+        const res = await firestore.collection('reviews').doc(reviewId).update({
             text: newText,
             rating: newRating,
             updatedAt: new Date().toISOString()
         });
+        this.clearCache('reviews');
+        return res;
     }
 
     async editReviewReply(reviewId, newReplyText) {
         const doc = await firestore.collection('reviews').doc(reviewId).get();
         if (!doc.exists) throw new Error('Review not found');
         const existing = doc.data().managerReply || {};
-        return await firestore.collection('reviews').doc(reviewId).update({
+        const res = await firestore.collection('reviews').doc(reviewId).update({
             managerReply: {
                 ...existing,
                 text: newReplyText,
                 updatedAt: new Date().toISOString()
             }
         });
+        this.clearCache('reviews');
+        return res;
     }
 
     async getReviews(propertyId) {
-        const snapshot = await firestore.collection('reviews')
-            .where('propertyId', '==', propertyId).get();
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Fast path: check in-memory cache first
+        if (this.cache && this.cache.reviews && this.cache.reviews[propertyId] && (Date.now() - this.cache.reviews[propertyId].ts < this.cache.cacheDuration)) {
+            return this.cache.reviews[propertyId].data;
+        }
+        try {
+            const fetchPromise = firestore.collection('reviews').where('propertyId', '==', propertyId).get();
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000));
+            const snapshot = await Promise.race([fetchPromise, timeoutPromise]);
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            if (this.cache && this.cache.reviews) {
+                this.cache.reviews[propertyId] = { data, ts: Date.now() };
+            }
+            try {
+                localStorage.setItem('michu_reviews_cache_' + propertyId, JSON.stringify({ data, ts: Date.now() }));
+            } catch(e) {}
+            return data;
+        } catch(e) {
+            // Fallback to cache/local if server fetch fails or times out
+            if (this.cache && this.cache.reviews && this.cache.reviews[propertyId]) {
+                return this.cache.reviews[propertyId].data;
+            }
+            try {
+                const stored = localStorage.getItem('michu_reviews_cache_' + propertyId);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (this.cache && this.cache.reviews) {
+                        this.cache.reviews[propertyId] = parsed;
+                    }
+                    return parsed.data;
+                }
+            } catch(err) {}
+            // Final fallback: non-timeout get()
+            const snapshot = await firestore.collection('reviews').where('propertyId', '==', propertyId).get().catch(() => ({ docs: [] }));
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            if (this.cache && this.cache.reviews) {
+                this.cache.reviews[propertyId] = { data, ts: Date.now() };
+            }
+            return data;
+        }
     }
 
     async getAverageRating(propertyId) {

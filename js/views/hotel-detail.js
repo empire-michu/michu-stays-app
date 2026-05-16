@@ -56,7 +56,12 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     let reviews = [], avgRating = 0, reviewCount = 0;
     let cAvg = '—', lAvg = '—', sAvg = '—', vAvg = '—', cSum = 0, lSum = 0, sSum = 0, vSum = 0;
     try {
-        reviews = await window.db.getReviews(id).catch(() => []);
+        if (window.db && window.db.cache && window.db.cache.reviews && window.db.cache.reviews[id]) {
+            reviews = window.db.cache.reviews[id].data || [];
+        } else {
+            const stored = localStorage.getItem('michu_reviews_cache_' + id);
+            if (stored) reviews = JSON.parse(stored).data || [];
+        }
         if (reviews.length > 0) {
             avgRating = Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10;
             reviewCount = reviews.length;
@@ -974,6 +979,9 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     };
 
     window.renderMichuReviewsFeed();
+    setTimeout(() => {
+        if (window.refreshMichuReviewsUI) window.refreshMichuReviewsUI(id);
+    }, 100);
 
     window.toggleMichuDesc = () => {
         const container = document.getElementById('hotel-desc-container');
