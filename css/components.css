@@ -558,9 +558,10 @@
 
 /* Mobile Package & Reserve Container (Option 4: Full Width Reserve + Modal Sheet) */
 @media (max-width: 768px) {
-    /* Hide desktop-specific packages section and desktop-specific sidebar */
+    /* Hide desktop-specific packages section, desktop sidebar, and sticky mobile book bar */
     .desktop-packages-section,
-    .desktop-only-sidebar {
+    .desktop-only-sidebar,
+    #mobile-book-bar {
         display: none !important;
     }
 
