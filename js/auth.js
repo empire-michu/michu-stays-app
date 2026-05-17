@@ -97,8 +97,11 @@ class AuthEngine {
                 window.router.navigate(hash || 'home');
             } else {
                 // Auth state changed (login/logout)
+                const currentHash = window.location.hash.replace('#', '') || '';
                 if (!user) {
-                    window.router.navigate('home');
+                    if (!currentHash.startsWith('verify')) {
+                        window.router.navigate('home');
+                    }
                 } else {
                     this._redirectByRole();
                 }
@@ -109,6 +112,9 @@ class AuthEngine {
     }
 
     _redirectByRole() {
+        const hash = window.location.hash.replace('#', '') || '';
+        if (hash.startsWith('verify')) return; // Leave user on receipt verification page
+        
         const role = this.userData?.role;
         if (role === 'admin') window.router.navigate('admin');
         else if (role === 'manager') window.router.navigate('manager');

@@ -3,14 +3,26 @@ class Router {
         this.routes = {};
         this.appContainer = document.getElementById('app-container');
         const handleInitialOrPop = () => {
-            const fullHash = window.location.hash.replace('#', '') || 'home';
-            const [name, queryStr] = fullHash.split('?');
+            let name = 'home';
             const params = {};
-            if (queryStr) {
-                queryStr.split('&').forEach(pair => {
-                    const [k, v] = pair.split('=');
-                    if (k) params[k] = decodeURIComponent(v || '');
+
+            // Support direct server pathname routing for receipt verification (e.g. /verify?ref=XYZ)
+            if (window.location.pathname.startsWith('/verify')) {
+                name = 'verify';
+                const searchParams = new URLSearchParams(window.location.search);
+                searchParams.forEach((v, k) => {
+                    params[k] = v;
                 });
+            } else {
+                const fullHash = window.location.hash.replace('#', '') || 'home';
+                const [hashName, queryStr] = fullHash.split('?');
+                name = hashName;
+                if (queryStr) {
+                    queryStr.split('&').forEach(pair => {
+                        const [k, v] = pair.split('=');
+                        if (k) params[k] = decodeURIComponent(v || '');
+                    });
+                }
             }
             this.navigate(name, params, false);
         };

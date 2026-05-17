@@ -269,6 +269,34 @@ class Database {
         return data;
     }
 
+    async getBookingByRefCode(refCode) {
+        if (!refCode) return null;
+        let cleanRef = refCode.trim();
+        if (cleanRef.startsWith('#')) {
+            cleanRef = cleanRef.substring(1);
+        }
+        
+        // Query with hash prefix
+        const snapshotWithHash = await firestore.collection('bookings')
+            .where('referenceCode', '==', `#${cleanRef}`)
+            .limit(1)
+            .get();
+        if (!snapshotWithHash.empty) {
+            return { id: snapshotWithHash.docs[0].id, ...snapshotWithHash.docs[0].data() };
+        }
+        
+        // Query without hash prefix
+        const snapshotWithoutHash = await firestore.collection('bookings')
+            .where('referenceCode', '==', cleanRef)
+            .limit(1)
+            .get();
+        if (!snapshotWithoutHash.empty) {
+            return { id: snapshotWithoutHash.docs[0].id, ...snapshotWithoutHash.docs[0].data() };
+        }
+        
+        return null;
+    }
+
     async updateBookingStatus(bookingId, status) {
         const booking = (await firestore.collection('bookings').doc(bookingId).get()).data();
         await firestore.collection('bookings').doc(bookingId).update({ status });

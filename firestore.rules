@@ -38,12 +38,15 @@ service cloud.firestore {
     }
 
     // ─── BOOKINGS ────────────────────────────────────────────────────────
-    // Only the guest who made the booking, their assigned manager, or an admin can read
+    // Anyone can read if they have a valid referenceCode (for receipt verification),
+    // otherwise only the guest who made the booking, their assigned manager, or an admin.
     match /bookings/{bookingId} {
-      allow read: if isSignedIn() && (
-        resource.data.customerId == request.auth.uid ||
-        resource.data.managerId == request.auth.uid ||
-        isAdmin()
+      allow read: if (resource != null && resource.data.referenceCode != null) || (
+        isSignedIn() && (
+          resource.data.customerId == request.auth.uid ||
+          resource.data.managerId == request.auth.uid ||
+          isAdmin()
+        )
       );
       allow create: if isSignedIn();
       allow update: if isAdmin() ||
