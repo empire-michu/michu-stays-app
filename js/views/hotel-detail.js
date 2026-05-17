@@ -487,10 +487,6 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     window.refreshMichuPricing = () => {
         const activeBin = bin?.value || binMobile?.value;
         const activeBout = bout?.value || boutMobile?.value;
-        if (bin && bin.value !== activeBin) bin.value = activeBin;
-        if (binMobile && binMobile.value !== activeBin) binMobile.value = activeBin;
-        if (bout && bout.value !== activeBout) bout.value = activeBout;
-        if (boutMobile && boutMobile.value !== activeBout) boutMobile.value = activeBout;
 
         const d1 = new Date(activeBin);
         const d2 = new Date(activeBout);
@@ -543,10 +539,10 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         window.updateMichuPkgButtons();
     };
 
-    if (bin) bin.onchange = window.refreshMichuPricing;
-    if (bout) bout.onchange = window.refreshMichuPricing;
-    if (binMobile) binMobile.onchange = window.refreshMichuPricing;
-    if (boutMobile) boutMobile.onchange = window.refreshMichuPricing;
+    if (bin) bin.onchange = (e) => { if(binMobile) binMobile.value = e.target.value; window.refreshMichuPricing(); };
+    if (bout) bout.onchange = (e) => { if(boutMobile) boutMobile.value = e.target.value; window.refreshMichuPricing(); };
+    if (binMobile) binMobile.onchange = (e) => { if(bin) bin.value = e.target.value; window.refreshMichuPricing(); };
+    if (boutMobile) boutMobile.onchange = (e) => { if(bout) bout.value = e.target.value; window.refreshMichuPricing(); };
 
     window.applyMichuPkg = (idx) => {
         if (window._selectedPackageIndex === idx) {
