@@ -715,6 +715,17 @@ window.router.addRoute('home', async (container, params) => {
     window.toggleHouseFav = (val) => {
         filterState.onlyFavorites = val;
         filterState.page = 1;
+        
+        // Update tab colors dynamically
+        const allBtn = document.getElementById('show-all-houses');
+        const favBtn = document.getElementById('show-fav-houses');
+        if (allBtn && favBtn) {
+            allBtn.style.background = !val ? 'var(--color-primary)' : '#f9f9f9';
+            allBtn.style.color = !val ? 'white' : '#666';
+            favBtn.style.background = val ? '#d4af37' : '#f9f9f9';
+            favBtn.style.color = val ? 'white' : '#666';
+        }
+        
         applyFilters();
     };
 

@@ -652,11 +652,17 @@
 
     .filter-mobile-toggle {
         display: flex !important;
+        background: white !important;
+        color: #333 !important;
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+        margin-top: 0 !important;
+    }
+    .filter-mobile-toggle.active {
         background: var(--color-primary) !important;
         color: white !important;
-        border: none !important;
-        box-shadow: 0 8px 20px rgba(11, 110, 79, 0.25) !important;
-        margin-top: 0 !important;
+        border-color: var(--color-primary) !important;
+        box-shadow: 0 4px 12px rgba(26,96,50,0.2) !important;
     }
 }
 
