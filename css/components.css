@@ -656,7 +656,7 @@
         color: white !important;
         border: none !important;
         box-shadow: 0 8px 20px rgba(11, 110, 79, 0.25) !important;
-        margin-top: 1rem;
+        margin-top: 0 !important;
     }
 }
 

@@ -13,6 +13,17 @@
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
 
+        <!-- Brand Color Mapping for Native Controls (Select dropdown spinner dialogs, radio buttons, inputs) -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlActivated">@color/colorAccent</item>
+        <item name="colorControlHighlight">#200b6e4f</item>
+
+        <!-- Dialog themes for Calendar DatePickerDialog and TimePickerDialog -->
+        <item name="android:datePickerDialogTheme">@style/CustomDatePickerDialogTheme</item>
+        <item name="android:timePickerDialogTheme">@style/CustomDatePickerDialogTheme</item>
+
         <!-- CRITICAL: Make status bar VISIBLE with white bg + dark icons -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowFullscreen">false</item>
@@ -25,5 +36,21 @@
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@drawable/splash</item>
+    </style>
+
+    <!-- Custom Branded Date/Time Picker Modal Dialog Theme to remove default pink styling -->
+    <style name="CustomDatePickerDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">#212121</item>
+        <item name="android:textColorSecondary">#666666</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/DatePickerDialogButton</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/DatePickerDialogButton</item>
+        <item name="android:buttonBarNeutralButtonStyle">@style/DatePickerDialogButton</item>
+    </style>
+
+    <style name="DatePickerDialogButton" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/colorAccent</item>
     </style>
 </resources>
