@@ -409,10 +409,6 @@ window.openReceipt = (booking) => {
                         <div class="detail-label">Duration</div>
                         <div class="detail-value">${nights} Night${nights !== 1 ? 's' : ''}</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Guests</div>
-                        <div class="detail-value">${booking.guests || 1}</div>
-                    </div>
                     ${booking.packageInfo ? `
                     <div class="detail-item full-width">
                         <div class="detail-label">Package</div>

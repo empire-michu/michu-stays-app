@@ -539,10 +539,34 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         window.updateMichuPkgButtons();
     };
 
-    if (bin) bin.onchange = (e) => { if(binMobile) binMobile.value = e.target.value; window.refreshMichuPricing(); };
-    if (bout) bout.onchange = (e) => { if(boutMobile) boutMobile.value = e.target.value; window.refreshMichuPricing(); };
-    if (binMobile) binMobile.onchange = (e) => { if(bin) bin.value = e.target.value; window.refreshMichuPricing(); };
-    if (boutMobile) boutMobile.onchange = (e) => { if(bout) bout.value = e.target.value; window.refreshMichuPricing(); };
+    if (bin) bin.onchange = (e) => { 
+        if(binMobile) {
+            binMobile.value = e.target.value;
+            if (binMobile._flatpickr) binMobile._flatpickr.setDate(e.target.value, false);
+        }
+        window.refreshMichuPricing(); 
+    };
+    if (bout) bout.onchange = (e) => { 
+        if(boutMobile) {
+            boutMobile.value = e.target.value;
+            if (boutMobile._flatpickr) boutMobile._flatpickr.setDate(e.target.value, false);
+        }
+        window.refreshMichuPricing(); 
+    };
+    if (binMobile) binMobile.onchange = (e) => { 
+        if(bin) {
+            bin.value = e.target.value;
+            if (bin._flatpickr) bin._flatpickr.setDate(e.target.value, false);
+        }
+        window.refreshMichuPricing(); 
+    };
+    if (boutMobile) boutMobile.onchange = (e) => { 
+        if(bout) {
+            bout.value = e.target.value;
+            if (bout._flatpickr) bout._flatpickr.setDate(e.target.value, false);
+        }
+        window.refreshMichuPricing(); 
+    };
 
     window.applyMichuPkg = (idx) => {
         if (window._selectedPackageIndex === idx) {
@@ -556,8 +580,14 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
             const end = new Date(start); 
             end.setDate(start.getDate() + parseInt(pkg.nights));
             const endStr = end.toISOString().split('T')[0];
-            if (bout) bout.value = endStr;
-            if (boutMobile) boutMobile.value = endStr;
+            if (bout) {
+                bout.value = endStr;
+                if (bout._flatpickr) bout._flatpickr.setDate(endStr, false);
+            }
+            if (boutMobile) {
+                boutMobile.value = endStr;
+                if (boutMobile._flatpickr) boutMobile._flatpickr.setDate(endStr, false);
+            }
             window.refreshMichuPricing();
             window.showToast(`✅ ${pkg.title} Activated! Check the total below.`);
         }
@@ -772,8 +802,25 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
 
     // Initialize Dates
     const d1 = new Date(); const d2 = new Date(); d2.setDate(d1.getDate() + 1);
-    bin.value = d1.toISOString().split('T')[0];
-    bout.value = d2.toISOString().split('T')[0];
+    const d1Str = d1.toISOString().split('T')[0];
+    const d2Str = d2.toISOString().split('T')[0];
+    
+    if (bin) {
+        bin.value = d1Str;
+        if (bin._flatpickr) bin._flatpickr.setDate(d1Str, false);
+    }
+    if (bout) {
+        bout.value = d2Str;
+        if (bout._flatpickr) bout._flatpickr.setDate(d2Str, false);
+    }
+    if (binMobile) {
+        binMobile.value = d1Str;
+        if (binMobile._flatpickr) binMobile._flatpickr.setDate(d1Str, false);
+    }
+    if (boutMobile) {
+        boutMobile.value = d2Str;
+        if (boutMobile._flatpickr) boutMobile._flatpickr.setDate(d2Str, false);
+    }
     window.refreshMichuPricing();
 
     // Gallery Logic
