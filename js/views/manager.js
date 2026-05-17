@@ -35,6 +35,59 @@ window.router.addRoute('manager', async (container, params) => {
         analyticsStart = ''; analyticsEnd = '';
         renderManagerUI();
     };
+    window.setMgrAnaPreset = (preset) => {
+        const today = new Date();
+        const fmt = (d) => d.toISOString().split('T')[0];
+        if (preset === 'today') {
+            analyticsStart = fmt(today);
+            analyticsEnd = fmt(today);
+        } else if (preset === 'week') {
+            const d = new Date(today); d.setDate(d.getDate() - 7);
+            analyticsStart = fmt(d);
+            analyticsEnd = fmt(today);
+        } else if (preset === 'month') {
+            const d = new Date(today); d.setDate(d.getDate() - 30);
+            analyticsStart = fmt(d);
+            analyticsEnd = fmt(today);
+        } else {
+            analyticsStart = ''; analyticsEnd = '';
+        }
+        renderManagerUI();
+    };
+    window.setMgrBookingPreset = (preset) => {
+        const today = new Date();
+        const fmt = (d) => d.toISOString().split('T')[0];
+        if (preset === 'today') {
+            filterFrom = fmt(today);
+            filterTo = fmt(today);
+        } else if (preset === 'week') {
+            const d = new Date(today); d.setDate(d.getDate() - 7);
+            filterFrom = fmt(d);
+            filterTo = fmt(today);
+        } else if (preset === 'month') {
+            const d = new Date(today); d.setDate(d.getDate() - 30);
+            filterFrom = fmt(d);
+            filterTo = fmt(today);
+        } else {
+            filterFrom = ''; filterTo = ''; filterStatus = '';
+        }
+        bookingsPage = 1;
+        renderManagerUI();
+    };
+    window.mgrSearchRef = () => {
+        const q = document.getElementById('mgr-ref-search')?.value?.trim().toUpperCase() || '';
+        if (!q) { renderManagerUI(); return; }
+        const rows = document.querySelectorAll('#mgr-bookings-table tbody tr');
+        rows.forEach(r => {
+            const refCell = r.querySelector('td:nth-child(2)');
+            if (refCell && refCell.textContent.toUpperCase().includes(q)) {
+                r.style.display = '';
+                r.style.background = '#f0f7f4';
+            } else {
+                r.style.display = 'none';
+            }
+        });
+    };
     window.setMgrBookingPage = (page) => {
         if (page < 1 || page > totalBookingsPages) return;
         bookingsPage = page;
@@ -624,17 +677,25 @@ window.router.addRoute('manager', async (container, params) => {
 
         return `
         <div style="animation: fadeIn 0.4s ease;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; background:#f9f9f9; padding:1.2rem; border-radius:20px; border:1px solid #eee; flex-wrap:wrap; gap:1rem;">
-                <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
-                    <h4 style="margin:0; font-size:0.85rem; font-weight:800; text-transform:uppercase; color:#666;">Filter Range:</h4>
-                    <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
-                        <input type="date" id="mgr-ana-start" value="\${analyticsStart}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #eee; font-size:0.85rem; font-weight:700;">
-                        <span>to</span>
-                        <input type="date" id="mgr-ana-end" value="\${analyticsEnd}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #eee; font-size:0.85rem; font-weight:700;">
-                        <button class="btn-primary" style="padding:0.6rem 1.2rem; border-radius:10px; font-size:0.8rem;" onclick="window.applyMgrAnaFilter()">Filter</button>
+            <div style="margin-bottom:2rem; background:#f9f9f9; padding:1.2rem; border-radius:20px; border:1px solid #eee;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:0.8rem;">
+                    <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+                        <h4 style="margin:0; font-size:0.85rem; font-weight:800; text-transform:uppercase; color:#666;">Filter Range:</h4>
+                        <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                            <input type="date" id="mgr-ana-start" value="${analyticsStart}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:700;">
+                            <span style="color:#888; font-weight:600;">to</span>
+                            <input type="date" id="mgr-ana-end" value="${analyticsEnd}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:700;">
+                            <button class="btn-primary" style="padding:0.6rem 1.2rem; border-radius:10px; font-size:0.8rem;" onclick="window.applyMgrAnaFilter()">Filter</button>
+                        </div>
                     </div>
+                    <button class="btn-outline" style="font-size:0.75rem; border-radius:10px;" onclick="window.resetMgrAnaFilter()">Reset</button>
                 </div>
-                <button class="btn-outline" style="font-size:0.75rem; border-radius:10px;" onclick="window.resetMgrAnaFilter()">Reset</button>
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <button onclick="window.setMgrAnaPreset('today')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">📅 Today</button>
+                    <button onclick="window.setMgrAnaPreset('week')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">📆 This Week</button>
+                    <button onclick="window.setMgrAnaPreset('month')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">🗓 This Month</button>
+                    <button onclick="window.setMgrAnaPreset('reset')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid #ccc;background:white;color:#888;font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">✕ Reset</button>
+                </div>
             </div>
 
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1.2rem; margin-bottom:2rem;">
@@ -669,29 +730,43 @@ window.router.addRoute('manager', async (container, params) => {
         if (allBookings.length === 0) return `<div style="text-align:center; padding:5rem; background:white; border-radius:24px; box-shadow:var(--shadow-sm);"><h3>No bookings yet</h3><p style="color:#666;">Once guests book your property, they will appear here.</p></div>`;
         
         return `
-                <div style="background:white; border-radius:18px; padding:1.2rem; box-shadow:var(--shadow-sm); margin-bottom:1.5rem; display:flex; align-items:flex-end; gap:0.8rem; flex-wrap:wrap; border:1px solid #eee;">
-                    <div>
-                        <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">From Date</label>
-                        <input type="date" id="mgr-book-from" value="${filterFrom}" style="padding:0.6rem; border-radius:8px; border:1.5px solid #eee; font-size:0.85rem;" onchange="window.setMgrFilter()">
+                <div style="background:white; border-radius:18px; padding:1.2rem; box-shadow:var(--shadow-sm); margin-bottom:1.5rem; border:1px solid #eee;">
+                    <div style="display:flex; align-items:flex-end; gap:0.8rem; flex-wrap:wrap; margin-bottom:0.8rem;">
+                        <div>
+                            <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">From Date</label>
+                            <input type="date" id="mgr-book-from" value="${filterFrom}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:600;" onchange="window.setMgrFilter()">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">To Date</label>
+                            <input type="date" id="mgr-book-to" value="${filterTo}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:600;" onchange="window.setMgrFilter()">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">Status</label>
+                            <select id="mgr-book-status" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:700; background:white; cursor:pointer;" onchange="window.setMgrFilter()">
+                                <option value="">All Statuses</option>
+                                <option value="Awaiting Confirmation" ${filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>Awaiting Confirmation</option>
+                                <option value="Confirmed" ${filterStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                <option value="Denied" ${filterStatus === 'Denied' ? 'selected' : ''}>Denied</option>
+                            </select>
+                        </div>
+                        <button class="btn-outline" style="padding:0.6rem 1rem; border-radius:10px; font-size:0.8rem;" onclick="filterFrom=''; filterTo=''; filterStatus=''; window.setMgrFilter()">✕ Reset</button>
                     </div>
-                    <div>
-                        <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">To Date</label>
-                        <input type="date" id="mgr-book-to" value="${filterTo}" style="padding:0.6rem; border-radius:8px; border:1.5px solid #eee; font-size:0.85rem;" onchange="window.setMgrFilter()">
+                    <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.8rem;">
+                        <button onclick="window.setMgrBookingPreset('today')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">📅 Today</button>
+                        <button onclick="window.setMgrBookingPreset('week')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">📆 This Week</button>
+                        <button onclick="window.setMgrBookingPreset('month')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">🗓 This Month</button>
+                        <button onclick="window.setMgrBookingPreset('reset')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid #ccc;background:white;color:#888;font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">✕ Reset</button>
                     </div>
-                    <div>
-                        <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">Status</label>
-                        <select id="mgr-book-status" style="padding:0.6rem; border-radius:8px; border:1.5px solid #eee; font-size:0.85rem; font-weight:700; background:white; cursor:pointer;" onchange="window.setMgrFilter()">
-                            <option value="">All Statuses</option>
-                            <option value="Awaiting Confirmation" ${filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>Awaiting Confirmation</option>
-                            <option value="Confirmed" ${filterStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                            <option value="Denied" ${filterStatus === 'Denied' ? 'selected' : ''}>Denied</option>
-                        </select>
+                    <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                        <div style="display:flex; align-items:center; gap:0.5rem; background:#f8f9fa; padding:0.5rem 0.8rem; border-radius:10px; border:1.5px solid #e0e0e0; flex:1; min-width:200px; max-width:350px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input id="mgr-ref-search" type="text" placeholder="Search by Reference Code..." style="border:none; background:transparent; outline:none; font-size:0.85rem; font-weight:600; font-family:inherit; width:100%;" oninput="window.mgrSearchRef()">
+                        </div>
                     </div>
-                    <button class="btn-outline" style="padding:0.6rem 1rem; border-radius:8px; font-size:0.8rem;" onclick="filterFrom=''; filterTo=''; filterStatus=''; window.setMgrFilter()">✕ Reset</button>
                 </div>
 
                 <div class="table-responsive">
-                    <table class="manager-table" style="width:100%; border-collapse: collapse; min-width: 900px;">
+                    <table id="mgr-bookings-table" class="manager-table" style="width:100%; border-collapse: collapse; min-width: 900px;">
                         <thead id="mgr-bookings-thead">
                             <tr>
                                 <th style="border-top-left-radius:20px;">No.</th>

@@ -50,6 +50,35 @@ window.router.addRoute('profile', async (container, params) => {
 
     window.filterFrom = ''; window.filterTo = ''; window.filterHotel = 'all'; window.filterStatus = 'all';
 
+    window.setProfileDatePreset = (preset) => {
+        const today = new Date();
+        const fmt = (d) => d.toISOString().split('T')[0];
+        if (preset === 'today') {
+            window.filterFrom = fmt(today);
+            window.filterTo = fmt(today);
+        } else if (preset === 'week') {
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            window.filterFrom = fmt(weekAgo);
+            window.filterTo = fmt(today);
+        } else if (preset === 'month') {
+            const monthAgo = new Date(today);
+            monthAgo.setDate(monthAgo.getDate() - 30);
+            window.filterFrom = fmt(monthAgo);
+            window.filterTo = fmt(today);
+        } else {
+            window.filterFrom = '';
+            window.filterTo = '';
+        }
+        // Update the date input visuals
+        const fromEl = document.getElementById('filter-from');
+        const toEl = document.getElementById('filter-to');
+        if (fromEl) fromEl.value = window.filterFrom;
+        if (toEl) toEl.value = window.filterTo;
+        bookingsPage = 1;
+        renderBookings();
+    };
+
     const applyFilter = () => {
         let filtered = [...allBookings];
         if (window.filterFrom) filtered = filtered.filter(b => b.createdAt && new Date(b.createdAt) >= new Date(window.filterFrom));
@@ -100,7 +129,7 @@ window.router.addRoute('profile', async (container, params) => {
         if (statConfirmed) statConfirmed.innerText = allBookings.filter(b => b.status === 'Confirmed').length;
 
         if (list.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2.5rem;color:var(--color-text-light);">No bookings found.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:2.5rem;color:var(--color-text-light);">No bookings found.</td></tr>`;
             return;
         }
 
@@ -145,6 +174,9 @@ window.router.addRoute('profile', async (container, params) => {
                 </td>
                 <td data-label="Proof">
                     ${b.paymentProofUrl ? `<button onclick="showGuestProof('${b.id}')" class="btn-outline" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🖼 Proof</button>` : '—'}
+                </td>
+                <td data-label="Receipt">
+                    ${b.status === 'Confirmed' ? `<button onclick='window.openReceipt(${JSON.stringify({id:b.id,referenceCode:b.referenceCode,customerName:b.customerName,customerEmail:b.customerEmail,customerPhone:b.customerPhone,propertyTitle:b.propertyTitle,checkIn:b.checkIn,checkOut:b.checkOut,guests:b.guests,totalAmount:b.totalAmount,paymentMethod:b.paymentMethod,status:b.status,createdAt:b.createdAt,packageInfo:b.packageInfo})})' style="padding:0.3rem 0.7rem; border-radius:8px; border:1.5px solid var(--color-primary); background:linear-gradient(135deg,#e8f5e2,#f0f7f4); color:var(--color-primary); font-weight:700; font-size:0.75rem; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:0.3rem;">🧾 Receipt</button>` : '—'}
                 </td>
                 <td data-label="Chat">
                     <button onclick="window.router.navigate('chat', { bookingId: '${b.id}' })" class="btn-outline" style="padding:0.3rem 0.7rem; border-radius:8px; border:1.5px solid var(--color-primary); color:var(--color-primary); font-weight:700; font-size:0.75rem; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:0.3rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Message</button>
@@ -246,23 +278,29 @@ window.router.addRoute('profile', async (container, params) => {
             <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);margin-bottom:2rem;">
                 <div class="booking-history-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
                     <h3 style="margin:0;">📜 Booking History <span id="booking-count" style="font-size:0.8rem;font-weight:400;color:#888;"></span></h3>
-                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-                         <select id="filter-status" style="padding:0.4rem 0.8rem;border:1px solid #ddd;border-radius:8px;font-size:0.85rem;font-family:inherit;background:white;" onchange="window.filterStatus=this.value; window.renderBookings()">
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+                         <select id="filter-status" style="padding:0.4rem 0.8rem;border:1.5px solid #e0e0e0;border-radius:10px;font-size:0.85rem;font-family:inherit;background:white;font-weight:600;" onchange="window.filterStatus=this.value; window.renderBookings()">
                              <option value="all">All Statuses</option>
                              <option value="Awaiting Confirmation" ${window.filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>Awaiting Confirmation</option>
                              <option value="Confirmed" ${window.filterStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
                              <option value="Denied" ${window.filterStatus === 'Denied' ? 'selected' : ''}>Denied</option>
                          </select>
-                         <select id="filter-hotel" style="padding:0.4rem 0.8rem;border:1px solid #ddd;border-radius:8px;font-size:0.85rem;font-family:inherit;background:white;" onchange="window.filterHotel=this.value; window.renderBookings()">
+                         <select id="filter-hotel" style="padding:0.4rem 0.8rem;border:1.5px solid #e0e0e0;border-radius:10px;font-size:0.85rem;font-family:inherit;background:white;font-weight:600;" onchange="window.filterHotel=this.value; window.renderBookings()">
                              <option value="all">All Hotels</option>
                          </select>
-                         <input id="filter-from" type="date" value="${window.filterFrom}" style="padding:0.4rem;border:1px solid #ddd;border-radius:8px;" onchange="window.filterFrom=this.value; window.renderBookings()">
-                         <input id="filter-to" type="date" value="${window.filterTo}" style="padding:0.4rem;border:1px solid #ddd;border-radius:8px;" onchange="window.filterTo=this.value; window.renderBookings()">
+                         <input id="filter-from" type="date" value="${window.filterFrom}" style="padding:0.4rem;border:1.5px solid #e0e0e0;border-radius:10px;font-weight:600;" onchange="window.filterFrom=this.value; window.renderBookings()">
+                         <input id="filter-to" type="date" value="${window.filterTo}" style="padding:0.4rem;border:1.5px solid #e0e0e0;border-radius:10px;font-weight:600;" onchange="window.filterTo=this.value; window.renderBookings()">
+                    </div>
+                    <div style="display:flex;gap:0.4rem;flex-wrap:wrap;width:100%;">
+                         <button onclick="window.setProfileDatePreset('today')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">📅 Today</button>
+                         <button onclick="window.setProfileDatePreset('week')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">📆 This Week</button>
+                         <button onclick="window.setProfileDatePreset('month')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">🗓 This Month</button>
+                         <button onclick="window.setProfileDatePreset('reset')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid #ccc;background:white;color:#888;font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">✕ Reset</button>
                     </div>
                 </div>
                 <div style="overflow-x:auto;">
-                    <table class="manager-table" style="width: 100%; min-width: 900px;">
-                        <thead><tr><th>No.</th><th>Ref</th><th>Hotel</th><th>Total</th><th>Status</th><th>Date</th><th>Rating</th><th>Proof</th><th>Chat</th></tr></thead>
+                    <table class="manager-table" style="width: 100%; min-width: 1000px;">
+                        <thead><tr><th>No.</th><th>Ref</th><th>Hotel</th><th>Total</th><th>Status</th><th>Date</th><th>Rating</th><th>Proof</th><th>Receipt</th><th>Chat</th></tr></thead>
                         <tbody id="booking-table-body"></tbody>
                     </table>
                 </div>
