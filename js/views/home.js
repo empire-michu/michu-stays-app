@@ -410,11 +410,7 @@ window.router.addRoute('home', async (container, params) => {
 
             <!-- Main Layout with Sidebar -->
             <div class="main-layout" style="margin-top:2rem;">
-                <!-- Filter Toggle for Mobile -->
-                <button class="filter-mobile-toggle" onclick="document.querySelector('.filters-sidebar').classList.toggle('active')">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 4h18M6 10h12M9 16h6"></path></svg>
-                    <span>Filter Stays</span>
-                </button>
+                <!-- Filter Toggle moved to View Toggle area -->
 
                 <!-- Filters Sidebar -->
                 <div class="filters-sidebar">
@@ -456,6 +452,16 @@ window.router.addRoute('home', async (container, params) => {
                          </div>
                     </div>
 
+                    <div class="filter-section" style="margin-bottom:2rem;">
+                         <label style="display:block; font-weight:800; font-size:0.7rem; color:#999; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.5px;">Sort By</label>
+                         <select id="user-sort-dropdown" onchange="window.updateSort(this.value)" style="width:100%; border:1.5px solid #f0f0f0; background:#f9f9f9; padding:0.8rem; border-radius:12px; outline:none; font-weight:600; font-family:inherit;">
+                            <option value="default" ${filterState.sortOrder === 'default' ? 'selected' : ''}>Latest Added</option>
+                            <option value="price-asc" ${filterState.sortOrder === 'price-asc' ? 'selected' : ''}>Price: Low to High</option>
+                            <option value="price-desc" ${filterState.sortOrder === 'price-desc' ? 'selected' : ''}>Price: High to Low</option>
+                            <option value="name-asc" ${filterState.sortOrder === 'name-asc' ? 'selected' : ''}>Name: A - Z</option>
+                         </select>
+                    </div>
+
                     <button class="btn-outline" style="width:100%; border-radius:12px; padding:0.8rem; font-weight:700; font-size:0.8rem;" onclick="resetFilters()">↺ Reset All Filters</button>
                 </div>
 
@@ -464,7 +470,7 @@ window.router.addRoute('home', async (container, params) => {
                     <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom:2rem;">
                          <div>
                             <h3 id="results-count" style="font-size:1.6rem; font-weight:900; margin:0; letter-spacing:-1px;">Exploring Ethiopian Stays</h3>
-                            <div style="display:flex; gap:0.6rem; margin-top:0.6rem;">
+                            <div style="display:flex; gap:0.6rem; margin-top:0.6rem; align-items:center;">
                                 <button id="toggle-list" class="active" onclick="window.setViewMode('grid')" style="display:flex; align-items:center; gap:0.4rem; padding:0.5rem 1rem; border-radius:30px; border:1px solid #ddd; background:white; cursor:pointer; font-weight:700; font-size:0.8rem; height:36px; transition:all 0.2s;">
                                     <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zM1 10.5A1.5 1.5 0 0 1 2.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/></svg>
                                     Grid View
@@ -473,14 +479,12 @@ window.router.addRoute('home', async (container, params) => {
                                     <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
                                     Map View
                                 </button>
+                                <button class="filter-mobile-toggle" onclick="document.querySelector('.filters-sidebar').classList.toggle('active')">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 4h18M6 10h12M9 16h6"></path></svg>
+                                    Filter
+                                </button>
                             </div>
                          </div>
-                         <select id="user-sort-dropdown" onchange="window.updateSort(this.value)" style="padding:0.6rem 1rem; border-radius:12px; border:1.5px solid #f0f0f0; background:white; font-size:0.85rem; font-weight:700; outline:none; text-transform:uppercase;">
-                            <option value="default" ${filterState.sortOrder === 'default' ? 'selected' : ''}>Latest Added</option>
-                            <option value="price-asc" ${filterState.sortOrder === 'price-asc' ? 'selected' : ''}>Price: Low to High</option>
-                            <option value="price-desc" ${filterState.sortOrder === 'price-desc' ? 'selected' : ''}>Price: High to Low</option>
-                            <option value="name-asc" ${filterState.sortOrder === 'name-asc' ? 'selected' : ''}>Name: A - Z</option>
-                         </select>
                     </div>
 
                     <div class="property-grid" id="property-grid"></div>
