@@ -53,15 +53,15 @@ window.router.addRoute('profile', async (container, params) => {
     window.setProfileDatePreset = (preset) => {
         const today = new Date();
         const fmt = (d) => d.toISOString().split('T')[0];
-        if (preset === 'today') {
+        if (preset === 'today' || preset === 'daily') {
             window.filterFrom = fmt(today);
             window.filterTo = fmt(today);
-        } else if (preset === 'week') {
+        } else if (preset === 'week' || preset === 'weekly') {
             const weekAgo = new Date(today);
             weekAgo.setDate(weekAgo.getDate() - 7);
             window.filterFrom = fmt(weekAgo);
             window.filterTo = fmt(today);
-        } else if (preset === 'month') {
+        } else if (preset === 'month' || preset === 'monthly') {
             const monthAgo = new Date(today);
             monthAgo.setDate(monthAgo.getDate() - 30);
             window.filterFrom = fmt(monthAgo);
@@ -291,12 +291,12 @@ window.router.addRoute('profile', async (container, params) => {
                          <input id="filter-from" type="date" value="${window.filterFrom}" style="padding:0.4rem;border:1.5px solid #e0e0e0;border-radius:10px;font-weight:600;" onchange="window.filterFrom=this.value; window.renderBookings()">
                          <input id="filter-to" type="date" value="${window.filterTo}" style="padding:0.4rem;border:1.5px solid #e0e0e0;border-radius:10px;font-weight:600;" onchange="window.filterTo=this.value; window.renderBookings()">
                     </div>
-                    <div style="display:flex;gap:0.4rem;flex-wrap:wrap;width:100%;">
-                         <button onclick="window.setProfileDatePreset('today')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">📅 Today</button>
-                         <button onclick="window.setProfileDatePreset('week')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">📆 This Week</button>
-                         <button onclick="window.setProfileDatePreset('month')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">🗓 This Month</button>
-                         <button onclick="window.setProfileDatePreset('reset')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid #ccc;background:white;color:#888;font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">✕ Reset</button>
-                    </div>
+                    <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; width:100%;">
+                          <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('daily')">Daily</button>
+                          <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('weekly')">Weekly</button>
+                          <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('monthly')">Monthly</button>
+                          <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem; margin-left:0.5rem; border-color:#e2e8f0; color:#64748b;" onclick="window.setProfileDatePreset('reset')">Reset</button>
+                     </div>
                 </div>
                 <div style="overflow-x:auto;">
                     <table class="manager-table" style="width: 100%; min-width: 1000px;">

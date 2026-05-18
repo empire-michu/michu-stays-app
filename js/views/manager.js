@@ -38,14 +38,14 @@ window.router.addRoute('manager', async (container, params) => {
     window.setMgrAnaPreset = (preset) => {
         const today = new Date();
         const fmt = (d) => d.toISOString().split('T')[0];
-        if (preset === 'today') {
+        if (preset === 'today' || preset === 'daily') {
             analyticsStart = fmt(today);
             analyticsEnd = fmt(today);
-        } else if (preset === 'week') {
+        } else if (preset === 'week' || preset === 'weekly') {
             const d = new Date(today); d.setDate(d.getDate() - 7);
             analyticsStart = fmt(d);
             analyticsEnd = fmt(today);
-        } else if (preset === 'month') {
+        } else if (preset === 'month' || preset === 'monthly') {
             const d = new Date(today); d.setDate(d.getDate() - 30);
             analyticsStart = fmt(d);
             analyticsEnd = fmt(today);
@@ -57,14 +57,14 @@ window.router.addRoute('manager', async (container, params) => {
     window.setMgrBookingPreset = (preset) => {
         const today = new Date();
         const fmt = (d) => d.toISOString().split('T')[0];
-        if (preset === 'today') {
+        if (preset === 'today' || preset === 'daily') {
             filterFrom = fmt(today);
             filterTo = fmt(today);
-        } else if (preset === 'week') {
+        } else if (preset === 'week' || preset === 'weekly') {
             const d = new Date(today); d.setDate(d.getDate() - 7);
             filterFrom = fmt(d);
             filterTo = fmt(today);
-        } else if (preset === 'month') {
+        } else if (preset === 'month' || preset === 'monthly') {
             const d = new Date(today); d.setDate(d.getDate() - 30);
             filterFrom = fmt(d);
             filterTo = fmt(today);
@@ -690,11 +690,11 @@ window.router.addRoute('manager', async (container, params) => {
                     </div>
                     <button class="btn-outline" style="font-size:0.75rem; border-radius:10px;" onclick="window.resetMgrAnaFilter()">Reset</button>
                 </div>
-                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-                    <button onclick="window.setMgrAnaPreset('today')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">📅 Today</button>
-                    <button onclick="window.setMgrAnaPreset('week')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">📆 This Week</button>
-                    <button onclick="window.setMgrAnaPreset('month')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">🗓 This Month</button>
-                    <button onclick="window.setMgrAnaPreset('reset')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid #ccc;background:white;color:#888;font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">✕ Reset</button>
+                <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                    <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setMgrAnaPreset('daily')">Daily</button>
+                    <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setMgrAnaPreset('weekly')">Weekly</button>
+                    <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setMgrAnaPreset('monthly')">Monthly</button>
+                    <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem; margin-left:0.5rem; border-color:#e2e8f0; color:#64748b;" onclick="window.setMgrAnaPreset('reset')">Reset</button>
                 </div>
             </div>
 
@@ -751,11 +751,11 @@ window.router.addRoute('manager', async (container, params) => {
                         </div>
                         <button class="btn-outline" style="padding:0.6rem 1rem; border-radius:10px; font-size:0.8rem;" onclick="filterFrom=''; filterTo=''; filterStatus=''; window.setMgrFilter()">✕ Reset</button>
                     </div>
-                    <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.8rem;">
-                        <button onclick="window.setMgrBookingPreset('today')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">📅 Today</button>
-                        <button onclick="window.setMgrBookingPreset('week')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">📆 This Week</button>
-                        <button onclick="window.setMgrBookingPreset('month')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid var(--color-primary);background:white;color:var(--color-primary);font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">🗓 This Month</button>
-                        <button onclick="window.setMgrBookingPreset('reset')" style="padding:0.35rem 0.8rem;border-radius:99px;border:1.5px solid #ccc;background:white;color:#888;font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;font-family:inherit;">✕ Reset</button>
+                    <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:0.8rem;">
+                        <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setMgrBookingPreset('daily')">Daily</button>
+                        <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setMgrBookingPreset('weekly')">Weekly</button>
+                        <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setMgrBookingPreset('monthly')">Monthly</button>
+                        <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem; margin-left:0.5rem; border-color:#e2e8f0; color:#64748b;" onclick="window.setMgrBookingPreset('reset')">Reset</button>
                     </div>
                     <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
                         <div style="display:flex; align-items:center; gap:0.5rem; background:#f8f9fa; padding:0.5rem 0.8rem; border-radius:10px; border:1.5px solid #e0e0e0; flex:1; min-width:200px; max-width:350px;">
