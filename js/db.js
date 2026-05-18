@@ -1096,10 +1096,10 @@ class Database {
         return { id: threadId, ...thread };
     }
 
-    async sendChatMessage(threadId, { senderId, senderName, senderRole, text }) {
+    async sendChatMessage(threadId, { senderId, senderName, senderRole, text, imageUrl = null }) {
         await firestore.collection('chatThreads').doc(threadId).collection('messages').add({
             senderId, senderName: senderName || '', senderRole: senderRole || 'guest',
-            text, readAt: null, createdAt: new Date().toISOString()
+            text, imageUrl, readAt: null, createdAt: new Date().toISOString()
         });
         const update = { lastMessage: text.length > 100 ? text.slice(0,100)+'…' : text, lastMessageAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
         if (senderRole === 'guest') { 
