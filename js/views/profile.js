@@ -458,6 +458,21 @@ window.router.addRoute('profile', async (container, params) => {
         const phone = document.getElementById('p-phone').value;
         const city = document.getElementById('p-city').value;
         await firestore.collection('users').doc(uid).update({ fullName, phone, city, profilePic: selectedProfilePic });
+        
+        // Propagate name change immediately to all chat threads where this user is the guest
+        try {
+            const threadsSnapshot = await firestore.collection('chatThreads').where('guestId', '==', uid).get();
+            if (!threadsSnapshot.empty) {
+                const batch = firestore.batch();
+                threadsSnapshot.forEach(doc => {
+                    batch.update(doc.ref, { guestName: fullName, updatedAt: new Date().toISOString() });
+                });
+                await batch.commit();
+            }
+        } catch (e) {
+            console.warn('Batch updating guestName in chatThreads failed:', e);
+        }
+
         window.showToast(window.t("✅ Profile updated successfully!"));
         window.auth.userData = { ...window.auth.userData, fullName, profilePic: selectedProfilePic };
         window.auth.renderNav();

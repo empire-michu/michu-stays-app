@@ -1072,10 +1072,41 @@ class Database {
         const ref = firestore.collection('chatThreads').doc(threadId);
         const doc = await ref.get();
         if (doc.exists) {
-            if (bookingId && doc.data().bookingId !== bookingId) {
-                await ref.update({ bookingId, bookingRef: booking?.referenceCode || doc.data().bookingRef || '', updatedAt: new Date().toISOString() });
+            const data = doc.data();
+            let needsUpdate = false;
+            let updatedFields = {};
+
+            if (bookingId && data.bookingId !== bookingId) {
+                updatedFields.bookingId = bookingId;
+                updatedFields.bookingRef = booking?.referenceCode || data.bookingRef || '';
+                needsUpdate = true;
             }
-            return { id: doc.id, ...doc.data() };
+
+            // Sync guest name and email dynamically from users collection if stale or missing
+            try {
+                const uDoc = await firestore.collection('users').doc(guestId).get();
+                if (uDoc.exists) {
+                    const latestName = uDoc.data().fullName || uDoc.data().name || uDoc.data().displayName || null;
+                    const latestEmail = uDoc.data().email || null;
+                    if (data.guestName !== latestName) {
+                        updatedFields.guestName = latestName;
+                        needsUpdate = true;
+                    }
+                    if (data.guestEmail !== latestEmail) {
+                        updatedFields.guestEmail = latestEmail;
+                        needsUpdate = true;
+                    }
+                }
+            } catch (e) {
+                console.warn('Syncing guest details in getOrCreateChatThread failed:', e);
+            }
+
+            if (needsUpdate) {
+                updatedFields.updatedAt = new Date().toISOString();
+                await ref.update(updatedFields);
+                return { id: doc.id, ...data, ...updatedFields };
+            }
+            return { id: doc.id, ...data };
         }
         const thread = {
             propertyId, propertyTitle: property?.title || '', managerId: property?.managerId || '',

@@ -78,6 +78,18 @@ class AuthEngine {
                 this.hasInitialized = true;
                 const hash = window.location.hash.replace('#', '') || '';
 
+                // Support direct server pathname routing for receipt verification
+                if (window.location.pathname.startsWith('/verify')) {
+                    // Bypass all dashboard/home redirects, let verify page load
+                    const params = {};
+                    const searchParams = new URLSearchParams(window.location.search);
+                    searchParams.forEach((v, k) => {
+                        params[k] = v;
+                    });
+                    window.router.navigate('verify', params, false);
+                    return;
+                }
+
                 // Protect admin-only routes
                 if (hash === 'admin' && this.userData?.role !== 'admin') {
                     window.router.navigate('home'); return;
@@ -98,6 +110,9 @@ class AuthEngine {
             } else {
                 // Auth state changed (login/logout)
                 const currentHash = window.location.hash.replace('#', '') || '';
+                if (window.location.pathname.startsWith('/verify')) {
+                    return; // Ignore redirects on verification page
+                }
                 if (!user) {
                     if (!currentHash.startsWith('verify')) {
                         window.router.navigate('home');
@@ -114,6 +129,7 @@ class AuthEngine {
     _redirectByRole() {
         const hash = window.location.hash.replace('#', '') || '';
         if (hash.startsWith('verify')) return; // Leave user on receipt verification page
+        if (window.location.pathname.startsWith('/verify')) return; // Also ignore if pathname is verify
         
         const role = this.userData?.role;
         if (role === 'admin') window.router.navigate('admin');
