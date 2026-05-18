@@ -622,11 +622,11 @@
         BUILD: V1214.PRO.CROP.FIX</div>
 
     <!-- Custom Select Bottom Sheet Modal -->
-    <div id="custom-select-overlay" onclick="if(event.target === this) window.closeCustomSelect()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); z-index:40000; transition:all 0.3s; opacity:0; pointer-events:none;">
-        <div id="custom-select-sheet" style="position:absolute; bottom:-100%; left:0; right:0; background:white; border-radius:24px 24px 0 0; padding:1.5rem; transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1); display:flex; flex-direction:column; max-height:80vh;">
-            <div style="width:40px; height:5px; background:#e2e8f0; border-radius:10px; margin:0 auto 1rem;"></div>
+    <div id="custom-select-overlay" onclick="if(event.target === this) window.closeCustomSelect()" style="display:none;">
+        <div id="custom-select-sheet">
+            <div class="custom-select-drag-bar" style="width:40px; height:5px; background:#e2e8f0; border-radius:10px; margin:0 auto 1rem;"></div>
             <h3 id="custom-select-title" style="margin:0 0 1rem; font-size:1.1rem; color:#1e293b; font-weight:800; text-align:center;">Select Option</h3>
-            <div id="custom-select-options" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:0.5rem; padding-bottom:env(safe-area-inset-bottom);">
+            <div id="custom-select-options" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:0.5rem;">
                 <!-- Options injected via JS -->
             </div>
             <button onclick="window.closeCustomSelect()" style="margin-top:1rem; width:100%; padding:1rem; border-radius:16px; background:#f1f5f9; color:#64748b; border:none; font-weight:700; font-size:1rem; cursor:pointer;">Cancel</button>

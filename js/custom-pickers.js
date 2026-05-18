@@ -33,6 +33,115 @@ function injectPickerStyles() {
         .flatpickr-current-month .flatpickr-monthDropdown-months {
             font-weight: 700 !important;
         }
+
+        /* Custom Select Overlay & Sheet Responsive Premium Styles */
+        #custom-select-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6) !important;
+            backdrop-filter: blur(8px) !important;
+            z-index: 40000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+        }
+        
+        #custom-select-overlay.active {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+
+        #custom-select-sheet {
+            background: #ffffff !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3) !important;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow: hidden;
+            width: 100% !important;
+        }
+
+        /* Option Choice Item Style */
+        .custom-select-option {
+            padding: 1rem 1.2rem !important;
+            border-radius: 16px !important;
+            background: #f8fafc !important;
+            border: 2px solid transparent !important;
+            color: #1e293b !important;
+            font-weight: 600 !important;
+            font-size: 1.05rem !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1) !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .custom-select-option:hover {
+            background: #f1f5f9 !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+        }
+        
+        .custom-select-option:active {
+            transform: translateY(1px) scale(0.98) !important;
+        }
+        
+        .custom-select-option.selected {
+            background: rgba(11, 110, 79, 0.06) !important;
+            border-color: #0B6E4F !important;
+            color: #0B6E4F !important;
+            font-weight: 800 !important;
+        }
+
+        /* Mobile Viewport Style (Default) */
+        @media (max-width: 768px) {
+            #custom-select-overlay {
+                align-items: flex-end !important;
+            }
+            #custom-select-sheet {
+                max-width: 500px !important;
+                margin: 0 auto !important;
+                border-radius: 32px 32px 0 0 !important;
+                padding: 1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom)) !important;
+                max-height: 80vh !important;
+                transform: translateY(100%) !important;
+                transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+            }
+            #custom-select-overlay.active #custom-select-sheet {
+                transform: translateY(0) !important;
+            }
+            .custom-select-drag-bar {
+                display: block !important;
+            }
+        }
+
+        /* Desktop Viewport Style */
+        @media (min-width: 769px) {
+            #custom-select-overlay {
+                align-items: center !important;
+            }
+            #custom-select-sheet {
+                width: 450px !important;
+                border-radius: 28px !important;
+                padding: 2rem !important;
+                max-height: 85vh !important;
+                transform: scale(0.92) translateY(15px) !important;
+                opacity: 0 !important;
+                transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease !important;
+            }
+            #custom-select-overlay.active #custom-select-sheet {
+                transform: scale(1) translateY(0) !important;
+                opacity: 1 !important;
+            }
+            .custom-select-drag-bar {
+                display: none !important;
+            }
+        }
     `;
     document.head.appendChild(style);
 }
@@ -86,18 +195,7 @@ function initCustomPickers() {
             Array.from(select.options).forEach(opt => {
                 const isSelected = opt.value === select.value;
                 const optDiv = document.createElement('div');
-                optDiv.style.padding = '1.2rem 1rem';
-                optDiv.style.borderRadius = '16px';
-                optDiv.style.background = isSelected ? 'rgba(11, 110, 79, 0.08)' : '#f8fafc';
-                optDiv.style.border = `2px solid ${isSelected ? '#0B6E4F' : 'transparent'}`;
-                optDiv.style.color = isSelected ? '#0B6E4F' : '#1e293b';
-                optDiv.style.fontWeight = isSelected ? '800' : '600';
-                optDiv.style.fontSize = '1.05rem';
-                optDiv.style.cursor = 'pointer';
-                optDiv.style.display = 'flex';
-                optDiv.style.alignItems = 'center';
-                optDiv.style.justifyContent = 'space-between';
-                optDiv.style.transition = 'all 0.2s';
+                optDiv.className = 'custom-select-option' + (isSelected ? ' selected' : '');
                 
                 optDiv.innerHTML = `
                     <span>${opt.text}</span>
@@ -117,13 +215,11 @@ function initCustomPickers() {
             
             // Show overlay
             const overlay = document.getElementById('custom-select-overlay');
-            const sheet = document.getElementById('custom-select-sheet');
+            if(!overlay) return;
             overlay.style.display = 'flex';
             // Reflow
             void overlay.offsetWidth;
-            overlay.style.opacity = '1';
-            overlay.style.pointerEvents = 'auto';
-            sheet.style.bottom = '0';
+            overlay.classList.add('active');
         };
 
         // Prevent native Android/iOS select UI
@@ -143,13 +239,12 @@ function initCustomPickers() {
 
 window.closeCustomSelect = () => {
     const overlay = document.getElementById('custom-select-overlay');
-    const sheet = document.getElementById('custom-select-sheet');
-    if(!overlay || !sheet) return;
+    if(!overlay) return;
     
-    overlay.style.opacity = '0';
-    overlay.style.pointerEvents = 'none';
-    sheet.style.bottom = '-100%';
+    overlay.classList.remove('active');
     setTimeout(() => {
-        overlay.style.display = 'none';
-    }, 300);
+        if(!overlay.classList.contains('active')) {
+            overlay.style.display = 'none';
+        }
+    }, 350);
 };
