@@ -212,7 +212,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         .michu-room-card { background:white; border:2px solid #e2e8f0; border-radius:24px; overflow:hidden; transition:all 0.35s cubic-bezier(0.4,0,0.2,1); box-shadow:0 2px 12px rgba(0,0,0,0.04); }
                         .michu-room-card.selected { border-color:var(--color-primary); box-shadow:0 10px 30px rgba(11,110,79,0.12); }
                         .michu-room-card.fully-booked { opacity:0.62; filter:grayscale(0.35); }
-                        .michu-room-card-top { display:grid; grid-template-columns:1fr auto; gap:1rem; align-items:start; padding:1.4rem 1.5rem 1rem; cursor:pointer; }
+                        .michu-room-card-top { display:flex; flex-wrap:wrap; justify-content:space-between; gap:1rem; align-items:flex-start; padding:1.2rem; cursor:pointer; }
                         .michu-room-card.fully-booked .michu-room-card-top { cursor:not-allowed; }
                         .michu-room-stepper-panel { background:linear-gradient(135deg,#f0fdf6,#f8fafc); border-top:1.5px solid #e2e8f0; padding:1.2rem 1.5rem; display:none; flex-direction:column; gap:1rem; animation:stepperSlideIn 0.3s ease; }
                         .michu-room-card.selected .michu-room-stepper-panel { display:flex; }
@@ -230,6 +230,11 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         .michu-add-room-btn:hover { background:var(--color-primary); color:white; }
                         .michu-add-room-btn.active { background:var(--color-primary); color:white; }
                         .michu-room-price-subtotal { font-size:0.75rem; color:var(--color-primary); font-weight:800; text-align:right; margin-top:0.3rem; min-height:1.1em; }
+                        @media (max-width: 480px) {
+                            .michu-room-card-top h3 { font-size: 1rem !important; }
+                            .michu-room-card-top p { font-size: 0.75rem !important; }
+                            .michu-room-card-top { padding: 1rem 0.8rem; }
+                        }
                     </style>
                     <section class="mobile-order-2" style="margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid #f1f5f9;">
                         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.2rem; flex-wrap:wrap; gap:0.8rem;">
@@ -264,8 +269,8 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                 <div class="michu-room-card ${isRoomFullyBooked ? 'fully-booked' : ''}" id="room-card-${roomId}" data-room-id="${roomId}">
                                     ${isRoomFullyBooked ? `<div style="position:absolute; top:1rem; right:-2rem; background:#c5221f; color:white; font-size:0.72rem; font-weight:800; padding:0.2rem 2.5rem; transform:rotate(45deg); z-index:5; box-shadow:0 2px 4px rgba(0,0,0,0.2); pointer-events:none;">SOLD OUT</div>` : ''}
                                     <div class="michu-room-card-top" onclick="${isRoomFullyBooked ? '' : `window.michuToggleRoom('${roomId}')`}" style="position:relative;">
-                                        <div style="display:flex; gap:1.1rem; align-items:flex-start;">
-                                            ${room.image ? `<div style="width:82px; height:82px; border-radius:14px; background:url('${room.image}') center/cover; flex-shrink:0; box-shadow:0 4px 12px rgba(0,0,0,0.08);"></div>` : `<div style="width:82px; height:82px; border-radius:14px; background:linear-gradient(135deg,#ecfdf5,#d1fae5); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0b6e4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg></div>`}
+                                        <div style="display:flex; gap:0.8rem; align-items:flex-start; flex:1; min-width:180px;">
+                                            ${room.image ? `<div style="width:70px; height:70px; border-radius:12px; background:url('${room.image}') center/cover; flex-shrink:0; box-shadow:0 4px 12px rgba(0,0,0,0.08);"></div>` : `<div style="width:70px; height:70px; border-radius:12px; background:linear-gradient(135deg,#ecfdf5,#d1fae5); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0b6e4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg></div>`}
                                             <div style="flex:1; min-width:0;">
                                                 <h3 style="margin:0 0 0.3rem; font-size:1.1rem; font-weight:900; color:#0f172a;">${room.name}</h3>
                                                 <p style="margin:0 0 0.7rem; font-size:0.82rem; color:#64748b; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${room.description || 'Premium room with standard amenities included.'}</p>
@@ -369,8 +374,8 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
 
                     <section class="mobile-order-5">
                          <h2 style="margin-bottom:1.5rem; font-size:1.5rem;">Property Amenities</h2>
-                         <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:0.8rem;">
-                            ${amenities.map(a => `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:white; padding:1.2rem 0.5rem; border-radius:16px; border:1px solid #f1f5f9;">
+                         <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:0.5rem;">
+                            ${amenities.map(a => `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:white; padding:1rem 0.3rem; border-radius:14px; border:1px solid #f1f5f9;">
                                 <span style="font-size:1.8rem; margin-bottom:0.5rem;">${amenitiesIcons[a] || '✨'}</span>
                                 <span style="font-weight:700; font-size:0.85rem; color:#334155; word-wrap:break-word;">${a}</span>
                             </div>`).join('')}
@@ -575,7 +580,14 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
             </section>
         </div>
 
-        <!-- Mobile Sticky Book Now Bar (Removed per user request) -->
+        <!-- Mobile Sticky Book Now Bar (Upgraded per new UX Plan) -->
+        <div id="mobile-sticky-checkout" style="display:none; position:fixed; bottom:0; left:0; right:0; background:rgba(255,255,255,0.95); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); z-index:9000; padding:1rem 1.2rem; border-top:1px solid rgba(0,0,0,0.08); box-shadow:0 -10px 30px rgba(0,0,0,0.05); align-items:center; justify-content:space-between; transform:translateY(100%); transition:transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <div>
+                <div id="mobile-sticky-total" style="font-size:1.3rem; font-weight:900; color:var(--color-primary); line-height:1.1;">0 Birr</div>
+                <div id="mobile-sticky-summary" style="font-size:0.75rem; font-weight:700; color:#64748b; margin-top:0.2rem;">0 Rooms</div>
+            </div>
+            <button class="final-reserve-trigger" style="background:linear-gradient(135deg, var(--color-primary), #1e7e34); color:white; border:none; padding:0.9rem 1.6rem; border-radius:14px; font-weight:800; font-size:1rem; box-shadow:0 6px 15px rgba(11,102,70,0.25); cursor:pointer;" onclick="const tEl=document.querySelector('.final-total-val'); window.michuFinalNav('${id}', document.getElementById('book-in-mobile').value || document.getElementById('book-in').value, document.getElementById('book-out-mobile').value || document.getElementById('book-out').value, tEl?tEl.innerText:'')">Review & Book</button>
+        </div>
 
         <div id="gallery-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.96); z-index:10000; align-items:center; justify-content:center; flex-direction:column;">
              <button style="position:absolute; top:2rem; right:2rem; background:white; border:none; border-radius:50%; width:44px; height:44px; font-size:1.5rem; cursor:pointer;" onclick="document.getElementById('gallery-modal').style.display='none'">✕</button>
@@ -862,6 +874,11 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                             Select a room to see pricing
                         </div>
                     </div>`);
+                const stickyBar = document.getElementById('mobile-sticky-checkout');
+                if (stickyBar) {
+                    stickyBar.style.transform = 'translateY(100%)';
+                    setTimeout(() => { stickyBar.style.display = 'none'; }, 400);
+                }
                 return;
             }
 
@@ -899,6 +916,25 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 btn.style.pointerEvents = 'auto';
             });
 
+            // Update mobile sticky bar
+            const stickyBar = document.getElementById('mobile-sticky-checkout');
+            if (stickyBar) {
+                const isMobile = window.innerWidth <= 768;
+                if (hasRoomSelection && isMobile) {
+                    const stickyTotal = document.getElementById('mobile-sticky-total');
+                    const stickySummary = document.getElementById('mobile-sticky-summary');
+                    const totalRooms = activeSelections.reduce((s, r) => s + r.roomCount, 0);
+                    if (stickyTotal) stickyTotal.innerText = `${grandTotal.toLocaleString()} Birr`;
+                    if (stickySummary) stickySummary.innerText = `${totalRooms} Room${totalRooms > 1 ? 's' : ''} · ${nights} Night${nights > 1 ? 's' : ''}`;
+                    
+                    stickyBar.style.display = 'flex';
+                    setTimeout(() => { stickyBar.style.transform = 'translateY(0)'; }, 10);
+                } else {
+                    stickyBar.style.transform = 'translateY(100%)';
+                    setTimeout(() => { stickyBar.style.display = 'none'; }, 400);
+                }
+            }
+
             summaries.forEach(summary => summary.innerHTML = `
                 <div style="background:#f8fafc; padding:1.4rem; border-radius:22px; border:1px solid #f1f5f9;">
                     ${packageActive ? `
@@ -921,6 +957,12 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         } else {
             mainBtns.forEach(btn => btn.innerText = 'Select Dates');
             summaries.forEach(summary => summary.innerHTML = `<p style="text-align:center; color:#94a3b8; font-weight:700; font-size:0.85rem; padding:1rem 0;">Select check-in/out to see pricing</p>`);
+            
+            const stickyBar = document.getElementById('mobile-sticky-checkout');
+            if (stickyBar) {
+                stickyBar.style.transform = 'translateY(100%)';
+                setTimeout(() => { stickyBar.style.display = 'none'; }, 400);
+            }
         }
 
         window.updateMichuPkgButtons();
