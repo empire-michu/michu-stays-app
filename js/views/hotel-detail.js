@@ -231,9 +231,12 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         .michu-add-room-btn.active { background:var(--color-primary); color:white; }
                         .michu-room-price-subtotal { font-size:0.75rem; color:var(--color-primary); font-weight:800; text-align:right; margin-top:0.3rem; min-height:1.1em; }
                         @media (max-width: 480px) {
-                            .michu-room-card-top h3 { font-size: 1rem !important; }
-                            .michu-room-card-top p { font-size: 0.75rem !important; }
-                            .michu-room-card-top { padding: 1rem 0.8rem; }
+                            .michu-room-card-top { flex-wrap: nowrap !important; padding: 0.9rem 0.6rem !important; gap: 0.5rem !important; }
+                            .michu-room-card-top > div:first-child { min-width: 0 !important; gap: 0.5rem !important; }
+                            .michu-room-card-top > div:last-child { min-width: 0 !important; gap: 0.2rem !important; }
+                            .michu-room-card-top h3 { font-size: 0.9rem !important; }
+                            .michu-room-card-top p { font-size: 0.7rem !important; margin-bottom:0.3rem !important; }
+                            .michu-add-room-btn { min-width: 80px !important; padding: 0.4rem 0.6rem !important; font-size: 0.7rem !important; }
                         }
                     </style>
                     <section class="mobile-order-2" style="margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid #f1f5f9;">
