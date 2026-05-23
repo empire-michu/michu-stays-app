@@ -477,15 +477,60 @@ window.router.addRoute('admin', async (container, params) => {
                 services: row.querySelector('.adm-pkg-services')?.value || ''
             })).filter(p => p.nights > 0);
 
+            // Extract roomTypes
+            const roomRows = Array.from(document.querySelectorAll('.adm-room-row'));
+            const roomTypesArr = [];
+            for (let idx = 0; idx < roomRows.length; idx++) {
+                const row = roomRows[idx];
+                const fileInput = row.querySelector('.adm-room-img-input');
+                let imgUrl = row.querySelector('.adm-room-img-url')?.value || '';
+                if (fileInput && fileInput.files[0] && !uploadSkipped) {
+                    statusEl.innerText = `Uploading photo for room ${idx+1}...`;
+                    imgUrl = await window.db.uploadFile(fileInput.files[0], 'properties/rooms');
+                }
+                
+                const totalRooms = parseInt(row.querySelector('.adm-room-total-rooms').value) || 1;
+                let avail = row.querySelector('.adm-room-avail')?.value;
+                avail = avail !== '' && avail !== undefined ? parseInt(avail) : totalRooms;
+                
+                roomTypesArr.push({
+                    id: row.getAttribute('data-id') || `room_${idx}_${Date.now()}`,
+                    name: row.querySelector('.adm-room-name').value.trim(),
+                    description: row.querySelector('.adm-room-desc').value.trim(),
+                    price: parseInt(row.querySelector('.adm-room-price').value) || 0,
+                    capacity: parseInt(row.querySelector('.adm-room-capacity').value) || 2,
+                    beds: row.querySelector('.adm-room-beds').value.trim(),
+                    totalRooms: totalRooms,
+                    availableRooms: avail,
+                    isActive: row.querySelector('.adm-room-active')?.checked !== false, // Default to true if not found
+                    image: imgUrl
+                });
+            }
+            
+            const filteredRoomTypesArr = roomTypesArr.filter(r => r.name && r.price);
+
+            let finalPrice = price;
+            let finalAvail = getNum('h-avail-rooms');
+            let finalTotal = getNum('h-total-rooms');
+
+            if (filteredRoomTypesArr.length > 0) {
+                const activeRooms = filteredRoomTypesArr.filter(r => r.isActive !== false);
+                if (activeRooms.length > 0) {
+                    finalPrice = Math.min(...activeRooms.map(r => r.price));
+                }
+                finalTotal = filteredRoomTypesArr.reduce((sum, r) => sum + r.totalRooms, 0);
+                finalAvail = activeRooms.reduce((sum, r) => sum + r.availableRooms, 0);
+            }
+
             const payload = {
                 title,
                 type: getVal('h-type'),
-                price,
+                price: finalPrice,
                 discountPercent: discountP,
                 discount: discountP, // Redundant for compatibility
-                originalPrice,
-                totalRooms: getNum('h-total-rooms'),
-                availableRooms: getNum('h-avail-rooms'),
+                originalPrice: discountP > 0 ? Math.round(finalPrice / (1 - (discountP / 100))) : 0,
+                totalRooms: finalTotal,
+                availableRooms: finalAvail,
                 address,
                 mapQuery: getVal('h-map-query'),
                 phone: getVal('h-phone'),
@@ -503,12 +548,35 @@ window.router.addRoute('admin', async (container, params) => {
                 badgeText: getVal('h-badge-text'),
                 eventMode: document.getElementById('h-event-mode')?.checked || false,
                 packages: packagesArr,
+                roomTypes: filteredRoomTypesArr,
                 updatedAt: Date.now(),
                 managerId: existing?.managerId || '',
                 isActive: true
             };
 
             if (editPropertyId) {
+                // Media Cleanup: Remove files that are no longer used
+                try {
+                    const oldUrls = [
+                        ...(existing.images || []),
+                        existing.videoTour,
+                        ...(existing.roomTypes || []).map(r => r.image)
+                    ].filter(url => url && typeof url === 'string');
+                    
+                    const newUrls = [
+                        ...(payload.images || []),
+                        payload.videoTour,
+                        ...(payload.roomTypes || []).map(r => r.image)
+                    ].filter(url => url && typeof url === 'string');
+                    
+                    const urlsToDelete = oldUrls.filter(url => !newUrls.includes(url));
+                    for (const url of urlsToDelete) {
+                        await window.db.deleteFile(url);
+                    }
+                } catch(e) {
+                    console.warn("Media cleanup error:", e);
+                }
+
                 await window.db.updateProperty(editPropertyId, payload);
                 window.showToast("✅ Property Changes Saved!");
             } else {
@@ -594,6 +662,71 @@ window.router.addRoute('admin', async (container, params) => {
             <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800;">✕</button>
             <div style="grid-column: 1 / -1;">
                 <input type="text" placeholder="Included Services (e.g. Free Massage, Airport Shuttle)" class="adm-pkg-services" style="width:100%; padding:0.6rem; border:1px solid #eee; border-radius:8px; font-size:0.8rem; background:#fcfcfc;">
+            </div>
+        `;
+        container.appendChild(div);
+    };
+
+    window.addAdmRoomType = () => {
+        const container = document.getElementById('adm-rooms-container');
+        if (!container) return;
+        const div = document.createElement('div');
+        div.className = 'adm-room-row';
+        div.style.cssText = `background:white; padding:1.2rem; border-radius:18px; border:1px solid #cbd5e1; display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; position:relative; margin-top:0.8rem;`;
+        div.innerHTML = `
+            <div style="position:absolute; top:0.8rem; right:0.8rem; display:flex; gap:0.5rem; z-index:10;">
+                <label style="display:flex; align-items:center; gap:0.3rem; font-size:0.75rem; font-weight:800; cursor:pointer; background:#f1f5f9; padding:0.3rem 0.6rem; border-radius:6px; color:#475569;">
+                    <input type="checkbox" class="adm-room-active" checked style="accent-color:var(--color-primary);"> Active
+                </label>
+                <button type="button" onclick="this.closest('.adm-room-row').remove()" style="background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800;">✕</button>
+            </div>
+            
+            <div style="grid-column: 1 / -1; display:flex; gap:1rem; align-items:center; margin-bottom: 0.5rem; margin-top: 1.5rem;">
+                <div class="adm-room-img-preview" style="width:60px; height:60px; border-radius:10px; background:#f1f5f9; border:1px solid #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                    <span style="color:#94a3b8; font-size:1.2rem;">📷</span>
+                </div>
+                <div style="flex:1;">
+                    <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Room Photo</label>
+                    <input type="file" accept="image/*" class="adm-room-img-input" style="font-size:0.75rem; width:100%;" onchange="
+                        const file = this.files[0];
+                        if(file) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                const preview = this.closest('.adm-room-row').querySelector('.adm-room-img-preview');
+                                preview.style.background = 'url(' + e.target.result + ') center/cover';
+                                preview.innerHTML = '';
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    ">
+                    <input type="hidden" class="adm-room-img-url" value="">
+                    <input type="hidden" class="adm-room-avail" value="">
+                </div>
+            </div>
+            
+            <div style="grid-column: 1 / -1; margin-right: 2rem;">
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Room Type Name</label>
+                <input type="text" placeholder="e.g. Deluxe Double Room" class="adm-room-name" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Description</label>
+                <input type="text" placeholder="Description" class="adm-room-desc" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Price per Night (Birr)</label>
+                <input type="number" placeholder="Price" class="adm-room-price" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700; color:var(--color-primary);">
+            </div>
+            <div>
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Max Guests Capacity</label>
+                <input type="number" placeholder="Capacity" value="2" class="adm-room-capacity" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Bed Configurations</label>
+                <input type="text" placeholder="Beds" class="adm-room-beds" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Quantity (Total Rooms)</label>
+                <input type="number" placeholder="Total Rooms" value="5" class="adm-room-total-rooms" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
             </div>
         `;
         container.appendChild(div);
@@ -885,6 +1018,11 @@ window.router.addRoute('admin', async (container, params) => {
                                                         🎁 PKG: ${b.packageInfo.title}
                                                     </div>
                                                 ` : ''}
+                                                ${b.roomTypeName ? `
+                                                    <div style="margin-top:0.3rem; background:#ecfdf5; color:#065f46; font-size:0.6rem; font-weight:800; padding:0.15rem 0.4rem; border-radius:4px; border:1px solid #a7f3d0; display:inline-block; text-transform:uppercase;">
+                                                        🔑 ROOM: ${b.roomTypeName}
+                                                    </div>
+                                                ` : ''}
                                             </td>
                                             <td data-label="Amount" style="font-weight:600; white-space:nowrap;">${b.totalAmount} Birr</td>
                                             <td data-label="Status"><span style="padding:0.2rem 0.6rem; border-radius:99px; font-size:0.75rem; background:${b.status==='Confirmed'?'#e6f4ea':'#fff8e1'}; color:${b.status==='Confirmed'?'#1e7e34':'#b05d22'}; font-weight:700; text-transform:uppercase;">${b.status}</span></td>
@@ -1090,7 +1228,7 @@ window.router.addRoute('admin', async (container, params) => {
                                 <div>
                                     <label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:1rem; color:var(--color-primary);">✨ Amenities</label>
                                     <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:0.8rem; background:#f9f9f9; padding:1.2rem; border-radius:16px;">
-                                        ${['WiFi', 'Pool', 'Spa', 'Breakfast', 'Parking', 'Gym', 'AC', 'Bar'].map(a => `
+                                        ${['WiFi', 'Pool', 'Spa', 'Breakfast', 'Parking', 'Gym', 'AC', 'Bar', 'TV', 'Kitchen', 'Workspace', 'Balcony'].map(a => `
                                             <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-size:0.85rem; font-weight:600;">
                                                 <input type="checkbox" class="adm-amenity" value="${a}" ${(p.amenities||[]).includes(a)?'checked':''} style="width:18px; height:18px; accent-color:var(--color-primary);"> ${a}
                                             </label>
@@ -1140,6 +1278,75 @@ window.router.addRoute('admin', async (container, params) => {
                                         `).join('')}
                                     </div>
                                     <button onclick="window.addAdmPackage()" style="width:100%; margin-top:1rem; padding:0.8rem; border-radius:12px; border:1.5px dashed #0056b3; background:none; color:#0056b3; font-weight:700; cursor:pointer;">+ Add Package Option</button>
+                                 </div>
+
+                                 <!-- Room Types Section for Admin -->
+                                 <div style="background:#eafaf1; padding:1.5rem; border-radius:24px; border:1px solid #a7f3d0; margin-bottom:1.5rem;">
+                                     <h4 style="margin:0 0 1rem; font-size:0.9rem; color:#0b6646; display:flex; align-items:center; gap:0.5rem;">
+                                         <span style="font-size:1.4rem;">🔑</span> ROOM TYPES & BED CONFIGURATIONS
+                                     </h4>
+                                     
+                                     <div id="adm-rooms-container" style="display:grid; gap:1.2rem;">
+                                         ${(p.roomTypes || []).map((room, idx) => `
+                                             <div class="adm-room-row" data-id="${room.id || `room_${idx}`}" style="background:white; padding:1.2rem; border-radius:18px; border:1px solid #cbd5e1; display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; position:relative;">
+                                                 <div style="position:absolute; top:0.8rem; right:0.8rem; display:flex; gap:0.5rem; z-index:10;">
+                                                     <label style="display:flex; align-items:center; gap:0.3rem; font-size:0.75rem; font-weight:800; cursor:pointer; background:#f1f5f9; padding:0.3rem 0.6rem; border-radius:6px; color:#475569;">
+                                                         <input type="checkbox" class="adm-room-active" ${room.isActive !== false ? 'checked' : ''} style="accent-color:var(--color-primary);"> Active
+                                                     </label>
+                                                     <button type="button" onclick="this.closest('.adm-room-row').remove()" style="background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800;">✕</button>
+                                                 </div>
+                                                 
+                                                 <div style="grid-column: 1 / -1; display:flex; gap:1rem; align-items:center; margin-bottom: 0.5rem; margin-top: 1.5rem;">
+                                                     <div class="adm-room-img-preview" style="width:60px; height:60px; border-radius:10px; background:${room.image ? `url('${room.image}') center/cover` : '#f1f5f9'}; border:1px solid #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                                                         ${room.image ? '' : '<span style="color:#94a3b8; font-size:1.2rem;">📷</span>'}
+                                                     </div>
+                                                     <div style="flex:1;">
+                                                         <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Room Photo</label>
+                                                         <input type="file" accept="image/*" class="adm-room-img-input" style="font-size:0.75rem; width:100%;" onchange="
+                                                             const file = this.files[0];
+                                                             if(file) {
+                                                                 const reader = new FileReader();
+                                                                 reader.onload = (e) => {
+                                                                     const preview = this.closest('.adm-room-row').querySelector('.adm-room-img-preview');
+                                                                     preview.style.background = 'url(' + e.target.result + ') center/cover';
+                                                                     preview.innerHTML = '';
+                                                                 };
+                                                                 reader.readAsDataURL(file);
+                                                             }
+                                                         ">
+                                                         <input type="hidden" class="adm-room-img-url" value="${room.image || ''}">
+                                                         <input type="hidden" class="adm-room-avail" value="${room.availableRooms !== undefined ? room.availableRooms : (room.totalRooms || 1)}">
+                                                     </div>
+                                                 </div>
+                                                 
+                                                 <div style="grid-column: 1 / -1; margin-right: 2rem;">
+                                                     <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Room Type Name</label>
+                                                     <input type="text" placeholder="e.g. Deluxe Double Room" value="${room.name||''}" class="adm-room-name" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+                                                 </div>
+                                                 <div style="grid-column: 1 / -1;">
+                                                     <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Description</label>
+                                                     <input type="text" placeholder="Description" value="${room.description||''}" class="adm-room-desc" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                                                 </div>
+                                                 <div>
+                                                     <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Price per Night (Birr)</label>
+                                                     <input type="number" placeholder="Price" value="${room.price||''}" class="adm-room-price" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700; color:var(--color-primary);">
+                                                 </div>
+                                                 <div>
+                                                     <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Max Guests Capacity</label>
+                                                     <input type="number" placeholder="Capacity" value="${room.capacity||''}" class="adm-room-capacity" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                                                 </div>
+                                                 <div>
+                                                     <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Bed Configurations</label>
+                                                     <input type="text" placeholder="Beds" value="${room.beds||''}" class="adm-room-beds" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                                                 </div>
+                                                 <div>
+                                                     <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Quantity (Total Rooms)</label>
+                                                     <input type="number" placeholder="Total Rooms" value="${room.totalRooms||''}" class="adm-room-total-rooms" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+                                                 </div>
+                                             </div>
+                                         `).join('')}
+                                     </div>
+                                     <button type="button" onclick="window.addAdmRoomType()" style="width:100%; margin-top:1rem; padding:0.8rem; border-radius:12px; border:1.5px dashed #0b6646; background:none; color:#0b6646; font-weight:700; cursor:pointer;">+ Add Room Type</button>
                                  </div>
 
                                 <p id="adm-up-status" style="text-align:center; font-weight:700; color:var(--color-primary);"></p>

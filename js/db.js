@@ -94,11 +94,10 @@ class Database {
             let query = firestore.collection('properties');
             if (managerId) query = query.where('managerId', '==', managerId);
             
-            // Add a timeout for the fetch
+            // Remove artificial timeout to allow slow connections to fetch
             const fetchPromise = query.get();
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
             
-            const snapshot = await Promise.race([fetchPromise, timeoutPromise]);
+            const snapshot = await fetchPromise;
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             
             if (!managerId) {
@@ -212,6 +211,8 @@ class Database {
             checkOut: userDetails.checkOut || '',
             guests: userDetails.guests || 1,
             packageInfo: userDetails.packageInfo || null,
+            roomTypeId: userDetails.roomTypeId || null,
+            roomTypeName: userDetails.roomTypeName || null,
             createdAt: new Date().toISOString()
         };
         const ref = await firestore.collection('bookings').add(newBooking);
@@ -298,9 +299,55 @@ class Database {
     }
 
     async updateBookingStatus(bookingId, status) {
-        const booking = (await firestore.collection('bookings').doc(bookingId).get()).data();
-        await firestore.collection('bookings').doc(bookingId).update({ status });
+        const bookingRef = firestore.collection('bookings').doc(bookingId);
+        
+        await firestore.runTransaction(async (transaction) => {
+            const bookingDoc = await transaction.get(bookingRef);
+            if (!bookingDoc.exists) throw new Error("Booking not found");
+            const booking = bookingDoc.data();
+            
+            // Check if status actually changed in a way that affects inventory
+            const wasConfirmed = booking.status === 'Confirmed';
+            const isConfirmed = status === 'Confirmed';
+            
+            if (wasConfirmed !== isConfirmed) {
+                const propertyRef = firestore.collection('properties').doc(booking.propertyId);
+                const propertyDoc = await transaction.get(propertyRef);
+                
+                if (propertyDoc.exists) {
+                    const property = propertyDoc.data();
+                    let updated = false;
+                    
+                    if (booking.roomTypeId && property.roomTypes && property.roomTypes.length > 0) {
+                        const roomIdx = property.roomTypes.findIndex(r => r.id === booking.roomTypeId);
+                        if (roomIdx > -1) {
+                            let currentAvail = Number(property.roomTypes[roomIdx].availableRooms) || 0;
+                            if (isConfirmed) currentAvail = Math.max(0, currentAvail - 1); // Decrement, don't go below 0
+                            else currentAvail += 1; // Increment on cancellation
+                            property.roomTypes[roomIdx].availableRooms = currentAvail;
+                            updated = true;
+                        }
+                    } else if (property.availableRooms !== undefined) {
+                        let currentAvail = Number(property.availableRooms) || 0;
+                        if (isConfirmed) currentAvail = Math.max(0, currentAvail - 1);
+                        else currentAvail += 1;
+                        property.availableRooms = currentAvail;
+                        updated = true;
+                    }
+                    
+                    if (updated) {
+                        transaction.update(propertyRef, property);
+                    }
+                }
+            }
+            
+            transaction.update(bookingRef, { status });
+        });
+        
+        // Re-fetch booking for notifications after transaction
+        const booking = (await bookingRef.get()).data();
         this.clearCache('bookings');
+        this.clearCache('properties');
 
         // Update corresponding manager/admin notifications
         try {
@@ -374,7 +421,21 @@ class Database {
         await firestore.collection('users').doc(uid).delete();
     }
 
-    // ─── STORAGE (Cloudinary — Free persistent files) ──────────
+    // ─── STORAGE (Cloudinary / Firebase) ──────────
+    async deleteFile(url) {
+        if (!url || typeof url !== 'string') return;
+        try {
+            if (url.includes('firebasestorage.googleapis.com')) {
+                const fileRef = firebase.storage().refFromURL(url);
+                await fileRef.delete();
+            } else if (url.includes('cloudinary.com')) {
+                console.warn("Cloudinary file deletion bypassed on client:", url);
+            }
+        } catch(e) {
+            console.warn("Failed to delete file:", e);
+        }
+    }
+
     async uploadFile(file, folder = 'properties', onProgress = null) {
         const cloudName = 'dudc1zwmq';
         const uploadPreset = 'michu_stays';

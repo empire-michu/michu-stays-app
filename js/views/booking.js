@@ -15,7 +15,34 @@ window.router.addRoute('booking', async (container, params) => {
         return;
     }
 
-    const currentPrice = Number(String(property.price || 0).replace(/[^\d.-]/g, ''));
+    const roomTypeId = params.roomTypeId || null;
+    let selectedRoom = null;
+    if (roomTypeId && property.roomTypes) {
+        selectedRoom = property.roomTypes.find(rt => (rt.id || `room_${property.roomTypes.indexOf(rt)}`) === roomTypeId);
+    }
+
+    // Decode multi-room selection
+    let selectedRooms = [];
+    try {
+        if (params.selectedRooms) {
+            selectedRooms = JSON.parse(decodeURIComponent(params.selectedRooms));
+        }
+    } catch(e) {
+        if (selectedRoom) {
+            selectedRooms = [{ roomId: roomTypeId, roomCount: 1, adults: 2, children: 0, roomName: selectedRoom.name }];
+        }
+    }
+    if (selectedRooms.length === 0 && selectedRoom) {
+        selectedRooms = [{ roomId: roomTypeId, roomCount: 1, adults: 2, children: 0, roomName: selectedRoom.name }];
+    }
+
+    // Aggregated totals
+    const totalRoomsBooked = selectedRooms.reduce((s, r) => s + (r.roomCount || 1), 0);
+    const totalAdults = selectedRooms.reduce((s, r) => s + (r.adults || 1), 0);
+    const totalChildren = selectedRooms.reduce((s, r) => s + (r.children || 0), 0);
+    const totalGuests = totalAdults + totalChildren;
+
+    const currentPrice = selectedRoom ? Number(String(selectedRoom.price || 0).replace(/[^\d.-]/g, '')) : Number(String(property.price || 0).replace(/[^\d.-]/g, ''));
     let discountPercent = Number(property.discountPercent || property.discount || 0);
     let originalPrice = property.originalPrice ? Number(String(property.originalPrice).replace(/[^\d.-]/g, '')) : 0;
     
@@ -26,7 +53,7 @@ window.router.addRoute('booking', async (container, params) => {
     const calcBase = originalPrice || currentPrice;
     const checkIn = params.checkIn || 'Not set';
     const checkOut = params.checkOut || 'Not set';
-    const guests = params.guests || 2;
+    const guests = totalGuests || params.guests || 2;
 
     // Robust Date calculation for mobile
     const parseDate = (dStr) => {
@@ -89,6 +116,34 @@ window.router.addRoute('booking', async (container, params) => {
                     <div style="margin-top:0.8rem; font-size:0.95rem; color:var(--color-primary); font-weight:700; background:#f0f7ff; display:inline-block; padding:0.6rem 1.2rem; border-radius:12px; border:1px solid #c9e2ff;">
                         📅 ${checkIn} to ${checkOut}
                     </div>
+                    ${selectedRooms.length > 0 ? `
+                        <div style="margin-top:0.8rem; background:#ecfdf5; border:1.5px solid #a7f3d0; padding:1rem 1.2rem; border-radius:16px; max-width:460px; margin-left:auto; margin-right:auto;">
+                            <div style="font-weight:800; color:#065f46; font-size:0.7rem; text-transform:uppercase; margin-bottom:0.6rem; display:flex; align-items:center; gap:0.4rem;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>
+                                Your Room Selection
+                            </div>
+                            ${selectedRooms.map(r => {
+                                const rd = property.roomTypes ? property.roomTypes.find(rt => (rt.id || `room_${property.roomTypes.indexOf(rt)}`) === r.roomId) : null;
+                                const name = rd ? rd.name : (r.roomName || 'Room');
+                                return `<div style="display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0; border-bottom:1px dashed #bbf7d0; gap:0.5rem;">
+                                    <div>
+                                        <div style="font-weight:800; color:#064e3b; font-size:0.88rem;">🔑 ${r.roomCount}× ${name}</div>
+                                        <div style="font-size:0.72rem; color:#047857; margin-top:0.1rem;">${r.adults} adult${r.adults > 1 ? 's' : ''}${r.children > 0 ? ` · ${r.children} child${r.children > 1 ? 'ren' : ''}` : ''}</div>
+                                    </div>
+                                </div>`;
+                            }).join('')}
+                            <div style="display:flex; gap:1rem; margin-top:0.6rem; font-size:0.78rem; font-weight:800; color:#065f46;">
+                                <span>🛏 ${totalRoomsBooked} room${totalRoomsBooked > 1 ? 's' : ''}</span>
+                                <span>👤 ${totalAdults} adult${totalAdults > 1 ? 's' : ''}${totalChildren > 0 ? ` + ${totalChildren} child${totalChildren > 1 ? 'ren' : ''}` : ''}</span>
+                            </div>
+                        </div>
+                    ` : (selectedRoom ? `
+                        <div style="margin-top:0.8rem; background:#ecfdf5; border:1px solid #a7f3d0; padding:0.8rem; border-radius:12px; max-width:400px; margin-left:auto; margin-right:auto;">
+                            <div style="font-weight:800; color:#065f46; font-size:0.7rem; text-transform:uppercase;">Selected Room</div>
+                            <div style="font-weight:700; color:#064e3b;">🔑 ${selectedRoom.name}</div>
+                            <div style="font-size:0.75rem; color:#047857; margin-top:0.2rem;">Capacity: ${selectedRoom.capacity || 2} Guests | Beds: ${selectedRoom.beds || '1 Double'}</div>
+                        </div>
+                    ` : '')}
                     ${pkgInfo ? `
                         <div style="margin-top:1rem; background:#fff9e6; border:1px solid #ffecb3; padding:0.8rem; border-radius:12px; max-width:400px; margin-left:auto; margin-right:auto;">
                             <div style="font-weight:800; color:#856404; font-size:0.7rem; text-transform:uppercase;">Selected Offer</div>
@@ -259,8 +314,14 @@ window.router.addRoute('booking', async (container, params) => {
                 checkIn: checkIn,
                 checkOut: checkOut,
                 guests: guests,
+                adults: totalAdults,
+                children: totalChildren,
+                totalRooms: totalRoomsBooked,
                 totalAmount: amount,
-                packageInfo: pkgInfo
+                packageInfo: pkgInfo,
+                roomTypeId: roomTypeId,
+                roomTypeName: selectedRoom ? selectedRoom.name : (selectedRooms[0]?.roomName || null),
+                selectedRooms: selectedRooms.length > 0 ? selectedRooms : null
             }, code, proofUrl, currentMethod);
 
             if (bar) bar.style.width = '100%';

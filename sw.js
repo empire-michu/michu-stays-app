@@ -1,5 +1,5 @@
 // Michu Stays Service Worker - Enhanced for today's updates
-const CACHE_NAME = 'michu-stays-v4.0';
+const CACHE_NAME = 'michu-stays-v4.1';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -43,16 +43,28 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  if (url.hostname.includes('googleapis.com') ||
+      url.hostname.includes('firestore') ||
+      url.hostname.includes('cloudinary') ||
+      url.hostname.includes('gstatic.com') ||
+      event.request.method !== 'GET') {
+    return;
+  }
+
   // Stale-While-Revalidate Strategy for best update experience
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.match(event.request).then((response) => {
+      return cache.match(event.request, { ignoreSearch: true }).then((response) => {
         const fetchPromise = fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             cache.put(event.request, networkResponse.clone());
           }
           return networkResponse;
-        }).catch(() => {});
+        }).catch((err) => {
+          console.warn('Fetch error caught:', err);
+          return response || new Response('', { status: 503, statusText: 'Service Unavailable' });
+        });
         return response || fetchPromise;
       });
     })

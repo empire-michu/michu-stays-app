@@ -172,6 +172,71 @@ window.router.addRoute('manager', async (container, params) => {
         container.appendChild(div);
     };
 
+    window.addMgRoomType = () => {
+        const container = document.getElementById('mg-room-types-container');
+        if (!container) return;
+        const div = document.createElement('div');
+        div.className = 'mg-room-row';
+        div.style.cssText = `background:white; padding:1.2rem; border-radius:18px; border:1px solid #cbd5e1; display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; position:relative; margin-bottom:0.5rem;`;
+        div.innerHTML = `
+            <div style="position:absolute; top:0.8rem; right:0.8rem; display:flex; gap:0.5rem; z-index:10;">
+                <label style="display:flex; align-items:center; gap:0.3rem; font-size:0.75rem; font-weight:800; cursor:pointer; background:#f1f5f9; padding:0.3rem 0.6rem; border-radius:6px; color:#475569;">
+                    <input type="checkbox" class="mg-room-active" checked style="accent-color:var(--color-primary);"> Active
+                </label>
+                <button type="button" onclick="this.closest('.mg-room-row').remove()" style="background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800;">✕</button>
+            </div>
+            
+            <div style="grid-column: 1 / -1; display:flex; gap:1rem; align-items:center; margin-bottom: 0.5rem; margin-top: 1.5rem;">
+                <div class="mg-room-img-preview" style="width:60px; height:60px; border-radius:10px; background:#f1f5f9; border:1px solid #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                    <span style="color:#94a3b8; font-size:1.2rem;">📷</span>
+                </div>
+                <div style="flex:1;">
+                    <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Room Photo</label>
+                    <input type="file" accept="image/*" class="mg-room-img-input" style="font-size:0.75rem; width:100%;" onchange="
+                        const file = this.files[0];
+                        if(file) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                const preview = this.closest('.mg-room-row').querySelector('.mg-room-img-preview');
+                                preview.style.background = 'url(' + e.target.result + ') center/cover';
+                                preview.innerHTML = '';
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    ">
+                    <input type="hidden" class="mg-room-img-url" value="">
+                    <input type="hidden" class="mg-room-avail" value="">
+                </div>
+            </div>
+            
+            <div style="grid-column: 1 / -1; margin-right: 2rem;">
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Room Type Name</label>
+                <input type="text" placeholder="e.g. Deluxe Double Room" class="mg-room-name" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Description</label>
+                <input type="text" placeholder="e.g. Ocean view, mini-bar, balcony" class="mg-room-desc" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Price per Night (Birr)</label>
+                <input type="number" placeholder="Price" class="mg-room-price" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700; color:var(--color-primary);">
+            </div>
+            <div>
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Max Guests Capacity</label>
+                <input type="number" placeholder="Capacity" class="mg-room-capacity" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Bed Configurations</label>
+                <input type="text" placeholder="e.g. 1 King Bed or 2 Double Beds" class="mg-room-beds" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Quantity (Total Rooms)</label>
+                <input type="number" placeholder="Total Rooms" class="mg-room-total-rooms" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+            </div>
+        `;
+        container.appendChild(div);
+    };
+
     window.mgSaveHotel = async () => {
         const btn = document.getElementById('mg-save-btn');
         const status = document.getElementById('mg-save-status');
@@ -182,7 +247,47 @@ window.router.addRoute('manager', async (container, params) => {
             const getNum = (id) => Number(document.getElementById(id)?.value) || 0;
 
             const title = getVal('mg-h-title');
-            const priceVal = getNum('mg-h-price');
+            
+            // Extract Room Types first so we can use them to override list price/availability
+            const roomRows = Array.from(document.querySelectorAll('.mg-room-row'));
+            const roomTypesArr = [];
+            for (let idx = 0; idx < roomRows.length; idx++) {
+                const row = roomRows[idx];
+                const fileInput = row.querySelector('.mg-room-img-input');
+                let imgUrl = row.querySelector('.mg-room-img-url')?.value || '';
+                if (fileInput && fileInput.files[0]) {
+                    status.innerText = `Uploading photo for room ${idx+1}...`;
+                    imgUrl = await window.db.uploadFile(fileInput.files[0], 'properties/rooms');
+                }
+                
+                const totalRooms = parseInt(row.querySelector('.mg-room-total-rooms').value) || 1;
+                let avail = row.querySelector('.mg-room-avail')?.value;
+                avail = avail !== '' && avail !== undefined ? parseInt(avail) : totalRooms;
+                
+                roomTypesArr.push({
+                    id: row.dataset.id || `room_${idx}_${Date.now()}`,
+                    name: row.querySelector('.mg-room-name').value.trim(),
+                    description: row.querySelector('.mg-room-desc').value.trim(),
+                    price: parseInt(row.querySelector('.mg-room-price').value) || 0,
+                    capacity: parseInt(row.querySelector('.mg-room-capacity').value) || 2,
+                    beds: row.querySelector('.mg-room-beds').value.trim(),
+                    totalRooms: totalRooms,
+                    availableRooms: avail,
+                    isActive: row.querySelector('.mg-room-active')?.checked !== false, // Default to true if not found
+                    image: imgUrl
+                });
+            }
+            
+            const filteredRoomTypesArr = roomTypesArr.filter(r => r.name && r.price);
+
+            let priceVal = getNum('mg-h-price');
+            if (filteredRoomTypesArr.length > 0) {
+                const minPrice = Math.min(...filteredRoomTypesArr.filter(r => r.isActive !== false).map(r => r.price));
+                if (minPrice !== Infinity && minPrice > 0) {
+                    priceVal = minPrice;
+                }
+            }
+
             const discountVal = getNum('mg-h-discount');
             
             if (!title || !priceVal) {
@@ -234,6 +339,11 @@ window.router.addRoute('manager', async (container, params) => {
                 services: row.querySelector('.mg-pkg-services').value.trim()
             })).filter(p => p.title && p.nights);
 
+            let availableRoomsVal = getNum('mg-h-avail-rooms');
+            if (filteredRoomTypesArr.length > 0) {
+                availableRoomsVal = filteredRoomTypesArr.reduce((sum, r) => sum + (r.isActive !== false ? r.availableRooms : 0), 0);
+            }
+
             const updatedData = {
                 title,
                 type: getVal('mg-h-type'),
@@ -242,7 +352,7 @@ window.router.addRoute('manager', async (container, params) => {
                 discount: discountVal, 
                 originalPrice,
                 address: getVal('mg-h-address'),
-                availableRooms: getNum('mg-h-avail-rooms'),
+                availableRooms: availableRoomsVal,
                 mapQuery: getVal('mg-h-map-query'),
                 description: getVal('mg-h-desc'),
                 cbeAccount: getVal('mg-h-cbe-acc'),
@@ -259,8 +369,31 @@ window.router.addRoute('manager', async (container, params) => {
                 extraImages: filteredImages.slice(1),
                 videoTour: videoUrl,
                 packages: packagesArr,
+                roomTypes: filteredRoomTypesArr,
                 updatedAt: Date.now()
             };
+
+            // Media Cleanup: Remove files that are no longer used
+            try {
+                const oldUrls = [
+                    ...(myHotel.images || []),
+                    myHotel.videoTour,
+                    ...(myHotel.roomTypes || []).map(r => r.image)
+                ].filter(url => url && typeof url === 'string');
+                
+                const newUrls = [
+                    ...(updatedData.images || []),
+                    updatedData.videoTour,
+                    ...(updatedData.roomTypes || []).map(r => r.image)
+                ].filter(url => url && typeof url === 'string');
+                
+                const urlsToDelete = oldUrls.filter(url => !newUrls.includes(url));
+                for (const url of urlsToDelete) {
+                    await window.db.deleteFile(url);
+                }
+            } catch(e) {
+                console.warn("Media cleanup error:", e);
+            }
 
             await window.db.updateProperty(myHotel.id, updatedData);
             window.showToast("✅ Property updated successfully!");
@@ -824,6 +957,11 @@ window.router.addRoute('manager', async (container, params) => {
                                                     🎁 PACKAGE: ${b.packageInfo.title}
                                                 </div>
                                             ` : ''}
+                                            ${b.roomTypeName ? `
+                                                <div style="margin-top:0.3rem; background:#ecfdf5; color:#065f46; font-size:0.65rem; font-weight:800; padding:0.2rem 0.5rem; border-radius:6px; border:1px solid #a7f3d0; display:inline-block; text-transform:uppercase;">
+                                                    🔑 ROOM: ${b.roomTypeName}
+                                                </div>
+                                            ` : ''}
                                             <div style="font-size:0.75rem; color:var(--color-text-light); margin-top:0.3rem;">
                                                 Stay: <strong>${b.checkIn} &rarr; ${b.checkOut}</strong> <span style="font-weight:700;color:#d4af37;margin-left:4px;">(${nights} night${nights !== 1 ? 's' : ''})</span>
                                             </div>
@@ -1133,11 +1271,82 @@ window.router.addRoute('manager', async (container, params) => {
                             <button onclick="window.addMgPackage()" style="width:100%; margin-top:1rem; padding:0.8rem; border-radius:12px; border:1.5px dashed #0056b3; background:none; color:#0056b3; font-weight:700; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#e3efff'">+ Add New Special Offer</button>
                         </div>
 
+                        <!-- Room Types & Configurations Section -->
+                        <div style="background:#eafaf1; padding:1.5rem; border-radius:24px; border:1px solid #a7f3d0; margin-bottom:1.5rem;">
+                            <h4 style="margin:0 0 1rem; font-size:0.9rem; color:#0b6646; display:flex; align-items:center; gap:0.5rem;">
+                                <span style="font-size:1.4rem;">🔑</span> ROOM TYPES & BED CONFIGURATIONS
+                            </h4>
+                            <p style="font-size:0.8rem; color:#475569; margin-bottom:1.2rem;">Define the types of rooms (e.g. Standard Single, Deluxe Family Suite) and beds your hotel offers. If defined, listing pricing and inventory will automatically align with these configurations.</p>
+                            
+                            <div id="mg-room-types-container" style="display:grid; gap:1.2rem;">
+                                ${(myHotel.roomTypes || []).map((room, idx) => `
+                                    <div class="mg-room-row" data-id="${room.id || `room_${idx}`}" style="background:white; padding:1.2rem; border-radius:18px; border:1px solid #cbd5e1; display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; position:relative;">
+                                        <div style="position:absolute; top:0.8rem; right:0.8rem; display:flex; gap:0.5rem; z-index:10;">
+                                            <label style="display:flex; align-items:center; gap:0.3rem; font-size:0.75rem; font-weight:800; cursor:pointer; background:#f1f5f9; padding:0.3rem 0.6rem; border-radius:6px; color:#475569;">
+                                                <input type="checkbox" class="mg-room-active" ${room.isActive !== false ? 'checked' : ''} style="accent-color:var(--color-primary);"> Active
+                                            </label>
+                                            <button type="button" onclick="this.closest('.mg-room-row').remove()" style="background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800;">✕</button>
+                                        </div>
+                                        
+                                        <div style="grid-column: 1 / -1; display:flex; gap:1rem; align-items:center; margin-bottom: 0.5rem; margin-top: 1.5rem;">
+                                            <div class="mg-room-img-preview" style="width:60px; height:60px; border-radius:10px; background:${room.image ? `url('${room.image}') center/cover` : '#f1f5f9'}; border:1px solid #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                                                ${room.image ? '' : '<span style="color:#94a3b8; font-size:1.2rem;">📷</span>'}
+                                            </div>
+                                            <div style="flex:1;">
+                                                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Room Photo</label>
+                                                <input type="file" accept="image/*" class="mg-room-img-input" style="font-size:0.75rem; width:100%;" onchange="
+                                                    const file = this.files[0];
+                                                    if(file) {
+                                                        const reader = new FileReader();
+                                                        reader.onload = (e) => {
+                                                            const preview = this.closest('.mg-room-row').querySelector('.mg-room-img-preview');
+                                                            preview.style.background = 'url(' + e.target.result + ') center/cover';
+                                                            preview.innerHTML = '';
+                                                        };
+                                                        reader.readAsDataURL(file);
+                                                    }
+                                                ">
+                                                <input type="hidden" class="mg-room-img-url" value="${room.image || ''}">
+                                                <input type="hidden" class="mg-room-avail" value="${room.availableRooms !== undefined ? room.availableRooms : (room.totalRooms || 1)}">
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="grid-column: 1 / -1; margin-right: 2rem;">
+                                            <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Room Type Name</label>
+                                            <input type="text" placeholder="e.g. Deluxe Double Room" value="${room.name||''}" class="mg-room-name" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+                                        </div>
+                                        <div style="grid-column: 1 / -1;">
+                                            <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Description</label>
+                                            <input type="text" placeholder="e.g. Ocean view, mini-bar, balcony" value="${room.description||''}" class="mg-room-desc" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                                        </div>
+                                        <div>
+                                            <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Price per Night (Birr)</label>
+                                            <input type="number" placeholder="Price" value="${room.price||''}" class="mg-room-price" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700; color:var(--color-primary);">
+                                        </div>
+                                        <div>
+                                            <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Max Guests Capacity</label>
+                                            <input type="number" placeholder="Capacity" value="${room.capacity||''}" class="mg-room-capacity" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                                        </div>
+                                        <div>
+                                            <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Bed Configurations</label>
+                                            <input type="text" placeholder="e.g. 1 King Bed or 2 Double Beds" value="${room.beds||''}" class="mg-room-beds" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                                        </div>
+                                        <div>
+                                            <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Quantity (Total Rooms)</label>
+                                            <input type="number" placeholder="Total Rooms" value="${room.totalRooms||''}" class="mg-room-total-rooms" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <button type="button" onclick="window.addMgRoomType()" style="width:100%; margin-top:1rem; padding:0.8rem; border-radius:12px; border:1.5px dashed #0b6646; background:none; color:#0b6646; font-weight:700; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#e6f4ea'">+ Add New Room Type</button>
+                        </div>
+
                         <!-- Amenities -->
                         <div>
                             <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:1rem; color:var(--color-primary);">✨ AMENITIES</label>
                             <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:1rem; background:#f9f9f9; padding:1.5rem; border-radius:20px;">
-                                ${['WiFi', 'Pool', 'Spa', 'Breakfast', 'Parking', 'Gym', 'AC', 'Bar'].map(a => `
+                                ${['WiFi', 'Pool', 'Spa', 'Breakfast', 'Parking', 'Gym', 'AC', 'Bar', 'TV', 'Kitchen', 'Workspace', 'Balcony'].map(a => `
                                     <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-weight:600; font-size:0.85rem;">
                                         <input type="checkbox" class="mg-amenity" value="${a}" ${(myHotel.amenities || []).includes(a)?'checked':''} style="width:18px; height:18px; accent-color:var(--color-primary);"> ${a}
                                     </label>

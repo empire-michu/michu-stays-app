@@ -3,7 +3,7 @@ importScripts('https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js');
 
 // ─── ASSET CACHING (merged from sw.js) ─────────────────────
-const CACHE_NAME = 'michu-stays-v3.4';
+const CACHE_NAME = 'michu-stays-v4.1';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -76,13 +76,16 @@ self.addEventListener('fetch', (event) => {
   // Stale-While-Revalidate for app assets
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.match(event.request).then((response) => {
+      return cache.match(event.request, { ignoreSearch: true }).then((response) => {
         const fetchPromise = fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             cache.put(event.request, networkResponse.clone());
           }
           return networkResponse;
-        }).catch(() => {});
+        }).catch((err) => {
+          console.warn('Fetch error caught:', err);
+          return response || new Response('', { status: 503, statusText: 'Service Unavailable' });
+        });
         return response || fetchPromise;
       });
     })

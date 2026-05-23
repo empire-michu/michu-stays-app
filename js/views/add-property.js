@@ -23,11 +23,42 @@ window.router.addRoute('add-property', (container) => {
                                 <option value="Traditional Home">Traditional Home</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label>Price per Night (Birr)</label>
-                            <input type="number" id="prop-price" required placeholder="1000" min="1">
+                    </div>
+
+                    <h3 style="margin: 2rem 0 1rem; color: var(--color-primary); font-weight:800; font-size:1.1rem; display:flex; align-items:center; gap:0.5rem;">🔑 Room Types & Beds Configuration</h3>
+                    <p style="font-size: 0.8rem; color: #666; margin-bottom: 1.2rem; line-height:1.4;">Add the room types and bed configurations for this property. The lowest room price will be displayed as the main starting price in search listings.</p>
+                    
+                    <div id="prop-rooms-container" style="display:grid; gap:1.2rem; margin-bottom:1.5rem;">
+                        <div class="prop-room-row" style="background:#f8fafc; padding:1.2rem; border-radius:12px; border:1px solid #cbd5e1; display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; position:relative;">
+                            <button type="button" onclick="this.parentElement.remove()" style="position:absolute; top:0.8rem; right:0.8rem; background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800; z-index:10;">✕</button>
+                            <div style="grid-column: 1 / -1; margin-right: 2rem;">
+                                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Room Type Name</label>
+                                <input type="text" placeholder="e.g. Standard Single Room" value="Standard Single Room" class="prop-room-name" required style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+                            </div>
+                            <div style="grid-column: 1 / -1;">
+                                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Description</label>
+                                <input type="text" placeholder="e.g. Cozy single bed room with private bathroom" value="Cozy single bed room with private bathroom" class="prop-room-desc" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Price per Night (Birr)</label>
+                                <input type="number" placeholder="Price" value="1200" class="prop-room-price" required style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700; color:var(--color-primary);">
+                            </div>
+                            <div>
+                                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Max Guests Capacity</label>
+                                <input type="number" placeholder="Capacity" value="1" class="prop-room-capacity" required style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Bed Configurations</label>
+                                <input type="text" placeholder="e.g. 1 Single Bed" value="1 Single Bed" class="prop-room-beds" required style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Quantity (Total Rooms)</label>
+                                <input type="number" placeholder="Total Rooms" value="5" class="prop-room-total-rooms" required style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+                            </div>
                         </div>
                     </div>
+                    
+                    <button type="button" onclick="window.addPropRoomType()" style="width:100%; margin-bottom:2rem; padding:0.8rem; border-radius:12px; border:1.5px dashed var(--color-primary); background:none; color:var(--color-primary); font-weight:700; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#f0fdf4'">+ Add Another Room Type</button>
 
                     <div class="form-group">
                         <label>Address / Location</label>
@@ -120,6 +151,42 @@ window.router.addRoute('add-property', (container) => {
         }
     };
 
+    window.addPropRoomType = () => {
+        const container = document.getElementById('prop-rooms-container');
+        if (!container) return;
+        const div = document.createElement('div');
+        div.className = 'prop-room-row';
+        div.style.cssText = `background:#f8fafc; padding:1.2rem; border-radius:12px; border:1px solid #cbd5e1; display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; position:relative; margin-bottom:0.5rem;`;
+        div.innerHTML = `
+            <button type="button" onclick="this.parentElement.remove()" style="position:absolute; top:0.8rem; right:0.8rem; background:none; border:none; color:#ff385c; cursor:pointer; font-size:1.1rem; font-weight:800; z-index:10;">✕</button>
+            <div style="grid-column: 1 / -1; margin-right: 2rem;">
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Room Type Name</label>
+                <input type="text" placeholder="e.g. Deluxe Room" class="prop-room-name" required style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Description</label>
+                <input type="text" placeholder="e.g. Ocean view, balcony" class="prop-room-desc" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Price per Night (Birr)</label>
+                <input type="number" placeholder="Price" class="prop-room-price" required style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700; color:var(--color-primary);">
+            </div>
+            <div>
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Max Guests Capacity</label>
+                <input type="number" placeholder="Capacity" value="2" class="prop-room-capacity" required style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Bed Configurations</label>
+                <input type="text" placeholder="e.g. 1 King Bed" class="prop-room-beds" required style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Quantity (Total Rooms)</label>
+                <input type="number" placeholder="Total Rooms" value="5" class="prop-room-total-rooms" required style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+            </div>
+        `;
+        container.appendChild(div);
+    };
+
     let propUploadSkipped = false;
     let propUploadAborted = false;
     window.skipPropUpload = () => {
@@ -163,7 +230,25 @@ window.router.addRoute('add-property', (container) => {
             const title = document.getElementById('prop-title').value;
             const type = document.getElementById('prop-type').value;
             const address = document.getElementById('prop-address').value;
-            const price = parseInt(document.getElementById('prop-price').value);
+            
+            // Extract roomTypes
+            const roomTypesArr = Array.from(document.querySelectorAll('.prop-room-row')).map((row, idx) => ({
+                id: `room_${idx}_${Date.now()}`,
+                name: row.querySelector('.prop-room-name').value.trim(),
+                description: row.querySelector('.prop-room-desc').value.trim(),
+                price: parseInt(row.querySelector('.prop-room-price').value) || 0,
+                capacity: parseInt(row.querySelector('.prop-room-capacity').value) || 2,
+                beds: row.querySelector('.prop-room-beds').value.trim(),
+                totalRooms: parseInt(row.querySelector('.prop-room-total-rooms').value) || 1
+            })).filter(r => r.name && r.price);
+
+            if (roomTypesArr.length === 0) {
+                throw new Error("Please add at least one room type with a valid price.");
+            }
+
+            const price = Math.min(...roomTypesArr.map(r => r.price));
+            const availableRooms = roomTypesArr.reduce((sum, r) => sum + r.totalRooms, 0);
+
             const phone = document.getElementById('prop-phone').value;
             const cbeAccount = document.getElementById('prop-cbe-acc').value;
             const cbeName = document.getElementById('prop-cbe-name').value;
@@ -216,6 +301,7 @@ window.router.addRoute('add-property', (container) => {
                 type,
                 address,
                 price,
+                availableRooms,
                 phone,
                 cbeAccount,
                 cbeName,
@@ -227,6 +313,7 @@ window.router.addRoute('add-property', (container) => {
                 image: imageUrls[0] || '',
                 images: imageUrls,
                 videoTour: videoUrl,
+                roomTypes: roomTypesArr,
                 managerId: document.getElementById('prop-manager-id').value.trim() || window.auth?.currentUser?.uid || ''
             });
 

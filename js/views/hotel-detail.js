@@ -5,6 +5,15 @@ window.michuFinalNav = (pId, binVal, boutVal, totalStr) => {
         return;
     }
 
+    // Guard: Room selection is required if the hotel offers multiple room types
+    if (window._michuCurrentHotelHasRooms) {
+        const hasSelection = window._selectedRooms && window._selectedRooms.some(r => r.roomCount > 0);
+        if (!hasSelection) {
+            window.showToast("Please select at least one room first!");
+            return;
+        }
+    }
+
     // Block booking if hotel is fully booked
     if (window._michuCurrentHotelFullyBooked) {
         const lang = localStorage.getItem('michuLang') || 'en';
@@ -24,18 +33,25 @@ window.michuFinalNav = (pId, binVal, boutVal, totalStr) => {
     }
 
     console.log("NAVIGATING TO BOOKING:", pId);
-    
+
     // Clean total string (remove ' Birr' and commas)
     const tAmt = totalStr ? totalStr.replace(/[^0-9]/g, '') : '';
-    
-    // Strategy: Native Hash Change (Captured by the new hashchange listener in app.js)
-    const query = `id=${pId}&checkIn=${binVal}&checkOut=${boutVal}${tAmt ? `&totalAmount=${tAmt}` : ''}`;
+
+    // Encode the full multi-room selection as JSON
+    const activeRooms = (window._selectedRooms || []).filter(r => r.roomCount > 0);
+    const roomsParam = activeRooms.length > 0 ? encodeURIComponent(JSON.stringify(activeRooms)) : '';
+
+    // For backward compatibility also keep a single roomTypeId (first selected room)
+    const firstRoom = activeRooms[0];
+    const rId = firstRoom ? firstRoom.roomId : '';
+
+    const query = `id=${pId}&checkIn=${binVal}&checkOut=${boutVal}${tAmt ? `&totalAmount=${tAmt}` : ''}${rId ? `&roomTypeId=${rId}` : ''}${roomsParam ? `&selectedRooms=${roomsParam}` : ''}`;
     window.location.hash = `#booking?${query}`;
-    
+
     // Safety Fallback: if nothing happens in 800ms, try direct navigate
     setTimeout(() => {
         if (document.getElementById('final-reserve-trigger')) {
-            window.router.navigate('booking', { id: pId, checkIn: binVal, checkOut: boutVal, totalAmount: tAmt });
+            window.router.navigate('booking', { id: pId, checkIn: binVal, checkOut: boutVal, totalAmount: tAmt, roomTypeId: rId, selectedRooms: roomsParam });
         }
     }, 800);
 };
@@ -90,13 +106,17 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
 
     const amenitiesIcons = {
         'WiFi': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>',
-        'Pool': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22a8 8 0 0 0 20 0"></path><path d="M16 14v4"></path><path d="M8 14v4"></path><path d="M12 14v4"></path></svg>',
-        'Spa': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"></path><path d="M6 9h12"></path><path d="M6 15h12"></path></svg>',
+        'Pool': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6 0 1.2-.2 1.7-.6.9-.8 2.2-.8 3.1 0 .5.4 1.1.6 1.7.6.6 0 1.2-.2 1.7-.6.9-.8 2.2-.8 3.1 0 .5.4 1.1.6 1.7.6.6 0 1.2-.2 1.7-.6.9-.8 2.2-.8 3.1 0 .5.4 1.1.6 1.7.6"/><path d="M2 12c.6 0 1.2-.2 1.7-.6.9-.8 2.2-.8 3.1 0 .5.4 1.1.6 1.7.6.6 0 1.2-.2 1.7-.6.9-.8 2.2-.8 3.1 0 .5.4 1.1.6 1.7.6.6 0 1.2-.2 1.7-.6.9-.8 2.2-.8 3.1 0 .5.4 1.1.6 1.7.6"/><path d="M2 18c.6 0 1.2-.2 1.7-.6.9-.8 2.2-.8 3.1 0 .5.4 1.1.6 1.7.6.6 0 1.2-.2 1.7-.6.9-.8 2.2-.8 3.1 0 .5.4 1.1.6 1.7.6.6 0 1.2-.2 1.7-.6.9-.8 2.2-.8 3.1 0 .5.4 1.1.6 1.7.6"/></svg>',
+        'Spa': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
         'Breakfast': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>',
-        'Parking': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"></rect><circle cx="7" cy="15" r="2"></circle><circle cx="17" cy="15" r="2"></circle></svg>',
+        'Parking': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg>',
         'Gym': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11"></path><path d="M21 21l-1-1"></path><path d="M3 3l1 1"></path><path d="M18 22l4-4"></path><path d="M2 6l4-4"></path><path d="M3 10l7-7"></path><path d="M14 21l7-7"></path></svg>',
-        'AC': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="M8.5 4.5L12 8l3.5-3.5"></path><path d="M20.5 10.5L17 14l3.5 3.5"></path><path d="M3.5 13.5L7 10 3.5 6.5"></path><path d="M15.5 19.5L12 16l-3.5 3.5"></path></svg>',
-        'Bar': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22h8"></path><path d="M12 15v7"></path><path d="M12 15l-8-8V2h16v5z"></path></svg>'
+        'AC': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><line x1="22" x2="2" y1="12" y2="12"/><line x1="19.07" x2="4.93" y1="4.93" y2="19.07"/><line x1="19.07" x2="4.93" y1="19.07" y2="4.93"/></svg>',
+        'Bar': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22h8"></path><path d="M12 15v7"></path><path d="M12 15l-8-8V2h16v5z"></path></svg>',
+        'TV': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="15" x="2" y="7" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>',
+        'Kitchen': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>',
+        'Workspace': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/></svg>',
+        'Balcony': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4-1A2 2 0 0 1 13 4.561Z"/></svg>'
     };
 
     const isManager = window.auth.currentUser && window.auth.currentUser.uid === hotel.managerId;
@@ -105,6 +125,15 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     const isFullyBooked = (hotel.availableRooms !== undefined && hotel.availableRooms !== null && hotel.availableRooms <= 0);
     window._michuCurrentHotelFullyBooked = isFullyBooked;
     window._selectedPackageIndex = null;
+
+    const activeRoomTypes = (hotel.roomTypes || []).filter(r => r.isActive !== false);
+    const hasRoomTypes = activeRoomTypes.length > 0;
+    window._michuCurrentHotelHasRooms = hasRoomTypes;
+
+    // Multi-room selection state: array of { roomId, roomCount, adults, children }
+    window._selectedRooms = [];
+    // Keep legacy for any code that reads it
+    window._selectedRoomTypeId = null;
 
     container.innerHTML = `
         <div class="container" style="padding-top:1.5rem; padding-bottom:5rem;">
@@ -173,9 +202,140 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                          </div>
                          <div id="read-more-trigger" class="read-more-btn" onclick="window.toggleMichuDesc()">
                             <span>Read More</span>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6(6) 6-6"/></svg>
-                         </div>
+                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
+                          </div>
+                     </section>
+
+                    <!-- ROOM SELECTION SECTION -->
+                    ${hasRoomTypes ? `
+                    <style>
+                        .michu-room-card { background:white; border:2px solid #e2e8f0; border-radius:24px; overflow:hidden; transition:all 0.35s cubic-bezier(0.4,0,0.2,1); box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+                        .michu-room-card.selected { border-color:var(--color-primary); box-shadow:0 10px 30px rgba(11,110,79,0.12); }
+                        .michu-room-card.fully-booked { opacity:0.62; filter:grayscale(0.35); }
+                        .michu-room-card-top { display:grid; grid-template-columns:1fr auto; gap:1rem; align-items:start; padding:1.4rem 1.5rem 1rem; cursor:pointer; }
+                        .michu-room-card.fully-booked .michu-room-card-top { cursor:not-allowed; }
+                        .michu-room-stepper-panel { background:linear-gradient(135deg,#f0fdf6,#f8fafc); border-top:1.5px solid #e2e8f0; padding:1.2rem 1.5rem; display:none; flex-direction:column; gap:1rem; animation:stepperSlideIn 0.3s ease; }
+                        .michu-room-card.selected .michu-room-stepper-panel { display:flex; }
+                        @keyframes stepperSlideIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+                        .michu-stepper-row { display:flex; align-items:center; justify-content:space-between; }
+                        .michu-stepper-label { font-size:0.82rem; font-weight:800; color:#334155; display:flex; align-items:center; gap:0.4rem; }
+                        .michu-stepper { display:flex; align-items:center; gap:0; background:white; border:1.5px solid #e2e8f0; border-radius:12px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.04); }
+                        .michu-stepper-btn { width:34px; height:34px; border:none; background:transparent; font-size:1.2rem; font-weight:900; color:#0b6e4f; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s; line-height:1; }
+                        .michu-stepper-btn:hover:not(:disabled) { background:#ecfdf5; }
+                        .michu-stepper-btn:disabled { color:#cbd5e1; cursor:default; }
+                        .michu-stepper-val { min-width:32px; text-align:center; font-size:1rem; font-weight:900; color:#0f172a; padding:0 4px; border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0; }
+                        .michu-room-qty-badge { position:absolute; top:-8px; right:-8px; background:var(--color-primary); color:white; width:22px; height:22px; border-radius:50%; font-size:0.7rem; font-weight:900; display:flex; align-items:center; justify-content:center; border:2px solid white; box-shadow:0 2px 6px rgba(11,110,79,0.3); animation:popIn 0.25s ease; }
+                        @keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+                        .michu-add-room-btn { padding:0.55rem 1.3rem; border-radius:12px; font-size:0.82rem; font-weight:800; text-align:center; min-width:110px; border:2px solid var(--color-primary); background:transparent; color:var(--color-primary); cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+                        .michu-add-room-btn:hover { background:var(--color-primary); color:white; }
+                        .michu-add-room-btn.active { background:var(--color-primary); color:white; }
+                        .michu-room-price-subtotal { font-size:0.75rem; color:var(--color-primary); font-weight:800; text-align:right; margin-top:0.3rem; min-height:1.1em; }
+                    </style>
+                    <section class="mobile-order-2" style="margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid #f1f5f9;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.2rem; flex-wrap:wrap; gap:0.8rem;">
+                            <h2 style="margin:0; font-size:1.5rem; display:flex; align-items:center; gap:0.5rem; color:var(--color-primary); font-weight:800;">
+                                <span style="display:flex;align-items:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg></span>
+                                Choose Your Rooms
+                            </h2>
+                            <div id="michu-selection-summary-pill" style="display:none; background:#ecfdf5; border:1.5px solid #bbf7d0; padding:0.4rem 1rem; border-radius:99px; font-size:0.78rem; font-weight:800; color:#065f46;"></div>
+                        </div>
+                        <div id="room-selection-container" style="display:flex; flex-direction:column; gap:1.2rem;">
+                            ${activeRoomTypes.map((room) => {
+                                const roomId = room.id || `room_${hotel.roomTypes.indexOf(room)}`;
+                                const basePrice = Number(String(room.price || 0).replace(/[^\d.-]/g, ''));
+                                let discPercent = Number(hotel.discountPercent || hotel.discount || 0);
+                                let roomOrigPrice = basePrice;
+                                let roomCurrentPrice = basePrice;
+                                if (discPercent > 0) {
+                                    roomCurrentPrice = basePrice - Math.round(basePrice * (discPercent / 100));
+                                } else {
+                                    roomOrigPrice = 0;
+                                }
+                                const isRoomFullyBooked = (room.availableRooms !== undefined && room.availableRooms <= 0);
+                                const availableCount = room.availableRooms !== undefined ? room.availableRooms : (room.totalRooms || 10);
+                                const maxRooms = Math.min(availableCount, 10);
+
+                                const bedSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>`;
+                                const guestSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
+                                const keySvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+                                const childSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><circle cx="12" cy="6" r="3"/><path d="M12 10v5"/><path d="M9 17l3 4 3-4"/><path d="M9 13H6"/><path d="M18 13h-3"/></svg>`;
+
+                                return `
+                                <div class="michu-room-card ${isRoomFullyBooked ? 'fully-booked' : ''}" id="room-card-${roomId}" data-room-id="${roomId}">
+                                    ${isRoomFullyBooked ? `<div style="position:absolute; top:1rem; right:-2rem; background:#c5221f; color:white; font-size:0.72rem; font-weight:800; padding:0.2rem 2.5rem; transform:rotate(45deg); z-index:5; box-shadow:0 2px 4px rgba(0,0,0,0.2); pointer-events:none;">SOLD OUT</div>` : ''}
+                                    <div class="michu-room-card-top" onclick="${isRoomFullyBooked ? '' : `window.michuToggleRoom('${roomId}')`}" style="position:relative;">
+                                        <div style="display:flex; gap:1.1rem; align-items:flex-start;">
+                                            ${room.image ? `<div style="width:82px; height:82px; border-radius:14px; background:url('${room.image}') center/cover; flex-shrink:0; box-shadow:0 4px 12px rgba(0,0,0,0.08);"></div>` : `<div style="width:82px; height:82px; border-radius:14px; background:linear-gradient(135deg,#ecfdf5,#d1fae5); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0b6e4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg></div>`}
+                                            <div style="flex:1; min-width:0;">
+                                                <h3 style="margin:0 0 0.3rem; font-size:1.1rem; font-weight:900; color:#0f172a;">${room.name}</h3>
+                                                <p style="margin:0 0 0.7rem; font-size:0.82rem; color:#64748b; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${room.description || 'Premium room with standard amenities included.'}</p>
+                                                <div style="display:flex; gap:0.5rem; flex-wrap:wrap; font-size:0.75rem; font-weight:700; color:#475569;">
+                                                    <span style="background:#f1f5f9; padding:0.25rem 0.55rem; border-radius:8px; display:inline-flex; align-items:center;">${guestSvg} Up to ${room.capacity || 2} guests</span>
+                                                    <span style="background:#f1f5f9; padding:0.25rem 0.55rem; border-radius:8px; display:inline-flex; align-items:center;">${bedSvg} ${room.beds || '1 Double Bed'}</span>
+                                                    <span style="background:${isRoomFullyBooked ? '#fee2e2' : '#ecfccb'}; padding:0.25rem 0.55rem; border-radius:8px; display:inline-flex; align-items:center; color:${isRoomFullyBooked ? '#b91c1c' : '#4d7c0f'}; font-weight:800;">${keySvg} ${isRoomFullyBooked ? 'Sold out' : availableCount + ' left'}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem; min-width:120px; flex-shrink:0;">
+                                            <div style="text-align:right;">
+                                                ${roomOrigPrice > roomCurrentPrice ? `<div style="text-decoration:line-through; color:#94a3b8; font-size:0.75rem; font-weight:600; line-height:1;">${roomOrigPrice.toLocaleString()} Birr</div>` : ''}
+                                                <div style="font-size:1.25rem; font-weight:900; color:${isRoomFullyBooked ? '#94a3b8' : 'var(--color-primary)'}; line-height:1.1;">${roomCurrentPrice.toLocaleString()}</div>
+                                                <div style="font-size:0.7rem; color:#94a3b8; font-weight:700;">Birr / night</div>
+                                            </div>
+                                            ${isRoomFullyBooked ? `<span style="padding:0.45rem 1rem; border-radius:10px; font-size:0.78rem; font-weight:800; background:#f1f5f9; color:#94a3b8; border:1.5px solid #e2e8f0;">Sold Out</span>` : `<button class="michu-add-room-btn" id="add-btn-${roomId}" onclick="event.stopPropagation(); window.michuToggleRoom('${roomId}')">+ Add Room</button>`}
+                                            <div id="room-subtotal-${roomId}" class="michu-room-price-subtotal"></div>
+                                        </div>
+                                    </div>
+                                    <!-- STEPPER PANEL (shown when selected) -->
+                                    <div class="michu-room-stepper-panel" id="stepper-panel-${roomId}">
+                                        <!-- Row 1: Rooms count -->
+                                        <div class="michu-stepper-row">
+                                            <div class="michu-stepper-label">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>
+                                                Rooms
+                                            </div>
+                                            <div class="michu-stepper">
+                                                <button class="michu-stepper-btn" id="rooms-dec-${roomId}" onclick="window.michuStepRooms('${roomId}', -1)" disabled>−</button>
+                                                <div class="michu-stepper-val" id="rooms-val-${roomId}">1</div>
+                                                <button class="michu-stepper-btn" id="rooms-inc-${roomId}" onclick="window.michuStepRooms('${roomId}', 1)" ${maxRooms <= 1 ? 'disabled' : ''}>+</button>
+                                            </div>
+                                        </div>
+                                        <!-- Row 2: Adults -->
+                                        <div class="michu-stepper-row">
+                                            <div class="michu-stepper-label">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                                Adults
+                                                <span style="font-size:0.7rem; color:#94a3b8; font-weight:600;">(12+ yrs)</span>
+                                            </div>
+                                            <div class="michu-stepper">
+                                                <button class="michu-stepper-btn" id="adults-dec-${roomId}" onclick="window.michuStepAdults('${roomId}', -1)" disabled>−</button>
+                                                <div class="michu-stepper-val" id="adults-val-${roomId}">1</div>
+                                                <button class="michu-stepper-btn" id="adults-inc-${roomId}" onclick="window.michuStepAdults('${roomId}', 1)">+</button>
+                                            </div>
+                                        </div>
+                                        <!-- Row 3: Children -->
+                                        <div class="michu-stepper-row">
+                                            <div class="michu-stepper-label">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6" r="3"/><path d="M12 10v5"/><path d="M9 17l3 4 3-4"/><path d="M9 13H6"/><path d="M18 13h-3"/></svg>
+                                                Children
+                                                <span style="font-size:0.7rem; color:#94a3b8; font-weight:600;">(0–11 yrs)</span>
+                                            </div>
+                                            <div class="michu-stepper">
+                                                <button class="michu-stepper-btn" id="children-dec-${roomId}" onclick="window.michuStepChildren('${roomId}', -1)" disabled>−</button>
+                                                <div class="michu-stepper-val" id="children-val-${roomId}">0</div>
+                                                <button class="michu-stepper-btn" id="children-inc-${roomId}" onclick="window.michuStepChildren('${roomId}', 1)">+</button>
+                                            </div>
+                                        </div>
+                                        <!-- Remove Room link -->
+                                        <div style="text-align:right;">
+                                            <button onclick="window.michuToggleRoom('${roomId}')" style="background:none; border:none; color:#ef4444; font-size:0.78rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:0.3rem; padding:0.3rem 0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> Remove this room</button>
+                                        </div>
+                                    </div>
+                                </div>`;
+                            }).join('')}
+                        </div>
                     </section>
+                    ` : ''}
 
                     <!-- SPECIAL PACKAGES (Desktop View) -->
                     ${hotel.packages && hotel.packages.length > 0 ? `
@@ -222,7 +382,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     <div class="sidebar-card" style="background:white; padding:1.8rem; border:1px solid #eee; border-radius:28px; box-shadow:0 20px 40px rgba(0,0,0,0.06);">
                         <div class="sidebar-price-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
                              <div>
-                                <span style="font-size:1.9rem; font-weight:950; color:#d97706;">${currentPrice.toLocaleString()} Birr</span>
+                                <span class="sidebar-price-val-desktop" style="font-size:1.9rem; font-weight:950; color:#d97706;">${currentPrice.toLocaleString()} Birr</span>
                                 <span style="color:#64748b; font-weight:600;">/ night</span>
                              </div>
                              <div class="sidebar-rating-badge-update" style="background:#fff7ed; color:#ea580c; padding:0.5rem 0.9rem; border-radius:14px; font-weight:900;">★ ${avgRating || 'New'}</div>
@@ -264,7 +424,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         <div class="sidebar-card" style="background:white; padding:1.2rem; border:1px solid rgba(11,110,79,0.15); border-radius:16px; box-shadow:0 10px 25px rgba(11,110,79,0.08); background:linear-gradient(135deg, #ffffff 0%, #f8fdfa 100%);">
                             <div class="sidebar-price-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                                  <div>
-                                    <span style="font-size:1.35rem; font-weight:950; color:#d97706;">${currentPrice.toLocaleString()} Birr</span>
+                                    <span class="sidebar-price-val-mobile" style="font-size:1.35rem; font-weight:950; color:#d97706;">${currentPrice.toLocaleString()} Birr</span>
                                     <span style="color:#64748b; font-weight:600; font-size:0.85rem;">/ night</span>
                                  </div>
                                  <div class="sidebar-rating-badge-update" style="background:#fff7ed; color:#ea580c; padding:0.4rem 0.8rem; border-radius:12px; font-weight:900; font-size:0.85rem;">★ ${avgRating || 'New'}</div>
@@ -484,6 +644,166 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         });
     };
 
+    // ---- MULTI-ROOM SELECTION HELPERS ----
+
+    // Get or create a selection entry for a room
+    window._getMichuRoomEntry = (roomId) => {
+        let entry = window._selectedRooms.find(r => r.roomId === roomId);
+        if (!entry) {
+            const roomData = (hotel.roomTypes || []).find(r => (r.id || `room_${hotel.roomTypes.indexOf(r)}`) === roomId);
+            entry = { roomId, roomCount: 0, adults: 1, children: 0, roomName: roomData?.name || '', roomPrice: Number(String(roomData?.price || 0).replace(/[^\d.-]/g, '')) };
+            window._selectedRooms.push(entry);
+        }
+        return entry;
+    };
+
+    // Toggle room selection on/off
+    window.michuToggleRoom = (roomId) => {
+        const entry = window._getMichuRoomEntry(roomId);
+        if (entry.roomCount > 0) {
+            // Deselect
+            entry.roomCount = 0;
+            entry.adults = 1;
+            entry.children = 0;
+        } else {
+            // Select with default 1 room
+            entry.roomCount = 1;
+            entry.adults = 1;
+            entry.children = 0;
+        }
+        window._updateMichuRoomCardUI(roomId);
+        window._updateMichuSelectionPill();
+        window.refreshMichuPricing();
+    };
+
+    // Stepper for rooms count
+    window.michuStepRooms = (roomId, delta) => {
+        const entry = window._getMichuRoomEntry(roomId);
+        const roomData = (hotel.roomTypes || []).find(r => (r.id || `room_${hotel.roomTypes.indexOf(r)}`) === roomId);
+        const maxAvailable = roomData?.availableRooms !== undefined ? Math.min(roomData.availableRooms, 10) : 10;
+        const newVal = Math.max(1, Math.min(maxAvailable, entry.roomCount + delta));
+        entry.roomCount = newVal;
+        // Update stepper UI
+        const valEl = document.getElementById(`rooms-val-${roomId}`);
+        const decBtn = document.getElementById(`rooms-dec-${roomId}`);
+        const incBtn = document.getElementById(`rooms-inc-${roomId}`);
+        if (valEl) valEl.textContent = newVal;
+        if (decBtn) decBtn.disabled = newVal <= 1;
+        if (incBtn) incBtn.disabled = newVal >= maxAvailable;
+        window._updateMichuRoomSubtotal(roomId);
+        window._updateMichuSelectionPill();
+        window.refreshMichuPricing();
+    };
+
+    // Stepper for adults
+    window.michuStepAdults = (roomId, delta) => {
+        const entry = window._getMichuRoomEntry(roomId);
+        const newVal = Math.max(1, Math.min(20, entry.adults + delta));
+        entry.adults = newVal;
+        const valEl = document.getElementById(`adults-val-${roomId}`);
+        const decBtn = document.getElementById(`adults-dec-${roomId}`);
+        if (valEl) valEl.textContent = newVal;
+        if (decBtn) decBtn.disabled = newVal <= 1;
+        window._updateMichuSelectionPill();
+        window.refreshMichuPricing();
+    };
+
+    // Stepper for children
+    window.michuStepChildren = (roomId, delta) => {
+        const entry = window._getMichuRoomEntry(roomId);
+        const newVal = Math.max(0, Math.min(10, entry.children + delta));
+        entry.children = newVal;
+        const valEl = document.getElementById(`children-val-${roomId}`);
+        const decBtn = document.getElementById(`children-dec-${roomId}`);
+        if (valEl) valEl.textContent = newVal;
+        if (decBtn) decBtn.disabled = newVal <= 0;
+        window._updateMichuSelectionPill();
+        window.refreshMichuPricing();
+    };
+
+    // Update the visual state of a single room card
+    window._updateMichuRoomCardUI = (roomId) => {
+        const entry = window._selectedRooms.find(r => r.roomId === roomId);
+        const isSelected = entry && entry.roomCount > 0;
+        const card = document.getElementById(`room-card-${roomId}`);
+        const panel = document.getElementById(`stepper-panel-${roomId}`);
+        const addBtn = document.getElementById(`add-btn-${roomId}`);
+        const roomsValEl = document.getElementById(`rooms-val-${roomId}`);
+        const adultsValEl = document.getElementById(`adults-val-${roomId}`);
+        const childrenValEl = document.getElementById(`children-val-${roomId}`);
+        const roomsDecBtn = document.getElementById(`rooms-dec-${roomId}`);
+        const adultsDecBtn = document.getElementById(`adults-dec-${roomId}`);
+        const childrenDecBtn = document.getElementById(`children-dec-${roomId}`);
+
+        if (card) {
+            if (isSelected) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        }
+        if (addBtn) {
+            addBtn.textContent = isSelected ? '✓ Added' : '+ Add Room';
+            if (isSelected) addBtn.classList.add('active'); else addBtn.classList.remove('active');
+        }
+        if (isSelected && entry) {
+            if (roomsValEl) roomsValEl.textContent = entry.roomCount;
+            if (adultsValEl) adultsValEl.textContent = entry.adults;
+            if (childrenValEl) childrenValEl.textContent = entry.children;
+            if (roomsDecBtn) roomsDecBtn.disabled = entry.roomCount <= 1;
+            if (adultsDecBtn) adultsDecBtn.disabled = entry.adults <= 1;
+            if (childrenDecBtn) childrenDecBtn.disabled = entry.children <= 0;
+        } else {
+            if (roomsValEl) roomsValEl.textContent = 1;
+            if (adultsValEl) adultsValEl.textContent = 1;
+            if (childrenValEl) childrenValEl.textContent = 0;
+            if (roomsDecBtn) roomsDecBtn.disabled = true;
+            if (adultsDecBtn) adultsDecBtn.disabled = true;
+            if (childrenDecBtn) childrenDecBtn.disabled = true;
+        }
+        window._updateMichuRoomSubtotal(roomId);
+    };
+
+    // Update per-room subtotal label
+    window._updateMichuRoomSubtotal = (roomId) => {
+        const entry = window._selectedRooms.find(r => r.roomId === roomId);
+        const subtotalEl = document.getElementById(`room-subtotal-${roomId}`);
+        if (!subtotalEl) return;
+        const activeBin = document.getElementById('book-in')?.value || document.getElementById('book-in-mobile')?.value;
+        const activeBout = document.getElementById('book-out')?.value || document.getElementById('book-out-mobile')?.value;
+        const nights = activeBin && activeBout ? Math.max(0, Math.ceil((new Date(activeBout) - new Date(activeBin)) / 86400000)) : 0;
+        if (entry && entry.roomCount > 0 && nights > 0) {
+            const roomData = (hotel.roomTypes || []).find(r => (r.id || `room_${hotel.roomTypes.indexOf(r)}`) === roomId);
+            let price = Number(String(roomData?.price || 0).replace(/[^\d.-]/g, ''));
+            const disc = Number(hotel.discountPercent || hotel.discount || 0);
+            if (disc > 0) price = price - Math.round(price * disc / 100);
+            const sub = price * entry.roomCount * nights;
+            subtotalEl.textContent = `${entry.roomCount} room${entry.roomCount > 1 ? 's' : ''} × ${nights} night${nights > 1 ? 's' : ''} = ${sub.toLocaleString()} Birr`;
+        } else {
+            subtotalEl.textContent = '';
+        }
+    };
+
+    // Update the green summary pill at the top of the section
+    window._updateMichuSelectionPill = () => {
+        const pill = document.getElementById('michu-selection-summary-pill');
+        if (!pill) return;
+        const active = (window._selectedRooms || []).filter(r => r.roomCount > 0);
+        if (active.length === 0) {
+            pill.style.display = 'none';
+            return;
+        }
+        const totalRooms = active.reduce((s, r) => s + r.roomCount, 0);
+        const totalAdults = active.reduce((s, r) => s + r.adults, 0);
+        const totalChildren = active.reduce((s, r) => s + r.children, 0);
+        pill.style.display = 'inline-flex';
+        pill.innerHTML = `✓ ${totalRooms} Room${totalRooms > 1 ? 's' : ''} · ${totalAdults} Adult${totalAdults > 1 ? 's' : ''}${totalChildren > 0 ? ` · ${totalChildren} Child${totalChildren > 1 ? 'ren' : ''}` : ''} selected`;
+    };
+
+    // Legacy alias so any existing code that calls selectMichuRoom still works
+    window.selectMichuRoom = (roomId) => window.michuToggleRoom(roomId);
+
+
     window.refreshMichuPricing = () => {
         const activeBin = bin?.value || binMobile?.value;
         const activeBout = bout?.value || boutMobile?.value;
@@ -491,13 +811,36 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         const d1 = new Date(activeBin);
         const d2 = new Date(activeBout);
         const nights = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)) || 0;
-        
-        let packageActive = false, disc = dPct, pName = '';
+
+        // Update all room subtotal labels
+        (hotel.roomTypes || []).forEach(r => {
+            const rId = r.id || `room_${hotel.roomTypes.indexOf(r)}`;
+            window._updateMichuRoomSubtotal && window._updateMichuRoomSubtotal(rId);
+        });
+
+        // Compute totals from multi-room selection
+        const activeSelections = (window._selectedRooms || []).filter(r => r.roomCount > 0);
+        const hasRoomSelection = activeSelections.length > 0;
+
+        // Update sidebar price label — show base price if nothing selected
+        let displayPrice = currentPrice;
+        if (hasRoomSelection) {
+            const firstSel = activeSelections[0];
+            const firstRoomData = (hotel.roomTypes || []).find(r => (r.id || `room_${hotel.roomTypes.indexOf(r)}`) === firstSel.roomId);
+            if (firstRoomData) displayPrice = Number(String(firstRoomData.price || 0).replace(/[^\d.-]/g, ''));
+        }
+        const disc0 = Number(hotel.discountPercent || hotel.discount || 0);
+        const displayPriceDisc = disc0 > 0 ? displayPrice - Math.round(displayPrice * disc0 / 100) : displayPrice;
+        document.querySelectorAll('.sidebar-price-val-desktop').forEach(el => el.innerText = `${displayPriceDisc.toLocaleString()} Birr`);
+        document.querySelectorAll('.sidebar-price-val-mobile').forEach(el => el.innerText = `${displayPriceDisc.toLocaleString()} Birr`);
+
+        // Package check
+        let packageActive = false, pkgDisc = dPct, pName = '';
         if (window._selectedPackageIndex !== null && hotel.packages && hotel.packages[window._selectedPackageIndex]) {
             const curPkg = hotel.packages[window._selectedPackageIndex];
             if (nights === parseInt(curPkg.nights)) {
-                disc = curPkg.discount; 
-                packageActive = true; 
+                pkgDisc = curPkg.discount;
+                packageActive = true;
                 pName = curPkg.title;
             } else {
                 window._selectedPackageIndex = null;
@@ -505,35 +848,79 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         }
 
         if (nights > 0) {
-            const sub = (origPrice || currentPrice) * nights;
-            const savings = Math.round(sub * (disc / 100));
-            const total = sub - savings;
-            
-            mainBtns.forEach(btn => btn.innerText = packageActive ? 'Reserve Package' : 'Reserve Now');
+            if (!hasRoomSelection && window._michuCurrentHotelHasRooms) {
+                // No room selected yet
+                mainBtns.forEach(btn => {
+                    btn.innerText = 'Select a Room';
+                    btn.style.opacity = '0.55';
+                    btn.style.pointerEvents = 'none';
+                });
+                summaries.forEach(summary => summary.innerHTML = `
+                    <div style="background:#f8fafc; padding:1.5rem; border-radius:22px; border:1px solid #f1f5f9; text-align:center;">
+                        <div style="color:#94a3b8; font-size:0.9rem; font-weight:700; display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>
+                            Select a room to see pricing
+                        </div>
+                    </div>`);
+                return;
+            }
+
+            // Calculate totals from all selected rooms
+            let grandSub = 0;
+            let lineItemsHtml = '';
+            activeSelections.forEach(sel => {
+                const roomData = (hotel.roomTypes || []).find(r => (r.id || `room_${hotel.roomTypes.indexOf(r)}`) === sel.roomId);
+                if (!roomData) return;
+                let price = Number(String(roomData.price || 0).replace(/[^\d.-]/g, ''));
+                let origP = price;
+                const discPct = Number(hotel.discountPercent || hotel.discount || 0);
+                if (discPct > 0) price = price - Math.round(price * discPct / 100);
+                const lineTotal = price * sel.roomCount * nights;
+                grandSub += lineTotal;
+                const totalGuests = sel.adults + sel.children;
+                lineItemsHtml += `
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; padding:0.6rem 0; border-bottom:1px dashed #f1f5f9; gap:0.5rem;">
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-weight:800; font-size:0.82rem; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${roomData.name}</div>
+                            <div style="font-size:0.72rem; color:#94a3b8; font-weight:600;">${sel.roomCount} room${sel.roomCount > 1 ? 's' : ''} · ${sel.adults} adult${sel.adults > 1 ? 's' : ''}${sel.children > 0 ? ` · ${sel.children} child${sel.children > 1 ? 'ren' : ''}` : ''}</div>
+                        </div>
+                        <div style="font-weight:800; font-size:0.85rem; color:var(--color-primary); white-space:nowrap;">${lineTotal.toLocaleString()} Birr</div>
+                    </div>`;
+            });
+
+            // Apply package discount on top
+            const pkgSavings = packageActive ? Math.round(grandSub * (pkgDisc / 100)) : 0;
+            const regularDisc = !packageActive && dPct > 0 ? 0 : 0; // already applied per-room
+            const grandTotal = grandSub - pkgSavings;
+
+            mainBtns.forEach(btn => {
+                btn.innerText = packageActive ? 'Reserve Package' : 'Reserve Now';
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+            });
+
             summaries.forEach(summary => summary.innerHTML = `
-                <div style="background:#f8fafc; padding:1.5rem; border-radius:22px; border:1px solid #f1f5f9;">
+                <div style="background:#f8fafc; padding:1.4rem; border-radius:22px; border:1px solid #f1f5f9;">
                     ${packageActive ? `
                     <div style="display:flex; justify-content:space-between; align-items:center; background:#fef3c7; border:1px solid #f59e0b; padding:0.6rem 1rem; border-radius:14px; margin-bottom:1rem;">
                         <div style="display:flex; align-items:center; gap:0.5rem;">
-                            <span style="display:inline-flex;align-items:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#d97706;"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/><path d="M5.4 5.4h.01"/><path d="M10.2 3h.01"/><path d="M3 10.2h.01"/><path d="m14 14 6-6"/></svg></span>
+                            <span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#d97706;"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg></span>
                             <div>
-                                <div style="color:#d97706; font-weight:950; font-size:0.7rem; text-transform:uppercase;">PACKAGE APPLIED</div>
-                                <div style="color:#92400e; font-weight:800; font-size:0.85rem;">${pName}</div>
+                                <div style="color:#d97706; font-weight:950; font-size:0.65rem; text-transform:uppercase;">PACKAGE APPLIED</div>
+                                <div style="color:#92400e; font-weight:800; font-size:0.8rem;">${pName}</div>
                             </div>
                         </div>
-                        <button onclick="window.applyMichuPkg(${window._selectedPackageIndex})" style="background:#fee2e2; color:#ef4444; border:none; padding:0.4rem 0.8rem; border-radius:10px; font-weight:800; font-size:0.75rem; cursor:pointer; display:flex; align-items:center; gap:0.3rem; box-shadow:0 2px 6px rgba(239,68,68,0.2);">✕ Remove</button>
+                        <button onclick="window.applyMichuPkg(${window._selectedPackageIndex})" style="background:#fee2e2; color:#ef4444; border:none; padding:0.35rem 0.7rem; border-radius:10px; font-weight:800; font-size:0.72rem; cursor:pointer;">✕ Remove</button>
                     </div>` : ''}
-                    <div style="display:flex; justify-content:space-between; color:#64748b; margin-bottom:0.6rem;">
-                        <span>${(origPrice || currentPrice).toLocaleString()} x ${nights} nights</span>
-                        <span>${sub.toLocaleString()} Birr</span>
-                    </div>
-                    ${disc > 0 ? `<div style="display:flex; justify-content:space-between; color:#d97706; font-weight:800; margin-bottom:1rem;"><span>Discount (${disc}%)</span><span>-${savings.toLocaleString()} Birr</span></div>` : ''}
-                    <div style="display:flex; justify-content:space-between; font-weight:950; font-size:1.5rem; border-top:1.5px solid #e2e8f0; padding-top:1rem; color:var(--color-primary);"><span>Total</span><span><span class="final-total-val">${total.toLocaleString()}</span> Birr</span></div>
-                    <p style="text-align:right; font-size:0.65rem; color:#94a3b8; font-weight:700; margin-top:0.8rem;">Price includes all taxes & fees</p>
+                    <div style="font-size:0.72rem; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.5rem;">Breakdown (${nights} night${nights > 1 ? 's' : ''})</div>
+                    ${lineItemsHtml}
+                    ${packageActive && pkgSavings > 0 ? `<div style="display:flex; justify-content:space-between; color:#d97706; font-weight:800; margin-top:0.8rem; padding-top:0.5rem;"><span>Package Discount (${pkgDisc}%)</span><span>−${pkgSavings.toLocaleString()} Birr</span></div>` : ''}
+                    <div style="display:flex; justify-content:space-between; font-weight:950; font-size:1.4rem; border-top:1.5px solid #e2e8f0; padding-top:1rem; margin-top:0.8rem; color:var(--color-primary);"><span>Total</span><span><span class="final-total-val">${grandTotal.toLocaleString()}</span> Birr</span></div>
+                    <p style="text-align:right; font-size:0.65rem; color:#94a3b8; font-weight:700; margin-top:0.6rem;">Price includes all taxes & fees</p>
                 </div>`);
         } else {
-             mainBtns.forEach(btn => btn.innerText = 'Select Dates');
-             summaries.forEach(summary => summary.innerHTML = `<p style="text-align:center; color:#94a3b8; font-weight:700; font-size:0.85rem;">Select check-in/out to book</p>`);
+            mainBtns.forEach(btn => btn.innerText = 'Select Dates');
+            summaries.forEach(summary => summary.innerHTML = `<p style="text-align:center; color:#94a3b8; font-weight:700; font-size:0.85rem; padding:1rem 0;">Select check-in/out to see pricing</p>`);
         }
 
         window.updateMichuPkgButtons();
@@ -589,7 +976,20 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                 if (boutMobile._flatpickr) boutMobile._flatpickr.setDate(endStr, false);
             }
             window.refreshMichuPricing();
-            window.showToast(`✅ ${pkg.title} Activated! Check the total below.`);
+            
+            // Check if a room is selected
+            const hasRoomSelection = window._selectedRooms && window._selectedRooms.some(r => r.roomCount > 0);
+            if (window._michuCurrentHotelHasRooms && !hasRoomSelection) {
+                window.showToast(`✅ ${pkg.title} Activated! Please select a room below to see your discounted total.`);
+                setTimeout(() => {
+                    const roomContainer = document.getElementById('room-selection-container');
+                    if (roomContainer) {
+                        roomContainer.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    }
+                }, 400);
+            } else {
+                window.showToast(`✅ ${pkg.title} Activated! Check the total below.`);
+            }
         }
     };
 

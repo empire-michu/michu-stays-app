@@ -2,6 +2,18 @@
 <html lang="en">
 
 <head>
+    <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+        var msg = encodeURIComponent(message + ' at ' + source + ':' + lineno + ':' + colno + (error ? ' ' + error.stack : ''));
+        fetch('/log-error-browser?msg=' + msg).catch(function(){});
+        return false;
+    };
+    window.addEventListener('unhandledrejection', function(event) {
+        var reason = event.reason;
+        var msg = encodeURIComponent('Unhandled Rejection: ' + (reason ? (reason.message || reason) + (reason.stack ? ' ' + reason.stack : '') : event));
+        fetch('/log-error-browser?msg=' + msg).catch(function(){});
+    });
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -395,7 +407,7 @@
         <!-- Guest Testimonials Strip -->
         <!-- Footer Bottom Bar -->
         <div class="footer-bottom">
-            <p>© 2026 Michu Stays. All rights reserved. Made with ❤️ in Dire Dawa, Ethiopia.</p>
+            <p>© 2026 Michu Stays. All rights reserved. Made in Dire Dawa, Ethiopia.</p>
             <div class="footer-bottom-links">
                 <span onclick="openLegalModal('terms')">Terms &amp; Conditions</span>
                 <span onclick="openLegalModal('privacy')">Privacy Policy</span>
@@ -617,9 +629,6 @@
             </div>
         </div>
     </div>
-
-    <div style="text-align:center; padding:1rem; background:#1e293b; color:rgba(255,255,255,0.3); font-size:0.6rem; font-weight:800;">
-        BUILD: V1214.PRO.CROP.FIX</div>
 
     <!-- Custom Select Bottom Sheet Modal -->
     <div id="custom-select-overlay" onclick="if(event.target === this) window.closeCustomSelect()" style="display:none;">

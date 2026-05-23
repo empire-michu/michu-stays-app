@@ -6,11 +6,8 @@ window.router.addRoute('home', async (container, params) => {
 
     try {
         // Only fetch properties — reviews load in background, bookings not needed
-        const timeout = new Promise((resolve) => setTimeout(() => resolve([]), 12000));
-        allProperties = await Promise.race([
-            window.db.getProperties(null, true).catch(() => []),
-            timeout
-        ]);
+        // Wait for properties to load without an artificial timeout
+        allProperties = await window.db.getProperties(null, true).catch(() => []);
     } catch(e) { 
         console.error('Properties fetch failed:', e); 
     }
@@ -78,13 +75,27 @@ window.router.addRoute('home', async (container, params) => {
         const starHtml = avgRating > 0 
             ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> ${avgRating} <span style="color:#999;font-size:0.75rem;">(${rCount})</span>`
             : ``;
-        const avail = p.availableRooms ?? p.totalRooms ?? 0;
+        
+        const hasRoomTypes = p.roomTypes && p.roomTypes.length > 0;
+        let avail = 0;
+        if (hasRoomTypes) {
+            avail = p.roomTypes.reduce((sum, rt) => sum + (Number(rt.totalRooms) || 0), 0);
+        } else {
+            avail = p.availableRooms ?? p.totalRooms ?? 0;
+        }
+
         const roomBadge = avail > 0 
-            ? `<span style="background:#e6f4ea;color:#1e7e34;padding:0.15rem 0.5rem;border-radius:6px;font-size:0.7rem;font-weight:700;">${avail} room${avail>1?'s':''} left</span>`
-            : `<span style="background:#fce8e6;color:#c5221f;padding:0.15rem 0.5rem;border-radius:6px;font-size:0.7rem;font-weight:700;">Fully Booked</span>`;
+            ? `<span style="background:#e6f4ea;color:#1e7e34;padding:0.15rem 0.5rem;border-radius:6px;font-size:0.7rem;font-weight:700;white-space:nowrap;">${avail} room${avail>1?'s':''} left</span>`
+            : `<span style="background:#fce8e6;color:#c5221f;padding:0.15rem 0.5rem;border-radius:6px;font-size:0.7rem;font-weight:700;white-space:nowrap;">Fully Booked</span>`;
 
         // --- ROBUST DISCOUNT DATA ---
-        const currentPrice = Number(String(p.price || 0).replace(/[^\d.-]/g, ''));
+        let currentPrice = 0;
+        if (hasRoomTypes) {
+            currentPrice = Math.min(...p.roomTypes.map(rt => Number(String(rt.price || 0).replace(/[^\d.-]/g, ''))));
+        } else {
+            currentPrice = Number(String(p.price || 0).replace(/[^\d.-]/g, ''));
+        }
+
         let discountPercentage = 0;
         if (p.discountPercent !== undefined && p.discountPercent !== null) {
             discountPercentage = Number(p.discountPercent) || 0;
@@ -151,7 +162,7 @@ window.router.addRoute('home', async (container, params) => {
                     </div>
                 </div>` : ''}
                 
-                <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem;">
                     <div class="property-price" style="margin-top:0.3rem;">
                         ${isEvent ? `
                             <div style="display:flex; flex-direction:column;">
@@ -159,8 +170,8 @@ window.router.addRoute('home', async (container, params) => {
                                     <span style="font-size:0.6rem; background:#fff4e5; color:#d97706; padding:0.1rem 0.4rem; border-radius:4px; font-weight:900; text-transform:uppercase;">🎉 Event active</span>
                                 </div>
                                 <div style="display:flex; align-items:baseline; gap:0.25rem;">
-                                    <span style="font-weight:900; font-size:1.45rem; color: #0b6646; letter-spacing:-0.03em;">${effectiveRate.toLocaleString()} Birr</span>
-                                    <span style="color:#666; font-size:0.85rem; font-weight:700;">/ night</span>
+                                    <span style="font-weight:900; font-size:1.15rem; color: #0b6646; letter-spacing:-0.03em; white-space:nowrap;">${hasRoomTypes ? '<span style="font-size:0.75rem; color:#64748b; font-weight:700; text-transform:uppercase; margin-right:4px;">From</span>' : ''}${effectiveRate.toLocaleString()} Birr</span>
+                                    <span style="color:#666; font-size:0.85rem; font-weight:700; white-space:nowrap;">/ night</span>
                                 </div>
                                 <div style="font-size:0.65rem; color:#999; font-weight:600; margin-top:0.1rem;">
                                     (Total ${minPkgPrice.toLocaleString()} Birr for ${minPkgNights}-Night Package)
@@ -170,14 +181,14 @@ window.router.addRoute('home', async (container, params) => {
                             <div style="display:flex; flex-direction:column;">
                                 <span style="text-decoration:line-through;color:#999;font-weight:500;font-size:0.85rem;margin-bottom:-0.2rem;">${originalPrice} Birr</span>
                                 <div style="display:flex; align-items:baseline; gap:0.3rem;">
-                                    <span style="font-weight:900; font-size:1.35rem; color: #f2a100; letter-spacing:-0.02em;">${currentPrice} Birr</span>
-                                    <span style="color:var(--color-text-light);font-size:0.8rem;font-weight:normal">/ night</span>
+                                    <span style="font-weight:900; font-size:1.1rem; color: #f2a100; letter-spacing:-0.02em; white-space:nowrap;">${hasRoomTypes ? '<span style="font-size:0.75rem; color:#64748b; font-weight:700; text-transform:uppercase; margin-right:4px;">From</span>' : ''}${currentPrice} Birr</span>
+                                    <span style="color:var(--color-text-light);font-size:0.8rem;font-weight:normal; white-space:nowrap;">/ night</span>
                                 </div>
                             </div>
                         ` : `
                             <div style="display:flex; align-items:baseline; gap:0.3rem;">
-                                <span style="font-weight:900; font-size:1.35rem; color: var(--color-primary); letter-spacing:-0.02em;">${currentPrice} Birr</span>
-                                <span style="color:var(--color-text-light);font-size:0.8rem;font-weight:normal">/ night</span>
+                                <span style="font-weight:900; font-size:1.1rem; color: var(--color-primary); letter-spacing:-0.02em; white-space:nowrap;">${hasRoomTypes ? '<span style="font-size:0.75rem; color:#64748b; font-weight:700; text-transform:uppercase; margin-right:4px;">From</span>' : ''}${currentPrice} Birr</span>
+                                <span style="color:var(--color-text-light);font-size:0.8rem;font-weight:normal; white-space:nowrap;">/ night</span>
                             </div>
                         `)}
                     </div>
