@@ -102,15 +102,11 @@ window.router.addRoute('home', async (container, params) => {
         } else if (p.discount !== undefined && p.discount !== null) {
             discountPercentage = Number(p.discount) || 0;
         }
+        let originalPrice = currentPrice;
         
-        let originalPrice = p.originalPrice ? Number(String(p.originalPrice).replace(/[^\d.-]/g, '')) : 0;
-        
-        // Always ensure original price is calculated correctly if discount exists
+        // The price in the database is the ORIGINAL base price. Apply the discount to get the final price.
         if (discountPercentage > 0) {
-            const calculatedOriginal = Math.round(currentPrice / (1 - (discountPercentage / 100)));
-            if (!originalPrice || originalPrice <= currentPrice) {
-                originalPrice = calculatedOriginal;
-            }
+            currentPrice = originalPrice - Math.round(originalPrice * (discountPercentage / 100));
         }
 
         let minPkgPrice = 0;
