@@ -73,23 +73,38 @@ window.router.addRoute('booking', async (container, params) => {
     if (nights <= 0) nights = 1;
 
     let amount = 0;
-    if (params.totalAmount) {
-        amount = Number(params.totalAmount);
-    } else {
-        const base = calcBase * nights;
-        const discountToApply = discountPercent || 0;
-        amount = base - Math.round(base * (discountToApply / 100));
-    }
-
     let pkgInfo = params.packageInfo || null;
 
-    // Auto-detect package match if not passed explicitly (e.g. page refresh)
-    if (property && property.packages) {
-        const matching = property.packages.find(p => parseInt(p.nights) === nights);
-        if (matching) {
-            pkgInfo = { title: matching.title, services: matching.services };
-            const pBase = calcBase * nights;
-            amount = pBase - Math.round(pBase * (matching.discount / 100));
+    if (params.totalAmount) {
+        amount = Number(params.totalAmount);
+        
+        // Auto-detect package match strictly for UI display without overwriting amount
+        if (property && property.packages) {
+            const matching = property.packages.find(p => parseInt(p.nights) === nights);
+            if (matching) {
+                pkgInfo = { title: matching.title, services: matching.services };
+            }
+        }
+    } else {
+        const basePrice = selectedRoom ? Number(String(selectedRoom.price || 0).replace(/[^\d.-]/g, '')) : Number(String(property.price || 0).replace(/[^\d.-]/g, ''));
+        const discPct = Number(property.discountPercent || property.discount || 0);
+        let currentPricePerNight = basePrice;
+        if (discPct > 0) {
+            currentPricePerNight = basePrice - Math.round(basePrice * (discPct / 100));
+        }
+        
+        let subtotal = currentPricePerNight * totalRoomsBooked * nights;
+        
+        if (property && property.packages) {
+            const matching = property.packages.find(p => parseInt(p.nights) === nights);
+            if (matching) {
+                pkgInfo = { title: matching.title, services: matching.services };
+                amount = subtotal - Math.round(subtotal * (Number(matching.discount || 0) / 100));
+            } else {
+                amount = subtotal;
+            }
+        } else {
+            amount = subtotal;
         }
     }
 
