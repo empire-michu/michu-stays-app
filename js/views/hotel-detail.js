@@ -262,7 +262,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                 }
                                 const isRoomFullyBooked = (room.availableRooms !== undefined && room.availableRooms <= 0);
                                 const availableCount = room.availableRooms !== undefined ? room.availableRooms : (room.totalRooms || 10);
-                                const maxRooms = Math.min(availableCount, 10);
+                                const maxRooms = availableCount;
 
                                 const bedSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>`;
                                 const guestSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
@@ -696,7 +696,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
     window.michuStepRooms = (roomId, delta) => {
         const entry = window._getMichuRoomEntry(roomId);
         const roomData = (hotel.roomTypes || []).find(r => (r.id || `room_${hotel.roomTypes.indexOf(r)}`) === roomId);
-        const maxAvailable = roomData?.availableRooms !== undefined ? Math.min(roomData.availableRooms, 10) : 10;
+        const maxAvailable = roomData?.availableRooms !== undefined ? roomData.availableRooms : (roomData?.totalRooms || 10);
         const newVal = Math.max(1, Math.min(maxAvailable, entry.roomCount + delta));
         entry.roomCount = newVal;
         // Update stepper UI
