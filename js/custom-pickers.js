@@ -83,12 +83,10 @@ function injectPickerStyles() {
         
         .custom-select-option:hover {
             background: #f1f5f9 !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
         }
         
         .custom-select-option:active {
-            transform: translateY(1px) scale(0.98) !important;
+            background: #e2e8f0 !important;
         }
         
         .custom-select-option.selected {
@@ -106,11 +104,11 @@ function injectPickerStyles() {
             #custom-select-sheet {
                 max-width: 500px !important;
                 margin: 0 auto !important;
-                border-radius: 32px 32px 0 0 !important;
+                border-radius: 24px 24px 0 0 !important;
                 padding: 1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom)) !important;
                 max-height: 80vh !important;
                 transform: translateY(100%) !important;
-                transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+                transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
             }
             #custom-select-overlay.active #custom-select-sheet {
                 transform: translateY(0) !important;
@@ -127,12 +125,12 @@ function injectPickerStyles() {
             }
             #custom-select-sheet {
                 width: 450px !important;
-                border-radius: 28px !important;
+                border-radius: 24px !important;
                 padding: 2rem !important;
                 max-height: 85vh !important;
-                transform: scale(0.92) translateY(15px) !important;
+                transform: scale(0.96) translateY(15px) !important;
                 opacity: 0 !important;
-                transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease !important;
+                transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease !important;
             }
             #custom-select-overlay.active #custom-select-sheet {
                 transform: scale(1) translateY(0) !important;
