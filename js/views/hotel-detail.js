@@ -274,7 +274,7 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                                     ${isRoomFullyBooked ? `<div style="position:absolute; top:1rem; right:-2rem; background:#c5221f; color:white; font-size:0.72rem; font-weight:800; padding:0.2rem 2.5rem; transform:rotate(45deg); z-index:5; box-shadow:0 2px 4px rgba(0,0,0,0.2); pointer-events:none;">SOLD OUT</div>` : ''}
                                     <div class="michu-room-card-top" onclick="${isRoomFullyBooked ? '' : `window.michuToggleRoom('${roomId}')`}" style="position:relative;">
                                         <div style="display:flex; gap:0.8rem; align-items:flex-start; flex:1; min-width:180px;">
-                                            ${room.image ? `<div style="width:70px; height:70px; border-radius:12px; background:url('${room.image}') center/cover; flex-shrink:0; box-shadow:0 4px 12px rgba(0,0,0,0.08);"></div>` : `<div style="width:70px; height:70px; border-radius:12px; background:linear-gradient(135deg,#ecfdf5,#d1fae5); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0b6e4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg></div>`}
+                                            ${room.image ? `<div onclick="event.stopPropagation(); window.openRoomLightbox('${room.image}', '${room.name.replace(/'/g, "\\'")}')" style="width:70px; height:70px; border-radius:12px; background:url('${room.image}') center/cover; flex-shrink:0; box-shadow:0 4px 12px rgba(0,0,0,0.08); cursor:pointer;"></div>` : `<div style="width:70px; height:70px; border-radius:12px; background:linear-gradient(135deg,#ecfdf5,#d1fae5); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0b6e4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg></div>`}
                                             <div style="flex:1; min-width:0;">
                                                 <h3 style="margin:0 0 0.3rem; font-size:1.1rem; font-weight:900; color:#0f172a;">${room.name}</h3>
                                                 <p style="margin:0 0 0.7rem; font-size:0.82rem; color:#64748b; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${room.description || 'Premium room with standard amenities included.'}</p>
@@ -1521,5 +1521,33 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         const isExpanded = container.classList.contains('expanded');
         trigger.querySelector('span').innerText = isExpanded ? 'Read Less' : 'Read More';
         trigger.querySelector('svg').style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+    };
+
+    window.openRoomLightbox = (imgUrl, roomName) => {
+        if (!imgUrl || imgUrl.includes('placehold.co')) return;
+        
+        let lightbox = document.getElementById('room-photo-lightbox');
+        if (!lightbox) {
+            lightbox = document.createElement('div');
+            lightbox.id = 'room-photo-lightbox';
+            lightbox.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s ease; backdrop-filter:blur(10px);';
+            lightbox.innerHTML = `
+                <div style="position:absolute; top:1.5rem; right:1.5rem; width:40px; height:40px; background:rgba(255,255,255,0.15); border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:white; transition:background 0.2s;" onclick="this.parentElement.style.opacity='0'; setTimeout(()=>this.parentElement.style.display='none',300);" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </div>
+                <img id="room-lightbox-img" src="" style="max-width:90%; max-height:80%; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.5); transform:scale(0.95); transition:transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); object-fit:contain;">
+                <div id="room-lightbox-title" style="color:white; font-weight:800; font-size:1.2rem; margin-top:1.5rem; letter-spacing:0.5px;"></div>
+            `;
+            document.body.appendChild(lightbox);
+        }
+        
+        document.getElementById('room-lightbox-img').src = imgUrl;
+        document.getElementById('room-lightbox-title').innerText = roomName || 'Room View';
+        
+        lightbox.style.display = 'flex';
+        // Force reflow
+        void lightbox.offsetWidth;
+        lightbox.style.opacity = '1';
+        document.getElementById('room-lightbox-img').style.transform = 'scale(1)';
     };
 });

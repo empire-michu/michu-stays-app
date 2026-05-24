@@ -205,7 +205,6 @@ window.router.addRoute('manager', async (container, params) => {
                         }
                     ">
                     <input type="hidden" class="mg-room-img-url" value="">
-                    <input type="hidden" class="mg-room-avail" value="">
                 </div>
             </div>
             
@@ -232,6 +231,10 @@ window.router.addRoute('manager', async (container, params) => {
             <div>
                 <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Quantity (Total Rooms)</label>
                 <input type="number" placeholder="Total Rooms" class="mg-room-total-rooms" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+            </div>
+            <div>
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Available Rooms</label>
+                <input type="number" placeholder="Available" class="mg-room-avail" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
             </div>
         `;
         container.appendChild(div);
@@ -263,6 +266,7 @@ window.router.addRoute('manager', async (container, params) => {
                 const totalRooms = parseInt(row.querySelector('.mg-room-total-rooms').value) || 1;
                 let avail = row.querySelector('.mg-room-avail')?.value;
                 avail = avail !== '' && avail !== undefined ? parseInt(avail) : totalRooms;
+                if (avail > totalRooms) avail = totalRooms;
                 
                 roomTypesArr.push({
                     id: row.dataset.id || `room_${idx}_${Date.now()}`,
@@ -1307,7 +1311,6 @@ window.router.addRoute('manager', async (container, params) => {
                                                     }
                                                 ">
                                                 <input type="hidden" class="mg-room-img-url" value="${room.image || ''}">
-                                                <input type="hidden" class="mg-room-avail" value="${room.availableRooms !== undefined ? room.availableRooms : (room.totalRooms || 1)}">
                                             </div>
                                         </div>
                                         
@@ -1334,6 +1337,10 @@ window.router.addRoute('manager', async (container, params) => {
                                         <div>
                                             <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Quantity (Total Rooms)</label>
                                             <input type="number" placeholder="Total Rooms" value="${room.totalRooms||''}" class="mg-room-total-rooms" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+                                        </div>
+                                        <div>
+                                            <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Available Rooms</label>
+                                            <input type="number" placeholder="Available" value="${room.availableRooms !== undefined ? room.availableRooms : (room.totalRooms || '')}" class="mg-room-avail" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
                                         </div>
                                     </div>
                                 `).join('')}

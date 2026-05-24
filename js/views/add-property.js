@@ -55,6 +55,10 @@ window.router.addRoute('add-property', (container) => {
                                 <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Quantity (Total Rooms)</label>
                                 <input type="number" placeholder="Total Rooms" value="5" class="prop-room-total-rooms" required style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
                             </div>
+                            <div>
+                                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Available Rooms</label>
+                                <input type="number" placeholder="Available" value="5" class="prop-room-avail" required style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+                            </div>
                         </div>
                     </div>
                     
@@ -183,6 +187,10 @@ window.router.addRoute('add-property', (container) => {
                 <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Quantity (Total Rooms)</label>
                 <input type="number" placeholder="Total Rooms" value="5" class="prop-room-total-rooms" required style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
             </div>
+            <div>
+                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Available Rooms</label>
+                <input type="number" placeholder="Available" value="5" class="prop-room-avail" required style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
+            </div>
         `;
         container.appendChild(div);
     };
@@ -239,7 +247,11 @@ window.router.addRoute('add-property', (container) => {
                 price: parseInt(row.querySelector('.prop-room-price').value) || 0,
                 capacity: parseInt(row.querySelector('.prop-room-capacity').value) || 2,
                 beds: row.querySelector('.prop-room-beds').value.trim(),
-                totalRooms: parseInt(row.querySelector('.prop-room-total-rooms').value) || 1
+                totalRooms: parseInt(row.querySelector('.prop-room-total-rooms').value) || 1,
+                availableRooms: Math.min(
+                    parseInt(row.querySelector('.prop-room-avail')?.value) || parseInt(row.querySelector('.prop-room-total-rooms').value) || 1,
+                    parseInt(row.querySelector('.prop-room-total-rooms').value) || 1
+                )
             })).filter(r => r.name && r.price);
 
             if (roomTypesArr.length === 0) {
