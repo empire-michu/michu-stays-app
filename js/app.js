@@ -657,9 +657,8 @@ window.handleNotifAction = (notifId, actionIndex) => {
 
 window.updateNotifPanelOnly = (notif) => {
     // This function handles historical notifications silently (no popup/sound)
-    // but ensures they appear in the notification panel and update the badge.
-    if (!notif.isRead) unreadCount++;
-    updateNotifBadge();
+    // but ensures they are accumulated in memory and update the badge.
+    // The panel will render them when opened via showNotifModal.
 
     // Add to in-memory list if not already there
     if (!notifications.find(n => n.id === notif.id)) {
@@ -677,8 +676,14 @@ window.updateNotifPanelOnly = (notif) => {
         });
         // Sort by date to ensure history is correct
         notifications.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-        renderNotifList();
     }
+
+    if (!notif.isRead) unreadCount++;
+    updateNotifBadge();
+
+    // Try to render if DOM is ready, but don't fail if it isn't
+    const list = document.getElementById('notif-list-container');
+    if (list) renderNotifList();
 };
 
 window.updateExistingNotifOnly = (notif) => {
@@ -876,10 +881,19 @@ window.showNotifModal = (open) => {
 
     if (open) {
         modal.style.display = 'flex';
+        // Always force a fresh render from the full in-memory notifications array
+        // This ensures historical notifications that arrived while the panel was closed are shown
+        showAllNotifs = false; // Reset pagination
         renderNotifList();
+        // Update badge
+        const badge = document.getElementById('notif-badge');
+        if (badge) {
+            badge.style.display = 'none';
+            badge.classList.remove('notif-pulse');
+        }
+        unreadCount = 0;
     } else {
         modal.style.display = 'none';
-        // Mark all as read when closing the modal
         notifications.forEach(n => n.isNew = false);
     }
 };

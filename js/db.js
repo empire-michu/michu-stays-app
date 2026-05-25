@@ -778,25 +778,29 @@ class Database {
 
         try {
             if (role === 'admin') {
+                // Admins see ALL notifications (platform-wide visibility)
                 unsubs.push(base.onSnapshot(handleSnapshot, onError));
             } else {
-                // 1. Personal Notifications
+                // 1. Personal Notifications (targetUserId matches this user)
+                //    This catches: booking alerts for their specific hotel, chat messages,
+                //    review replies, and any notification addressed directly to them.
                 unsubs.push(base.where('targetUserId', '==', user.uid).onSnapshot(handleSnapshot, onError));
                 
-                // 2. Role-based Alerts (Manager/etc)
-                if (role && role !== 'customer') {
-                    unsubs.push(base.where('targetRole', '==', role).onSnapshot(handleSnapshot, onError));
-                }
-                
-                // 3. Global Announcements (To all users or specifically to customers)
+                // 2. Global Announcements (targetRole == 'all') — for everyone
                 unsubs.push(base.where('targetRole', '==', 'all').onSnapshot(handleSnapshot, onError));
                 
+                // 3. Customer-specific broadcasts
                 if (role === 'customer') {
                     unsubs.push(base.where('targetRole', '==', 'customer').onSnapshot(handleSnapshot, onError));
                 }
                 
-                // 4. Fallback for untargeted system alerts
+                // 4. Fallback for untargeted legacy system alerts
                 unsubs.push(base.where('targetUserId', '==', null).where('targetRole', '==', null).onSnapshot(handleSnapshot, onError));
+                
+                // NOTE: We intentionally do NOT subscribe to targetRole == 'manager'.
+                // Hotel-specific notifications (bookings, chats, reviews) use targetUserId
+                // to address the correct manager. A broad role-based listener would leak
+                // other hotels' private booking data to unrelated managers.
             }
         } catch (e) {
             console.warn("Failed to setup notification listeners:", e);
