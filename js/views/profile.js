@@ -157,7 +157,7 @@ window.router.addRoute('profile', async (container, params) => {
                 <td data-label="Ref"><span class="premium-ref">${b.referenceCode}</span></td>
                 <td data-label="Hotel">
                     <div style="font-weight:700;font-size:0.9rem;color:#1e293b;">${b.propertyTitle}</div>
-                    <div class="premium-stay-dates">${b.checkIn} → ${b.checkOut} <span class="premium-nights-badge">(${nights} night${nights !== 1 ? 's' : ''})</span></div>
+                    <div class="premium-stay-dates">${b.checkIn} → ${b.checkOut} <span class="premium-nights-badge">(${nights} ${nights !== 1 ? t('nights') : t('night')})</span></div>
                 </td>
                 <td data-label="Total"><span class="premium-amount">${b.totalAmount}<span class="premium-amount-currency">Birr</span></span></td>
                 <td data-label="Status"><span class="premium-status ${b.status==='Confirmed'?'premium-status--confirmed':(b.status==='Denied'?'premium-status--denied':'premium-status--awaiting')}">

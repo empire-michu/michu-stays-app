@@ -1,6 +1,6 @@
 // js/i18n.js
 
-// Formal and Professional Amharic and Oromiffa Translations
+// Formal and Professional Amharic and Afaan Oromoo Translations
 const translations = {
     am: {
         // Core Navigation & UI
@@ -161,6 +161,14 @@ const translations = {
         "⭐ Rate Stay": "⭐ ደረጃ ይስጡ",
         "🖼 Proof": "🖼 ማረጋገጫ",
         "Edit Review": "አስተያየትዎን ያርትዑ",
+        "Adult": "አዋቂ",
+        "Adults": "አዋቂዎች",
+        "Child": "ልጅ",
+        "Children": "ልጆች",
+        "Stay:": "ቆይታ:",
+        "PKG:": "ጥቅል:",
+        "ROOM:": "ክፍል:",
+        "Anonymous Guest": "ያልታወቀ እንግዳ",
         
         // Detail missing strings
         "Reserve Package": "ፓኬጁን ያስይዙ",
@@ -762,6 +770,14 @@ const translations = {
         "⭐ Rate Stay": "⭐ Sadarkaa Kennaa",
         "🖼 Proof": "🖼 Ragaa Kaffaltii",
         "Edit Review": "Yaada Keessan Sirreessaa",
+        "Adult": "Guddaa",
+        "Adults": "Gurguddaa",
+        "Child": "Daa'ima",
+        "Children": "Daa'imman",
+        "Stay:": "Turmaata:",
+        "PKG:": "PKG:",
+        "ROOM:": "KUTAA:",
+        "Anonymous Guest": "Keessummaa Hin Beekamne",
 
         // Detail missing strings
         "Reserve Package": "Pakeejii Qabadhu",
