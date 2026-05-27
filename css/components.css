@@ -835,3 +835,410 @@
     margin-top: 0.15rem;
     letter-spacing: 0.3px;
 }
+
+/* Polished Booking Screen Styles */
+.booking-polish-container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 1rem 3rem;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.booking-main-title {
+    font-family: 'Hanken Grotesk', system-ui, sans-serif;
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #1a1c1e;
+    margin-bottom: 0.25rem;
+    letter-spacing: -0.02em;
+}
+
+.booking-main-subtitle {
+    font-size: 0.95rem;
+    color: #5d5e61;
+    margin-bottom: 1.75rem;
+}
+
+.booking-card {
+    background: #ffffff;
+    border: 1px solid #e2e2e5;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.booking-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.booking-hotel-name {
+    font-family: 'Hanken Grotesk', system-ui, sans-serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #1a1c1e;
+    margin: 0 0 0.35rem 0;
+    letter-spacing: -0.01em;
+}
+
+.booking-hotel-location {
+    font-size: 0.85rem;
+    color: #5d5e61;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.booking-hotel-location svg {
+    color: var(--color-primary, #008450);
+}
+
+.booking-offer-badge {
+    background: #e6f4ea;
+    color: #008450;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.booking-info-block {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    background: #f8fafb;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 0.85rem;
+    border: 1px solid #eceeef;
+}
+
+.booking-info-block-icon {
+    background: #e2e2e5;
+    color: #1a1c1e;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.booking-info-block-content {
+    flex: 1;
+}
+
+.booking-info-block-label {
+    display: block;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.72rem;
+    color: #5d5e61;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.15rem;
+}
+
+.booking-info-block-value {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #1a1c1e;
+    line-height: 1.4;
+}
+
+.offer-accordion-trigger {
+    margin-top: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #856404;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.offer-accordion-content {
+    display: none;
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 0.5rem;
+    line-height: 1.4;
+}
+
+.booking-divider {
+    height: 1px;
+    background: #eceeef;
+    margin: 1.25rem 0;
+}
+
+.booking-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.booking-price-label {
+    font-family: 'Hanken Grotesk', system-ui, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1a1c1e;
+}
+
+.booking-price-value {
+    font-family: 'Hanken Grotesk', system-ui, sans-serif;
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #008450;
+    letter-spacing: -0.01em;
+}
+
+/* Payment styles */
+.payment-section-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    background: #ffffff;
+    border: 1px solid #e2e2e5;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.payment-section-trigger:hover {
+    border-color: #008450;
+}
+
+.booking-section-title {
+    font-family: 'Hanken Grotesk', system-ui, sans-serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1a1c1e;
+    margin: 0;
+}
+
+.payment-arrow {
+    font-size: 0.8rem;
+    color: #5d5e61;
+    transition: transform 0.2s ease;
+}
+
+.payment-method-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.pay-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    border: 2px solid #e2e2e5;
+    border-radius: 12px;
+    cursor: pointer;
+    background: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.pay-card:hover {
+    border-color: #bdcabe;
+}
+
+.pay-card.active {
+    border-color: #008450;
+    background: #f0fdf4;
+    color: #008450;
+    box-shadow: 0 4px 12px rgba(0, 132, 80, 0.06);
+}
+
+.pay-card-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.25rem;
+}
+
+.pay-card-label {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+
+.bank-details-box {
+    background: #f8fafb;
+    border: 1px solid #e2e2e5;
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.bank-details-value-container {
+    background: #ffffff;
+    border: 1px solid #eceeef;
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.85rem;
+    position: relative;
+}
+
+.bank-details-copy-btn {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: #e6f4ea;
+    color: #008450;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.bank-details-copy-btn:hover {
+    background: #d1ebd6;
+}
+
+.details-accordion-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #008450;
+    cursor: pointer;
+    margin-top: 0.75rem;
+    user-select: none;
+}
+
+.accordion-arrow {
+    transition: transform 0.2s ease;
+}
+
+.details-accordion-content {
+    display: none;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #e2e2e5;
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: #5d5e61;
+}
+
+.guest-phone-input-polished {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 1.5px solid #e2e2e5;
+    border-radius: 12px;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1a1c1e;
+    background: #ffffff;
+    margin-bottom: 1.25rem;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.guest-phone-input-polished:focus {
+    outline: none;
+    border-color: #008450;
+}
+
+.upload-area-polished {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1.5px dashed #bdcabe;
+    border-radius: 12px;
+    background: #f8fafb;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 1.25rem;
+}
+
+.upload-area-polished:hover {
+    border-color: #008450;
+    background: #f4faf6;
+}
+
+.upload-area-polished-icon {
+    color: #008450;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.upload-area-polished-text {
+    display: block;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1a1c1e;
+}
+
+.upload-area-polished-subtext {
+    display: block;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.72rem;
+    color: #5d5e61;
+    margin-top: 0.15rem;
+}
+
+.btn-primary-polished {
+    width: 100%;
+    padding: 1rem;
+    background: #008450;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Hanken Grotesk', system-ui, sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 14px rgba(0, 132, 80, 0.2);
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.btn-primary-polished:hover:not(:disabled) {
+    background: #00683e;
+    box-shadow: 0 6px 18px rgba(0, 104, 62, 0.25);
+}
+
+.btn-primary-polished:disabled {
+    background: #bdcabe;
+    color: #ffffff;
+    cursor: not-allowed;
+    box-shadow: none;
+}

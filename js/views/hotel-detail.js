@@ -347,34 +347,71 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                     ` : ''}
 
                     <!-- SPECIAL PACKAGES (Desktop View) -->
-                    ${hotel.packages && hotel.packages.length > 0 ? `
-                    <section class="mobile-order-4 desktop-packages-section" style="margin-bottom:3.5rem; background: linear-gradient(135deg, #ffffff 0%, #fffbf2 100%); padding:2.5rem; border-radius:32px; border:2px solid rgba(217,119,6,0.15); box-shadow: 0 20px 50px rgba(217,119,6,0.08); position:relative; overflow:hidden;">
-                        <div style="position:absolute; top:-50px; right:-50px; width:150px; height:150px; background:rgba(217,119,6,0.03); border-radius:50%;"></div>
-                        <h2 style="margin-bottom:1.5rem; display:flex; align-items:center; gap:0.8rem; color:#d97706; font-size:1.4rem; font-weight:950; text-transform:uppercase; letter-spacing:0.5px;">
-                            <span style="background:#d97706; color:white; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(217,119,6,0.3);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg></span> 
-                            Exclusive Offers
-                        </h2>
-                        <div class="mobile-package-carousel" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:2rem;">
-                            ${hotel.packages.map((pkg, idx) => `
-                                <div class="pkg-card" onclick="window.applyMichuPkg(${idx})" 
-                                     style="background:white; border:1px solid rgba(217,119,6,0.1); border-radius:26px; padding:1.8rem; cursor:pointer; position:relative; transition:all 0.4s ease; box-shadow:0 10px 20px rgba(0,0,0,0.03);">
-                                    <div style="background:linear-gradient(90deg, #fff7ed 0%, #ffedd5 100%); color:#ea580c; font-weight:950; font-size:0.7rem; padding:0.5rem 1rem; border-radius:99px; display:inline-flex; align-items:center; gap:0.4rem; margin-bottom:1.2rem; text-transform:uppercase; border:1px solid rgba(234,88,12,0.1); box-shadow:0 2px 8px rgba(234,88,12,0.05);">
-                                        <span style="font-size:0.9rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span> ${pkg.nights} Night Bundle
-                                    </div>
-                                    <h3 style="margin:0 0 0.6rem; font-size:1.35rem; font-weight:900; color:#1e293b;">${pkg.title}</h3>
-                                    <p style="font-size:0.95rem; line-height:1.6; color:#64748b; margin-bottom:1.8rem; height:45px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${pkg.services || 'Inclusive premium amenities.'}</p>
-                                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1.5rem; border-top:1.5px solid #f1f5f9;">
-                                        <div style="display:flex; flex-direction:column;">
-                                            <span style="color:#d97706; font-weight:950; font-size:1.6rem; line-height:1;">${pkg.discount}% OFF</span>
-                                            <span style="font-size:0.65rem; color:#94a3b8; font-weight:700; margin-top:0.3rem;">LIMITED TIME DEAL</span>
-                                        </div>
-                                        <span class="btn-primary pkg-select-btn" id="desktop-pkg-btn-${idx}" style="padding:0.8rem 1.8rem; border-radius:16px; font-size:0.9rem; font-weight:800; background:linear-gradient(135deg, #0b6646 0%, #15803d 100%); box-shadow:0 6px 15px rgba(11,102,70,0.25);">Select Bundle</span>
-                                    </div>
-                                    <!-- Decorative glow -->
-                                    <div style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:60%; height:2px; background:linear-gradient(90deg, transparent, rgba(217,119,6,0.3), transparent); opacity:0.5;"></div>
-                                </div>`).join('')}
-                        </div>
-                    </section>` : ''}
+                    ${hotel.packages && hotel.packages.length > 0 ? (() => {
+                        const maxDisc = Math.max(...hotel.packages.map(p => parseInt(p.discount) || 0));
+                        return `
+                        <style>
+                            @keyframes pulseGlow {
+                                0% { box-shadow: 0 0 5px rgba(245,158,11,0.25); border-color: rgba(245,158,11,0.4); }
+                                50% { box-shadow: 0 0 15px rgba(245,158,11,0.65); border-color: rgba(245,158,11,0.9); }
+                                100% { box-shadow: 0 0 5px rgba(245,158,11,0.25); border-color: rgba(245,158,11,0.4); }
+                            }
+                            @keyframes pulseText {
+                                0% { text-shadow: 0 0 3px rgba(245,158,11,0.4); }
+                                50% { text-shadow: 0 0 10px rgba(245,158,11,0.95), 0 0 20px rgba(245,158,11,0.5); }
+                                100% { text-shadow: 0 0 3px rgba(245,158,11,0.4); }
+                            }
+                            .glow-section-active {
+                                animation: pulseGlow 3s infinite ease-in-out;
+                            }
+                        </style>
+                        <section class="mobile-order-4 desktop-packages-section glow-section-active" style="margin-bottom:3.5rem; background:white; padding:1.5rem; border-radius:24px; border:1.5px solid rgba(245,158,11,0.4); box-shadow:0 0 15px rgba(245,158,11,0.15); overflow:hidden; transition:all 0.3s ease;">
+                            <!-- Collapsible Trigger Header -->
+                            <div onclick="window.toggleExclusiveOffers(this)" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:0.25rem 0.5rem;">
+                                <h2 style="margin:0; display:flex; align-items:center; gap:0.75rem; color:var(--color-text-dark); font-size:1.35rem; font-weight:800; font-family:'Hanken Grotesk', sans-serif; letter-spacing:-0.01em;">
+                                    <span style="background:#fef3c7; color:#d97706; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid #fde68a; flex-shrink:0; box-shadow: 0 0 8px rgba(245,158,11,0.35);">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                                            <rect x="2" y="7" width="20" height="5"></rect>
+                                            <line x1="12" y1="22" x2="12" y2="7"></line>
+                                            <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                                            <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+                                        </svg>
+                                    </span>
+                                    <span>Exclusive Offers</span>
+                                    ${maxDisc > 0 ? `<span style="margin-left:0.5rem; background:linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border:1.5px solid #f59e0b; color:#b45309; font-weight:900; font-size:0.72rem; padding:0.2rem 0.5rem; border-radius:8px; display:inline-flex; align-items:center; box-shadow:0 0 10px rgba(245,158,11,0.4); animation: pulseText 2s infinite ease-in-out; letter-spacing:0.02em;">SAVE UP TO ${maxDisc}% OFF</span>` : ''}
+                                </h2>
+                                <span class="offers-arrow" style="font-size:0.9rem; font-weight:700; color:#d97706; transition: transform 0.25s ease;">▼</span>
+                            </div>
+
+                            <!-- Collapsible Content Section -->
+                            <div id="exclusive-offers-collapsible-content" style="display:none; margin-top:1.5rem; animation: slideDownFade 0.25s ease-out;">
+                                <div class="mobile-package-carousel" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
+                                    ${hotel.packages.map((pkg, idx) => `
+                                        <div class="pkg-card" onclick="window.applyMichuPkg(${idx})" 
+                                             style="background:white; border:1px solid var(--color-border); border-radius:20px; padding:1.5rem; cursor:pointer; position:relative; transition:all 0.3s ease; box-shadow:0 6px 15px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:space-between; min-height:240px;">
+                                            <div>
+                                                <div style="background:#fef3c7; color:#d97706; font-weight:800; font-size:0.72rem; padding:0.35rem 0.75rem; border-radius:12px; display:inline-flex; align-items:center; gap:0.3rem; margin-bottom:1rem; text-transform:uppercase; border:1px solid #fde68a; font-family:'Inter', sans-serif; box-shadow:0 0 6px rgba(245,158,11,0.15);">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                                    </svg>
+                                                    <span>${pkg.nights} Night Bundle</span>
+                                                </div>
+                                                <h3 style="margin:0 0 0.5rem; font-size:1.25rem; font-weight:800; color:var(--color-text-dark); font-family:'Hanken Grotesk', sans-serif; letter-spacing:-0.01em;">${pkg.title}</h3>
+                                                <p style="font-size:0.85rem; line-height:1.5; color:var(--color-text-light); margin-bottom:1.5rem; font-family:'Plus Jakarta Sans', sans-serif; height:42px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${pkg.services || 'Inclusive premium amenities.'}</p>
+                                            </div>
+                                            <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1.25rem; border-top:1px solid var(--color-border); margin-top:auto;">
+                                                <div style="display:flex; flex-direction:column;">
+                                                    <span style="color:#d97706; font-weight:900; font-size:1.55rem; line-height:1; font-family:'Hanken Grotesk', sans-serif; background:#fffbeb; border:1px solid #f59e0b; padding:0.25rem 0.5rem; border-radius:8px; box-shadow:0 0 12px rgba(245,158,11,0.45); animation: pulseText 2.5s infinite ease-in-out;">${pkg.discount}% OFF</span>
+                                                    <span style="font-size:0.62rem; color:var(--color-text-light); font-weight:700; margin-top:0.35rem; font-family:'Inter', sans-serif; letter-spacing:0.02em;">LIMITED TIME DEAL</span>
+                                                </div>
+                                                <span class="btn-primary pkg-select-btn" id="desktop-pkg-btn-${idx}" style="padding:0.7rem 1.4rem; border-radius:14px; font-size:0.85rem; font-weight:800; background:linear-gradient(135deg, var(--color-primary) 0%, #1e7e34 100%); box-shadow:0 4px 10px rgba(11,110,79,0.15); font-family:'Hanken Grotesk', sans-serif;">Select Bundle</span>
+                                            </div>
+                                        </div>`).join('')}
+                                </div>
+                            </div>
+                        </section>`;
+                    })() : ''}
 
                     <section class="mobile-order-5">
                          <h2 style="margin-bottom:1.5rem; font-size:1.5rem;">Property Amenities</h2>
@@ -494,18 +531,23 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
                         <div class="sheet-body" style="display:flex; flex-direction:column; gap:1rem; max-height:70vh; overflow-y:auto; padding-right:0.5rem;">
                             ${hotel.packages.map((pkg, idx) => `
                                 <div class="pkg-card-modal" onclick="document.getElementById('mobile-packages-modal').classList.remove('active'); window.applyMichuPkg(${idx})" 
-                                     style="background:linear-gradient(135deg, #ffffff 0%, #fffbf2 100%); border:1px solid rgba(217,119,6,0.2); border-radius:20px; padding:1.2rem; cursor:pointer; position:relative; transition:all 0.3s ease; box-shadow:0 10px 25px rgba(217,119,6,0.08);">
-                                    <div style="background:linear-gradient(90deg, #fff7ed 0%, #ffedd5 100%); color:#ea580c; font-weight:950; font-size:0.7rem; padding:0.4rem 0.8rem; border-radius:99px; display:inline-flex; align-items:center; gap:0.4rem; margin-bottom:0.8rem; text-transform:uppercase; border:1px solid rgba(234,88,12,0.1);">
-                                        <span style="font-size:0.85rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span> ${pkg.nights} Night Bundle
-                                    </div>
-                                    <h4 style="margin:0 0 0.4rem; font-size:1.15rem; font-weight:900; color:#1e293b;">${pkg.title}</h4>
-                                    <p style="font-size:0.85rem; line-height:1.4; color:#64748b; margin-bottom:1.2rem;">${pkg.services || 'Inclusive premium amenities.'}</p>
-                                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1.2rem; border-top:1.5px solid #f1f5f9;">
-                                        <div style="display:flex; flex-direction:column;">
-                                            <span style="color:#d97706; font-weight:950; font-size:1.35rem; line-height:1;">${pkg.discount}% OFF</span>
-                                            <span style="font-size:0.65rem; color:#94a3b8; font-weight:700; margin-top:0.3rem;">LIMITED TIME DEAL</span>
+                                     style="background:white; border:1px solid var(--color-border); border-radius:20px; padding:1.2rem; cursor:pointer; position:relative; transition:all 0.3s ease; box-shadow:0 6px 15px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:space-between; min-height:200px;">
+                                    <div>
+                                        <div style="background:#e6f4ea; color:var(--color-primary); font-weight:800; font-size:0.72rem; padding:0.35rem 0.75rem; border-radius:12px; display:inline-flex; align-items:center; gap:0.3rem; margin-bottom:0.8rem; text-transform:uppercase; border:1px solid #bbf7d0; font-family:'Inter', sans-serif;">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                            </svg>
+                                            <span>${pkg.nights} Night Bundle</span>
                                         </div>
-                                        <span class="btn-primary pkg-select-btn" id="mobile-pkg-btn-${idx}" style="padding:0.7rem 1.4rem; border-radius:14px; font-size:0.85rem; font-weight:800; background:linear-gradient(135deg, #0b6646 0%, #15803d 100%); box-shadow:0 6px 15px rgba(11,102,70,0.25);">Select Bundle</span>
+                                        <h4 style="margin:0 0 0.4rem; font-size:1.15rem; font-weight:800; color:var(--color-text-dark); font-family:'Hanken Grotesk', sans-serif;">${pkg.title}</h4>
+                                        <p style="font-size:0.82rem; line-height:1.4; color:var(--color-text-light); margin-bottom:1.2rem; font-family:'Plus Jakarta Sans', sans-serif;">${pkg.services || 'Inclusive premium amenities.'}</p>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1.2rem; border-top:1px solid var(--color-border); margin-top:auto;">
+                                        <div style="display:flex; flex-direction:column;">
+                                            <span style="color:var(--color-primary); font-weight:900; font-size:1.35rem; line-height:1; font-family:'Hanken Grotesk', sans-serif;">${pkg.discount}% OFF</span>
+                                            <span style="font-size:0.62rem; color:var(--color-text-light); font-weight:700; margin-top:0.25rem; font-family:'Inter', sans-serif;">LIMITED TIME DEAL</span>
+                                        </div>
+                                        <span class="btn-primary pkg-select-btn" id="mobile-pkg-btn-${idx}" style="padding:0.6rem 1.2rem; border-radius:12px; font-size:0.82rem; font-weight:800; background:linear-gradient(135deg, var(--color-primary) 0%, #1e7e34 100%); box-shadow:0 4px 10px rgba(11,110,79,0.15); font-family:'Hanken Grotesk', sans-serif;">Select Bundle</span>
                                     </div>
                                 </div>`).join('')}
                         </div>
@@ -642,20 +684,20 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
             const mBtn = document.getElementById(`mobile-pkg-btn-${idx}`);
             const isSelected = (window._selectedPackageIndex === idx);
             
-            const activeBg = 'linear-gradient(135deg, #d97706 0%, #b45309 100%)';
-            const activeText = 'Selected (Tap to Unselect)';
-            const normalBg = 'linear-gradient(135deg, #0b6646 0%, #15803d 100%)';
+            const activeBg = 'linear-gradient(135deg, #0f5132 0%, #083421 100%)';
+            const activeText = '✓ Selected';
+            const normalBg = 'linear-gradient(135deg, var(--color-primary) 0%, #1e7e34 100%)';
             const normalText = 'Select Bundle';
 
             if (dBtn) {
                 dBtn.innerText = isSelected ? activeText : normalText;
                 dBtn.style.background = isSelected ? activeBg : normalBg;
-                dBtn.style.boxShadow = isSelected ? '0 6px 15px rgba(217,119,6,0.3)' : '0 6px 15px rgba(11,102,70,0.25)';
+                dBtn.style.boxShadow = isSelected ? '0 4px 10px rgba(15,81,50,0.3)' : '0 4px 10px rgba(11,110,79,0.15)';
             }
             if (mBtn) {
                 mBtn.innerText = isSelected ? activeText : normalText;
                 mBtn.style.background = isSelected ? activeBg : normalBg;
-                mBtn.style.boxShadow = isSelected ? '0 6px 15px rgba(217,119,6,0.3)' : '0 6px 15px rgba(11,102,70,0.25)';
+                mBtn.style.boxShadow = isSelected ? '0 4px 10px rgba(15,81,50,0.3)' : '0 4px 10px rgba(11,110,79,0.15)';
             }
         });
     };
@@ -942,19 +984,24 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
             summaries.forEach(summary => summary.innerHTML = `
                 <div style="background:#f8fafc; padding:1.4rem; border-radius:22px; border:1px solid #f1f5f9;">
                     ${packageActive ? `
-                    <div style="display:flex; justify-content:space-between; align-items:center; background:#fef3c7; border:1px solid #f59e0b; padding:0.6rem 1rem; border-radius:14px; margin-bottom:1rem;">
-                        <div style="display:flex; align-items:center; gap:0.5rem;">
-                            <span style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#d97706;"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg></span>
-                            <div>
-                                <div style="color:#d97706; font-weight:950; font-size:0.65rem; text-transform:uppercase;">PACKAGE APPLIED</div>
-                                <div style="color:#92400e; font-weight:800; font-size:0.8rem;">${pName}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid var(--color-border); padding:0.4rem 0.6rem; border-radius:12px; margin-bottom:1rem; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                        <div style="display:flex; align-items:center; gap:0.4rem;">
+                            <span style="display:inline-flex; align-items:center; justify-content:center; background:#e6f4ea; color:var(--color-primary); width:22px; height:22px; border-radius:50%; border:1px solid #bbf7d0; flex-shrink:0;">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                                </svg>
+                            </span>
+                            <div style="display:flex; flex-direction:column; line-height:1.2;">
+                                <span style="color:var(--color-primary); font-weight:800; font-size:0.6rem; text-transform:uppercase; letter-spacing:0.02em;">Package Active</span>
+                                <span style="color:var(--color-text-dark); font-weight:700; font-size:0.75rem; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${pName}</span>
                             </div>
                         </div>
-                        <button onclick="window.applyMichuPkg(${window._selectedPackageIndex})" style="background:#fee2e2; color:#ef4444; border:none; padding:0.35rem 0.7rem; border-radius:10px; font-weight:800; font-size:0.72rem; cursor:pointer;">✕ Remove</button>
+                        <button onclick="window.applyMichuPkg(${window._selectedPackageIndex})" style="background:transparent; color:#ef4444; border:none; padding:0.25rem; font-weight:700; font-size:0.72rem; cursor:pointer; font-family:'Inter',sans-serif; text-decoration:underline;">Remove</button>
                     </div>` : ''}
                     <div style="font-size:0.72rem; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.5rem;">Breakdown (${nights} night${nights > 1 ? 's' : ''})</div>
                     ${lineItemsHtml}
-                    ${packageActive && pkgSavings > 0 ? `<div style="display:flex; justify-content:space-between; color:#d97706; font-weight:800; margin-top:0.8rem; padding-top:0.5rem;"><span>Package Discount (${pkgDisc}%)</span><span>−${pkgSavings.toLocaleString()} Birr</span></div>` : ''}
+                    ${packageActive && pkgSavings > 0 ? `<div style="display:flex; justify-content:space-between; color:var(--color-primary); font-weight:800; margin-top:0.8rem; padding-top:0.5rem;"><span>Package Discount (${pkgDisc}%)</span><span>−${pkgSavings.toLocaleString()} Birr</span></div>` : ''}
                     <div style="display:flex; justify-content:space-between; font-weight:950; font-size:1.4rem; border-top:1.5px solid #e2e8f0; padding-top:1rem; margin-top:0.8rem; color:var(--color-primary);"><span>Total</span><span><span class="final-total-val">${grandTotal.toLocaleString()}</span> Birr</span></div>
                     <p style="text-align:right; font-size:0.65rem; color:#94a3b8; font-weight:700; margin-top:0.6rem;">Price includes all taxes & fees</p>
                 </div>`);
@@ -1521,6 +1568,21 @@ window.router.addRoute('hotel_detail_view', async (container, params) => {
         const isExpanded = container.classList.contains('expanded');
         trigger.querySelector('span').innerText = isExpanded ? 'Read Less' : 'Read More';
         trigger.querySelector('svg').style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+    };
+
+    window.toggleExclusiveOffers = (trigger) => {
+        const content = document.getElementById('exclusive-offers-collapsible-content');
+        if (!content) return;
+        const arrow = trigger.querySelector('.offers-arrow');
+        const isCollapsed = content.style.display === 'none' || content.style.display === '';
+        
+        if (isCollapsed) {
+            content.style.display = 'block';
+            if (arrow) arrow.style.transform = 'rotate(180deg)';
+        } else {
+            content.style.display = 'none';
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+        }
     };
 
     window.openRoomLightbox = (imgUrl, roomName) => {
