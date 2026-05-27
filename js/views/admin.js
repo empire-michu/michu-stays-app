@@ -937,38 +937,53 @@ window.router.addRoute('admin', async (container, params) => {
 
                 <!-- BOOKINGS TAB -->
                 <div id="adm-tab-bookings" style="display:${activeTab==='bookings'?'block':'none'}">
-                    <div style="background:white; border-radius:24px; padding:1.5rem; box-shadow:var(--shadow-sm); margin-bottom:1.5rem; border:1px solid #eee;">
-                        <div style="display:flex; align-items:flex-end; gap:0.8rem; flex-wrap:wrap;">
-                            <div style="flex:1; min-width:150px;">
-                                <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.4rem; text-transform:uppercase;">Hotel / Stay</label>
-                                <select id="adm-book-hotel" style="width:100%; padding:0.7rem; border-radius:10px; border:1.5px solid #eee; font-weight:600; background:white; cursor:pointer;" onchange="window.setAdmFilter()">
-                                    <option value="">All Hotels</option>
-                                    ${cachedProperties.map(p => `<option value="${p.title}" ${filterHotel===p.title?'selected':''}>${p.title}</option>`).join('')}
-                                </select>
+                    <details class="premium-filter-collapse" style="background:white; padding:1.5rem; border-radius:24px; box-shadow:var(--shadow-sm); margin-bottom:1.5rem; border:1px solid #eee;">
+                        <summary style="cursor:pointer; font-weight:700; color:var(--color-primary); outline:none;">
+                            <div style="display:inline-flex; align-items:center; gap:0.5rem;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                                Filter & Search Bookings
                             </div>
-                            <div style="min-width:130px;">
-                                <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.4rem; text-transform:uppercase;">From Date</label>
-                                <input type="date" id="adm-book-from" value="${filterFrom}" style="width:100%; padding:0.7rem; border-radius:10px; border:1.5px solid #eee; font-weight:600;" onchange="window.setAdmFilter()">
+                        </summary>
+                        <div class="filter-content" style="margin-top:1.5rem;">
+                            <div style="display:flex; align-items:flex-end; gap:0.8rem; flex-wrap:wrap; margin-bottom:0.8rem;">
+                                <div>
+                                    <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">Hotel/Property</label>
+                                    <select id="adm-book-hotel" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:700; background:white; cursor:pointer;" onchange="window.setAdmFilter()">
+                                        <option value="">All Properties</option>
+                                        ${Array.from(new Set(cachedBookings.map(b => b.propertyTitle))).sort().map(title => `<option value="${title}" ${filterHotel === title ? 'selected' : ''}>${title}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">From Date</label>
+                                    <input type="date" id="adm-book-from" value="${filterFrom}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:600;" onchange="window.setAdmFilter()">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">To Date</label>
+                                    <input type="date" id="adm-book-to" value="${filterTo}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:600;" onchange="window.setAdmFilter()">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">Status</label>
+                                    <select id="adm-book-status" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:700; background:white; cursor:pointer;" onchange="window.setAdmFilter()">
+                                        <option value="">All Statuses</option>
+                                        <option value="Awaiting Confirmation" ${filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>Awaiting Confirmation</option>
+                                        <option value="Confirmed" ${filterStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                        <option value="Denied" ${filterStatus === 'Denied' ? 'selected' : ''}>Denied</option>
+                                    </select>
+                                </div>
+                                <button class="btn-outline" style="padding:0.6rem 1rem; border-radius:10px; font-size:0.8rem;" onclick="filterHotel=''; filterFrom=''; filterTo=''; filterStatus=''; window.setAdmFilter()">✕ Reset Filters</button>
                             </div>
-                            <div style="min-width:130px;">
-                                <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.4rem; text-transform:uppercase;">To Date</label>
-                                <input type="date" id="adm-book-to" value="${filterTo}" style="width:100%; padding:0.7rem; border-radius:10px; border:1.5px solid #eee; font-weight:600;" onchange="window.setAdmFilter()">
+                            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                                <div style="display:flex; align-items:center; gap:0.5rem; background:#f8f9fa; padding:0.5rem 0.8rem; border-radius:10px; border:1.5px solid #e0e0e0; flex:1; min-width:200px; max-width:350px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                    <input id="adm-ref-search" type="text" placeholder="Search by Reference Code..." style="border:none; background:transparent; outline:none; font-size:0.85rem; font-weight:600; font-family:inherit; width:100%;" oninput="window.admSearchRef()">
+                                </div>
                             </div>
-                            <div style="min-width:130px;">
-                                <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.4rem; text-transform:uppercase;">Status</label>
-                                <select id="adm-book-status" style="width:100%; padding:0.7rem; border-radius:10px; border:1.5px solid #eee; font-weight:600; background:white; cursor:pointer;" onchange="window.setAdmFilter()">
-                                    <option value="">All Statuses</option>
-                                    <option value="Awaiting Confirmation" ${filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>Awaiting Confirmation</option>
-                                    <option value="Confirmed" ${filterStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                                    <option value="Denied" ${filterStatus === 'Denied' ? 'selected' : ''}>Denied</option>
-                                </select>
-                            </div>
-                            <button style="padding:0.7rem 1.2rem; border-radius:10px; border:1.5px solid #e74c3c; background:white; color:#e74c3c; font-weight:700; cursor:pointer; white-space:nowrap; transition:all 0.2s;" onmouseover="this.style.background='#e74c3c';this.style.color='white'" onmouseout="this.style.background='white';this.style.color='#e74c3c'" onclick="filterFrom=''; filterTo=''; filterHotel=''; filterStatus=''; window.setAdmFilter()">✕ Clear All</button>
+                            ${(filterFrom || filterTo || filterHotel || filterStatus) ? `<div style="margin-top:0.8rem; padding:0.6rem 1rem; background:#f8f9fa; border-radius:10px; font-size:0.8rem; color:#666; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">🔍 Filtering: ${filterHotel ? '<strong>' + filterHotel + '</strong>' : ''} ${filterFrom ? 'from <strong>' + filterFrom + '</strong>' : ''} ${filterTo ? 'to <strong>' + filterTo + '</strong>' : ''} ${filterStatus ? 'status: <strong>' + filterStatus + '</strong>' : ''}</div>` : ''}
                         </div>
-                        ${(filterFrom || filterTo || filterHotel || filterStatus) ? `<div style="margin-top:0.8rem; padding:0.6rem 1rem; background:#f8f9fa; border-radius:10px; font-size:0.8rem; color:#666; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">🔍 Filtering: ${filterHotel ? '<strong>' + filterHotel + '</strong>' : ''} ${filterFrom ? 'from <strong>' + filterFrom + '</strong>' : ''} ${filterTo ? 'to <strong>' + filterTo + '</strong>' : ''} ${filterStatus ? 'status: <strong>' + filterStatus + '</strong>' : ''}</div>` : ''}
-                    </div>
+                    </details>
 
-                    <div style="background:white; border-radius:20px; box-shadow:var(--shadow-sm); overflow-x:auto;">
+                    <div class="premium-table-wrap">
+                    <div style="overflow-x:auto;">
                         <table class="manager-table" style="width:100%; min-width:900px;">
                             <thead><tr><th>No.</th><th>Ref</th><th>Stay</th><th>Guest</th><th>Amount</th><th>Status</th><th>Date & Time</th><th>Proof</th><th>Actions</th></tr></thead>
                             <tbody>
@@ -1005,37 +1020,32 @@ window.router.addRoute('admin', async (container, params) => {
                                         }
                                         return `
                                         <tr>
-                                            <td data-label="No." style="font-weight:800; color:#888;">${rowNum}</td>
-                                            <td data-label="Ref" style="font-family:monospace;font-weight:700;color:var(--color-primary);">${b.referenceCode}</td>
+                                            <td data-label="No."><span class="premium-row-num">${rowNum}</span></td>
+                                            <td data-label="Ref"><span class="premium-ref">${b.referenceCode}</span></td>
                                             <td data-label="Stay">
-                                                <div style="font-weight:700">${b.propertyTitle}</div>
-                                                <div style="font-size:0.75rem; color:var(--color-text-light); margin-top:0.2rem; white-space:nowrap;">
-                                                    ${b.checkIn} → ${b.checkOut} <span style="font-weight:700;color:#d4af37;margin-left:4px;">(${nights} night${nights !== 1 ? 's' : ''})</span>
+                                                <div style="font-weight:700;color:#1e293b;">${b.propertyTitle}</div>
+                                                <div class="premium-stay-dates">
+                                                    ${b.checkIn} → ${b.checkOut} <span class="premium-nights-badge">(${nights} night${nights !== 1 ? 's' : ''})</span>
                                                 </div>
                                             </td>
                                             <td data-label="Guest">
-                                                <div style="font-weight:700; color:#333; text-transform:uppercase; font-size:0.85rem;">${b.customerName || b.customerEmail}</div>
-                                                ${b.customerName ? `<div style="font-size:0.75rem; color:#08553d; margin-bottom:2px; font-weight:500;">${b.customerEmail}</div>` : ''}
-                                                ${b.customerPhone ? `<div style="font-size:0.75rem; color:#08553d; font-weight:700;"><span style="color:#d4af37; margin-right:4px;">📞</span>${b.customerPhone}</div>` : ''}
-                                                ${b.packageInfo ? `
-                                                    <div style="margin-top:0.3rem; background:#fff9e6; color:#856404; font-size:0.6rem; font-weight:800; padding:0.15rem 0.4rem; border-radius:4px; border:1px solid #ffecb3; display:inline-block; text-transform:uppercase;">
-                                                        🎁 PKG: ${b.packageInfo.title}
-                                                    </div>
-                                                ` : ''}
-                                                ${b.roomTypeName ? `
-                                                    <div style="margin-top:0.3rem; background:#ecfdf5; color:#065f46; font-size:0.6rem; font-weight:800; padding:0.15rem 0.4rem; border-radius:4px; border:1px solid #a7f3d0; display:inline-block; text-transform:uppercase;">
-                                                        🔑 ROOM: ${b.roomTypeName}
-                                                    </div>
-                                                ` : ''}
+                                                <div class="premium-guest-name">${b.customerName || b.customerEmail}</div>
+                                                ${b.customerName ? `<div class="premium-guest-email"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> ${b.customerEmail}</div>` : ''}
+                                                ${b.customerPhone ? `<div class="premium-guest-phone"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> ${b.customerPhone}</div>` : ''}
+                                                ${b.packageInfo ? `<div class="premium-tag premium-tag--package"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg> PKG: ${b.packageInfo.title}</div>` : ''}
+                                                ${b.roomTypeName ? `<div class="premium-tag premium-tag--room"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg> ROOM: ${b.roomTypeName}</div>` : ''}
                                             </td>
-                                            <td data-label="Amount" style="font-weight:600; white-space:nowrap;">${b.totalAmount} Birr</td>
-                                            <td data-label="Status"><span style="padding:0.2rem 0.6rem; border-radius:99px; font-size:0.75rem; background:${b.status==='Confirmed'?'#e6f4ea':'#fff8e1'}; color:${b.status==='Confirmed'?'#1e7e34':'#b05d22'}; font-weight:700; text-transform:uppercase;">${b.status}</span></td>
-                                            <td data-label="Date & Time" style="font-size:0.8rem;color:#555;font-weight:600;">${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + '<br><small style="color:#aaa;">' + new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + '</small>' : '—'}</td>
-                                            <td data-label="Proof">${b.paymentProofUrl ? `<button class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-radius:8px;" onclick="window.viewProof('${b.paymentProofUrl}')">🖼 Proof</button>` : '—'}</td>
+                                            <td data-label="Amount"><span class="premium-amount">${b.totalAmount}<span class="premium-amount-currency">Birr</span></span></td>
+                                            <td data-label="Status"><span class="premium-status ${b.status==='Confirmed'?'premium-status--confirmed':(b.status==='Denied'?'premium-status--denied':'premium-status--awaiting')}">${b.status}</span></td>
+                                            <td data-label="Date & Time">
+                                                <div class="premium-date">${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</div>
+                                                ${b.createdAt ? `<div class="premium-date-time">${new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>` : ''}
+                                            </td>
+                                            <td data-label="Proof">${b.paymentProofUrl ? `<button class="premium-action-btn" onclick="window.viewProof('${b.paymentProofUrl}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> Proof</button>` : '<span style="color:#cbd5e1;">—</span>'}</td>
                                             <td data-label="Actions">
                                                 ${b.status === 'Confirmed' ? `
-                                                    <button class="btn-outline" style="padding:0.3rem 0.5rem; font-size:0.65rem; border-radius:8px; background:#f0faf2; border-color:#27ae60; color:#27ae60; font-weight:700;" onclick="window.admResendEmail('${b.id}')">📧 Resend Email</button>
-                                                ` : '—'}
+                                                    <button class="premium-action-btn premium-action-btn--primary" onclick="window.admResendEmail('${b.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Resend</button>
+                                                ` : '<span style="color:#cbd5e1;">—</span>'}
                                             </td>
                                         </tr>`;
                                     }).join('');
@@ -1043,17 +1053,18 @@ window.router.addRoute('admin', async (container, params) => {
                             </tbody>
                         </table>
                     </div>
+                    </div>
                     ${(() => {
                         if (totalBookingsPages <= 1) return '';
                         let btns = '';
                         for (let i = 1; i <= totalBookingsPages; i++) {
-                            btns += `<button onclick="window.setBookingPage(${i})" style="width:36px; height:36px; border-radius:10px; border:1px solid ${bookingsPage===i?'var(--color-primary)':'#ddd'}; background:${bookingsPage===i?'var(--color-primary)':'white'}; color:${bookingsPage===i?'white':'#666'}; font-weight:700; cursor:pointer; transition:all 0.2s;">${i}</button>`;
+                            btns += `<button onclick="window.setBookingPage(${i})" class="${bookingsPage===i?'active':''}" style="width:36px; height:36px;">${i}</button>`;
                         }
                         return `
-                        <div style="display:flex; justify-content:center; gap:0.5rem; margin-top:2rem;">
-                            <button onclick="window.setBookingPage(${bookingsPage - 1})" ${bookingsPage === 1 ? 'disabled' : ''} style="padding:0 0.8rem; height:36px; border-radius:10px; border:1px solid #ddd; background:white; color:#666; font-weight:700; cursor:pointer; opacity:${bookingsPage===1?0.5:1}">‹ Previous</button>
+                        <div class="premium-pagination">
+                            <button onclick="window.setBookingPage(${bookingsPage - 1})" ${bookingsPage === 1 ? 'disabled' : ''} style="padding:0 0.8rem; height:36px;">‹ Previous</button>
                             ${btns}
-                            <button onclick="window.setBookingPage(${bookingsPage + 1})" ${bookingsPage === totalBookingsPages ? 'disabled' : ''} style="padding:0 0.8rem; height:36px; border-radius:10px; border:1px solid #ddd; background:white; color:#666; font-weight:700; cursor:pointer; opacity:${bookingsPage===totalBookingsPages?0.5:1}">Next ›</button>
+                            <button onclick="window.setBookingPage(${bookingsPage + 1})" ${bookingsPage === totalBookingsPages ? 'disabled' : ''} style="padding:0 0.8rem; height:36px;">Next ›</button>
                         </div>`;
                     })()}
                 </div>

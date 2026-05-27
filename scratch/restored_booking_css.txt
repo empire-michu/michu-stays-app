@@ -1,0 +1,2 @@
+"    display: block;\n    font-size: 0.6rem;\n    font-weight: 700;\n    color: #94a3b8;\n    text-transform: uppercase;\n    margin-top: 0.15rem;\n    letter-spacing: 0.3px;\n}\n\n/* Polish Booking confirmation styles */\n.booking-polish-container {\n    
+<truncated 8367 bytes>

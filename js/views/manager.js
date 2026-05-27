@@ -481,7 +481,11 @@ window.router.addRoute('manager', async (container, params) => {
         }
     };
 
-    window.mgrConfirmBooking = async (id) => {
+    window.mgrConfirmBooking = async (id, btn) => {
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="premium-spinner"></span> Confirming...';
+        }
         try {
             await window.db.updateBookingStatus(id, 'Confirmed');
             
@@ -546,10 +550,18 @@ window.router.addRoute('manager', async (container, params) => {
         } catch (e) {
             console.error(e);
             window.showToast("❌ Confirmation failed: " + e.message);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = 'Confirm';
+            }
         }
     };
 
-    window.mgrCancelBooking = async (id) => {
+    window.mgrCancelBooking = async (id, btn) => {
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="premium-spinner"></span> Canceling...';
+        }
         try {
             await window.db.updateBookingStatus(id, 'Denied');
             
@@ -558,6 +570,10 @@ window.router.addRoute('manager', async (container, params) => {
         } catch (e) {
             console.error(e);
             window.showToast("❌ Cancellation failed: " + e.message);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = 'Cancel';
+            }
         }
     };
 
@@ -642,9 +658,7 @@ window.router.addRoute('manager', async (container, params) => {
                     .manager-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:2rem; }
                     .mgr-tab-bar { background:#eee; border-radius:99px; padding:0.3rem; display:inline-flex; gap:0.2rem; margin-bottom:2.5rem; flex-wrap:wrap; }
                     
-                    .manager-table { width:100%; border-collapse:collapse; background:white; }
-                    .manager-table th { background:#f9fafb; padding:1.2rem 1rem; text-align:left; font-size:0.75rem; font-weight:800; color:#666; text-transform:uppercase; border-bottom:2px solid #f0f0f0; }
-                    .manager-table td { padding:1.2rem 1rem; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
+                    /* manager-table styles are defined in components.css */
 
                     /* Property Editor Fluid Grid */
                     .mgr-prop-layout { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; align-items: start; }
@@ -652,7 +666,7 @@ window.router.addRoute('manager', async (container, params) => {
                     .mgr-two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
                     .mgr-three-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
                     .mgr-inventory-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-                    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 24px; border: 1px solid #eee; background: white; box-shadow: var(--shadow-sm); }
+                    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
                     .mg-package-row { display: grid; grid-template-columns: 1fr 100px 100px 40px; gap: 0.8rem; align-items: center; }
                     @media (max-width: 600px) {
@@ -867,41 +881,50 @@ window.router.addRoute('manager', async (container, params) => {
         if (allBookings.length === 0) return `<div style="text-align:center; padding:5rem; background:white; border-radius:24px; box-shadow:var(--shadow-sm);"><h3>No bookings yet</h3><p style="color:#666;">Once guests book your property, they will appear here.</p></div>`;
         
         return `
-                <div style="background:white; border-radius:18px; padding:1.2rem; box-shadow:var(--shadow-sm); margin-bottom:1.5rem; border:1px solid #eee;">
-                    <div style="display:flex; align-items:flex-end; gap:0.8rem; flex-wrap:wrap; margin-bottom:0.8rem;">
-                        <div>
-                            <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">From Date</label>
-                            <input type="date" id="mgr-book-from" value="${filterFrom}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:600;" onchange="window.setMgrFilter()">
+                <details class="premium-filter-collapse">
+                    <summary>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                            Filter & Search Bookings
                         </div>
-                        <div>
-                            <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">To Date</label>
-                            <input type="date" id="mgr-book-to" value="${filterTo}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:600;" onchange="window.setMgrFilter()">
+                    </summary>
+                    <div class="filter-content">
+                        <div style="display:flex; align-items:flex-end; gap:0.8rem; flex-wrap:wrap; margin-bottom:0.8rem;">
+                            <div>
+                                <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">From Date</label>
+                                <input type="date" id="mgr-book-from" value="${filterFrom}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:600;" onchange="window.setMgrFilter()">
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">To Date</label>
+                                <input type="date" id="mgr-book-to" value="${filterTo}" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:600;" onchange="window.setMgrFilter()">
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">Status</label>
+                                <select id="mgr-book-status" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:700; background:white; cursor:pointer;" onchange="window.setMgrFilter()">
+                                    <option value="">All Statuses</option>
+                                    <option value="Awaiting Confirmation" ${filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>Awaiting Confirmation</option>
+                                    <option value="Confirmed" ${filterStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                    <option value="Denied" ${filterStatus === 'Denied' ? 'selected' : ''}>Denied</option>
+                                </select>
+                            </div>
+                            <button class="btn-outline" style="padding:0.6rem 1rem; border-radius:10px; font-size:0.8rem;" onclick="filterFrom=''; filterTo=''; filterStatus=''; window.setMgrFilter()">✕ Reset</button>
                         </div>
-                        <div>
-                            <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">Status</label>
-                            <select id="mgr-book-status" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:700; background:white; cursor:pointer;" onchange="window.setMgrFilter()">
-                                <option value="">All Statuses</option>
-                                <option value="Awaiting Confirmation" ${filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>Awaiting Confirmation</option>
-                                <option value="Confirmed" ${filterStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                                <option value="Denied" ${filterStatus === 'Denied' ? 'selected' : ''}>Denied</option>
-                            </select>
+                        <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:0.8rem;">
+                            <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setMgrBookingPreset('daily')">Daily</button>
+                            <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setMgrBookingPreset('weekly')">Weekly</button>
+                            <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setMgrBookingPreset('monthly')">Monthly</button>
+                            <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem; margin-left:0.5rem; border-color:#e2e8f0; color:#64748b;" onclick="window.setMgrBookingPreset('reset')">Reset Preset</button>
                         </div>
-                        <button class="btn-outline" style="padding:0.6rem 1rem; border-radius:10px; font-size:0.8rem;" onclick="filterFrom=''; filterTo=''; filterStatus=''; window.setMgrFilter()">✕ Reset</button>
+                        <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                            <div style="display:flex; align-items:center; gap:0.5rem; background:#f8f9fa; padding:0.5rem 0.8rem; border-radius:10px; border:1.5px solid #e0e0e0; flex:1; min-width:200px; max-width:350px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input id="mgr-ref-search" type="text" placeholder="Search by Reference Code..." style="border:none; background:transparent; outline:none; font-size:0.85rem; font-weight:600; font-family:inherit; width:100%;" oninput="window.mgrSearchRef()">
+                            </div>
+                        </div>
                     </div>
-                    <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:0.8rem;">
-                        <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setMgrBookingPreset('daily')">Daily</button>
-                        <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setMgrBookingPreset('weekly')">Weekly</button>
-                        <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setMgrBookingPreset('monthly')">Monthly</button>
-                        <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem; margin-left:0.5rem; border-color:#e2e8f0; color:#64748b;" onclick="window.setMgrBookingPreset('reset')">Reset</button>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-                        <div style="display:flex; align-items:center; gap:0.5rem; background:#f8f9fa; padding:0.5rem 0.8rem; border-radius:10px; border:1.5px solid #e0e0e0; flex:1; min-width:200px; max-width:350px;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                            <input id="mgr-ref-search" type="text" placeholder="Search by Reference Code..." style="border:none; background:transparent; outline:none; font-size:0.85rem; font-weight:600; font-family:inherit; width:100%;" oninput="window.mgrSearchRef()">
-                        </div>
-                    </div>
-                </div>
+                </details>
 
+                <div class="premium-table-wrap">
                 <div class="table-responsive">
                     <table id="mgr-bookings-table" class="manager-table" style="width:100%; border-collapse: collapse; min-width: 900px;">
                         <thead id="mgr-bookings-thead">
@@ -950,44 +973,37 @@ window.router.addRoute('manager', async (container, params) => {
                                     }
                                     return `
                                     <tr>
-                                        <td data-label="No." style="font-weight:800; color:#888;">${rowNum}</td>
-                                        <td data-label="Ref" style="font-family:monospace;font-weight:700;color:var(--color-primary);">${b.referenceCode}</td>
+                                        <td data-label="No."><span class="premium-row-num">${rowNum}</span></td>
+                                        <td data-label="Ref"><span class="premium-ref">${b.referenceCode}</span></td>
                                         <td data-label="Guest">
-                                            <div style="font-weight:700; color:#333; text-transform:uppercase; font-size:0.85rem;">${b.customerName || 'Anonymous Guest'}</div>
-                                            <div style="font-size:0.75rem; color:#08553d; margin-bottom:2px; font-weight:500;">✉️ ${b.customerEmail}</div>
-                                            ${b.customerPhone ? `<div style="font-size:0.75rem; color:#08553d; font-weight:700;"><span style="color:#d4af37; margin-right:4px;">📞</span>${b.customerPhone}</div>` : ''}
-                                            ${b.packageInfo ? `
-                                                <div style="margin-top:0.3rem; background:#fff9e6; color:#856404; font-size:0.65rem; font-weight:800; padding:0.2rem 0.5rem; border-radius:6px; border:1px solid #ffecb3; display:inline-block; text-transform:uppercase;">
-                                                    🎁 PACKAGE: ${b.packageInfo.title}
-                                                </div>
-                                            ` : ''}
-                                            ${b.roomTypeName ? `
-                                                <div style="margin-top:0.3rem; background:#ecfdf5; color:#065f46; font-size:0.65rem; font-weight:800; padding:0.2rem 0.5rem; border-radius:6px; border:1px solid #a7f3d0; display:inline-block; text-transform:uppercase;">
-                                                    🔑 ROOM: ${b.roomTypeName}
-                                                </div>
-                                            ` : ''}
-                                            <div style="font-size:0.75rem; color:var(--color-text-light); margin-top:0.3rem;">
-                                                Stay: <strong>${b.checkIn} &rarr; ${b.checkOut}</strong> <span style="font-weight:700;color:#d4af37;margin-left:4px;">(${nights} night${nights !== 1 ? 's' : ''})</span>
+                                            <div class="premium-guest-name">${b.customerName || 'Anonymous Guest'}</div>
+                                            <div class="premium-guest-email"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> ${b.customerEmail}</div>
+                                            ${b.customerPhone ? `<div class="premium-guest-phone"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> ${b.customerPhone}</div>` : ''}
+                                            ${b.packageInfo ? `<div class="premium-tag premium-tag--package"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg> PKG: ${b.packageInfo.title}</div>` : ''}
+                                            ${b.roomTypeName ? `<div class="premium-tag premium-tag--room"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg> ROOM: ${b.roomTypeName}</div>` : ''}
+                                            <div class="premium-stay-dates">
+                                                Stay: <strong>${b.checkIn} → ${b.checkOut}</strong> <span class="premium-nights-badge">(${nights} night${nights !== 1 ? 's' : ''})</span>
                                             </div>
                                         </td>
-                                        <td data-label="Amount" style="font-weight:600; white-space:nowrap;">${b.totalAmount} Birr</td>
+                                        <td data-label="Amount"><span class="premium-amount">${b.totalAmount}<span class="premium-amount-currency">Birr</span></span></td>
                                         <td data-label="Status">
-                                            <span style="padding:0.2rem 0.6rem; border-radius:99px; font-size:0.75rem; background:${b.status==='Confirmed'?'#e6f4ea':(b.status==='Denied'?'#fce8e6':'#fff8e1')}; color:${b.status==='Confirmed'?'#1e7e34':(b.status==='Denied'?'#c5221f':'#b05d22')}; font-weight:700; text-transform:uppercase;">${b.status}</span>
+                                            <span class="premium-status ${b.status==='Confirmed'?'premium-status--confirmed':(b.status==='Denied'?'premium-status--denied':'premium-status--awaiting')}">${b.status}</span>
                                         </td>
-                                        <td data-label="Date" style="font-size:0.8rem;color:#555;font-weight:600;">
-                                            ${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + '<br><small style="color:#aaa;">' + new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + '</small>' : '—'}
+                                        <td data-label="Date">
+                                            <div class="premium-date">${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—'}</div>
+                                            ${b.createdAt ? `<div class="premium-date-time">${new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>` : ''}
                                         </td>
-                                        <td data-label="Proof">${b.paymentProofUrl ? `<button class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-radius:8px;" onclick="window.viewProof('${b.paymentProofUrl}')">🖼 Proof</button>` : '<span style="color:#ddd; font-style:italic; font-size:0.8rem;">No file</span>'}</td>
-                                        <td data-label="Chat"><button onclick="window.router.navigate('chat', { bookingId: '${b.id}' })" class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-radius:8px; border-color:var(--color-primary); color:var(--color-primary); font-weight:700;">💬 Chat</button></td>
+                                        <td data-label="Proof">${b.paymentProofUrl ? `<button class="premium-action-btn" onclick="window.viewProof('${b.paymentProofUrl}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> Proof</button>` : '<span style="color:#cbd5e1;">No file</span>'}</td>
+                                        <td data-label="Chat"><button onclick="window.router.navigate('chat', { bookingId: '${b.id}' })" class="premium-action-btn premium-action-btn--chat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Chat</button></td>
                                         <td>
                                             ${b.status === 'Awaiting Verification' 
                                                 ? `<div style="display:flex; gap:0.4rem; flex-direction:column;">
-                                                        <button class="btn-primary" style="padding:0.4rem 0.6rem; font-size:0.75rem; border-radius:8px; width:100%; box-shadow:0 4px 10px rgba(26,96,50,0.2);" onclick="window.mgrConfirmBooking('${b.id}')">Confirm</button>
-                                                        <button class="btn-outline" style="padding:0.4rem 0.6rem; font-size:0.75rem; border-radius:8px; width:100%; border-color:#e74c3c; color:#e74c3c;" onclick="window.mgrCancelBooking('${b.id}')">Cancel</button>
+                                                        <button class="premium-action-btn premium-action-btn--primary" onclick="window.mgrConfirmBooking('${b.id}', this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Confirm</button>
+                                                        <button class="premium-action-btn premium-action-btn--danger" onclick="window.mgrCancelBooking('${b.id}', this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Cancel</button>
                                                     </div>` 
                                                 : (b.status === 'Confirmed'
-                                                    ? `<div style="color:#27ae60; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.3rem;">✅ Confirmed</div>`
-                                                    : '<div style="color:#bbb; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; padding:0.3rem;">❌ Denied</div>')}
+                                                    ? `<div style="display:flex;align-items:center;gap:0.3rem;color:#047857; font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Confirmed</div>`
+                                                    : `<div style="display:flex;align-items:center;gap:0.3rem;color:#94a3b8; font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> Denied</div>`)}
                                         </td>
                                     </tr>
                                     `;
@@ -996,17 +1012,18 @@ window.router.addRoute('manager', async (container, params) => {
                         </tbody>
                     </table>
                 </div>
+                </div>
                 ${(() => {
                     if (totalBookingsPages <= 1) return '';
                     let btns = '';
                     for (let i = 1; i <= totalBookingsPages; i++) {
-                        btns += `<button onclick="window.setMgrBookingPage(${i})" style="width:36px; height:36px; border-radius:10px; border:1px solid ${bookingsPage === i ? 'var(--color-primary)' : '#ddd'}; background:${bookingsPage === i ? 'var(--color-primary)' : 'white'}; color:${bookingsPage === i ? 'white' : '#666'}; font-weight:700; cursor:pointer; transition:all 0.2s;">${i}</button>`;
+                        btns += `<button onclick="window.setMgrBookingPage(${i})" class="${bookingsPage === i ? 'active' : ''}" style="width:36px; height:36px;">${i}</button>`;
                     }
                     return `
-                    <div style="display:flex; justify-content:center; gap:0.4rem; margin-top:2rem;">
-                        <button onclick="window.setMgrBookingPage(${bookingsPage - 1})" ${bookingsPage === 1 ? 'disabled' : ''} style="padding:0 0.7rem; height:32px; border-radius:8px; border:1px solid #ddd; background:white; color:#666; font-weight:700; cursor:pointer; opacity:${bookingsPage === 1 ? 0.5 : 1}">‹</button>
+                    <div class="premium-pagination">
+                        <button onclick="window.setMgrBookingPage(${bookingsPage - 1})" ${bookingsPage === 1 ? 'disabled' : ''} style="padding:0 0.7rem; height:32px;">‹</button>
                         ${btns}
-                        <button onclick="window.setMgrBookingPage(${bookingsPage + 1})" ${bookingsPage === totalBookingsPages ? 'disabled' : ''} style="padding:0 0.7rem; height:32px; border-radius:8px; border:1px solid #ddd; background:white; color:#666; font-weight:700; cursor:pointer; opacity:${bookingsPage === totalBookingsPages ? 0.5 : 1}">›</button>
+                        <button onclick="window.setMgrBookingPage(${bookingsPage + 1})" ${bookingsPage === totalBookingsPages ? 'disabled' : ''} style="padding:0 0.7rem; height:32px;">›</button>
                     </div>`;
                 })()}
 

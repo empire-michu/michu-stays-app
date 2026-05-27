@@ -149,37 +149,38 @@ window.router.addRoute('profile', async (container, params) => {
             };
             return `
             <tr>
-                <td data-label="No." style="font-weight:800; color:#888;">${rowNum}</td>
-                <td data-label="Ref" style="font-family:monospace;font-size:0.8rem;font-weight:600;color:var(--color-primary);">${b.referenceCode}</td>
+                <td data-label="No."><span class="premium-row-num">${rowNum}</span></td>
+                <td data-label="Ref"><span class="premium-ref">${b.referenceCode}</span></td>
                 <td data-label="Hotel">
-                    <div style="font-weight:600;font-size:0.9rem;">${b.propertyTitle}</div>
-                    <div style="font-size:0.75rem;color:var(--color-text-light);">${b.checkIn} → ${b.checkOut} <span style="font-weight:700;color:#d4af37;margin-left:4px;">(${nights} night${nights !== 1 ? 's' : ''})</span></div>
+                    <div style="font-weight:700;font-size:0.9rem;color:#1e293b;">${b.propertyTitle}</div>
+                    <div class="premium-stay-dates">${b.checkIn} → ${b.checkOut} <span class="premium-nights-badge">(${nights} night${nights !== 1 ? 's' : ''})</span></div>
                 </td>
-                <td data-label="Total" style="font-weight:600;">${b.totalAmount} Birr</td>
-                <td data-label="Status"><span style="padding:0.25rem 0.7rem;border-radius:99px;font-size:0.75rem;font-weight:700;${statusStyle(b.status)}">
+                <td data-label="Total"><span class="premium-amount">${b.totalAmount}<span class="premium-amount-currency">Birr</span></span></td>
+                <td data-label="Status"><span class="premium-status ${b.status==='Confirmed'?'premium-status--confirmed':(b.status==='Denied'?'premium-status--denied':'premium-status--awaiting')}">
                     ${statusIcon(b.status)} ${b.status}
                 </span></td>
-                <td data-label="Date" style="font-size:0.8rem;color:#555;font-weight:600;">
-                    ${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + '<br><small style="color:#aaa;">' + new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + '</small>' : '—'}
+                <td data-label="Date">
+                    <div class="premium-date">${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</div>
+                    ${b.createdAt ? `<div class="premium-date-time">${new Date(b.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>` : ''}
                 </td>
                 <td data-label="Rating">
                     ${b.status === 'Confirmed' ? (
                         review 
-                        ? `<div style="display:flex;flex-direction:column;gap:0.2rem;">
-                             <div style="display:flex;align-items:center;gap:0.3rem;">${starDisplay(stars)}</div>
-                             <button onclick="window.openRatingModal('${b.id}','${b.propertyId}','${b.propertyTitle.replace(/'/g, "\\\'")}', true)" style="border:none; background:none; color:var(--color-primary); font-size:0.7rem; font-weight:700; cursor:pointer; padding:0; text-align:left; text-decoration:underline;">Edit Review</button>
+                        ? `<div style="display:flex;flex-direction:column;gap:0.25rem;">
+                             <div class="premium-stars">${starDisplay(stars)}</div>
+                             <button onclick="window.openRatingModal('${b.id}','${b.propertyId}','${b.propertyTitle.replace(/'/g, "\\\'")}', true)" style="border:none;background:none;color:#008450;font-size:0.68rem;font-weight:700;cursor:pointer;padding:0;text-align:left;text-decoration:underline;">Edit Review</button>
                            </div>` 
-                        : `<button onclick="window.openRatingModal('${b.id}','${b.propertyId}','${b.propertyTitle.replace(/'/g, "\\\'")}')" style="padding:0.3rem 0.7rem;border-radius:8px;border:1.5px solid #f59e0b;background:#fffbeb;color:#b45309;font-weight:700;font-size:0.75rem;cursor:pointer;white-space:nowrap;">⭐ Rate Stay</button>`
-                    ) : '—'}
+                        : `<button onclick="window.openRatingModal('${b.id}','${b.propertyId}','${b.propertyTitle.replace(/'/g, "\\\'")}')" class="premium-action-btn premium-action-btn--accent"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Rate Stay</button>`
+                    ) : '<span style="color:#cbd5e1;">—</span>'}
                 </td>
                 <td data-label="Proof">
-                    ${b.paymentProofUrl ? `<button onclick="showGuestProof('${b.id}')" class="btn-outline" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🖼 Proof</button>` : '—'}
+                    ${b.paymentProofUrl ? `<button onclick="showGuestProof('${b.id}')" class="premium-action-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> Proof</button>` : '<span style="color:#cbd5e1;">—</span>'}
                 </td>
                 <td data-label="Receipt">
-                    ${b.status === 'Confirmed' ? `<button onclick='window.openReceipt(${JSON.stringify({id:b.id,referenceCode:b.referenceCode,customerName:b.customerName,customerEmail:b.customerEmail,customerPhone:b.customerPhone,propertyTitle:b.propertyTitle,checkIn:b.checkIn,checkOut:b.checkOut,guests:b.guests,totalAmount:b.totalAmount,paymentMethod:b.paymentMethod,status:b.status,createdAt:b.createdAt,packageInfo:b.packageInfo})})' style="padding:0.3rem 0.7rem; border-radius:8px; border:1.5px solid var(--color-primary); background:linear-gradient(135deg,#e8f5e2,#f0f7f4); color:var(--color-primary); font-weight:700; font-size:0.75rem; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:0.3rem;">🧾 Receipt</button>` : '—'}
+                    ${b.status === 'Confirmed' ? `<button onclick='window.openReceipt(${JSON.stringify({id:b.id,referenceCode:b.referenceCode,customerName:b.customerName,customerEmail:b.customerEmail,customerPhone:b.customerPhone,propertyTitle:b.propertyTitle,checkIn:b.checkIn,checkOut:b.checkOut,guests:b.guests,totalAmount:b.totalAmount,paymentMethod:b.paymentMethod,status:b.status,createdAt:b.createdAt,packageInfo:b.packageInfo})})' class="premium-action-btn premium-action-btn--primary"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Receipt</button>` : '<span style="color:#cbd5e1;">—</span>'}
                 </td>
                 <td data-label="Chat">
-                    <button onclick="window.router.navigate('chat', { bookingId: '${b.id}' })" class="btn-outline" style="padding:0.3rem 0.7rem; border-radius:8px; border:1.5px solid var(--color-primary); color:var(--color-primary); font-weight:700; font-size:0.75rem; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:0.3rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Message</button>
+                    <button onclick="window.router.navigate('chat', { bookingId: '${b.id}' })" class="premium-action-btn premium-action-btn--chat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Message</button>
                 </td>
             </tr>
         `;
@@ -191,13 +192,13 @@ window.router.addRoute('profile', async (container, params) => {
             } else {
                 let btns = '';
                 for (let i = 1; i <= totalBookingsPages; i++) {
-                    btns += `<button onclick="window.setProfileBookingPage(${i})" style="width:32px; height:32px; border-radius:8px; border:1px solid ${bookingsPage===i?'var(--color-primary)':'#ddd'}; background:${bookingsPage===i?'var(--color-primary)':'white'}; color:${bookingsPage===i?'white':'#666'}; font-weight:700; cursor:pointer;">${i}</button>`;
+                    btns += `<button onclick="window.setProfileBookingPage(${i})" class="${bookingsPage===i?'active':''}" style="width:34px; height:34px;">${i}</button>`;
                 }
                 paginationEl.innerHTML = `
-                    <div style="display:flex; justify-content:center; gap:0.4rem; padding:1.5rem 0;">
-                        <button onclick="window.setProfileBookingPage(${bookingsPage - 1})" ${bookingsPage === 1 ? 'disabled' : ''} style="padding:0 0.7rem; height:32px; border-radius:8px; border:1px solid #ddd; background:white; color:#666; font-weight:700; cursor:pointer; opacity:${bookingsPage===1?0.5:1}">‹</button>
+                    <div class="premium-pagination">
+                        <button onclick="window.setProfileBookingPage(${bookingsPage - 1})" ${bookingsPage === 1 ? 'disabled' : ''} style="padding:0 0.8rem; height:34px;">‹</button>
                         ${btns}
-                        <button onclick="window.setProfileBookingPage(${bookingsPage + 1})" ${bookingsPage === totalBookingsPages ? 'disabled' : ''} style="padding:0 0.7rem; height:32px; border-radius:8px; border:1px solid #ddd; background:white; color:#666; font-weight:700; cursor:pointer; opacity:${bookingsPage===totalBookingsPages?0.5:1}">›</button>
+                        <button onclick="window.setProfileBookingPage(${bookingsPage + 1})" ${bookingsPage === totalBookingsPages ? 'disabled' : ''} style="padding:0 0.8rem; height:34px;">›</button>
                     </div>
                 `;
             }
@@ -277,32 +278,45 @@ window.router.addRoute('profile', async (container, params) => {
             ${!['manager', 'admin'].includes(userData.role) ? `
             <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);margin-bottom:2rem;">
                 <div class="booking-history-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
-                    <h3 style="margin:0;">📜 Booking History <span id="booking-count" style="font-size:0.8rem;font-weight:400;color:#888;"></span></h3>
-                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
-                         <select id="filter-status" style="padding:0.4rem 0.8rem;border:1.5px solid #e0e0e0;border-radius:10px;font-size:0.85rem;font-family:inherit;background:white;font-weight:600;" onchange="window.filterStatus=this.value; window.renderBookings()">
-                             <option value="all">All Statuses</option>
-                             <option value="Awaiting Confirmation" ${window.filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>Awaiting Confirmation</option>
-                             <option value="Confirmed" ${window.filterStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                             <option value="Denied" ${window.filterStatus === 'Denied' ? 'selected' : ''}>Denied</option>
-                         </select>
-                         <select id="filter-hotel" style="padding:0.4rem 0.8rem;border:1.5px solid #e0e0e0;border-radius:10px;font-size:0.85rem;font-family:inherit;background:white;font-weight:600;" onchange="window.filterHotel=this.value; window.renderBookings()">
-                             <option value="all">All Hotels</option>
-                         </select>
-                         <input id="filter-from" type="date" value="${window.filterFrom}" style="padding:0.4rem;border:1.5px solid #e0e0e0;border-radius:10px;font-weight:600;" onchange="window.filterFrom=this.value; window.renderBookings()">
-                         <input id="filter-to" type="date" value="${window.filterTo}" style="padding:0.4rem;border:1.5px solid #e0e0e0;border-radius:10px;font-weight:600;" onchange="window.filterTo=this.value; window.renderBookings()">
-                    </div>
-                    <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; width:100%;">
-                          <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('daily')">Daily</button>
-                          <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('weekly')">Weekly</button>
-                          <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('monthly')">Monthly</button>
-                          <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem; margin-left:0.5rem; border-color:#e2e8f0; color:#64748b;" onclick="window.setProfileDatePreset('reset')">Reset</button>
-                     </div>
+                    <h3 style="margin:0; width:100%;">📜 Booking History <span id="booking-count" style="font-size:0.8rem;font-weight:400;color:#888;"></span></h3>
+                    
+                    <details class="premium-filter-collapse" style="width:100%; margin-bottom:0; box-shadow:none; border:1px solid #e2e8f0; background:#f8fafc;">
+                        <summary style="color:#475569; font-size:0.8rem;">
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                                Filter Bookings
+                            </div>
+                        </summary>
+                        <div class="filter-content" style="display:flex; flex-direction:column; gap:0.8rem; border-top-color:#e2e8f0;">
+                            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+                                 <select id="filter-status" style="padding:0.4rem 0.8rem;border:1.5px solid #cbd5e1;border-radius:10px;font-size:0.85rem;font-family:inherit;background:white;font-weight:600;" onchange="window.filterStatus=this.value; window.renderBookings()">
+                                     <option value="all">All Statuses</option>
+                                     <option value="Awaiting Confirmation" ${window.filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>Awaiting Confirmation</option>
+                                     <option value="Confirmed" ${window.filterStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                     <option value="Denied" ${window.filterStatus === 'Denied' ? 'selected' : ''}>Denied</option>
+                                 </select>
+                                 <select id="filter-hotel" style="padding:0.4rem 0.8rem;border:1.5px solid #cbd5e1;border-radius:10px;font-size:0.85rem;font-family:inherit;background:white;font-weight:600;" onchange="window.filterHotel=this.value; window.renderBookings()">
+                                     <option value="all">All Hotels</option>
+                                 </select>
+                                 <input id="filter-from" type="date" value="${window.filterFrom}" style="padding:0.4rem;border:1.5px solid #cbd5e1;border-radius:10px;font-weight:600;" onchange="window.filterFrom=this.value; window.renderBookings()">
+                                 <input id="filter-to" type="date" value="${window.filterTo}" style="padding:0.4rem;border:1.5px solid #cbd5e1;border-radius:10px;font-weight:600;" onchange="window.filterTo=this.value; window.renderBookings()">
+                            </div>
+                            <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; width:100%;">
+                                  <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('daily')">Daily</button>
+                                  <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('weekly')">Weekly</button>
+                                  <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('monthly')">Monthly</button>
+                                  <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem; margin-left:0.5rem; border-color:#cbd5e1; color:#64748b;" onclick="window.setProfileDatePreset('reset')">Reset Filter</button>
+                             </div>
+                        </div>
+                    </details>
                 </div>
+                <div class="premium-table-wrap">
                 <div style="overflow-x:auto;">
                     <table class="manager-table" style="width: 100%; min-width: 1000px;">
                         <thead><tr><th>No.</th><th>Ref</th><th>Hotel</th><th>Total</th><th>Status</th><th>Date</th><th>Rating</th><th>Proof</th><th>Receipt</th><th>Chat</th></tr></thead>
                         <tbody id="booking-table-body"></tbody>
                     </table>
+                </div>
                 </div>
                 <div id="bookings-pagination"></div>
             </div>
