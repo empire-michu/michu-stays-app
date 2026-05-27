@@ -984,7 +984,7 @@ window.router.addRoute('admin', async (container, params) => {
 
                     <div class="premium-table-wrap">
                     <div style="overflow-x:auto;">
-                        <table class="manager-table" style="width:100%; min-width:900px;">
+                        <table class="manager-table" style="width:100%; min-width:800px;">
                             <thead><tr><th>No.</th><th>Ref</th><th>Stay</th><th>Guest</th><th>Amount</th><th>Status</th><th>Date & Time</th><th>Proof</th><th>Actions</th></tr></thead>
                             <tbody>
                                 ${(() => {

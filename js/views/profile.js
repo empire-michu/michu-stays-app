@@ -312,7 +312,7 @@ window.router.addRoute('profile', async (container, params) => {
                 </div>
                 <div class="premium-table-wrap">
                 <div style="overflow-x:auto;">
-                    <table class="manager-table" style="width: 100%; min-width: 1000px;">
+                    <table class="manager-table" style="width: 100%; min-width: 800px;">
                         <thead><tr><th>No.</th><th>Ref</th><th>Hotel</th><th>Total</th><th>Status</th><th>Date</th><th>Rating</th><th>Proof</th><th>Receipt</th><th>Chat</th></tr></thead>
                         <tbody id="booking-table-body"></tbody>
                     </table>

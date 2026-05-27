@@ -926,7 +926,7 @@ window.router.addRoute('manager', async (container, params) => {
 
                 <div class="premium-table-wrap">
                 <div class="table-responsive">
-                    <table id="mgr-bookings-table" class="manager-table" style="width:100%; border-collapse: collapse; min-width: 900px;">
+                    <table id="mgr-bookings-table" class="manager-table" style="width:100%; border-collapse: collapse; min-width: 800px;">
                         <thead id="mgr-bookings-thead">
                             <tr>
                                 <th style="border-top-left-radius:20px;">No.</th>
