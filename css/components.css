@@ -613,7 +613,8 @@
   margin-top: 0.1rem;
 }
 
-.premium-guest-phone {
+.premium-guest-phone,
+.premium-guest-occupants {
   font-size: 0.75rem;
   color: #475569;
   font-weight: 600;

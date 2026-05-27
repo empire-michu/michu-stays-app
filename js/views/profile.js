@@ -93,7 +93,11 @@ window.router.addRoute('profile', async (container, params) => {
         if (status === 'Denied')    return 'background:#fce8e6;color:#c5221f';
         return 'background:#fff8e1;color:#e37400';
     };
-    const statusIcon = (status) => status === 'Confirmed' ? '✅' : status === 'Denied' ? '✗' : '⏳';
+    const statusIcon = (status) => {
+        if (status === 'Confirmed') return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        if (status === 'Denied') return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+        return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
+    };
 
     const renderBookings = () => {
         const fullList = applyFilter();
