@@ -20,6 +20,7 @@ window.router.addRoute('admin', async (container, params) => {
     let isSyncing = false;
     let analyticsStart = '';
     let analyticsEnd = '';
+    window.admFiltersOpen = false;
 
     // --- Global Assignments (Top-level for immediate button access) ---
     let editPropertyId = null;
@@ -937,7 +938,7 @@ window.router.addRoute('admin', async (container, params) => {
 
                 <!-- BOOKINGS TAB -->
                 <div id="adm-tab-bookings" style="display:${activeTab==='bookings'?'block':'none'}">
-                    <details class="premium-filter-collapse" style="background:white; padding:1.5rem; border-radius:24px; box-shadow:var(--shadow-sm); margin-bottom:1.5rem; border:1px solid #eee;">
+                    <details class="premium-filter-collapse" ${window.admFiltersOpen ? 'open' : ''} ontoggle="window.admFiltersOpen = this.open" style="background:white; padding:1.5rem; border-radius:24px; box-shadow:var(--shadow-sm); margin-bottom:1.5rem; border:1px solid #eee;">
                         <summary style="cursor:pointer; font-weight:700; color:var(--color-primary); outline:none;">
                             <div style="display:inline-flex; align-items:center; gap:0.5rem;">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>

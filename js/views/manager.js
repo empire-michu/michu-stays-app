@@ -16,6 +16,7 @@ window.router.addRoute('manager', async (container, params) => {
     let allBookings = [];
     let bookingsPage = 1;
     let totalBookingsPages = 1;
+    window.mgrFiltersOpen = false;
 
     // --- Tab & Function Globals ---
     window.setMgrTab = (tab) => { activeTab = tab; renderManagerUI(); };
@@ -881,7 +882,7 @@ window.router.addRoute('manager', async (container, params) => {
         if (allBookings.length === 0) return `<div style="text-align:center; padding:5rem; background:white; border-radius:24px; box-shadow:var(--shadow-sm);"><h3>No bookings yet</h3><p style="color:#666;">Once guests book your property, they will appear here.</p></div>`;
         
         return `
-                <details class="premium-filter-collapse">
+                <details class="premium-filter-collapse" ${window.mgrFiltersOpen ? 'open' : ''} ontoggle="window.mgrFiltersOpen = this.open">
                     <summary>
                         <div style="display:flex; align-items:center; gap:0.5rem;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
