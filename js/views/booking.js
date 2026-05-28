@@ -516,6 +516,9 @@ window.router.addRoute('booking', async (container, params) => {
             if (stepC) stepC.classList.remove('hidden');
             if (refCode) refCode.innerText = code;
             if (methodReceipt) methodReceipt.innerText = currentMethod;
+            
+            // Fix: Ensure the user sees the confirmation at the top, avoiding scroll jump
+            window.scrollTo({ top: 0, behavior: 'smooth' });
 
         } catch (err) {
             btn.innerText = 'Submit Proof & Confirm Booking';

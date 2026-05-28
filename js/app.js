@@ -2,6 +2,12 @@ class Router {
     constructor() {
         this.routes = {};
         this.appContainer = document.getElementById('app-container');
+        
+        // Prevent browser from auto-scrolling to bottom on refresh
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+
         const handleInitialOrPop = () => {
             let name = 'home';
             const params = {};
@@ -192,14 +198,27 @@ class Router {
             }
         }
 
+        const isSourceBookings = window.location.hash.includes('source=bookings');
+
         document.querySelectorAll('.mobile-nav-item').forEach(item => {
             item.classList.remove('active');
             const onclick = item.getAttribute('onclick') || '';
-            if (onclick.includes(`'${name}'`) || 
-                (name === 'bookings' && onclick.includes('mobileBookings')) ||
-                (name === 'saved' && onclick.includes("'saved'")) ||
-                (name === 'manager' && onclick.includes('mobileManage')) ||
-                (name === 'admin' && onclick.includes('mobileManage'))) {
+            
+            let shouldBeActive = false;
+            
+            if (isSourceBookings) {
+                if (onclick.includes('mobileBookings')) shouldBeActive = true;
+            } else {
+                if (onclick.includes(`'${name}'`) || 
+                    (name === 'bookings' && onclick.includes('mobileBookings')) ||
+                    (name === 'saved' && onclick.includes("'saved'")) ||
+                    (name === 'manager' && onclick.includes('mobileManage')) ||
+                    (name === 'admin' && onclick.includes('mobileManage'))) {
+                    shouldBeActive = true;
+                }
+            }
+
+            if (shouldBeActive) {
                 item.classList.add('active');
             }
         });
