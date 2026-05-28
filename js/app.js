@@ -235,13 +235,12 @@ window.mobileSearch = function() {
     }, 400);
 };
 
-// Mobile Bookings: Route based on user role
 window.mobileBookings = function() {
     const role = window.auth?.userData?.role;
     if (role === 'admin') {
-        router.navigate('admin', { tab: 'bookings' });
+        router.navigate('admin', { source: 'bookings' });
     } else if (role === 'manager') {
-        router.navigate('manager', { tab: 'bookings' });
+        router.navigate('manager', { source: 'bookings' });
     } else if (window.auth?.currentUser) {
         router.navigate('bookings');
     } else {

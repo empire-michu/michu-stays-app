@@ -5,7 +5,8 @@ window.router.addRoute('manager', async (container, params) => {
     }
 
     const fromManageTab = params?.source === 'manage';
-    let activeTab = params?.tab || (fromManageTab ? 'analytics' : 'bookings'); // bookings, property, account, reviews
+    const fromBookingsTab = params?.source === 'bookings';
+    let activeTab = fromBookingsTab ? 'bookings' : (params?.tab || (fromManageTab ? 'analytics' : 'bookings'));
     let filterFrom = '';
     let filterTo = '';
     let filterStatus = '';
@@ -692,6 +693,7 @@ window.router.addRoute('manager', async (container, params) => {
                     }
                 </style>
 
+                ${fromBookingsTab ? '' : `
                 <div class="manager-header">
                     <div>
                         <h2 style="color:var(--color-primary); margin:0; font-weight:900; font-size:1.6rem;">Manager Dashboard</h2>
@@ -727,6 +729,7 @@ window.router.addRoute('manager', async (container, params) => {
                         My Account
                     </button>
                 </div>
+                `}
 
                 <div class="manager-content">
                     ${renderActiveTab()}

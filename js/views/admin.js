@@ -7,7 +7,8 @@ window.router.addRoute('admin', async (container, params) => {
     let cachedBookings = [];
     let cachedUsers = [];
     const fromManageTab = params?.source === 'manage';
-    let activeTab = params?.tab || (fromManageTab ? 'analytics' : 'analytics'); // analytics, hotels, bookings, managers, add-hotel, account
+    const fromBookingsTab = params?.source === 'bookings';
+    let activeTab = fromBookingsTab ? 'bookings' : (params?.tab || (fromManageTab ? 'analytics' : 'analytics'));
     let filterFrom = '';
     let filterTo = '';
     let filterHotel = '';
@@ -797,26 +798,28 @@ window.router.addRoute('admin', async (container, params) => {
                     }
                 </style>
                 <div style="padding-top:1rem;">
+                ${fromBookingsTab ? '' : `
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
                     <h2 style="color:var(--color-primary);margin:0;font-weight:800;">Admin Console</h2>
                     <div style="display:flex; gap:0.5rem;">
                         ${(userData.fcmTokens && userData.fcmTokens.length > 0) 
-                            ? `<button class="btn-outline" style="border-radius:12px; border-color:green; color:green; font-weight:700; cursor:pointer;" onclick="window.enableAdminPush(this)">✅ Push Enabled</button>`
-                            : `<button class="btn-outline" style="border-radius:12px; border-color:#f59e0b; color:#d97706; font-weight:700; cursor:pointer;" onclick="window.enableAdminPush(this)">🔔 Enable Push Alerts</button>`
+                            ? \`<button class="btn-outline" style="border-radius:12px; border-color:green; color:green; font-weight:700; cursor:pointer;" onclick="window.enableAdminPush(this)">✅ Push Enabled</button>\`
+                            : \`<button class="btn-outline" style="border-radius:12px; border-color:#f59e0b; color:#d97706; font-weight:700; cursor:pointer;" onclick="window.enableAdminPush(this)">🔔 Enable Push Alerts</button>\`
                         }
                         <button class="btn-outline" style="border-radius:12px;" onclick="window.syncData()">🔄 Sync Data</button>
                     </div>
                 </div>
 
                 <div style="background:#eee; border-radius:99px; padding:0.3rem; display:inline-flex; gap:0.2rem; margin-bottom:2.5rem; flex-wrap:wrap;">
-                    <button style="${tabStyle('analytics')}" onclick="window.fastTab('analytics')">📊 Analytics</button>
-                    <button style="${tabStyle('hotels')}" onclick="window.fastTab('hotels')">Properties</button>
-                    ${!fromManageTab ? `<button style="${tabStyle('bookings')}" onclick="window.fastTab('bookings')">Bookings</button>` : ''}
-                    <button style="${tabStyle('managers')}" onclick="window.fastTab('managers')">Managers</button>
-                    <button style="${tabStyle('announcements')}" onclick="window.fastTab('announcements')">Announcements</button>
-                    <button style="${tabStyle('add-hotel')}" onclick="window.fastTab('add-hotel')">Add Stay</button>
-                    <button style="${tabStyle('account')}" onclick="window.fastTab('account')">My Account</button>
+                    <button style="\${tabStyle('analytics')}" onclick="window.fastTab('analytics')">📊 Analytics</button>
+                    <button style="\${tabStyle('hotels')}" onclick="window.fastTab('hotels')">Properties</button>
+                    \${!fromManageTab ? \`<button style="\${tabStyle('bookings')}" onclick="window.fastTab('bookings')">Bookings</button>\` : ''}
+                    <button style="\${tabStyle('managers')}" onclick="window.fastTab('managers')">Managers</button>
+                    <button style="\${tabStyle('announcements')}" onclick="window.fastTab('announcements')">Announcements</button>
+                    <button style="\${tabStyle('add-hotel')}" onclick="window.fastTab('add-hotel')">Add Stay</button>
+                    <button style="\${tabStyle('account')}" onclick="window.fastTab('account')">My Account</button>
                 </div>
+                `}
 
                 <!-- ANALYTICS TAB -->
                 <div id="adm-tab-analytics" style="display:${activeTab==='analytics'?'block':'none'}">
