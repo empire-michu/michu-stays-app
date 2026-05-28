@@ -518,7 +518,8 @@ window.router.addRoute('booking', async (container, params) => {
             if (methodReceipt) methodReceipt.innerText = currentMethod;
             
             // Fix: Ensure the user sees the confirmation at the top, avoiding scroll jump
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo(0, 0);
+            setTimeout(() => window.scrollTo(0, 0), 50);
 
         } catch (err) {
             btn.innerText = 'Submit Proof & Confirm Booking';

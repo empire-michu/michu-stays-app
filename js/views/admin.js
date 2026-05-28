@@ -1073,13 +1073,13 @@ window.router.addRoute('admin', async (container, params) => {
                         if (totalBookingsPages <= 1) return '';
                         let btns = '';
                         for (let i = 1; i <= totalBookingsPages; i++) {
-                            btns += `<button onclick="window.setBookingPage(${i})" class="${bookingsPage===i?'active':''}" style="width:36px; height:36px;">${i}</button>`;
+                            btns += `<button onclick="window.setBookingPage(${i})" class="${bookingsPage===i?'active':''}">${i}</button>`;
                         }
                         return `
                         <div class="premium-pagination">
-                            <button onclick="window.setBookingPage(${bookingsPage - 1})" ${bookingsPage === 1 ? 'disabled' : ''} style="padding:0 0.8rem; height:36px;">‹ Previous</button>
+                            <button onclick="window.setBookingPage(${bookingsPage - 1})" ${bookingsPage === 1 ? 'disabled' : ''}>‹ Previous</button>
                             ${btns}
-                            <button onclick="window.setBookingPage(${bookingsPage + 1})" ${bookingsPage === totalBookingsPages ? 'disabled' : ''} style="padding:0 0.8rem; height:36px;">Next ›</button>
+                            <button onclick="window.setBookingPage(${bookingsPage + 1})" ${bookingsPage === totalBookingsPages ? 'disabled' : ''}>Next ›</button>
                         </div>`;
                     })()}
                 </div>
