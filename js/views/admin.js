@@ -34,6 +34,8 @@ window.router.addRoute('admin', async (container, params) => {
         filterHotel = document.getElementById('adm-book-hotel')?.value || '';
         filterStatus = document.getElementById('adm-book-status')?.value || '';
         bookingsPage = 1;
+        // Preserve filter panel open state before re-render destroys the DOM
+        window.admFiltersOpen = true;
         renderAdmin();
     };
     window.setBookingPage = (page) => {

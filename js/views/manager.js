@@ -25,6 +25,8 @@ window.router.addRoute('manager', async (container, params) => {
         filterTo = document.getElementById('mgr-book-to')?.value || '';
         filterStatus = document.getElementById('mgr-book-status')?.value || '';
         bookingsPage = 1;
+        // Preserve filter panel open state before re-render destroys the DOM
+        window.mgrFiltersOpen = true;
         renderManagerUI();
     };
     window.applyMgrAnaFilter = () => {
@@ -73,6 +75,8 @@ window.router.addRoute('manager', async (container, params) => {
             filterFrom = ''; filterTo = ''; filterStatus = '';
         }
         bookingsPage = 1;
+        // Preserve filter panel open state before re-render destroys the DOM
+        window.mgrFiltersOpen = true;
         renderManagerUI();
     };
     window.mgrSearchRef = () => {
