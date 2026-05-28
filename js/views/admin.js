@@ -803,8 +803,8 @@ window.router.addRoute('admin', async (container, params) => {
                     <h2 style="color:var(--color-primary);margin:0;font-weight:800;">Admin Console</h2>
                     <div style="display:flex; gap:0.5rem;">
                         ${(userData.fcmTokens && userData.fcmTokens.length > 0) 
-                            ? \`<button class="btn-outline" style="border-radius:12px; border-color:green; color:green; font-weight:700; cursor:pointer;" onclick="window.enableAdminPush(this)">✅ Push Enabled</button>\`
-                            : \`<button class="btn-outline" style="border-radius:12px; border-color:#f59e0b; color:#d97706; font-weight:700; cursor:pointer;" onclick="window.enableAdminPush(this)">🔔 Enable Push Alerts</button>\`
+                            ? `<button class="btn-outline" style="border-radius:12px; border-color:green; color:green; font-weight:700; cursor:pointer;" onclick="window.enableAdminPush(this)">✅ Push Enabled</button>`
+                            : `<button class="btn-outline" style="border-radius:12px; border-color:#f59e0b; color:#d97706; font-weight:700; cursor:pointer;" onclick="window.enableAdminPush(this)">🔔 Enable Push Alerts</button>`
                         }
                         <button class="btn-outline" style="border-radius:12px;" onclick="window.syncData()">🔄 Sync Data</button>
                     </div>
