@@ -1926,11 +1926,3 @@ select {
   font-size: 0.8rem;
   color: #6b7280;
 }
-
- @ m e d i a   ( m a x - w i d t h :   7 6 8 p x )   { 
-         . h i d e - o n - m o b i l e   { 
-                 d i s p l a y :   n o n e   ! i m p o r t a n t ; 
-         } 
- } 
-  
- 
