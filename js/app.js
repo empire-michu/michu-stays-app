@@ -194,8 +194,11 @@ class Router {
 
         document.querySelectorAll('.mobile-nav-item').forEach(item => {
             item.classList.remove('active');
-            const onclick = item.getAttribute('onclick');
-            if (onclick && onclick.includes(`'${name}'`)) {
+            const onclick = item.getAttribute('onclick') || '';
+            if (onclick.includes(`'${name}'`) || 
+                (name === 'bookings' && onclick.includes('mobileBookings')) ||
+                (name === 'manager' && onclick.includes('mobileManage')) ||
+                (name === 'admin' && onclick.includes('mobileManage'))) {
                 item.classList.add('active');
             }
         });
@@ -225,7 +228,19 @@ window.mobileBookings = function() {
     } else if (role === 'manager') {
         router.navigate('manager', { tab: 'bookings' });
     } else if (window.auth?.currentUser) {
-        router.navigate('profile', { section: 'bookings' });
+        router.navigate('bookings');
+    } else {
+        router.navigate('login');
+    }
+};
+
+// Mobile Manage: Route to manager or admin dashboard
+window.mobileManage = function() {
+    const role = window.auth?.userData?.role;
+    if (role === 'admin') {
+        router.navigate('admin');
+    } else if (role === 'manager') {
+        router.navigate('manager');
     } else {
         router.navigate('login');
     }

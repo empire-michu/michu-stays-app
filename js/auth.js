@@ -176,6 +176,19 @@ class AuthEngine {
                     ${dashBtn}
                 </div>
             `;
+            
+            // Mobile Nav Role Handling
+            const mobileSaved = document.getElementById('mobile-nav-saved');
+            const mobileManage = document.getElementById('mobile-nav-manage');
+            if (mobileSaved && mobileManage) {
+                if (role === 'admin' || role === 'manager') {
+                    mobileSaved.style.display = 'none';
+                    mobileManage.style.display = 'flex';
+                } else {
+                    mobileSaved.style.display = 'flex';
+                    mobileManage.style.display = 'none';
+                }
+            }
         } else {
             if (notifBtn) notifBtn.style.display = 'none';
             
@@ -185,6 +198,14 @@ class AuthEngine {
                     <button class="btn-primary" style="padding:0.35rem 0.8rem;font-size:0.8rem;border-radius:12px;" onclick="window.router.navigate('signup')">${__('Sign Up')}</button>
                 </div>
             `;
+            
+            // Default to Guest view when not logged in
+            const mobileSaved = document.getElementById('mobile-nav-saved');
+            const mobileManage = document.getElementById('mobile-nav-manage');
+            if (mobileSaved && mobileManage) {
+                mobileSaved.style.display = 'flex';
+                mobileManage.style.display = 'none';
+            }
         }
     }
 
