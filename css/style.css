@@ -1926,3 +1926,10 @@ select {
   font-size: 0.8rem;
   color: #6b7280;
 }
+
+
+@media (max-width: 768px) {
+    .hide-on-mobile {
+        display: none !important;
+    }
+}
