@@ -197,11 +197,26 @@ class Router {
             const onclick = item.getAttribute('onclick') || '';
             if (onclick.includes(`'${name}'`) || 
                 (name === 'bookings' && onclick.includes('mobileBookings')) ||
+                (name === 'saved' && onclick.includes("'saved'")) ||
                 (name === 'manager' && onclick.includes('mobileManage')) ||
                 (name === 'admin' && onclick.includes('mobileManage'))) {
                 item.classList.add('active');
             }
         });
+
+        // Enforce role-based Saved/Manage visibility on every route change
+        const role = window.auth?.userData?.role;
+        const mobileSaved = document.getElementById('mobile-nav-saved');
+        const mobileManage = document.getElementById('mobile-nav-manage');
+        if (mobileSaved && mobileManage) {
+            if (role === 'admin' || role === 'manager') {
+                mobileSaved.style.display = 'none';
+                mobileManage.style.display = 'flex';
+            } else {
+                mobileSaved.style.display = 'flex';
+                mobileManage.style.display = 'none';
+            }
+        }
     }
 }
 
@@ -234,13 +249,13 @@ window.mobileBookings = function() {
     }
 };
 
-// Mobile Manage: Route to manager or admin dashboard
+// Mobile Manage: Route to manager or admin dashboard (without bookings tab)
 window.mobileManage = function() {
     const role = window.auth?.userData?.role;
     if (role === 'admin') {
-        router.navigate('admin');
+        router.navigate('admin', { source: 'manage' });
     } else if (role === 'manager') {
-        router.navigate('manager');
+        router.navigate('manager', { source: 'manage' });
     } else {
         router.navigate('login');
     }

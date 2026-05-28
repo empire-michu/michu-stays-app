@@ -6,7 +6,8 @@ window.router.addRoute('admin', async (container, params) => {
     let cachedProperties = [];
     let cachedBookings = [];
     let cachedUsers = [];
-    let activeTab = params?.tab || 'analytics'; // analytics, hotels, bookings, managers, add-hotel, account
+    const fromManageTab = params?.source === 'manage';
+    let activeTab = params?.tab || (fromManageTab ? 'analytics' : 'analytics'); // analytics, hotels, bookings, managers, add-hotel, account
     let filterFrom = '';
     let filterTo = '';
     let filterHotel = '';
@@ -810,7 +811,7 @@ window.router.addRoute('admin', async (container, params) => {
                 <div style="background:#eee; border-radius:99px; padding:0.3rem; display:inline-flex; gap:0.2rem; margin-bottom:2.5rem; flex-wrap:wrap;">
                     <button style="${tabStyle('analytics')}" onclick="window.fastTab('analytics')">📊 Analytics</button>
                     <button style="${tabStyle('hotels')}" onclick="window.fastTab('hotels')">Properties</button>
-                    <button style="${tabStyle('bookings')}" onclick="window.fastTab('bookings')">Bookings</button>
+                    ${!fromManageTab ? `<button style="${tabStyle('bookings')}" onclick="window.fastTab('bookings')">Bookings</button>` : ''}
                     <button style="${tabStyle('managers')}" onclick="window.fastTab('managers')">Managers</button>
                     <button style="${tabStyle('announcements')}" onclick="window.fastTab('announcements')">Announcements</button>
                     <button style="${tabStyle('add-hotel')}" onclick="window.fastTab('add-hotel')">Add Stay</button>
