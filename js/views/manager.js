@@ -6,7 +6,7 @@ window.router.addRoute('manager', async (container, params) => {
 
     const fromManageTab = params?.source === 'manage';
     const fromBookingsTab = params?.source === 'bookings';
-    let activeTab = fromBookingsTab ? 'bookings' : (params?.tab || (fromManageTab ? 'analytics' : 'bookings'));
+    let activeTab = fromBookingsTab ? 'bookings' : (params?.tab || 'analytics');
     let filterFrom = '';
     let filterTo = '';
     let filterStatus = '';
@@ -21,7 +21,7 @@ window.router.addRoute('manager', async (container, params) => {
     window.mgrFiltersOpen = false;
 
     // --- Tab & Function Globals ---
-    window.setMgrTab = (tab) => { activeTab = tab; renderManagerUI(); };
+    window.setMgrTab = (tab) => { activeTab = tab; renderManagerUI(true); };
     window.setMgrFilter = () => {
         filterFrom = document.getElementById('mgr-book-from')?.value || '';
         filterTo = document.getElementById('mgr-book-to')?.value || '';
@@ -408,7 +408,7 @@ window.router.addRoute('manager', async (container, params) => {
 
             await window.db.updateProperty(myHotel.id, updatedData);
             window.showToast("✅ Property updated successfully!");
-            await syncManagerData();
+            syncManagerData();
         } catch (e) {
             console.error("Manager Save Error:", e);
             window.showToast("❌ Operation failed: " + (e.message || "Unknown error"));
@@ -553,7 +553,6 @@ window.router.addRoute('manager', async (container, params) => {
                 await window.db.updateProperty(myHotel.id, { availableRooms: newAvail });
             }
             window.showAlert("✅ Booking Confirmed! The guest has been notified and one room has been deducted from your inventory.");
-            syncManagerData(); 
         } catch (e) {
             console.error(e);
             window.showToast("❌ Confirmation failed: " + e.message);
@@ -573,7 +572,6 @@ window.router.addRoute('manager', async (container, params) => {
             await window.db.updateBookingStatus(id, 'Denied');
             
             window.showAlert("❌ Booking Denied! The guest has been notified.");
-            syncManagerData(); 
         } catch (e) {
             console.error(e);
             window.showToast("❌ Cancellation failed: " + e.message);
@@ -630,7 +628,7 @@ window.router.addRoute('manager', async (container, params) => {
             // Start Live Listener
             bookingUnsub = window.db.listenToBookings((data) => {
                 allBookings = data;
-                renderManagerUI();
+                renderManagerUI(true);
             }, uid);
 
             // Fetch property info
@@ -645,12 +643,40 @@ window.router.addRoute('manager', async (container, params) => {
             console.error("Manager Sync Error:", err);
             // Don't throw, just let it render empty/fallback
         } finally {
-            renderManagerUI();
+            renderManagerUI(true);
         }
     };
 
-    const renderManagerUI = () => {
+    const renderManagerUI = (incremental = false) => {
         const userData = window.auth.userData || {};
+        
+        if (incremental || container.querySelector('.manager-container')) {
+            const existingContainer = container.querySelector('.manager-container');
+            if (existingContainer) {
+                const contentDiv = existingContainer.querySelector('.manager-content');
+                if (contentDiv) {
+                    contentDiv.innerHTML = renderActiveTab();
+                }
+                const tabs = existingContainer.querySelectorAll('.mgr-tab-bar button');
+                tabs.forEach(btn => {
+                    const match = btn.getAttribute('onclick')?.match(/'([^']+)'/);
+                    if (match && match[1]) {
+                        const t = match[1];
+                        if (t === activeTab) {
+                            btn.style.background = 'white';
+                            btn.style.color = 'var(--color-primary)';
+                            btn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+                        } else {
+                            btn.style.background = 'transparent';
+                            btn.style.color = '#666';
+                            btn.style.boxShadow = 'none';
+                        }
+                    }
+                });
+                return;
+            }
+        }
+
         const tabStyle = (tab) => `
             padding:0.7rem 1.4rem; border-radius:99px; font-weight:700; cursor:pointer; font-size:0.85rem; border:none;
             background:${activeTab===tab?'var(--color-primary)':'transparent'};
@@ -712,10 +738,6 @@ window.router.addRoute('manager', async (container, params) => {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
                         Analytics
                     </button>
-                    ${!fromManageTab ? `<button style="${tabStyle('bookings')} display:flex; align-items:center; gap:0.4rem;" onclick="window.setMgrTab('bookings')">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                        Bookings
-                    </button>` : ''}
                     <button style="${tabStyle('property')} display:flex; align-items:center; gap:0.4rem;" onclick="window.setMgrTab('property')">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                         My Property

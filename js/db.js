@@ -436,56 +436,67 @@ class Database {
         }
     }
 
-    async uploadFile(file, folder = 'properties', onProgress = null) {
+    async uploadFile(file, folder = 'properties', onProgress = null, retries = 2) {
         const cloudName = 'dudc1zwmq';
         const uploadPreset = 'michu_stays';
         const resourceType = file.type.startsWith('video/') ? 'video' : 'image';
         const url = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
 
-        return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', url, true);
+        const attemptUpload = (attemptsLeft) => {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', url, true);
 
-            // Mock the Firebase task object so the UI's .cancel() still works
-            this.lastTask = {
-                cancel: () => xhr.abort()
-            };
+                // Mock the Firebase task object so the UI's .cancel() still works
+                this.lastTask = {
+                    cancel: () => xhr.abort()
+                };
 
-            xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable && onProgress) {
-                    const percent = Math.round((event.loaded / event.total) * 100);
-                    onProgress(percent);
-                }
-            };
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable && onProgress) {
+                        const percent = Math.round((event.loaded / event.total) * 100);
+                        onProgress(percent);
+                    }
+                };
 
-            xhr.onload = () => {
-                if (xhr.status === 200) {
-                    const response = JSON.parse(xhr.responseText);
-                    this.lastTask = null;
-                    resolve(response.secure_url);
-                } else {
-                    const err = JSON.parse(xhr.responseText || '{}');
-                    console.error("Cloudinary Error:", err);
-                    reject(new Error(err.error?.message || "Upload failed."));
-                }
-            };
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        this.lastTask = null;
+                        resolve(response.secure_url);
+                    } else {
+                        const err = JSON.parse(xhr.responseText || '{}');
+                        console.error("Cloudinary Error:", err);
+                        reject(new Error(err.error?.message || "Upload failed."));
+                    }
+                };
 
-            xhr.onerror = () => {
-                console.error("Cloudinary Network Error");
-                reject(new Error("Network error during upload."));
-            };
+                xhr.onerror = () => {
+                    console.error("Cloudinary Network Error. Attempts left:", attemptsLeft);
+                    if (attemptsLeft > 0) {
+                        if (onProgress) onProgress(`Retrying... (${attemptsLeft})`);
+                        setTimeout(() => {
+                            attemptUpload(attemptsLeft - 1).then(resolve).catch(reject);
+                        }, 2000);
+                    } else {
+                        reject(new Error("Network error during upload after retries."));
+                    }
+                };
 
-            xhr.onabort = () => {
-                reject(new Error("Upload aborted."));
-            };
+                xhr.onabort = () => {
+                    reject(new Error("Upload aborted."));
+                };
 
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', uploadPreset);
-            formData.append('folder', folder);
-            
-            xhr.send(formData);
-        });
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', uploadPreset);
+                formData.append('folder', folder);
+
+                xhr.send(formData);
+            });
+        };
+
+        return attemptUpload(retries);
     }
 
     // ─── REVIEWS / RATINGS ─────────────────────────────────────
