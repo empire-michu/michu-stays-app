@@ -4,7 +4,9 @@ window.router.addRoute('admin', async (container, params) => {
     }
 
     let cachedProperties = [];
-    let cachedBookings = [];
+    let analyticsBookings = [];
+    let tableBookings = [];
+    let currentAdminLimit = 20;
     let cachedUsers = [];
     const fromManageTab = params?.source === 'manage';
     const fromBookingsTab = params?.source === 'bookings';
@@ -13,8 +15,6 @@ window.router.addRoute('admin', async (container, params) => {
     let filterTo = '';
     let filterHotel = '';
     let filterStatus = '';
-    let bookingsPage = 1;
-    let totalBookingsPages = 1;
     let hotelsPage = 1;
     let totalHotelsPages = 1;
     let managersPage = 1;
@@ -35,10 +35,15 @@ window.router.addRoute('admin', async (container, params) => {
         filterTo = document.getElementById('adm-book-to')?.value || '';
         filterHotel = document.getElementById('adm-book-hotel')?.value || '';
         filterStatus = document.getElementById('adm-book-status')?.value || '';
-        bookingsPage = 1;
+        currentAdminLimit = 20;
         // Preserve filter panel open state before re-render destroys the DOM
         window.admFiltersOpen = true;
-        renderAdmin();
+        window.attachAdmBookingListener();
+    };
+    
+    window.loadMoreAdmBookings = () => {
+        currentAdminLimit += 20;
+        window.attachAdmBookingListener();
     };
     window.setBookingPage = (page) => {
         if (page < 1 || page > totalBookingsPages) return;
@@ -138,11 +143,25 @@ window.router.addRoute('admin', async (container, params) => {
                 if (!isSyncing) renderAdmin();
             });
 
-            // Bookings Listener
-            booksUnsub = window.db.listenToBookings(data => {
-                cachedBookings = data;
-                if (!isSyncing) renderAdmin();
-            });
+            // Bookings Listeners
+            window.attachAdmBookingListener = () => {
+                if (booksUnsub) booksUnsub();
+                booksUnsub = window.db.listenToBookings(data => {
+                    tableBookings = data;
+                    if (!isSyncing) renderAdmin();
+                }, null, null, { from: filterFrom, to: filterTo, status: filterStatus, propertyTitle: filterHotel }, currentAdminLimit);
+            };
+
+            window.attachAdmAnalyticsListener = () => {
+                if (window.admAnaUnsub) window.admAnaUnsub();
+                window.admAnaUnsub = window.db.listenToAnalytics(data => {
+                    analyticsBookings = data;
+                    if (!isSyncing) renderAdmin();
+                }, null, { from: analyticsStart, to: analyticsEnd });
+            };
+
+            window.attachAdmBookingListener();
+            window.attachAdmAnalyticsListener();
 
             // Users Listener
             usersUnsub = firestore.collection('users').onSnapshot(snap => {
@@ -842,14 +861,7 @@ window.router.addRoute('admin', async (container, params) => {
                     </div>
 
                     ${(() => {
-                        const start = analyticsStart ? new Date(analyticsStart) : null;
-                        const end = analyticsEnd ? new Date(analyticsEnd) : null;
-                        const filtered = cachedBookings.filter(b => {
-                            const d = new Date(b.createdAt);
-                            if (start && d < start) return false;
-                            if (end && d > end) return false;
-                            return true;
-                        });
+                        const filtered = analyticsBookings;
 
                         const totalRev = filtered.reduce((s, b) => s + (b.totalAmount || 0), 0);
                         const avgValue = Math.round(totalRev / (filtered.length || 1));
@@ -995,31 +1007,10 @@ window.router.addRoute('admin', async (container, params) => {
                             <thead><tr><th>No.</th><th>Ref</th><th>Stay</th><th>Guest</th><th>Amount</th><th>Status</th><th>Date & Time</th><th>Proof</th><th>Actions</th></tr></thead>
                             <tbody>
                                 ${(() => {
-                                    const filtered = cachedBookings.filter(b => {
-                                        if(filterStatus && b.status !== filterStatus) return false;
-                                        if(filterHotel && b.propertyTitle !== filterHotel) return false;
-                                        if(!b.createdAt) return true;
-                                        const bDate = new Date(b.createdAt);
-                                        if(filterFrom) {
-                                            const fDate = new Date(filterFrom);
-                                            fDate.setHours(0,0,0,0);
-                                            if(bDate < fDate) return false;
-                                        }
-                                        if(filterTo) {
-                                            const tDate = new Date(filterTo);
-                                            tDate.setHours(23,59,59,999);
-                                            if(bDate > tDate) return false;
-                                        }
-                                        return true;
-                                    }).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-
-                                    totalBookingsPages = Math.max(1, Math.ceil(filtered.length / 20));
-                                    if(bookingsPage > totalBookingsPages) bookingsPage = totalBookingsPages;
+                                    if (tableBookings.length === 0) return '<tr><td colspan="9" style="text-align:center;padding:2rem;">No bookings found.</td></tr>';
                                     
-                                    const paginated = filtered.slice((bookingsPage - 1) * 20, bookingsPage * 20);
-
-                                    return paginated.map((b, index) => {
-                                        let rowNum = (bookingsPage - 1) * 20 + index + 1;
+                                    return tableBookings.map((b, index) => {
+                                        let rowNum = index + 1;
                                         let nights = 0;
                                         if (b.checkIn && b.checkOut) {
                                             const diffTime = Math.abs(new Date(b.checkOut) - new Date(b.checkIn));
@@ -1070,17 +1061,13 @@ window.router.addRoute('admin', async (container, params) => {
                     </div>
                     </div>
                     ${(() => {
-                        if (totalBookingsPages <= 1) return '';
-                        let btns = '';
-                        for (let i = 1; i <= totalBookingsPages; i++) {
-                            btns += `<button onclick="window.setBookingPage(${i})" class="${bookingsPage===i?'active':''}">${i}</button>`;
+                        if (tableBookings.length === currentAdminLimit) {
+                            return `
+                            <div style="display:flex;justify-content:center;margin-top:1.5rem;">
+                                <button onclick="window.loadMoreAdmBookings()" class="premium-action-btn premium-action-btn--primary" style="padding:0.75rem 1.5rem;">Load More</button>
+                            </div>`;
                         }
-                        return `
-                        <div class="premium-pagination">
-                            <button onclick="window.setBookingPage(${bookingsPage - 1})" ${bookingsPage === 1 ? 'disabled' : ''}>‹ Previous</button>
-                            ${btns}
-                            <button onclick="window.setBookingPage(${bookingsPage + 1})" ${bookingsPage === totalBookingsPages ? 'disabled' : ''}>Next ›</button>
-                        </div>`;
+                        return '';
                     })()}
                 </div>
 
@@ -1564,17 +1551,17 @@ window.router.addRoute('admin', async (container, params) => {
         analyticsEnd = end;
         document.getElementById('ana-start').value = analyticsStart;
         document.getElementById('ana-end').value = analyticsEnd;
-        renderAdmin();
+        window.attachAdmAnalyticsListener();
     };
 
     window.applyAnaFilter = () => {
         analyticsStart = document.getElementById('ana-start').value;
         analyticsEnd = document.getElementById('ana-end').value;
-        renderAdmin();
+        window.attachAdmAnalyticsListener();
     };
     window.resetAnaFilter = () => {
         analyticsStart = ''; analyticsEnd = '';
-        renderAdmin();
+        window.attachAdmAnalyticsListener();
     };
 
     const renderAdmin = () => {

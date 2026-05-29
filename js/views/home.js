@@ -1,5 +1,32 @@
 window.router.addRoute('home', async (container, params) => {
-    container.innerHTML = `<div class="container" style="text-align:center; padding-top:4rem;"><div style="display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%; background:#f0f7f2; color:var(--color-primary); margin-bottom:1.5rem;"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 21h18M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16M9 21v-4a2 2 0 012-2h2a2 2 0 012 2v4M9 7h6M9 11h6"/></svg></div><div style="font-size:1.2rem; font-weight:700; color:#555;">Loading Stays...</div></div>`;
+    container.innerHTML = `
+        <style>
+            @keyframes skeleton-pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+            .skel-box { background: #f1f5f9; border-radius: 16px; animation: skeleton-pulse 1.5s infinite ease-in-out; }
+        </style>
+        <div id="home-search-wrapper" style="display:flex; justify-content:center; background:white; padding:0.6rem 0.75rem; border-bottom:1px solid #f0f0f0;">
+            <div class="skel-box" style="max-width:500px; width:100%; height:48px; border-radius:99px;"></div>
+        </div>
+        <div class="skel-box" style="height: 280px; width:100%; border-radius:0;"></div>
+        <div class="container" style="margin-top:2rem;">
+            <div style="display:flex; gap:1rem; margin-bottom:2rem; overflow:hidden;">
+                <div class="skel-box" style="width:100px; height:40px; border-radius:20px;"></div>
+                <div class="skel-box" style="width:100px; height:40px; border-radius:20px;"></div>
+                <div class="skel-box" style="width:100px; height:40px; border-radius:20px;"></div>
+            </div>
+            <div class="property-grid">
+                ${Array(6).fill(`
+                <div style="background:white; border-radius:24px; padding-bottom:1rem; border:1px solid #eee;">
+                    <div class="skel-box" style="height:220px; border-radius:24px 24px 0 0; margin-bottom:1rem;"></div>
+                    <div style="padding:0 1rem;">
+                        <div class="skel-box" style="height:20px; width:70%; margin-bottom:0.5rem;"></div>
+                        <div class="skel-box" style="height:14px; width:40%; margin-bottom:1rem;"></div>
+                        <div class="skel-box" style="height:24px; width:50%;"></div>
+                    </div>
+                </div>`).join('')}
+            </div>
+        </div>
+    `;
     let allProperties = [];
     let allBookings = [];
     let propertyRatings = {};

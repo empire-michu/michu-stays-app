@@ -743,7 +743,29 @@ class Database {
         return query.onSnapshot(snapshot => {
             const bookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             callback(bookings);
-        }, err => console.warn('Booking listener error:', err));
+        }, error => {
+            console.error("listenToBookings Error:", error);
+        });
+    }
+
+    listenToAnalytics(callback, managerId = null, filters = {}) {
+        let query = firestore.collection('bookings');
+        if (managerId) query = query.where('managerId', '==', managerId);
+        
+        if (filters.from) query = query.where('createdAt', '>=', filters.from);
+        if (filters.to) query = query.where('createdAt', '<=', filters.to + 'T23:59:59');
+
+        // Without a limit, this fetches all matching records for the timeframe.
+        // If they select "All Time" (no dates), it might still be heavy for admin, 
+        // but for a manager it's usually fine. We add an arbitrary safety limit of 5000.
+        query = query.orderBy('createdAt', 'desc').limit(5000);
+
+        return query.onSnapshot(snapshot => {
+            const bookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            callback(bookings);
+        }, error => {
+            console.error("listenToAnalytics Error:", error);
+        });
     }
 
     listenForNotifications(callback, onError) {

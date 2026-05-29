@@ -15,9 +15,9 @@ window.router.addRoute('manager', async (container, params) => {
     const uid = window.auth?.currentUser?.uid;
     let userData = window.auth?.userData || {};
     let myHotel = null;
-    let allBookings = [];
-    let bookingsPage = 1;
-    let totalBookingsPages = 1;
+    let analyticsBookings = [];
+    let tableBookings = [];
+    let currentManagerLimit = 20;
     window.mgrFiltersOpen = false;
 
     // --- Tab & Function Globals ---
@@ -26,19 +26,19 @@ window.router.addRoute('manager', async (container, params) => {
         filterFrom = document.getElementById('mgr-book-from')?.value || '';
         filterTo = document.getElementById('mgr-book-to')?.value || '';
         filterStatus = document.getElementById('mgr-book-status')?.value || '';
-        bookingsPage = 1;
+        currentManagerLimit = 20;
         // Preserve filter panel open state before re-render destroys the DOM
         window.mgrFiltersOpen = true;
-        renderManagerUI();
+        window.attachMgrBookingListener();
     };
     window.applyMgrAnaFilter = () => {
         analyticsStart = document.getElementById('mgr-ana-start')?.value || '';
         analyticsEnd = document.getElementById('mgr-ana-end')?.value || '';
-        renderManagerUI();
+        window.attachMgrAnalyticsListener();
     };
     window.resetMgrAnaFilter = () => {
         analyticsStart = ''; analyticsEnd = '';
-        renderManagerUI();
+        window.attachMgrAnalyticsListener();
     };
     window.setMgrAnaPreset = (preset) => {
         const today = new Date();
@@ -57,7 +57,7 @@ window.router.addRoute('manager', async (container, params) => {
         } else {
             analyticsStart = ''; analyticsEnd = '';
         }
-        renderManagerUI();
+        window.attachMgrAnalyticsListener();
     };
     window.setMgrBookingPreset = (preset) => {
         const today = new Date();
@@ -76,10 +76,15 @@ window.router.addRoute('manager', async (container, params) => {
         } else {
             filterFrom = ''; filterTo = ''; filterStatus = '';
         }
-        bookingsPage = 1;
+        currentManagerLimit = 20;
         // Preserve filter panel open state before re-render destroys the DOM
         window.mgrFiltersOpen = true;
-        renderManagerUI();
+        window.attachMgrBookingListener();
+    };
+    
+    window.loadMoreMgrBookings = () => {
+        currentManagerLimit += 20;
+        window.attachMgrBookingListener();
     };
     window.mgrSearchRef = () => {
         const q = document.getElementById('mgr-ref-search')?.value?.trim().toUpperCase() || '';
@@ -621,15 +626,28 @@ window.router.addRoute('manager', async (container, params) => {
     };
 
     let bookingUnsub = null;
+    let analyticsUnsub = null;
+
+    window.attachMgrBookingListener = () => {
+        if (bookingUnsub) bookingUnsub();
+        bookingUnsub = window.db.listenToBookings((data) => {
+            tableBookings = data;
+            renderManagerUI(true);
+        }, uid, null, { from: filterFrom, to: filterTo, status: filterStatus }, currentManagerLimit);
+    };
+
+    window.attachMgrAnalyticsListener = () => {
+        if (analyticsUnsub) analyticsUnsub();
+        analyticsUnsub = window.db.listenToAnalytics((data) => {
+            analyticsBookings = data;
+            renderManagerUI(true);
+        }, uid, { from: analyticsStart, to: analyticsEnd });
+    };
+
     const syncManagerData = async () => {
         try {
-            if (bookingUnsub) bookingUnsub(); // Cleanup old listener
-            
-            // Start Live Listener
-            bookingUnsub = window.db.listenToBookings((data) => {
-                allBookings = data;
-                renderManagerUI(true);
-            }, uid);
+            window.attachMgrBookingListener();
+            window.attachMgrAnalyticsListener();
 
             // Fetch property info
             const userData = window.auth.userData || {};
@@ -803,17 +821,9 @@ window.router.addRoute('manager', async (container, params) => {
     };
 
     const renderAnalyticsTab = () => {
-        if (allBookings.length === 0) return `<div style="text-align:center; padding:5rem; background:white; border-radius:24px; box-shadow:var(--shadow-sm);"><h3>No data available</h3><p style="color:#666;">Once guests book your property, analytics will appear here.</p></div>`;
+        if (analyticsBookings.length === 0) return `<div style="text-align:center; padding:5rem; background:white; border-radius:24px; box-shadow:var(--shadow-sm);"><h3>No data available</h3><p style="color:#666;">Once guests book your property, analytics will appear here.</p></div>`;
 
-        const start = analyticsStart ? new Date(analyticsStart) : null;
-        const end = analyticsEnd ? new Date(analyticsEnd) : null;
-        const filtered = allBookings.filter(b => {
-            if (b.status === 'Denied') return false; // Usually don't count denied in revenue
-            const d = new Date(b.createdAt);
-            if (start && d < start) return false;
-            if (end && d > end) return false;
-            return true;
-        });
+        const filtered = analyticsBookings.filter(b => b.status !== 'Denied');
 
         const totalRev = filtered.reduce((s, b) => s + (b.totalAmount || 0), 0);
         const avgValue = Math.round(totalRev / (filtered.length || 1));
@@ -977,30 +987,9 @@ window.router.addRoute('manager', async (container, params) => {
                         </thead>
                         <tbody>
                             ${(() => {
-                                const filtered = allBookings.filter(b => {
-                                    if(filterStatus && b.status !== filterStatus) return false;
-                                    if(!b.createdAt) return true;
-                                    const bDate = new Date(b.createdAt);
-                                    if(filterFrom) {
-                                        const fDate = new Date(filterFrom);
-                                        fDate.setHours(0,0,0,0);
-                                        if(bDate < fDate) return false;
-                                    }
-                                    if(filterTo) {
-                                        const tDate = new Date(filterTo);
-                                        tDate.setHours(23,59,59,999);
-                                        if(bDate > tDate) return false;
-                                    }
-                                    return true;
-                                }).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-
-                                totalBookingsPages = Math.max(1, Math.ceil(filtered.length / 20));
-                                if(bookingsPage > totalBookingsPages) bookingsPage = totalBookingsPages;
-                                
-                                const paginated = filtered.slice((bookingsPage - 1) * 20, bookingsPage * 20);
-
-                                return paginated.map((b, index) => {
-                                    let rowNum = (bookingsPage - 1) * 20 + index + 1;
+                                if (tableBookings.length === 0) return '<tr><td colspan="9" style="text-align:center;padding:2rem;">No bookings found.</td></tr>';
+                                return tableBookings.map((b, index) => {
+                                    let rowNum = index + 1;
                                     let nights = 0;
                                     if (b.checkIn && b.checkOut) {
                                         const diffTime = Math.abs(new Date(b.checkOut) - new Date(b.checkIn));
@@ -1057,18 +1046,15 @@ window.router.addRoute('manager', async (container, params) => {
                 </div>
                 </div>
                 ${(() => {
-                    if (totalBookingsPages <= 1) return '';
-                    let btns = '';
-                    for (let i = 1; i <= totalBookingsPages; i++) {
-                        btns += `<button onclick="window.setMgrBookingPage(${i})" class="${bookingsPage === i ? 'active' : ''}">${i}</button>`;
+                    if (tableBookings.length === currentManagerLimit) {
+                        return `
+                        <div style="display:flex;justify-content:center;margin-top:1.5rem;">
+                            <button onclick="window.loadMoreMgrBookings()" class="premium-action-btn premium-action-btn--primary" style="padding:0.75rem 1.5rem;">Load More</button>
+                        </div>`;
                     }
-                    return `
-                    <div class="premium-pagination">
-                        <button onclick="window.setMgrBookingPage(${bookingsPage - 1})" ${bookingsPage === 1 ? 'disabled' : ''}>‹</button>
-                        ${btns}
-                        <button onclick="window.setMgrBookingPage(${bookingsPage + 1})" ${bookingsPage === totalBookingsPages ? 'disabled' : ''}>›</button>
-                    </div>`;
+                    return '';
                 })()}
+
 
         `;
      };
