@@ -699,7 +699,27 @@ const translations = {
         "💬 Reviews": "💬 ግምገማዎች",
         "👤 My Account": "👤 የኔ መለያ",
         "No data available": "መረጃ አይገኝም",
-        "Loading...": "በመጫን ላይ..."
+        "Loading...": "በመጫን ላይ...",
+        "Loading your bookings...": "ቦታ ማስያዣዎችዎን በመጫን ላይ...",
+        "No bookings found.": "ምንም ቦታ ማስያዣ አልተገኘም።",
+        "Filter Bookings": "ቦታ ማስያዣዎችን ያጣሩ",
+        "Overall Experience": "አጠቃላይ ተሞክሮ",
+        "Detailed Category Ratings": "ዝርዝር የምድብ ደረጃዎች",
+        "Cleanliness": "ንፅህና",
+        "Location": "አድራሻ",
+        "Service": "አገልግሎት",
+        "Value": "ዋጋ",
+        "Written Review": "የጽሁፍ አስተያየት",
+        "Tell us about the service...": "ስለ አገልግሎቱ ይንገሩን...",
+        "Share Photos (Optional)": "ፎቶዎችን ያጋሩ (አማራጭ)",
+        "Add Photo": "ፎቶ ጨምር",
+        "You can upload up to 5 photos from your stay.": "ከቆይታዎ እስከ 5 ፎቶዎችን መስቀል ይችላሉ።",
+        "Dismiss": "አሰናብት",
+        "Submit Review": "አስተያየት አስገባ",
+        "Message": "መልዕክት",
+        "Rate Your Stay": "ለቆይታዎ ደረጃ ይስጡ",
+        "Back to Home": "ወደ ዋና ገፅ ይመለሱ",
+        "My Bookings": "የኔ ቦታ ማስያዣዎች"
     },
     om: {
         // Core Navigation & UI
@@ -1377,7 +1397,27 @@ const translations = {
         "💬 Reviews": "💬 Yaadota",
         "👤 My Account": "👤 Herrega Koo",
         "No data available": "Deetaan Hin Argamne",
-        "Loading...": "Fe'aa Jira..."
+        "Loading...": "Fe'aa Jira...",
+        "Loading your bookings...": "Kutaawwan keessan fe'amaa jira...",
+        "No bookings found.": "Kutaawwan hin argamne.",
+        "Filter Bookings": "Kutaawwan Calay",
+        "Overall Experience": "Muuxannoo Waliigalaa",
+        "Detailed Category Ratings": "Sadarkaa Ramaddii Bal'aa",
+        "Cleanliness": "Qulqullina",
+        "Location": "Iddoo",
+        "Service": "Tajaajila",
+        "Value": "Gatii",
+        "Written Review": "Yaada Barreeffamaa",
+        "Tell us about the service...": "Waa'ee tajaajilichaa nutti himaa...",
+        "Share Photos (Optional)": "Suuraawwan Qoodaa (Filannoo)",
+        "Add Photo": "Suuraa Ida'i",
+        "You can upload up to 5 photos from your stay.": "Turmaata keessan irraa suuraawwan hanga 5 fiduu dandeessu.",
+        "Dismiss": "Dhiisi",
+        "Submit Review": "Yaada Galchi",
+        "Message": "Ergaa",
+        "Rate Your Stay": "Turmaata Keessan Sadarkaa Kennaa",
+        "Back to Home": "Gara Fuula Duraatti Deebi'i",
+        "My Bookings": "Kutaawwan Koo"
     }
 };
 

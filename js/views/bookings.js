@@ -3,7 +3,7 @@ window.router.addRoute('bookings', async (container, params) => {
         window.router.navigate('login'); return;
     }
 
-    container.innerHTML = `<div class="container" style="text-align:center;padding-top:4rem;">Loading your bookings...</div>`;
+    container.innerHTML = `<div class="container" style="text-align:center;padding-top:4rem;">${t('Loading your bookings...')}</div>`;
 
     const uid = window.auth.currentUser.uid;
     const userRole = window.auth.userData?.role || 'customer';
@@ -109,7 +109,7 @@ window.router.addRoute('bookings', async (container, params) => {
         if (countEl) countEl.innerText = `${fullList.length} booking${fullList.length !== 1 ? 's' : ''}`;
 
         if (list.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:2.5rem;color:var(--color-text-light);">No bookings found.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:2.5rem;color:var(--color-text-light);">${t('No bookings found.')}</td></tr>`;
             return;
         }
 
@@ -148,19 +148,19 @@ window.router.addRoute('bookings', async (container, params) => {
                         review 
                         ? `<div style="display:flex;flex-direction:column;gap:0.25rem;">
                              <div class="premium-stars">${starDisplay(stars)}</div>
-                             <button onclick="window.openRatingModal('${b.id}','${b.propertyId}','${b.propertyTitle.replace(/'/g, "\\\'")}', true)" style="border:none;background:none;color:#008450;font-size:0.68rem;font-weight:700;cursor:pointer;padding:0;text-align:left;text-decoration:underline;">Edit Review</button>
+                             <button onclick="window.openRatingModal('${b.id}','${b.propertyId}','${b.propertyTitle.replace(/'/g, "\\\'")}', true)" style="border:none;background:none;color:#008450;font-size:0.68rem;font-weight:700;cursor:pointer;padding:0;text-align:left;text-decoration:underline;">${t('Edit Review')}</button>
                            </div>` 
-                        : `<button onclick="window.openRatingModal('${b.id}','${b.propertyId}','${b.propertyTitle.replace(/'/g, "\\\'")}')" class="premium-action-btn premium-action-btn--accent"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Rate Stay</button>`
+                        : `<button onclick="window.openRatingModal('${b.id}','${b.propertyId}','${b.propertyTitle.replace(/'/g, "\\\'")}')" class="premium-action-btn premium-action-btn--accent"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> ${t('Rate Stay')}</button>`
                     ) : '<span style="color:#cbd5e1;">—</span>'}
                 </td>
                 <td data-label="Proof">
-                    ${b.paymentProofUrl ? `<button onclick="showGuestProof('${b.id}')" class="premium-action-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> Proof</button>` : '<span style="color:#cbd5e1;">—</span>'}
+                    ${b.paymentProofUrl ? `<button onclick="showGuestProof('${b.id}')" class="premium-action-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> ${t('Proof')}</button>` : '<span style="color:#cbd5e1;">—</span>'}
                 </td>
                 <td data-label="Receipt">
-                    ${b.status === 'Confirmed' ? `<button onclick='window.openReceipt(${JSON.stringify({id:b.id,referenceCode:b.referenceCode,customerName:b.customerName,customerEmail:b.customerEmail,customerPhone:b.customerPhone,propertyTitle:b.propertyTitle,checkIn:b.checkIn,checkOut:b.checkOut,guests:b.guests,totalAmount:b.totalAmount,paymentMethod:b.paymentMethod,status:b.status,createdAt:b.createdAt,packageInfo:b.packageInfo})})' class="premium-action-btn premium-action-btn--primary"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Receipt</button>` : '<span style="color:#cbd5e1;">—</span>'}
+                    ${b.status === 'Confirmed' ? `<button onclick='window.openReceipt(${JSON.stringify({id:b.id,referenceCode:b.referenceCode,customerName:b.customerName,customerEmail:b.customerEmail,customerPhone:b.customerPhone,propertyTitle:b.propertyTitle,checkIn:b.checkIn,checkOut:b.checkOut,guests:b.guests,totalAmount:b.totalAmount,paymentMethod:b.paymentMethod,status:b.status,createdAt:b.createdAt,packageInfo:b.packageInfo})})' class="premium-action-btn premium-action-btn--primary"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> ${t('Receipt')}</button>` : '<span style="color:#cbd5e1;">—</span>'}
                 </td>
                 <td data-label="Chat">
-                    <button onclick="window.router.navigate('chat', { bookingId: '${b.id}' })" class="premium-action-btn premium-action-btn--chat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Message</button>
+                    <button onclick="window.router.navigate('chat', { bookingId: '${b.id}' })" class="premium-action-btn premium-action-btn--chat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> ${t('Message')}</button>
                 </td>
             </tr>
         `;
@@ -192,8 +192,8 @@ window.router.addRoute('bookings', async (container, params) => {
     };
 
     container.innerHTML = `
-        <div class="container" style="padding-top:2.5rem;padding-bottom:2rem;max-width:1200px;">
-            <div style="margin-bottom:1.5rem;"><button onclick="window.router.navigate('home')" class="btn-outline" style="border:none;padding:0;">← Back to Home</button></div>
+        <div class="container" style="padding-top:2.5rem;padding-bottom:2rem;max-width:1600px;width:100%;padding-left:1.5rem;padding-right:1.5rem;">
+            <div style="margin-bottom:1.5rem;"><button onclick="window.router.navigate('home')" class="btn-outline" style="border:none;padding:0;">← ${t('Back to Home') || 'Back to Home'}</button></div>
 
             <style>
                 @media (max-width: 768px) {
@@ -203,34 +203,34 @@ window.router.addRoute('bookings', async (container, params) => {
 
             <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);margin-bottom:2rem;">
                 <div class="booking-history-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
-                    <h3 style="margin:0; width:100%; color:#0F5A3F;">📜 My Bookings <span id="booking-count" style="font-size:0.8rem;font-weight:400;color:#888;"></span></h3>
+                    <h3 style="margin:0; width:100%; color:#0F5A3F; display:flex; align-items:center; gap:0.5rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg> ${t('My Bookings')} <span id="booking-count" style="font-size:0.8rem;font-weight:400;color:#888;"></span></h3>
                     
                     <details class="premium-filter-collapse" style="width:100%; margin-bottom:0; box-shadow:none; border:1px solid #e2e8f0; background:#f8fafc;">
                         <summary style="color:#475569; font-size:0.8rem;">
                             <div style="display:flex; align-items:center; gap:0.5rem;">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-                                Filter Bookings
+                                ${t('Filter Bookings')}
                             </div>
                         </summary>
                         <div class="filter-content" style="display:flex; flex-direction:column; gap:0.8rem; border-top-color:#e2e8f0;">
                             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
                                  <select id="filter-status" style="padding:0.4rem 0.8rem;border:1.5px solid #cbd5e1;border-radius:10px;font-size:0.85rem;font-family:inherit;background:white;font-weight:600;" onchange="window.filterStatus=this.value; window.renderBookings()">
-                                     <option value="all">All Statuses</option>
-                                     <option value="Awaiting Confirmation" ${window.filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>Awaiting Confirmation</option>
-                                     <option value="Confirmed" ${window.filterStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                                     <option value="Denied" ${window.filterStatus === 'Denied' ? 'selected' : ''}>Denied</option>
+                                     <option value="all">${t('All Statuses')}</option>
+                                     <option value="Awaiting Confirmation" ${window.filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>${t('Awaiting Confirmation')}</option>
+                                     <option value="Confirmed" ${window.filterStatus === 'Confirmed' ? 'selected' : ''}>${t('Confirmed')}</option>
+                                     <option value="Denied" ${window.filterStatus === 'Denied' ? 'selected' : ''}>${t('Denied')}</option>
                                  </select>
                                  <select id="filter-hotel" style="padding:0.4rem 0.8rem;border:1.5px solid #cbd5e1;border-radius:10px;font-size:0.85rem;font-family:inherit;background:white;font-weight:600;" onchange="window.filterHotel=this.value; window.renderBookings()">
-                                     <option value="all">All Hotels</option>
+                                     <option value="all">${t('All Hotels')}</option>
                                  </select>
                                  <input id="filter-from" type="date" value="${window.filterFrom}" style="padding:0.4rem;border:1.5px solid #cbd5e1;border-radius:10px;font-weight:600;" onchange="window.filterFrom=this.value; window.renderBookings()">
                                  <input id="filter-to" type="date" value="${window.filterTo}" style="padding:0.4rem;border:1.5px solid #cbd5e1;border-radius:10px;font-weight:600;" onchange="window.filterTo=this.value; window.renderBookings()">
                             </div>
                             <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; width:100%;">
-                                  <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('daily')">Daily</button>
-                                  <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('weekly')">Weekly</button>
-                                  <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('monthly')">Monthly</button>
-                                  <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem; margin-left:0.5rem; border-color:#cbd5e1; color:#64748b;" onclick="window.setProfileDatePreset('reset')">Reset Filter</button>
+                                  <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('daily')">${t('Daily')}</button>
+                                  <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('weekly')">${t('Weekly')}</button>
+                                  <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('monthly')">${t('Monthly')}</button>
+                                  <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem; margin-left:0.5rem; border-color:#cbd5e1; color:#64748b;" onclick="window.setProfileDatePreset('reset')">${t('Reset Filters')}</button>
                              </div>
                         </div>
                     </details>
@@ -238,7 +238,7 @@ window.router.addRoute('bookings', async (container, params) => {
                 <div class="premium-table-wrap">
                 <div style="overflow-x:auto;">
                     <table class="manager-table" style="width: 100%; min-width: 800px;">
-                        <thead><tr><th>No.</th><th>Ref</th><th>Hotel</th><th>Total</th><th>Status</th><th>Date</th><th>Rating</th><th>Proof</th><th>Receipt</th><th>Chat</th></tr></thead>
+                        <thead><tr><th>${t('No.')}</th><th>${t('Ref')}</th><th>${t('Hotel')}</th><th>${t('Total')}</th><th>${t('Status')}</th><th>${t('Date')}</th><th>${t('Rating')}</th><th>${t('Proof')}</th><th>${t('Receipt')}</th><th>${t('Chat')}</th></tr></thead>
                         <tbody id="booking-table-body"></tbody>
                     </table>
                 </div>
@@ -250,58 +250,58 @@ window.router.addRoute('bookings', async (container, params) => {
         <!-- Star Rating Modal -->
         <div id="rating-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
             <div style="background:white;border-radius:28px;padding:2.5rem;max-width:500px;width:95%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;">
-                <h3 id="rate-hotel-name-header" style="margin:0 0 0.5rem; font-size:1.6rem;">Rate Your Stay</h3>
+                <h3 id="rate-hotel-name-header" style="margin:0 0 0.5rem; font-size:1.6rem;">${t('Rate Your Stay')}</h3>
                 <p id="rate-hotel-name" style="color:#666;margin:0 0 1.5rem;font-size:0.95rem;font-weight:600;"></p>
                 
-                <div style="margin-bottom:0.5rem; font-weight:800; font-size:0.8rem; text-transform:uppercase; color:#888;">Overall Experience</div>
+                <div style="margin-bottom:0.5rem; font-weight:800; font-size:0.8rem; text-transform:uppercase; color:#888;">${t('Overall Experience')}</div>
                 <div id="rating-stars" class="star-rating-input" style="display:flex;justify-content:center;gap:0.7rem;margin-bottom:1.5rem;">
                     ${[1,2,3,4,5].map(i => `<span data-value="${i}" style="font-size:2.8rem; cursor:pointer; color:#eee; transition:all 0.2s;" onclick="window.pickStar(${i})">★</span>`).join('')}
                 </div>
 
                 <div style="margin-bottom:1.5rem; background:#f8f9fa; padding:1.5rem; border-radius:20px; text-align:left;">
-                    <div style="font-weight:800; font-size:0.85rem; text-transform:uppercase; color:#888; margin-bottom:1rem; text-align:center;">Detailed Category Ratings</div>
+                    <div style="font-weight:800; font-size:0.85rem; text-transform:uppercase; color:#888; margin-bottom:1rem; text-align:center;">${t('Detailed Category Ratings')}</div>
                     <div style="display:grid; gap:1rem;">
                         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-                            <span style="font-weight:700; font-size:0.95rem; display:inline-flex; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/><path d="M5.4 5.4h.01"/><path d="M10.2 3h.01"/><path d="M3 10.2h.01"/><path d="m14 14 6-6"/></svg> Cleanliness</span>
+                            <span style="font-weight:700; font-size:0.95rem; display:inline-flex; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/><path d="M5.4 5.4h.01"/><path d="M10.2 3h.01"/><path d="M3 10.2h.01"/><path d="m14 14 6-6"/></svg> ${t('Cleanliness')}</span>
                             <div id="sub-stars-cleanliness" style="display:flex; gap:0.4rem;"></div>
                         </div>
                         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-                            <span style="font-weight:700; font-size:0.95rem; display:inline-flex; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Location</span>
+                            <span style="font-weight:700; font-size:0.95rem; display:inline-flex; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> ${t('Location')}</span>
                             <div id="sub-stars-location" style="display:flex; gap:0.4rem;"></div>
                         </div>
                         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-                            <span style="font-weight:700; font-size:0.95rem; display:inline-flex; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4 12H2"/><path d="M22 12h-2"/><path d="m19.07 4.93-1.41 1.41"/><path d="m6.34 17.66-1.41 1.41"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M12 6a6 6 0 0 0-6 6h12a6 6 0 0 0-6-6Z"/><path d="M6 16h12"/></svg> Service</span>
+                            <span style="font-weight:700; font-size:0.95rem; display:inline-flex; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4 12H2"/><path d="M22 12h-2"/><path d="m19.07 4.93-1.41 1.41"/><path d="m6.34 17.66-1.41 1.41"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M12 6a6 6 0 0 0-6 6h12a6 6 0 0 0-6-6Z"/><path d="M6 16h12"/></svg> ${t('Service')}</span>
                             <div id="sub-stars-service" style="display:flex; gap:0.4rem;"></div>
                         </div>
                         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-                            <span style="font-weight:700; font-size:0.95rem; display:inline-flex; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13"/><path d="M13 3l3 6-4 13"/><path d="M2 9h20"/></svg> Value</span>
+                            <span style="font-weight:700; font-size:0.95rem; display:inline-flex; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); margin-right:6px;"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13"/><path d="M13 3l3 6-4 13"/><path d="M2 9h20"/></svg> ${t('Value')}</span>
                             <div id="sub-stars-value" style="display:flex; gap:0.4rem;"></div>
                         </div>
                     </div>
                 </div>
 
                 <div style="text-align:left; margin-bottom:1.5rem;">
-                    <label style="display:block; font-weight:800; font-size:0.8rem; text-transform:uppercase; color:#888; margin-bottom:0.6rem;">Written Review</label>
-                    <textarea id="rate-comment" placeholder="Tell us about the service, the rooms, and your overall experience..." rows="4" style="width:100%; padding:1rem; border-radius:16px; border:1.5px solid #eee; font-family:inherit; resize:none; font-size:0.95rem; line-height:1.5;"></textarea>
+                    <label style="display:block; font-weight:800; font-size:0.8rem; text-transform:uppercase; color:#888; margin-bottom:0.6rem;">${t('Written Review')}</label>
+                    <textarea id="rate-comment" placeholder="${t('Tell us about the service...')}" rows="4" style="width:100%; padding:1rem; border-radius:16px; border:1.5px solid #eee; font-family:inherit; resize:none; font-size:0.95rem; line-height:1.5;"></textarea>
                 </div>
 
                 <div style="text-align:left; margin-bottom:2rem;">
-                    <label style="display:block; font-weight:800; font-size:0.8rem; text-transform:uppercase; color:#888; margin-bottom:0.6rem;">Share Photos (Optional)</label>
+                    <label style="display:block; font-weight:800; font-size:0.8rem; text-transform:uppercase; color:#888; margin-bottom:0.6rem;">${t('Share Photos (Optional)')}</label>
                     <div id="review-photo-list" style="display:flex; gap:0.8rem; flex-wrap:wrap; margin-bottom:1rem;">
                         <div onclick="document.getElementById('input-review-photos').click()" style="width:80px; height:80px; border-radius:14px; border:2px dashed #ddd; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; color:#aaa; font-size:0.7rem; gap:4px; hover:background:#f9f9f9;">
                             <span style="display:flex;align-items:center;justify-content:center;margin-bottom:2px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></span>
-                            <span>Add Photo</span>
+                            <span>${t('Add Photo')}</span>
                         </div>
                     </div>
                     <input type="file" id="input-review-photos" accept="image/*" multiple style="display:none;" onchange="window.handleReviewPhotos(this)">
-                    <p style="font-size:0.7rem; color:#aaa; margin:0;">You can upload up to 5 photos from your stay.</p>
+                    <p style="font-size:0.7rem; color:#aaa; margin:0;">${t('You can upload up to 5 photos from your stay.')}</p>
                 </div>
 
                 <div id="rate-status" style="margin-bottom:1rem; font-weight:700; color:var(--color-primary); font-size:0.85rem;"></div>
 
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
-                    <button class="btn-outline" style="padding:1rem; border-radius:14px; font-weight:700;" onclick="document.getElementById('rating-modal').style.display='none'">Dismiss</button>
-                    <button id="rating-submit-btn" class="btn-primary" style="padding:1rem; border-radius:14px; font-weight:700;" onclick="window.submitRating()">Submit Review</button>
+                    <button class="btn-outline" style="padding:1rem; border-radius:14px; font-weight:700;" onclick="document.getElementById('rating-modal').style.display='none'">${t('Dismiss')}</button>
+                    <button id="rating-submit-btn" class="btn-primary" style="padding:1rem; border-radius:14px; font-weight:700;" onclick="window.submitRating()">${t('Submit Review')}</button>
                 </div>
             </div>
         </div>
@@ -340,7 +340,7 @@ window.router.addRoute('bookings', async (container, params) => {
         list.innerHTML = items + `
             <div onclick="document.getElementById('input-review-photos').click()" style="width:80px; height:80px; border-radius:14px; border:2px dashed #ddd; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; color:#aaa; font-size:0.7rem; gap:4px; hover:background:#f9f9f9;">
                 <span style="font-size:1.5rem;">📸</span>
-                <span>Add Photo</span>
+                <span>${t('Add Photo')}</span>
             </div>
         `;
     };
