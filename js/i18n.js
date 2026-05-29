@@ -719,7 +719,25 @@ const translations = {
         "Message": "መልዕክት",
         "Rate Your Stay": "ለቆይታዎ ደረጃ ይስጡ",
         "Back to Home": "ወደ ዋና ገፅ ይመለሱ",
-        "My Bookings": "የኔ ቦታ ማስያዣዎች"
+        "My Bookings": "የኔ ቦታ ማስያዣዎች",
+        "Confirmed": "ተረጋግጧል",
+        "Denied": "ተከልክሏል",
+        "Awaiting Confirmation": "ማረጋገጫ በመጠባበቅ ላይ",
+        "Birr": "ብር",
+        "Rating": "ደረጃ",
+        "Proof": "ማስረጃ",
+        "Receipt": "ደረሰኝ",
+        "Chat": "ቻት",
+        "Total": "ድምር",
+        "Status": "ሁኔታ",
+        "Date": "ቀን",
+        "No.": "ቁ.",
+        "Ref": "መለያ",
+        "Hotel": "ሆቴል",
+        "booking": "ቦታ ማስያዣ",
+        "bookings": "ቦታ ማስያዣዎች",
+        "night": "አዳር",
+        "nights": "አዳሮች"
     },
     om: {
         // Core Navigation & UI
@@ -1417,7 +1435,25 @@ const translations = {
         "Message": "Ergaa",
         "Rate Your Stay": "Turmaata Keessan Sadarkaa Kennaa",
         "Back to Home": "Gara Fuula Duraatti Deebi'i",
-        "My Bookings": "Kutaawwan Koo"
+        "My Bookings": "Kutaawwan Koo",
+        "Confirmed": "Mirkanaa'era",
+        "Denied": "Dhorkameera",
+        "Awaiting Confirmation": "Mirkaneessa Eegaa Jira",
+        "Birr": "Birrii",
+        "Rating": "Sadarkaa",
+        "Proof": "Ragaa",
+        "Receipt": "Nagahee",
+        "Chat": "Haasaa",
+        "Total": "Ida'ama",
+        "Status": "Haala",
+        "Date": "Guyyaa",
+        "No.": "Lak.",
+        "Ref": "Lakk. Addaa",
+        "Hotel": "Hoteela",
+        "booking": "kutaa",
+        "bookings": "kutaawwan",
+        "night": "halkan",
+        "nights": "halkan"
     }
 };
 

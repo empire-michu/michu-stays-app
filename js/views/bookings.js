@@ -135,9 +135,9 @@ window.router.addRoute('bookings', async (container, params) => {
                     <div style="font-weight:700;font-size:0.9rem;color:#1e293b;">${b.propertyTitle}</div>
                     <div class="premium-stay-dates">${b.checkIn} → ${b.checkOut} <span class="premium-nights-badge">(${nights} ${nights !== 1 ? t('nights') : t('night')})</span></div>
                 </td>
-                <td data-label="Total"><span class="premium-amount">${b.totalAmount}<span class="premium-amount-currency">Birr</span></span></td>
+                <td data-label="Total"><span class="premium-amount">${b.totalAmount}<span class="premium-amount-currency">${t('Birr')}</span></span></td>
                 <td data-label="Status"><span class="premium-status ${b.status==='Confirmed'?'premium-status--confirmed':(b.status==='Denied'?'premium-status--denied':'premium-status--awaiting')}">
-                    ${statusIcon(b.status)} ${b.status}
+                    ${statusIcon(b.status)} ${t(b.status)}
                 </span></td>
                 <td data-label="Date">
                     <div class="premium-date">${b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</div>
@@ -192,16 +192,18 @@ window.router.addRoute('bookings', async (container, params) => {
     };
 
     container.innerHTML = `
-        <div class="container" style="padding-top:2.5rem;padding-bottom:2rem;max-width:1600px;width:100%;padding-left:1.5rem;padding-right:1.5rem;">
+        <div class="container bookings-main-container" style="padding-top:2.5rem;padding-bottom:2rem;max-width:1600px;width:100%;padding-left:1.5rem;padding-right:1.5rem;">
             <div style="margin-bottom:1.5rem;"><button onclick="window.router.navigate('home')" class="btn-outline" style="border:none;padding:0;">← ${t('Back to Home') || 'Back to Home'}</button></div>
 
             <style>
                 @media (max-width: 768px) {
                     .booking-history-header { flex-direction: column; align-items: flex-start !important; gap: 1rem; }
+                    .bookings-main-container { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+                    .bookings-card { padding: 1rem !important; }
                 }
             </style>
 
-            <div style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);margin-bottom:2rem;">
+            <div class="bookings-card" style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);margin-bottom:2rem;">
                 <div class="booking-history-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
                     <h3 style="margin:0; width:100%; color:#0F5A3F; display:flex; align-items:center; gap:0.5rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg> ${t('My Bookings')} <span id="booking-count" style="font-size:0.8rem;font-weight:400;color:#888;"></span></h3>
                     
