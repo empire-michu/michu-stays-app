@@ -813,6 +813,7 @@ window.router.addRoute('admin', async (container, params) => {
                 <div style="background:#eee; border-radius:99px; padding:0.3rem; display:inline-flex; gap:0.2rem; margin-bottom:2.5rem; flex-wrap:wrap;">
                     <button style="${tabStyle('analytics')}" onclick="window.fastTab('analytics')">📊 Analytics</button>
                     <button style="${tabStyle('hotels')}" onclick="window.fastTab('hotels')">Properties</button>
+                    <button class="hide-on-mobile" style="${tabStyle('bookings')}" onclick="window.fastTab('bookings')">Bookings</button>
                     <button style="${tabStyle('managers')}" onclick="window.fastTab('managers')">Managers</button>
                     <button style="${tabStyle('announcements')}" onclick="window.fastTab('announcements')">Announcements</button>
                     <button style="${tabStyle('add-hotel')}" onclick="window.fastTab('add-hotel')">Add Stay</button>
