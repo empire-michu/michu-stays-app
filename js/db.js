@@ -722,15 +722,26 @@ class Database {
 
     // Old duplicate methods removed — using the unified versions at the bottom of this class
 
-    listenToBookings(callback, managerId = null, customerId = null) {
+    listenToBookings(callback, managerId = null, customerId = null, filters = {}, limitCount = 20) {
         let query = firestore.collection('bookings');
         if (managerId) query = query.where('managerId', '==', managerId);
         if (customerId) query = query.where('customerId', '==', customerId);
         
+        if (filters.status && filters.status !== 'all') {
+            query = query.where('status', '==', filters.status);
+        }
+        if (filters.propertyTitle && filters.propertyTitle !== 'all') {
+            query = query.where('propertyTitle', '==', filters.propertyTitle);
+        }
+        
+        // Note: Firestore requires all range filters to be on the same field as the first orderBy
+        if (filters.from) query = query.where('createdAt', '>=', filters.from);
+        if (filters.to) query = query.where('createdAt', '<=', filters.to + 'T23:59:59');
+
+        query = query.orderBy('createdAt', 'desc').limit(limitCount);
+
         return query.onSnapshot(snapshot => {
-            const bookings = snapshot.docs
-                .map(doc => ({ id: doc.id, ...doc.data() }))
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            const bookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             callback(bookings);
         }, err => console.warn('Booking listener error:', err));
     }

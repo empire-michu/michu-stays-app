@@ -9,33 +9,54 @@ window.router.addRoute('bookings', async (container, params) => {
     const userRole = window.auth.userData?.role || 'customer';
 
     let allBookings = [], bookingReviews = {};
-    let bookingsPage = 1;
-    let totalBookingsPages = 1;
+    let currentLimit = 20;
 
     // ─── BACKGROUND REVIEW LOADING (non-blocking) ─────────────────
     const loadReviewsInBackground = async () => {
         let changed = false;
         const confirmedBookings = allBookings.filter(b => b.status === 'Confirmed');
-        for (const b of confirmedBookings) {
-            if (bookingReviews[b.id]) continue; 
-            try {
-                const review = await Promise.race([
-                    window.db.getUserReviewForBooking(b.id),
-                    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
-                ]);
-                if (review) { bookingReviews[b.id] = review; changed = true; }
-            } catch (e) { break; }
+        const idsToFetch = confirmedBookings.map(b => b.id).filter(id => !bookingReviews[id]);
+        
+        if (idsToFetch.length === 0) return;
+
+        try {
+            // Firestore 'in' queries are limited to 30 items
+            const chunks = [];
+            for (let i = 0; i < idsToFetch.length; i += 30) chunks.push(idsToFetch.slice(i, i + 30));
+            
+            for (const chunk of chunks) {
+                const reviews = await window.db.firestore.collection('reviews')
+                    .where('bookingId', 'in', chunk).get();
+                reviews.forEach(doc => {
+                    const r = doc.data();
+                    bookingReviews[r.bookingId] = r;
+                    changed = true;
+                });
+            }
+        } catch (err) {
+            console.warn('Batch review load failed:', err);
         }
+
         if (changed) renderBookings(); 
     };
 
     // ─── LIVE BOOKING LISTENER ───────────────────────────────────
-    if (window.bookingsUnsub) window.bookingsUnsub(); 
-    window.bookingsUnsub = window.db.listenToBookings((data) => {
-        allBookings = data;
-        renderBookings();
-        loadReviewsInBackground();
-    }, null, uid);
+    const attachBookingListener = () => {
+        if (window.bookingsUnsub) window.bookingsUnsub(); 
+        
+        const filters = {
+            status: window.filterStatus,
+            propertyTitle: window.filterHotel,
+            from: window.filterFrom,
+            to: window.filterTo
+        };
+
+        window.bookingsUnsub = window.db.listenToBookings((data) => {
+            allBookings = data;
+            renderBookings();
+            loadReviewsInBackground();
+        }, null, uid, filters, currentLimit);
+    };
 
     window.filterFrom = ''; window.filterTo = ''; window.filterHotel = 'all'; window.filterStatus = 'all';
 
@@ -63,18 +84,13 @@ window.router.addRoute('bookings', async (container, params) => {
         const toEl = document.getElementById('filter-to');
         if (fromEl) fromEl.value = window.filterFrom;
         if (toEl) toEl.value = window.filterTo;
-        bookingsPage = 1;
-        renderBookings();
+        currentLimit = 20; // reset limit on filter change
+        attachBookingListener();
     };
 
-    const applyFilter = () => {
-        let filtered = [...allBookings];
-        if (window.filterFrom) filtered = filtered.filter(b => b.createdAt && new Date(b.createdAt) >= new Date(window.filterFrom));
-        if (window.filterTo)   filtered = filtered.filter(b => b.createdAt && new Date(b.createdAt) <= new Date(window.filterTo + 'T23:59:59'));
-        if (window.filterHotel && window.filterHotel !== 'all') filtered = filtered.filter(b => b.propertyTitle === window.filterHotel);
-        if (window.filterStatus && window.filterStatus !== 'all') filtered = filtered.filter(b => b.status === window.filterStatus);
-        return filtered;
-    };
+    // applyFilter is removed as filtering is now done via DB queries
+    // We attach listeners globally on init
+    attachBookingListener();
 
     const statusIcon = (status) => {
         if (status === 'Confirmed') return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
@@ -83,38 +99,27 @@ window.router.addRoute('bookings', async (container, params) => {
     };
 
     const renderBookings = () => {
-        const fullList = applyFilter();
-        const hotelNames = [...new Set(allBookings.map(b => b.propertyTitle))].filter(Boolean).sort();
-
-        const hSelect = document.getElementById('filter-hotel');
-        if (hSelect && hSelect.options.length <= 1) {
-            hotelNames.forEach(name => {
-                const opt = document.createElement('option');
-                opt.value = name; opt.innerText = name;
-                if (filterHotel === name) opt.selected = true;
-                hSelect.appendChild(opt);
-            });
-        }
-
-        totalBookingsPages = Math.max(1, Math.ceil(fullList.length / 20));
-        if (bookingsPage > totalBookingsPages) bookingsPage = totalBookingsPages;
+        // Since we are no longer fetching the entire collection, we can't build the hotel dropdown dynamically
+        // We will leave the HTML select options as they are defined statically in the DOM, or they need to be populated from getProperties.
+        // For MVP paginated approach, we trust the predefined select or fetch properties separately if needed.
         
-        const list = fullList.slice((bookingsPage - 1) * 20, (bookingsPage - 1) * 20 + 20);
+        const list = allBookings; // Already limited and filtered by DB
         
         const tbody = document.getElementById('booking-table-body');
         const countEl = document.getElementById('booking-count');
         const paginationEl = document.getElementById('bookings-pagination');
         if (!tbody) return;
 
-        if (countEl) countEl.innerText = `${fullList.length} booking${fullList.length !== 1 ? 's' : ''}`;
+        if (countEl) countEl.innerText = `${list.length} booking${list.length !== 1 ? 's' : ''}`;
 
         if (list.length === 0) {
             tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:2.5rem;color:var(--color-text-light);">${t('No bookings found.')}</td></tr>`;
+            if (paginationEl) paginationEl.innerHTML = '';
             return;
         }
 
         tbody.innerHTML = list.map((b, index) => {
-            let rowNum = (bookingsPage - 1) * 20 + index + 1;
+            let rowNum = index + 1;
             const review = bookingReviews[b.id];
             const stars = review ? review.rating : 0;
             let nights = 0;
@@ -167,29 +172,26 @@ window.router.addRoute('bookings', async (container, params) => {
         }).join('');
 
         if (paginationEl) {
-            if (totalBookingsPages <= 1) {
-                paginationEl.innerHTML = '';
-            } else {
-                let btns = '';
-                for (let i = 1; i <= totalBookingsPages; i++) {
-                    btns += `<button onclick="window.setProfileBookingPage(${i})" class="${bookingsPage===i?'active':''}" style="width:34px; height:34px;">${i}</button>`;
-                }
+            if (list.length === currentLimit) {
+                // There might be more data
                 paginationEl.innerHTML = `
-                    <div class="premium-pagination">
-                        <button onclick="window.setProfileBookingPage(${bookingsPage - 1})" ${bookingsPage === 1 ? 'disabled' : ''} style="padding:0 0.8rem; height:34px;">‹</button>
-                        ${btns}
-                        <button onclick="window.setProfileBookingPage(${bookingsPage + 1})" ${bookingsPage === totalBookingsPages ? 'disabled' : ''} style="padding:0 0.8rem; height:34px;">›</button>
+                    <div style="display:flex;justify-content:center;margin-top:1.5rem;">
+                        <button onclick="window.loadMoreBookings()" class="premium-action-btn premium-action-btn--primary" style="padding:0.75rem 1.5rem;">${t('Load More') || 'Load More'}</button>
                     </div>
                 `;
+            } else {
+                paginationEl.innerHTML = ''; // End of list
             }
         }
     };
 
-    window.setProfileBookingPage = (page) => {
-        if (page < 1 || page > totalBookingsPages) return;
-        bookingsPage = page;
-        renderBookings();
+    window.loadMoreBookings = () => {
+        currentLimit += 20;
+        window.attachBookingListener();
     };
+    
+    // Bind to window so the HTML template can use it
+    window.attachBookingListener = attachBookingListener;
 
     container.innerHTML = `
         <div class="container bookings-main-container" style="padding-top:2.5rem;padding-bottom:2rem;max-width:1600px;width:100%;padding-left:1.5rem;padding-right:1.5rem;">
@@ -216,17 +218,17 @@ window.router.addRoute('bookings', async (container, params) => {
                         </summary>
                         <div class="filter-content" style="display:flex; flex-direction:column; gap:0.8rem; border-top-color:#e2e8f0;">
                             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
-                                 <select id="filter-status" style="padding:0.4rem 0.8rem;border:1.5px solid #cbd5e1;border-radius:10px;font-size:0.85rem;font-family:inherit;background:white;font-weight:600;" onchange="window.filterStatus=this.value; window.renderBookings()">
+                                 <select id="filter-status" style="padding:0.4rem 0.8rem;border:1.5px solid #cbd5e1;border-radius:10px;font-size:0.85rem;font-family:inherit;background:white;font-weight:600;" onchange="window.filterStatus=this.value; currentLimit=20; window.attachBookingListener()">
                                      <option value="all">${t('All Statuses')}</option>
                                      <option value="Awaiting Confirmation" ${window.filterStatus === 'Awaiting Confirmation' ? 'selected' : ''}>${t('Awaiting Confirmation')}</option>
                                      <option value="Confirmed" ${window.filterStatus === 'Confirmed' ? 'selected' : ''}>${t('Confirmed')}</option>
                                      <option value="Denied" ${window.filterStatus === 'Denied' ? 'selected' : ''}>${t('Denied')}</option>
                                  </select>
-                                 <select id="filter-hotel" style="padding:0.4rem 0.8rem;border:1.5px solid #cbd5e1;border-radius:10px;font-size:0.85rem;font-family:inherit;background:white;font-weight:600;" onchange="window.filterHotel=this.value; window.renderBookings()">
+                                 <select id="filter-hotel" style="padding:0.4rem 0.8rem;border:1.5px solid #cbd5e1;border-radius:10px;font-size:0.85rem;font-family:inherit;background:white;font-weight:600;" onchange="window.filterHotel=this.value; currentLimit=20; window.attachBookingListener()">
                                      <option value="all">${t('All Hotels')}</option>
                                  </select>
-                                 <input id="filter-from" type="date" value="${window.filterFrom}" style="padding:0.4rem;border:1.5px solid #cbd5e1;border-radius:10px;font-weight:600;" onchange="window.filterFrom=this.value; window.renderBookings()">
-                                 <input id="filter-to" type="date" value="${window.filterTo}" style="padding:0.4rem;border:1.5px solid #cbd5e1;border-radius:10px;font-weight:600;" onchange="window.filterTo=this.value; window.renderBookings()">
+                                 <input id="filter-from" type="date" value="${window.filterFrom}" style="padding:0.4rem;border:1.5px solid #cbd5e1;border-radius:10px;font-weight:600;" onchange="window.filterFrom=this.value; currentLimit=20; window.attachBookingListener()">
+                                 <input id="filter-to" type="date" value="${window.filterTo}" style="padding:0.4rem;border:1.5px solid #cbd5e1;border-radius:10px;font-weight:600;" onchange="window.filterTo=this.value; currentLimit=20; window.attachBookingListener()">
                             </div>
                             <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; width:100%;">
                                   <button class="btn-outline" style="font-size:0.75rem; border-radius:10px; padding:0.4rem 0.8rem;" onclick="window.setProfileDatePreset('daily')">${t('Daily')}</button>
