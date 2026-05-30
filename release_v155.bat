@@ -14,7 +14,7 @@ if %errorlevel% neq 0 (
 
 echo 2. Committing to Git and Pushing to trigger GitHub Actions (AAB generation)
 git add .
-git commit -m "Release v1.55 - Pro UI Refinements, Room Availability Fixes, and Privacy Logic"
+git commit -m "Release v1.55.2 - Force Cache Invalidation for Mobile Clients"
 git push
 
 if %errorlevel% neq 0 (
