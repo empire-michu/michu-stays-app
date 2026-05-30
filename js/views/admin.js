@@ -970,7 +970,7 @@ window.router.addRoute('admin', async (container, params) => {
                                     <label style="display:block; font-size:0.7rem; font-weight:800; color:#888; margin-bottom:0.3rem; text-transform:uppercase;">Hotel/Property</label>
                                     <select id="adm-book-hotel" style="padding:0.6rem; border-radius:10px; border:1.5px solid #e0e0e0; font-size:0.85rem; font-weight:700; background:white; cursor:pointer;" onchange="window.setAdmFilter()">
                                         <option value="">All Properties</option>
-                                        ${Array.from(new Set(cachedBookings.map(b => b.propertyTitle))).sort().map(title => `<option value="${title}" ${filterHotel === title ? 'selected' : ''}>${title}</option>`).join('')}
+                                        ${Array.from(new Set(cachedProperties.map(p => p.title))).sort().map(title => `<option value="${title}" ${filterHotel === title ? 'selected' : ''}>${title}</option>`).join('')}
                                     </select>
                                 </div>
                                 <div>

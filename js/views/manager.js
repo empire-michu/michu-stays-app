@@ -924,7 +924,7 @@ window.router.addRoute('manager', async (container, params) => {
     };
 
     const renderBookingsTab = () => {
-        if (allBookings.length === 0) return `<div style="text-align:center; padding:5rem; background:white; border-radius:24px; box-shadow:var(--shadow-sm);"><h3>No bookings yet</h3><p style="color:#666;">Once guests book your property, they will appear here.</p></div>`;
+        if (tableBookings.length === 0) return `<div style="text-align:center; padding:5rem; background:white; border-radius:24px; box-shadow:var(--shadow-sm);"><h3>No bookings yet</h3><p style="color:#666;">Once guests book your property, they will appear here.</p></div>`;
         
         return `
                 <details class="premium-filter-collapse" ${window.mgrFiltersOpen ? 'open' : ''} ontoggle="window.mgrFiltersOpen = this.open">
