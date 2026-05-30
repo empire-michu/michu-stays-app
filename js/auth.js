@@ -167,9 +167,28 @@ class AuthEngine {
                     ? `<img src="${this.userData.profilePic}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.3);">`
                     : `<img src="images/logo.png" style="width:24px;height:24px;border-radius:50%;object-fit:contain;background:white;padding:2px;">`;
 
-                dashBtn = `<button class="btn-outline" style="padding:0.3rem 0.7rem;font-size:0.75rem;display:flex;align-items:center;gap:0.4rem;font-weight:700;border-radius:12px;" onclick="window.router.navigate('profile')">
-                    ${avatarImg} ${displayName}
-                </button>`;
+                dashBtn = `
+                <div class="desktop-user-dropdown" style="position:relative; display:inline-block;">
+                    <style>
+                        .desktop-user-dropdown:hover .user-dropdown-menu { display: block; animation: dropFade 0.2s ease-out; }
+                        .desktop-user-dropdown::after { content: ''; position: absolute; top: 100%; left: 0; right: 0; height: 15px; }
+                        .user-dropdown-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; min-width: 180px; background: white; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #f1f5f9; padding: 0.5rem; z-index: 9999; }
+                        .user-dropdown-menu a { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1rem; color: #475569; font-weight: 600; font-size: 0.85rem; border-radius: 10px; cursor: pointer; transition: 0.2s; text-decoration: none; }
+                        .user-dropdown-menu a:hover { background: #f8fafc; color: #0F5A3F; }
+                        .user-dropdown-menu a svg { width: 16px; height: 16px; opacity: 0.8; }
+                        @keyframes dropFade { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+                    </style>
+                    <button class="btn-outline" style="padding:0.3rem 0.7rem;font-size:0.75rem;display:flex;align-items:center;gap:0.4rem;font-weight:700;border-radius:12px;cursor:pointer;">
+                        ${avatarImg} ${displayName}
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="user-dropdown-menu">
+                        <a onclick="window.router.navigate('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> ${window.t ? window.t('My Profile') : 'My Profile'}</a>
+                        <a onclick="window.router.navigate('bookings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg> ${window.t ? window.t('My Bookings') : 'My Bookings'}</a>
+                        <div style="border-top:1px solid #e2e8f0;margin:0.3rem 0;"></div>
+                        <a onclick="window.auth.logout()" style="color:#dc2626;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> ${window.t ? window.t('Log out') : 'Log out'}</a>
+                    </div>
+                </div>`;
             }
             container.innerHTML = `
                 <div style="display:flex;align-items:center;">

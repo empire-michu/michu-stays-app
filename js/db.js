@@ -398,16 +398,24 @@ class Database {
             link: 'profile',
             params: { tab: 'bookings' }
         });
+        let actualManagerId = booking.managerId;
+        if (!actualManagerId && booking.propertyId) {
+            try {
+                const propDoc = await firestore.collection('properties').doc(booking.propertyId).get();
+                if (propDoc.exists) actualManagerId = propDoc.data().managerId;
+            } catch(e) {}
+        }
 
-        if (status === 'Confirmed' && booking.managerId) {
+        if (status === 'Confirmed' && actualManagerId) {
             await this.createNotification({
                 message: '✅ Booking Confirmed',
                 details: `Booking for ${booking.propertyTitle} (${booking.referenceCode}) has been confirmed successfully.`,
-                targetUserId: booking.managerId,
+                targetUserId: actualManagerId,
                 category: 'bookings',
                 status: 'confirmed',
                 link: 'manager',
-                params: { tab: 'bookings' }
+                params: { tab: 'bookings' },
+                bookingId: bookingId
             });
         }
 
@@ -421,12 +429,12 @@ class Database {
             { tab: 'bookings' }
         );
 
-        if (status === 'Confirmed' && booking.managerId) {
+        if (status === 'Confirmed' && actualManagerId) {
             await this.triggerPushNotification(
                 booking.propertyId,
                 '✅ Booking Confirmed',
                 `Booking for ${booking.propertyTitle} (${booking.referenceCode}) has been confirmed.`,
-                booking.managerId,
+                actualManagerId,
                 'manager',
                 { tab: 'bookings' }
             );
@@ -1404,6 +1412,7 @@ class Database {
             status: notif.status || 'info',
             link: notif.link || null,
             params: notif.params || null,
+            bookingId: notif.bookingId || null,
             actions: notif.actions || []
         };
         const ref = await firestore.collection('notifications').add(payload);

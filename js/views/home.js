@@ -410,7 +410,7 @@ window.router.addRoute('home', async (container, params) => {
 
         <div class="container" style="position:relative; z-index:10; margin-top:-2rem;">
             <!-- Categories -->
-            <div class="category-filters" style="margin-top:3rem; padding-bottom:1.5rem; border:none; gap:1.2rem;">
+            <div class="category-filters" style="margin-top:1.5rem; padding-bottom:1rem; border:none; gap:1.2rem;">
                 <div class="category-item active" id="cat-all" onclick="setCat('all')">
                     <svg class="category-icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
@@ -445,7 +445,7 @@ window.router.addRoute('home', async (container, params) => {
             </div>
 
             <!-- Main Layout with Sidebar -->
-            <div class="main-layout" style="margin-top:2rem;">
+            <div class="main-layout" style="margin-top:0.5rem;">
                 <!-- Filter Toggle moved to View Toggle area -->
 
                 <!-- Filters Sidebar -->
