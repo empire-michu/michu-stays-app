@@ -43,7 +43,7 @@ window.router.addRoute('saved', async (container, params) => {
         }
 
         const avail = hasRoomTypes 
-            ? p.roomTypes.reduce((sum, rt) => sum + (Number(rt.totalRooms) || 0), 0)
+            ? p.roomTypes.reduce((sum, rt) => sum + (Number(rt.availableRooms !== undefined ? rt.availableRooms : rt.totalRooms) || 0), 0)
             : (p.availableRooms ?? p.totalRooms ?? 0);
 
         const roomBadge = avail > 0 

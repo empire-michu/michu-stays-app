@@ -208,7 +208,15 @@ window.router.addRoute('bookings', async (container, params) => {
 
             <div class="bookings-card" style="background:white;border-radius:20px;padding:2rem;box-shadow:var(--shadow-sm);margin-bottom:2rem;">
                 <div class="booking-history-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
-                    <h3 style="margin:0; width:100%; color:#0F5A3F; display:flex; align-items:center; gap:0.5rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg> ${t('My Bookings')} <span id="booking-count" style="font-size:0.8rem;font-weight:400;color:#888;"></span></h3>
+                    <h3 style="margin:0; width:100%; color:#0F5A3F; display:flex; align-items:center; justify-content:space-between;">
+                        <span style="display:flex; align-items:center; gap:0.5rem;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg> ${t('My Bookings')} <span id="booking-count" style="font-size:0.8rem;font-weight:400;color:#888;"></span>
+                        </span>
+                        <button class="btn-outline" style="font-size:0.75rem; color:#dc2626; border-color:#fca5a5; padding:0.4rem 0.8rem; border-radius:10px; display:flex; align-items:center; gap:0.3rem;" onclick="window.confirmClearBookingsMobile()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            <span class="hide-mobile">${t('Clear History')}</span>
+                        </button>
+                    </h3>
                     
                     <details class="premium-filter-collapse" style="width:100%; margin-bottom:0; box-shadow:none; border:1px solid #e2e8f0; background:#f8fafc;">
                         <summary style="color:#475569; font-size:0.8rem;">
@@ -465,6 +473,36 @@ window.router.addRoute('bookings', async (container, params) => {
     };
 
     window.renderBookings = renderBookings;
+
+    window.confirmClearBookingsMobile = async () => {
+        if (allBookings.length === 0) {
+            window.showToast(t('ℹ️ You have no booking history to delete.'));
+            return;
+        }
+        const confirmed = await window.showConfirm({
+            title: t('📋 Delete All Bookings?'),
+            message: t(`This will permanently delete all ${allBookings.length} booking record(s). This cannot be undone.`),
+            confirmText: t('Delete All'),
+            cancelText: t('Cancel'),
+            type: 'danger'
+        });
+        if (!confirmed) return;
+
+        try {
+            const batch = window.db.firestore.batch();
+            allBookings.forEach(b => {
+                batch.delete(window.db.firestore.collection('bookings').doc(b.id));
+            });
+            await batch.commit();
+            window.showToast(t('✅ Booking history cleared successfully.'));
+            allBookings = [];
+            renderBookings();
+        } catch(e) {
+            console.error('Clear bookings error:', e);
+            window.showToast(t('Error clearing history: ' + e.message));
+        }
+    };
+
     renderBookings();
     loadReviewsInBackground();
 

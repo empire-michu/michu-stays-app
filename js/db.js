@@ -99,13 +99,14 @@ class Database {
             
             const snapshot = await fetchPromise;
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const finalData = managerId ? data : data.filter(p => p.isAvailable !== false);
             
             if (!managerId) {
-                this.cache.properties = data;
+                this.cache.properties = finalData;
                 this.cache.propertiesLastFetch = Date.now();
-                localStorage.setItem('michu_prop_cache', JSON.stringify({ data, ts: Date.now() }));
+                localStorage.setItem('michu_prop_cache', JSON.stringify({ data: finalData, ts: Date.now() }));
             }
-            return data;
+            return finalData;
         } catch(e) {
             console.warn("Fetch failed, returning cached data if available:", e);
             if (this.cache.properties) return this.cache.properties;
@@ -210,6 +211,10 @@ class Database {
             checkIn: userDetails.checkIn || '',
             checkOut: userDetails.checkOut || '',
             guests: userDetails.guests || 1,
+            adults: userDetails.adults,
+            children: userDetails.children,
+            totalRooms: userDetails.totalRooms,
+            selectedRooms: userDetails.selectedRooms || null,
             packageInfo: userDetails.packageInfo || null,
             roomTypeId: userDetails.roomTypeId || null,
             roomTypeName: userDetails.roomTypeName || null,
@@ -394,6 +399,18 @@ class Database {
             params: { tab: 'bookings' }
         });
 
+        if (status === 'Confirmed' && booking.managerId) {
+            await this.createNotification({
+                message: '✅ Booking Confirmed',
+                details: `Booking for ${booking.propertyTitle} (${booking.referenceCode}) has been confirmed successfully.`,
+                targetUserId: booking.managerId,
+                category: 'bookings',
+                status: 'confirmed',
+                link: 'manager',
+                params: { tab: 'bookings' }
+            });
+        }
+
         // SEND HARD NOTIFICATION (PUSH)
         await this.triggerPushNotification(
             booking.propertyId,
@@ -403,6 +420,17 @@ class Database {
             'profile',
             { tab: 'bookings' }
         );
+
+        if (status === 'Confirmed' && booking.managerId) {
+            await this.triggerPushNotification(
+                booking.propertyId,
+                '✅ Booking Confirmed',
+                `Booking for ${booking.propertyTitle} (${booking.referenceCode}) has been confirmed.`,
+                booking.managerId,
+                'manager',
+                { tab: 'bookings' }
+            );
+        }
     }
 
     // ─── USERS ────────────────────────────────────────────────
@@ -791,6 +819,9 @@ class Database {
                     const id = change.doc.id;
                     if (!seenIds.has(id)) {
                         seenIds.add(id);
+                        
+                        // Prevent admins from receiving direct chat notifications (they are between guest and manager)
+                        if (role === 'admin' && data.link === 'chat') return;
                         
                         // Skip notifications this user has dismissed locally
                         if (this.isNotifDismissed(id)) return;

@@ -380,6 +380,7 @@ window.router.addRoute('manager', async (container, params) => {
                 distanceFromCenter: getNum('mg-h-distance'),
                 badgeText: getVal('mg-badge-text'),
                 eventMode: document.getElementById('mg-event-mode')?.checked || false,
+                isAvailable: document.getElementById('mg-h-available')?.checked !== false,
                 amenities: Array.from(document.querySelectorAll('.mg-amenity:checked')).map(el => el.value),
                 images: filteredImages,
                 image: filteredImages[0] || '',
@@ -713,8 +714,8 @@ window.router.addRoute('manager', async (container, params) => {
                     /* manager-table styles are defined in components.css */
 
                     /* Property Editor Fluid Grid */
-                    .mgr-prop-layout { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; align-items: start; }
-                    .mgr-main-card { min-width: 0; }
+                    .mgr-prop-layout { width: 100%; display: block; }
+                    .mgr-main-card { min-width: 0; width: 100%; }
                     .mgr-two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
                     .mgr-three-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
                     .mgr-inventory-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -727,8 +728,7 @@ window.router.addRoute('manager', async (container, params) => {
                     }
 
                     @media (max-width: 1024px) {
-                        .mgr-prop-layout { grid-template-columns: 1fr; }
-                        .mgr-prop-preview { display: none; }
+                        .mgr-prop-layout { display: block; }
                     }
 
                     @media (max-width: 768px) {
@@ -1009,9 +1009,9 @@ window.router.addRoute('manager', async (container, params) => {
                                                 <div class="guest-details-content">
                                                     <div class="premium-guest-email"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> ${b.customerEmail}</div>
                                                     ${b.customerPhone ? `<div class="premium-guest-phone"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> ${b.customerPhone}</div>` : ''}
-                                                    ${(b.adults !== undefined || b.children !== undefined) ? `<div class="premium-guest-occupants"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> ${b.adults || 0} ${b.adults !== 1 ? t('Adults') : t('Adult')}${b.children ? `, ${b.children} ${b.children !== 1 ? t('Children') : t('Child')}` : ''}</div>` : ''}
+                                                    <div class="premium-tag" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; margin-top:0.3rem;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> ${t('GUESTS:')} ${b.adults !== undefined ? `${b.adults} ${t('Adults')}, ${b.children || 0} ${t('Children')}` : `${b.guests || 1} ${t('Guests')}`}</div>
                                                     ${b.packageInfo ? `<div class="premium-tag premium-tag--package"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg> ${t('PKG:')} ${b.packageInfo.title}</div>` : ''}
-                                                    ${b.roomTypeName ? `<div class="premium-tag premium-tag--room"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg> ${t('ROOM:')} ${b.roomTypeName}</div>` : ''}
+                                                    ${(b.selectedRooms && b.selectedRooms.length > 0) || b.roomTypeName ? `<div class="premium-tag premium-tag--room"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg> ${t('ROOM:')} ${(b.selectedRooms && b.selectedRooms.length > 0) ? b.selectedRooms.map(r => r.roomCount + 'x ' + (r.roomName || 'Room')).join(', ') : (b.totalRooms ? b.totalRooms + 'x ' : '') + b.roomTypeName}</div>` : ''}
                                                     <div class="premium-stay-dates">
                                                         ${t('Stay:')} <strong>${b.checkIn} → ${b.checkOut}</strong> <span class="premium-nights-badge">(${nights} ${nights !== 1 ? t('nights') : t('night')})</span>
                                                     </div>
@@ -1175,10 +1175,31 @@ window.router.addRoute('manager', async (container, params) => {
         if (!myHotel) return `<div style="text-align:center; padding:5rem; background:white; border-radius:24px;"><h3>No property assigned.</h3><p>Contact Admin to link your account to a hotel listing.</p></div>`;
         
         return `
-            <div class="mgr-prop-layout">
+            <div class="mgr-prop-layout" style="max-width: 800px; margin: 0 auto;">
                 <!-- Main Form -->
                 <div class="mgr-main-card" style="background:white; border-radius:24px; padding:2.5rem; box-shadow:var(--shadow-sm); border:1px solid #eee;">
-                    <h3 style="margin-bottom:1.5rem; color:var(--color-primary);">Property Control Center</h3>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                        <h3 style="margin:0; color:var(--color-primary);">Property Control Center</h3>
+                    </div>
+                    
+                    <!-- Hotel Availability Status -->
+                    <div style="margin-bottom:2rem; background:${myHotel.isAvailable === false ? '#fff4f4' : '#f0fdf4'}; padding:1.5rem; border-radius:18px; border:2px solid ${myHotel.isAvailable === false ? '#fecdd3' : '#bbf7d0'}; display:flex; align-items:center; justify-content:space-between; gap:1rem; transition:0.3s;">
+                        <div>
+                            <h4 style="margin:0 0 0.4rem; font-size:1.05rem; font-weight:800; color:${myHotel.isAvailable === false ? '#e11d48' : '#166534'};">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:0.3rem; margin-bottom:-3px;">
+                                    ${myHotel.isAvailable === false ? '<path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line>' : '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>'}
+                                </svg>
+                                Status: ${myHotel.isAvailable === false ? 'Inactive (Hidden)' : 'Active (Visible)'}
+                            </h4>
+                            <p style="margin:0; font-size:0.8rem; color:${myHotel.isAvailable === false ? '#be123c' : '#14532d'}; font-weight:600;">
+                                ${myHotel.isAvailable === false ? 'Your hotel is currently hidden from guests. New bookings are disabled.' : 'Your hotel is active and visible to all guests for booking.'}
+                            </p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="mg-h-available" ${myHotel.isAvailable !== false ? 'checked' : ''}>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
                     
                     <div style="background:white; padding:1.5rem; border-radius:24px; border:1.5px solid #eee; margin-bottom:1.5rem;">
                             <h4 style="margin:0 0 1.2rem; font-size:0.85rem; color:#888; text-transform:uppercase; letter-spacing:0.1em;">🏨 Basic Identity</h4>
@@ -1425,26 +1446,6 @@ window.router.addRoute('manager', async (container, params) => {
                     </div>
                 </div>
 
-                <!-- Preview Card (hidden on mobile) -->
-                <div class="mgr-prop-preview" style="position:sticky; top:2rem;">
-                    <h4 style="margin-top:0; color:#666; font-size:0.9rem;">LIVE PREVIEW</h4>
-                    <div style="background:white; border-radius:24px; overflow:hidden; box-shadow:var(--shadow-lg); border:1px solid #eee; max-width:400px; margin:0 auto;">
-                        <img src="${myHotel.image || ''}" style="width:100%; height:180px; object-fit:cover;">
-                        <div style="padding:1.5rem;">
-                            <div style="font-weight:800; font-size:1.25rem; color:var(--color-primary); margin-bottom:0.3rem;">${myHotel.title}</div>
-                            <div style="font-size:0.85rem; color:#666; margin-bottom:1rem; display:flex; align-items:center; gap:0.4rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${myHotel.address || 'Location Pending'}</div>
-                            <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-                                <div style="font-weight:900; font-size:1.4rem;">${myHotel.price} <span style="font-size:0.8rem; font-weight:500;">BR / night</span></div>
-                                <div style="color:${myHotel.availableRooms > 0 ? '#28a745':'#dc3545'}; font-weight:800; font-size:0.85rem;">
-                                    ${myHotel.availableRooms > 0 ? `${myHotel.availableRooms} Rooms Left` : 'FULLY BOOKED'}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="margin-top:1.5rem; background:#fff8e1; border-radius:16px; padding:1.2rem; border:1px solid #ffe082; display:flex; align-items:center; gap:0.8rem;">
-                         <span style="font-size:1.5rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg></span>
-                         <p style="margin:0; font-size:0.8rem; color:#856404; font-weight:600; line-height:1.4;">Keep your <b>Available Rooms</b> updated to ensure guests can book successfully.</p>
-                    </div>
                 </div>
             </div>
         `;

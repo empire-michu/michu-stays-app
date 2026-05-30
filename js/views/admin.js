@@ -128,7 +128,9 @@ window.router.addRoute('admin', async (container, params) => {
     window.syncData = async () => {
         isSyncing = true;
         container.innerHTML = `<div class="container" style="text-align:center;padding-top:4rem;">
-            <div style="font-size:3rem; margin-bottom:1rem;">⏳</div>
+            <div style="display:flex; justify-content:center; margin-bottom:1.5rem;">
+                <div class="premium-spinner" style="width:50px; height:50px; border-width:4px;"></div>
+            </div>
             <h2 style="color:var(--color-primary);">Synchronizing Admin Data...</h2>
             <p style="color:#666;">Establishing live connection to properties, bookings, and users.</p>
         </div>`;
@@ -573,6 +575,7 @@ window.router.addRoute('admin', async (container, params) => {
                 amenities,
                 badgeText: getVal('h-badge-text'),
                 eventMode: document.getElementById('h-event-mode')?.checked || false,
+                isAvailable: document.getElementById('h-available') ? document.getElementById('h-available').checked : true,
                 packages: packagesArr,
                 roomTypes: filteredRoomTypesArr,
                 updatedAt: Date.now(),
@@ -777,7 +780,7 @@ window.router.addRoute('admin', async (container, params) => {
                 btn.innerText = "Registering...";
                 const token = await window.db.requestPushPermission(window.auth.currentUser.uid);
                 window.showToast("✅ Push notifications enabled!");
-                btn.innerText = "✅ Push Enabled";
+                btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Push Enabled`;
                 btn.style.borderColor = "green";
                 btn.style.color = "green";
                 console.log("Admin FCM Token:", token);
@@ -786,9 +789,9 @@ window.router.addRoute('admin', async (container, params) => {
             window.showToast("❌ Could not update notifications: " + error.message);
             const userData = window.auth.userData || {};
             if (userData.fcmTokens && userData.fcmTokens.length > 0) {
-                btn.innerText = "✅ Push Enabled";
+                btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Push Enabled`;
             } else {
-                btn.innerText = "🔔 Enable Push Alerts";
+                btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Enable Push Alerts`;
             }
         }
     };
@@ -802,7 +805,7 @@ window.router.addRoute('admin', async (container, params) => {
         const userData = window.auth.userData || {};
 
         const tabStyle = (tab) => `
-            padding:0.7rem 1.4rem; border-radius:99px; font-weight:700; cursor:pointer; font-size:0.85rem; border:none;
+            display:flex; align-items:center; gap:0.4rem; padding:0.7rem 1.4rem; border-radius:99px; font-weight:700; cursor:pointer; font-size:0.85rem; border:none;
             background:${activeTab===tab?'var(--color-primary)':'transparent'};
             color:${activeTab===tab?'white':'#666'};
             transition: 0.2s;
@@ -823,21 +826,21 @@ window.router.addRoute('admin', async (container, params) => {
                     <h2 style="color:var(--color-primary);margin:0;font-weight:800;">Admin Console</h2>
                     <div style="display:flex; gap:0.5rem;">
                         ${(userData.fcmTokens && userData.fcmTokens.length > 0) 
-                            ? `<button class="btn-outline" style="border-radius:12px; border-color:green; color:green; font-weight:700; cursor:pointer;" onclick="window.enableAdminPush(this)">✅ Push Enabled</button>`
-                            : `<button class="btn-outline" style="border-radius:12px; border-color:#f59e0b; color:#d97706; font-weight:700; cursor:pointer;" onclick="window.enableAdminPush(this)">🔔 Enable Push Alerts</button>`
+                            ? `<button class="btn-outline" style="border-radius:12px; border-color:green; color:green; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.4rem;" onclick="window.enableAdminPush(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Push Enabled</button>`
+                            : `<button class="btn-outline" style="border-radius:12px; border-color:#f59e0b; color:#d97706; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.4rem;" onclick="window.enableAdminPush(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Enable Push Alerts</button>`
                         }
-                        <button class="btn-outline" style="border-radius:12px;" onclick="window.syncData()">🔄 Sync Data</button>
+                        <button class="btn-outline" style="border-radius:12px; display:flex; align-items:center; gap:0.4rem;" onclick="window.syncData()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Sync Data</button>
                     </div>
                 </div>
 
                 <div style="background:#eee; border-radius:99px; padding:0.3rem; display:inline-flex; gap:0.2rem; margin-bottom:2.5rem; flex-wrap:wrap;">
-                    <button style="${tabStyle('analytics')}" onclick="window.fastTab('analytics')">📊 Analytics</button>
-                    <button style="${tabStyle('hotels')}" onclick="window.fastTab('hotels')">Properties</button>
-                    <button class="hide-on-mobile" style="${tabStyle('bookings')}" onclick="window.fastTab('bookings')">Bookings</button>
-                    <button style="${tabStyle('managers')}" onclick="window.fastTab('managers')">Managers</button>
-                    <button style="${tabStyle('announcements')}" onclick="window.fastTab('announcements')">Announcements</button>
-                    <button style="${tabStyle('add-hotel')}" onclick="window.fastTab('add-hotel')">Add Stay</button>
-                    <button style="${tabStyle('account')}" onclick="window.fastTab('account')">My Account</button>
+                    <button style="${tabStyle('analytics')}" onclick="window.fastTab('analytics')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> Analytics</button>
+                    <button style="${tabStyle('hotels')}" onclick="window.fastTab('hotels')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> Properties</button>
+                    <button class="hide-on-mobile" style="${tabStyle('bookings')}" onclick="window.fastTab('bookings')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Bookings</button>
+                    <button style="${tabStyle('managers')}" onclick="window.fastTab('managers')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Managers</button>
+                    <button style="${tabStyle('announcements')}" onclick="window.fastTab('announcements')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> Announcements</button>
+                    <button style="${tabStyle('add-hotel')}" onclick="window.fastTab('add-hotel')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg> Add Stay</button>
+                    <button style="${tabStyle('account')}" onclick="window.fastTab('account')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> My Account</button>
                 </div>
                 `}
 
@@ -1036,9 +1039,9 @@ window.router.addRoute('admin', async (container, params) => {
                                                     <div class="guest-details-content">
                                                         ${b.customerName ? `<div class="premium-guest-email"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> ${b.customerEmail}</div>` : ''}
                                                         ${b.customerPhone ? `<div class="premium-guest-phone"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> ${b.customerPhone}</div>` : ''}
-                                                        ${(b.adults !== undefined || b.children !== undefined) ? `<div class="premium-guest-occupants"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> ${b.adults || 0} ${b.adults !== 1 ? t('Adults') : t('Adult')}${b.children ? `, ${b.children} ${b.children !== 1 ? t('Children') : t('Child')}` : ''}</div>` : ''}
+                                                        <div class="premium-tag" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; margin-top:0.3rem;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> ${t('GUESTS:')} ${b.adults !== undefined ? `${b.adults} ${t('Adults')}, ${b.children || 0} ${t('Children')}` : `${b.guests || 1} ${t('Guests')}`}</div>
                                                         ${b.packageInfo ? `<div class="premium-tag premium-tag--package"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg> ${t('PKG:')} ${b.packageInfo.title}</div>` : ''}
-                                                        ${b.roomTypeName ? `<div class="premium-tag premium-tag--room"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg> ${t('ROOM:')} ${b.roomTypeName}</div>` : ''}
+                                                        ${(b.selectedRooms && b.selectedRooms.length > 0) || b.roomTypeName ? `<div class="premium-tag premium-tag--room"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg> ${t('ROOM:')} ${(b.selectedRooms && b.selectedRooms.length > 0) ? b.selectedRooms.map(r => r.roomCount + 'x ' + (r.roomName || 'Room')).join(', ') : (b.totalRooms ? b.totalRooms + 'x ' : '') + b.roomTypeName}</div>` : ''}
                                                     </div>
                                                 </details>
                                             </td>
@@ -1144,6 +1147,25 @@ window.router.addRoute('admin', async (container, params) => {
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
                                 <h3 style="margin:0; color:var(--color-primary);">${editPropertyId ? 'Edit Stay: ' + p.title : 'Launch New Stay'}</h3>
                                 ${editPropertyId ? `<button class="btn-outline" style="border-radius:10px; font-size:0.8rem;" onclick="window.cancelEdit()">Cancel Edit</button>` : ''}
+                            </div>
+                            
+                            <!-- Hotel Availability Status -->
+                            <div style="margin-bottom:2rem; background:${p.isAvailable === false ? '#fff4f4' : '#f0fdf4'}; padding:1.5rem; border-radius:18px; border:2px solid ${p.isAvailable === false ? '#fecdd3' : '#bbf7d0'}; display:flex; align-items:center; justify-content:space-between; gap:1rem; transition:0.3s;">
+                                <div>
+                                    <h4 style="margin:0 0 0.4rem; font-size:1.05rem; font-weight:800; color:${p.isAvailable === false ? '#e11d48' : '#166534'};">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:0.3rem; margin-bottom:-3px;">
+                                            ${p.isAvailable === false ? '<path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line>' : '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>'}
+                                        </svg>
+                                        Status: ${p.isAvailable === false ? 'Inactive (Hidden)' : 'Active (Visible)'}
+                                    </h4>
+                                    <p style="margin:0; font-size:0.8rem; color:${p.isAvailable === false ? '#be123c' : '#14532d'}; font-weight:600;">
+                                        ${p.isAvailable === false ? 'This hotel is currently hidden from guests. New bookings are disabled.' : 'This hotel is active and visible to all guests for booking.'}
+                                    </p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="h-available" ${p.isAvailable !== false ? 'checked' : ''}>
+                                    <span class="slider round"></span>
+                                </label>
                             </div>
                             
                             <div style="display:flex; flex-direction:column; gap:1.5rem;">

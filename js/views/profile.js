@@ -16,7 +16,7 @@ window.router.addRoute('profile', async (container, params) => {
     } catch(e) { console.warn('User doc load:', e); }
 
     try {
-        const snaps = await firestore.collection('bookings').where('userId', '==', uid).get();
+        const snaps = await firestore.collection('bookings').where('customerId', '==', uid).get();
         allBookings = snaps.docs.map(d => ({id: d.id, ...d.data()}));
     } catch(e) { console.warn('Bookings load for stats:', e); }
 

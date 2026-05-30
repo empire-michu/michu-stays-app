@@ -3,6 +3,7 @@ window.router.addRoute('home', async (container, params) => {
         <style>
             @keyframes skeleton-pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
             .skel-box { background: #f1f5f9; border-radius: 16px; animation: skeleton-pulse 1.5s infinite ease-in-out; }
+            @keyframes gold-neon-pulse { 0% { box-shadow: 0 0 5px rgba(212,175,55,0.4), 0 0 10px rgba(212,175,55,0.2); } 100% { box-shadow: 0 0 12px rgba(212,175,55,0.8), 0 0 24px rgba(212,175,55,0.4); border-color: #d4af37; } }
         </style>
         <div id="home-search-wrapper" style="display:flex; justify-content:center; background:white; padding:0.6rem 0.75rem; border-bottom:1px solid #f0f0f0;">
             <div class="skel-box" style="max-width:500px; width:100%; height:48px; border-radius:99px;"></div>
@@ -106,7 +107,7 @@ window.router.addRoute('home', async (container, params) => {
         const hasRoomTypes = p.roomTypes && p.roomTypes.length > 0;
         let avail = 0;
         if (hasRoomTypes) {
-            avail = p.roomTypes.reduce((sum, rt) => sum + (Number(rt.totalRooms) || 0), 0);
+            avail = p.roomTypes.reduce((sum, rt) => sum + (Number(rt.availableRooms !== undefined ? rt.availableRooms : rt.totalRooms) || 0), 0);
         } else {
             avail = p.availableRooms ?? p.totalRooms ?? 0;
         }
@@ -180,8 +181,9 @@ window.router.addRoute('home', async (container, params) => {
                 </div>` : ''}
                 ${p.packages && p.packages.length > 0 ? `
                 <div style="margin:0.5rem 0; display:flex;">
-                    <div style="background:#0b6646; color:#e0b246; font-size:0.65rem; font-weight:900; padding:0.3rem 0.7rem; border-radius:8px; border:1px solid #c59d3f; display:inline-flex; align-items:center; gap:0.4rem; box-shadow:0 0 12px rgba(197,157,63,0.35); text-transform:uppercase; letter-spacing:0.05em; animation: pulse-glow 2.5s infinite alternate;">
-                        <span style="font-size:0.8rem;">🎁</span> ${p.badgeText || 'SPECIAL OFFERS INSIDE'}
+                    <div style="background:#fdf9f1; color:#856404; font-size:0.65rem; font-weight:800; padding:0.35rem 0.6rem; border-radius:6px; border:1px solid #d4af37; box-shadow:0 0 10px rgba(212,175,55,0.8), 0 0 24px rgba(212,175,55,0.5); display:inline-flex; align-items:center; gap:0.4rem; text-transform:uppercase; letter-spacing:0.04em;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                        ${p.badgeText || 'SPECIAL OFFER'}
                     </div>
                 </div>` : ''}
                 
@@ -449,18 +451,17 @@ window.router.addRoute('home', async (container, params) => {
                 <!-- Filters Sidebar -->
                 <div class="filters-sidebar">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                         <label style="font-weight:800; font-size:0.7rem; color:#999; text-transform:uppercase; letter-spacing:0.5px; margin:0;">Location & Filters</label>
-                         <span onclick="window.clearAllFilters()" style="font-size:0.75rem; color:var(--color-primary); cursor:pointer; font-weight:700;">Clear All</span>
+                         <label style="font-weight:900; font-size:0.85rem; color:#1e293b; letter-spacing:0.02em; margin:0; font-family:'Plus Jakarta Sans',sans-serif;">Location & Filters</label>
                     </div>
                     <div class="filter-section" style="margin-bottom:2rem;">
-                        <label style="display:block; font-weight:800; font-size:0.7rem; color:#999; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.5px;">City / Location</label>
-                        <select id="city-filter" style="width:100%; border:1.5px solid #f0f0f0; background:#f9f9f9; padding:0.8rem; border-radius:12px; outline:none; font-weight:600; font-family:inherit;">
+                        <label style="display:block; font-weight:800; font-size:0.75rem; color:#64748b; margin-bottom:0.75rem; text-transform:uppercase; letter-spacing:0.05em; font-family:'Plus Jakarta Sans',sans-serif;">City / Location</label>
+                        <select id="city-filter" style="width:100%; border:1px solid #e2e8f0; background:white; padding:0.8rem; border-radius:12px; outline:none; font-weight:700; color:#1e293b; font-family:inherit; transition:border-color 0.2s; cursor:pointer;" onfocus="this.style.borderColor='var(--color-primary)'" onblur="this.style.borderColor='#e2e8f0'">
                             ${ETHIOPIAN_CITIES.map(c => `<option value="${c}" ${c === filterState.city ? 'selected' : ''}>${c}</option>`).join('')}
                         </select>
                     </div>
 
                     <div class="filter-section" style="margin-bottom:2rem;">
-                        <label style="display:block; font-weight:800; font-size:0.7rem; color:#999; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.5px;">Price range</label>
+                        <label style="display:block; font-weight:800; font-size:0.75rem; color:#64748b; margin-bottom:0.75rem; text-transform:uppercase; letter-spacing:0.05em; font-family:'Plus Jakarta Sans',sans-serif;">Price range</label>
                         <div class="price-range-dual" id="price-range-dual">
                             <div class="slider-track"></div>
                             <div class="slider-range" id="price-slider-range"></div>
@@ -474,21 +475,21 @@ window.router.addRoute('home', async (container, params) => {
                     </div>
 
                     <div class="filter-section" style="margin-bottom:2rem;">
-                        <label style="display:block; font-weight:800; font-size:0.7rem; color:#999; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.5px;">Minimum Rating</label>
+                        <label style="display:block; font-weight:800; font-size:0.75rem; color:#64748b; margin-bottom:0.75rem; text-transform:uppercase; letter-spacing:0.05em; font-family:'Plus Jakarta Sans',sans-serif;">Minimum Rating</label>
                         <div id="rating-filter" style="display:flex; gap:0.4rem; flex-wrap:wrap;"></div>
                     </div>
 
                     <div class="filter-section" style="margin-bottom:2rem;">
-                         <label style="display:block; font-weight:800; font-size:0.7rem; color:#999; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.5px;">Shortcuts</label>
-                         <div style="display:grid; gap:0.8rem;">
-                            <button id="show-all-houses" style="width:100%; text-align:left; padding:0.7rem 1rem; border-radius:12px; font-weight:700; font-size:0.85rem; border:none; cursor:pointer; background:${!filterState.onlyFavorites ? 'var(--color-primary)' : '#f9f9f9'}; color:${!filterState.onlyFavorites ? 'white' : '#666'};" onclick="toggleHouseFav(false)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; margin-bottom:-2px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> All Stays</button>
-                            <button id="show-fav-houses" style="width:100%; text-align:left; padding:0.7rem 1rem; border-radius:12px; font-weight:700; font-size:0.85rem; border:none; cursor:pointer; background:${filterState.onlyFavorites ? '#d4af37' : '#f9f9f9'}; color:${filterState.onlyFavorites ? 'white' : '#666'};" onclick="toggleHouseFav(true)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; margin-bottom:-2px;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Favorites</button>
+                         <label style="display:block; font-weight:800; font-size:0.75rem; color:#64748b; margin-bottom:0.75rem; text-transform:uppercase; letter-spacing:0.05em; font-family:'Plus Jakarta Sans',sans-serif;">Shortcuts</label>
+                         <div style="display:grid; gap:0.6rem;">
+                            <button id="show-all-houses" style="width:100%; text-align:left; padding:0.75rem 1rem; border-radius:12px; font-weight:700; font-size:0.85rem; border:1px solid ${!filterState.onlyFavorites ? 'var(--color-primary)' : '#e2e8f0'}; cursor:pointer; background:${!filterState.onlyFavorites ? '#f0fdf4' : 'white'}; color:${!filterState.onlyFavorites ? 'var(--color-primary)' : '#64748b'}; transition:all 0.2s;" onclick="toggleHouseFav(false)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px; margin-bottom:-3px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> All Stays</button>
+                            <button id="show-fav-houses" style="width:100%; text-align:left; padding:0.75rem 1rem; border-radius:12px; font-weight:700; font-size:0.85rem; border:1px solid ${filterState.onlyFavorites ? 'var(--color-primary)' : '#e2e8f0'}; cursor:pointer; background:${filterState.onlyFavorites ? '#f0fdf4' : 'white'}; color:${filterState.onlyFavorites ? 'var(--color-primary)' : '#64748b'}; transition:all 0.2s;" onclick="toggleHouseFav(true)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px; margin-bottom:-3px;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Favorites</button>
                          </div>
                     </div>
 
                     <div class="filter-section" style="margin-bottom:2rem;">
-                         <label style="display:block; font-weight:800; font-size:0.7rem; color:#999; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.5px;">Sort By</label>
-                         <select id="user-sort-dropdown" onchange="window.updateSort(this.value)" style="width:100%; border:1.5px solid #f0f0f0; background:#f9f9f9; padding:0.8rem; border-radius:12px; outline:none; font-weight:600; font-family:inherit;">
+                         <label style="display:block; font-weight:800; font-size:0.75rem; color:#64748b; margin-bottom:0.75rem; text-transform:uppercase; letter-spacing:0.05em; font-family:'Plus Jakarta Sans',sans-serif;">Sort By</label>
+                         <select id="user-sort-dropdown" onchange="window.updateSort(this.value)" style="width:100%; border:1px solid #e2e8f0; background:white; padding:0.8rem; border-radius:12px; outline:none; font-weight:700; color:#1e293b; font-family:inherit; transition:border-color 0.2s; cursor:pointer;" onfocus="this.style.borderColor='var(--color-primary)'" onblur="this.style.borderColor='#e2e8f0'">
                             <option value="default" ${filterState.sortOrder === 'default' ? 'selected' : ''}>Latest Added</option>
                             <option value="price-asc" ${filterState.sortOrder === 'price-asc' ? 'selected' : ''}>Price: Low to High</option>
                             <option value="price-desc" ${filterState.sortOrder === 'price-desc' ? 'selected' : ''}>Price: High to Low</option>
@@ -671,9 +672,9 @@ window.router.addRoute('home', async (container, params) => {
     const renderRatingFilter = () => {
         const container = document.getElementById('rating-filter');
         if (!container) return;
-        let html = `<span onclick="window.setMinRating(0)" style="padding:0.3rem 0.6rem; border-radius:8px; font-size:0.8rem; cursor:pointer; font-weight:600; ${filterState.minRating === 0 ? 'background:var(--color-primary);color:white;' : 'background:#f4f4f4;color:#666;'}">Any</span>`;
+        let html = `<span onclick="window.setMinRating(0)" style="padding:0.4rem 0.8rem; border-radius:12px; font-size:0.8rem; cursor:pointer; font-weight:700; transition:all 0.2s; ${filterState.minRating === 0 ? 'background:var(--color-primary);color:white; box-shadow:0 4px 10px rgba(11,110,79,0.2);' : 'background:white; border:1px solid #e2e8f0; color:#64748b;'}">Any</span>`;
         for (let s = 1; s <= 5; s++) {
-            html += `<span onclick="window.setMinRating(${s})" style="padding:0.3rem 0.5rem; border-radius:8px; font-size:0.85rem; cursor:pointer; ${filterState.minRating === s ? 'background:#f59e0b;color:white;' : 'background:#f4f4f4;color:#666;'}">${s}★</span>`;
+            html += `<span onclick="window.setMinRating(${s})" style="display:inline-flex; align-items:center; gap:0.2rem; padding:0.4rem 0.6rem; border-radius:12px; font-size:0.8rem; cursor:pointer; font-weight:700; transition:all 0.2s; ${filterState.minRating === s ? 'background:var(--color-primary);color:white; box-shadow:0 4px 10px rgba(11,110,79,0.2);' : 'background:white; border:1px solid #e2e8f0; color:#64748b;'}">${s}<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></span>`;
         }
         container.innerHTML = html;
     };
