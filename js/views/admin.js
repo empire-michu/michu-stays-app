@@ -1,4 +1,5 @@
 window.router.addRoute('admin', async (container, params) => {
+    const t = window.__ || window.t || (s => s);
     if (window.auth?.userData?.role !== 'admin') {
         window.router.navigate('home'); return;
     }

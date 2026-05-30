@@ -1,4 +1,5 @@
 window.router.addRoute('bookings', async (container, params) => {
+    const t = window.__ || window.t || (s => s);
     if (!window.auth?.currentUser) {
         window.router.navigate('login'); return;
     }

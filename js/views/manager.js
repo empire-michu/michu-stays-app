@@ -1,4 +1,5 @@
 window.router.addRoute('manager', async (container, params) => {
+    const t = window.__ || window.t || (s => s);
     const role = window.auth?.role || window.auth?.userData?.role;
     if (!['manager','admin'].includes(role)) {
         window.router.navigate('login'); return;
