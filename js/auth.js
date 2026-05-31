@@ -177,8 +177,11 @@ class AuthEngine {
                         .user-dropdown-menu a:hover { background: #f8fafc; color: #0F5A3F; }
                         .user-dropdown-menu a svg { width: 16px; height: 16px; opacity: 0.8; }
                         @keyframes dropFade { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+                        @media(max-width: 768px) {
+                            .desktop-user-dropdown:hover .user-dropdown-menu { display: none !important; }
+                        }
                     </style>
-                    <button class="btn-outline" style="padding:0.3rem 0.7rem;font-size:0.75rem;display:flex;align-items:center;gap:0.4rem;font-weight:700;border-radius:12px;cursor:pointer;">
+                    <button class="btn-outline" onclick="if(window.innerWidth <= 768) window.router.navigate('profile')" style="padding:0.3rem 0.7rem;font-size:0.75rem;display:flex;align-items:center;gap:0.4rem;font-weight:700;border-radius:12px;cursor:pointer;">
                         ${avatarImg} ${displayName}
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6;"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>

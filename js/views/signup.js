@@ -72,6 +72,18 @@ window.router.addRoute('signup', (container) => {
                         </button>
                     </form>
 
+                    <div style="display: flex; align-items: center; margin: 2.5rem 0;">
+                        <div style="flex: 1; height: 1px; background: #eee;"></div>
+                        <span style="padding: 0 1.2rem; font-size: 0.75rem; color: #aaa; font-weight: 700; letter-spacing: 0.1em;">${__('OR CONTINUE WITH')}</span>
+                        <div style="flex: 1; height: 1px; background: #eee;"></div>
+                    </div>
+
+                    <button onclick="window.auth.loginWithGoogle()" 
+                        style="width: 100%; box-sizing: border-box; background: white; border: 2px solid #eee; border-radius: 12px; padding: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.75rem; cursor: pointer; transition: all 0.2s; font-weight: 700; color: #444;">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+                        ${__('Google Account')}
+                    </button>
+
                     <p style="text-align: center; margin-top: 2.5rem; color: #666; font-size: 1rem;">
                         ${__('Already joined?')} <a href="#" onclick="event.preventDefault(); window.router.navigate('login')" 
                             style="color: var(--color-primary); font-weight: 800; text-decoration: none; border-bottom: 2px solid var(--color-primary-light);">${__('Sign In')}</a>
