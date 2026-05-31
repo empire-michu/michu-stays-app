@@ -183,7 +183,8 @@ class AuthEngine {
                     </style>
                     <button class="btn-outline" onclick="if(window.innerWidth <= 768) window.router.navigate('profile')" style="padding:0.3rem 0.7rem;font-size:0.75rem;display:flex;align-items:center;gap:0.4rem;font-weight:700;border-radius:12px;cursor:pointer;">
                         ${avatarImg} ${displayName}
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <svg class="desktop-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <style>@media(max-width: 768px) { .desktop-arrow { display: none !important; } }</style>
                     </button>
                     <div class="user-dropdown-menu">
                         <a onclick="window.router.navigate('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> ${window.t ? window.t('My Profile') : 'My Profile'}</a>

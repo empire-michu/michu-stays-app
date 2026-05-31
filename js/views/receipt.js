@@ -35,6 +35,7 @@ window.openReceipt = (booking) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Receipt — ${refCode} | Michu Stays</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
@@ -458,14 +459,38 @@ window.openReceipt = (booking) => {
         </div>
     </div>
 
-    <button class="print-btn no-print" onclick="window.print()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-        Download / Print Receipt
+    <button class="print-btn no-print" onclick="downloadPDF()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Download PDF Receipt
+    </button>
+    
+    <button class="print-btn no-print" style="background:#f1f5f9; color:#475569; margin-top:0.8rem;" onclick="window.close()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Back to App
     </button>
 
     <script>
-        // Auto-trigger print dialog after a brief delay
-        setTimeout(() => { window.print(); }, 800);
+        function downloadPDF() {
+            const element = document.querySelector('.receipt-wrapper');
+            const opt = {
+              margin:       0.2,
+              filename:     'MichuStays_Receipt_${refCode}.pdf',
+              image:        { type: 'jpeg', quality: 0.98 },
+              html2canvas:  { scale: 2, useCORS: true },
+              jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            
+            const btn = document.querySelector('.print-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Generating PDF...';
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = originalText;
+            }).catch(err => {
+                alert('Failed to generate PDF. Please take a screenshot.');
+                btn.innerHTML = originalText;
+            });
+        }
     </script>
 </body>
 </html>`;
