@@ -471,25 +471,43 @@ window.openReceipt = (booking) => {
 
     <script>
         function downloadPDF() {
-            const element = document.querySelector('.receipt-wrapper');
-            const opt = {
-              margin:       0.2,
-              filename:     'MichuStays_Receipt_${refCode}.pdf',
-              image:        { type: 'jpeg', quality: 0.98 },
-              html2canvas:  { scale: 2, useCORS: true },
-              jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-            
-            const btn = document.querySelector('.print-btn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Generating PDF...';
-            
-            html2pdf().set(opt).from(element).save().then(() => {
-                btn.innerHTML = originalText;
-            }).catch(err => {
-                alert('Failed to generate PDF. Please take a screenshot.');
-                btn.innerHTML = originalText;
-            });
+            try {
+                window.scrollTo(0, 0);
+                const element = document.querySelector('.receipt-wrapper');
+                
+                // Hide buttons during capture
+                const buttons = document.querySelectorAll('.print-btn');
+                buttons.forEach(b => b.style.display = 'none');
+                
+                const opt = {
+                  margin:       0.2,
+                  filename:     'MichuStays_Receipt.pdf',
+                  image:        { type: 'jpeg', quality: 0.98 },
+                  html2canvas:  { 
+                      scale: 2, 
+                      useCORS: true,
+                      scrollY: 0,
+                      allowTaint: true
+                  },
+                  jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+                
+                html2pdf().set(opt).from(element).output('datauristring').then(function(pdfAsString) {
+                    const a = document.createElement('a');
+                    a.href = pdfAsString;
+                    a.download = opt.filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    buttons.forEach(b => b.style.display = 'flex');
+                }).catch(function(err) {
+                    buttons.forEach(b => b.style.display = 'flex');
+                    alert('PDF Generation Error: ' + (err.message || err.toString()));
+                });
+            } catch(e) {
+                alert('PDF Setup Error: ' + e.message);
+            }
         }
     </script>
 </body>
