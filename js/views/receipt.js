@@ -459,12 +459,12 @@ window.openReceipt = (booking) => {
         </div>
     </div>
 
-    <button class="print-btn no-print" onclick="downloadPDF()">
+    <button class="print-btn no-print" data-html2canvas-ignore="true" onclick="downloadPDF()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         Download PDF Receipt
     </button>
     
-    <button class="print-btn no-print" style="background:#f1f5f9; color:#475569; margin-top:0.8rem;" onclick="window.close()">
+    <button class="print-btn no-print" data-html2canvas-ignore="true" style="background:#f1f5f9; color:#475569; margin-top:0.8rem;" onclick="window.close()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
         Back to App
     </button>
@@ -475,9 +475,9 @@ window.openReceipt = (booking) => {
                 window.scrollTo(0, 0);
                 const element = document.querySelector('.receipt-wrapper');
                 
-                // Hide buttons during capture
-                const buttons = document.querySelectorAll('.print-btn');
-                buttons.forEach(b => b.style.display = 'none');
+                const btn = document.querySelector('.print-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '⏳ Generating PDF...';
                 
                 const opt = {
                   margin:       0.2,
@@ -500,10 +500,13 @@ window.openReceipt = (booking) => {
                     a.click();
                     document.body.removeChild(a);
                     
-                    buttons.forEach(b => b.style.display = 'flex');
+                    btn.innerHTML = originalText;
                 }).catch(function(err) {
-                    buttons.forEach(b => b.style.display = 'flex');
-                    alert('PDF Generation Error: ' + (err.message || err.toString()));
+                    btn.innerHTML = originalText;
+                    
+                    // Fallback to standard native print if PDF generation fails on desktop
+                    console.error("PDF Engine Failed, falling back to native print:", err);
+                    window.print();
                 });
             } catch(e) {
                 alert('PDF Setup Error: ' + e.message);
