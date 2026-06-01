@@ -32,8 +32,7 @@ service cloud.firestore {
     match /properties/{propertyId} {
       allow read:   if true;
       allow create: if isAdmin();
-      allow update: if isAdmin() ||
-        (isManager() && resource.data.managerId == request.auth.uid);
+      allow update: if isAdmin() || resource.data.managerId == request.auth.uid;
       allow delete: if isAdmin();
     }
 
@@ -41,16 +40,22 @@ service cloud.firestore {
     // Anyone can read if they have a valid referenceCode (for receipt verification),
     // otherwise only the guest who made the booking, their assigned manager, or an admin.
     match /bookings/{bookingId} {
-      allow read: if (resource != null && resource.data.referenceCode != null) || (
+      // get: Used for single document fetches (like receipt verification)
+      allow get: if (resource != null && resource.data.referenceCode != null) || (
         isSignedIn() && (
           resource.data.customerId == request.auth.uid ||
           resource.data.managerId == request.auth.uid ||
           isAdmin()
         )
       );
+      // list: Used for queries (manager dashboard, user profile). Removes the resource != null OR condition which breaks Firestore static analysis
+      allow list: if isSignedIn() && (
+        resource.data.customerId == request.auth.uid ||
+        resource.data.managerId == request.auth.uid ||
+        isAdmin()
+      );
       allow create: if isSignedIn();
-      allow update: if isAdmin() ||
-        (isManager() && resource.data.managerId == request.auth.uid);
+      allow update: if isAdmin() || resource.data.managerId == request.auth.uid;
       allow delete: if isAdmin() || resource.data.customerId == request.auth.uid;
     }
 
