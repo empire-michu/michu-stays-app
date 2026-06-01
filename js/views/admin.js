@@ -685,9 +685,7 @@ window.router.addRoute('admin', async (container, params) => {
             window.syncData();
         } catch (error) {
             console.error("Manager Creation Error:", error);
-            // Use native alert as a bulletproof fallback in case toast fails
-            alert("❌ Creation Failed:\n\n" + (error.message || "Unknown Error"));
-            window.showToast("❌ Failed: " + error.message);
+            window.showAlert(error.message || "Unknown Error", "error");
         } finally {
             if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
         }
