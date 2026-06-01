@@ -241,10 +241,7 @@ window.router.addRoute('manager', async (container, params) => {
                 <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Bed Configurations</label>
                 <input type="text" placeholder="e.g. 1 King Bed or 2 Double Beds" class="mg-room-beds" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
             </div>
-            <div>
-                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Quantity (Total Rooms)</label>
-                <input type="number" placeholder="Total Rooms" class="mg-room-total-rooms" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
-            </div>
+
             <div>
                 <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Available Rooms</label>
                 <input type="number" placeholder="Available" class="mg-room-avail" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
@@ -276,10 +273,9 @@ window.router.addRoute('manager', async (container, params) => {
                     imgUrl = await window.db.uploadFile(fileInput.files[0], 'properties/rooms');
                 }
                 
-                const totalRooms = parseInt(row.querySelector('.mg-room-total-rooms').value) || 1;
-                let avail = row.querySelector('.mg-room-avail')?.value;
-                avail = avail !== '' && avail !== undefined ? parseInt(avail) : totalRooms;
-                if (avail > totalRooms) avail = totalRooms;
+                let availStr = row.querySelector('.mg-room-avail')?.value;
+                let avail = availStr !== '' && availStr !== undefined ? parseInt(availStr) : 10;
+                const totalRooms = avail; // Default to available rooms as total since manual entry is removed
                 
                 roomTypesArr.push({
                     id: row.dataset.id || `room_${idx}_${Date.now()}`,
@@ -555,13 +551,49 @@ window.router.addRoute('manager', async (container, params) => {
                 console.warn("Skipping email: No guest email found for booking", id);
             }
 
-            // Deduct available room instantly
+            let roomsDeducted = 1;
+            if (booking && booking.selectedRooms && booking.selectedRooms.length > 0) {
+                roomsDeducted = booking.selectedRooms.reduce((acc, r) => acc + (parseInt(r.roomCount) || 1), 0);
+            } else if (booking && booking.totalRooms) {
+                roomsDeducted = parseInt(booking.totalRooms, 10) || 1;
+            }
+
+            // Deduct available rooms instantly from global inventory AND specific room types
             if (myHotel && myHotel.id) {
                 const current = myHotel.availableRooms ?? myHotel.totalRooms ?? 0;
-                const newAvail = Math.max(0, current - 1);
-                await window.db.updateProperty(myHotel.id, { availableRooms: newAvail });
+                const newAvail = Math.max(0, current - roomsDeducted);
+                
+                let updatePayload = { availableRooms: newAvail };
+
+                // Update specific room types inventory if they exist
+                if (myHotel.roomTypes && booking && booking.selectedRooms && booking.selectedRooms.length > 0) {
+                    let updatedRoomTypes = [...myHotel.roomTypes];
+                    let needsRoomTypeUpdate = false;
+
+                    booking.selectedRooms.forEach(bookedRoom => {
+                        const targetCount = parseInt(bookedRoom.roomCount) || 1;
+                        const matchIndex = updatedRoomTypes.findIndex(rt => (rt.id || `room_${updatedRoomTypes.indexOf(rt)}`) === bookedRoom.roomId);
+                        if (matchIndex !== -1) {
+                            const rt = updatedRoomTypes[matchIndex];
+                            const currentRtAvail = rt.availableRooms !== undefined ? rt.availableRooms : (rt.totalRooms || 10);
+                            updatedRoomTypes[matchIndex] = {
+                                ...rt,
+                                availableRooms: Math.max(0, currentRtAvail - targetCount)
+                            };
+                            needsRoomTypeUpdate = true;
+                        }
+                    });
+
+                    if (needsRoomTypeUpdate) {
+                        updatePayload.roomTypes = updatedRoomTypes;
+                        myHotel.roomTypes = updatedRoomTypes; // Update local cache
+                    }
+                }
+
+                await window.db.updateProperty(myHotel.id, updatePayload);
+                myHotel.availableRooms = newAvail; // Update local cache
             }
-            window.showAlert("✅ Booking Confirmed! The guest has been notified and one room has been deducted from your inventory.");
+            window.showAlert(`✅ Booking Confirmed! The guest has been notified and ${roomsDeducted} room${roomsDeducted > 1 ? 's have' : ' has'} been deducted from your inventory.`);
         } catch (e) {
             console.error(e);
             window.showToast("❌ Confirmation failed: " + e.message);
@@ -655,7 +687,7 @@ window.router.addRoute('manager', async (container, params) => {
             // Fetch property info first so we can query bookings by propertyId
             const uData = window.auth.userData || {};
             if (uData?.hotelId) {
-                myHotel = await window.db.getPropertyById(uData.hotelId);
+                myHotel = await window.db.getPropertyById(uData.hotelId, true);
             } else {
                 const props = await window.db.getProperties(uid);
                 myHotel = props[0] || null;
@@ -1409,10 +1441,7 @@ window.router.addRoute('manager', async (container, params) => {
                                             <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Bed Configurations</label>
                                             <input type="text" placeholder="e.g. 1 King Bed or 2 Double Beds" value="${room.beds||''}" class="mg-room-beds" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
                                         </div>
-                                        <div>
-                                            <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Quantity (Total Rooms)</label>
-                                            <input type="number" placeholder="Total Rooms" value="${room.totalRooms||''}" class="mg-room-total-rooms" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
-                                        </div>
+
                                         <div>
                                             <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Available Rooms</label>
                                             <input type="number" placeholder="Available" value="${room.availableRooms !== undefined ? room.availableRooms : (room.totalRooms || '')}" class="mg-room-avail" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">

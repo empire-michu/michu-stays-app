@@ -516,10 +516,9 @@ window.router.addRoute('admin', async (container, params) => {
                     imgUrl = await window.db.uploadFile(fileInput.files[0], 'properties/rooms');
                 }
                 
-                const totalRooms = parseInt(row.querySelector('.adm-room-total-rooms').value) || 1;
-                let avail = row.querySelector('.adm-room-avail')?.value;
-                avail = avail !== '' && avail !== undefined ? parseInt(avail) : totalRooms;
-                if (avail > totalRooms) avail = totalRooms;
+                let availStr = row.querySelector('.adm-room-avail')?.value;
+                let avail = availStr !== '' && availStr !== undefined ? parseInt(availStr) : 10;
+                const totalRooms = avail; // Default to available rooms as total since manual entry is removed
                 
                 roomTypesArr.push({
                     id: row.getAttribute('data-id') || `room_${idx}_${Date.now()}`,
@@ -539,7 +538,7 @@ window.router.addRoute('admin', async (container, params) => {
 
             let finalPrice = price;
             let finalAvail = getNum('h-avail-rooms');
-            let finalTotal = getNum('h-total-rooms');
+            let finalTotal = finalAvail; // Default to available rooms
 
             if (filteredRoomTypesArr.length > 0) {
                 const activeRooms = filteredRoomTypesArr.filter(r => r.isActive !== false);
@@ -781,10 +780,7 @@ window.router.addRoute('admin', async (container, params) => {
                 <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Bed Configurations</label>
                 <input type="text" placeholder="Beds" class="adm-room-beds" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
             </div>
-            <div>
-                <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Quantity (Total Rooms)</label>
-                <input type="number" placeholder="Total Rooms" value="5" class="adm-room-total-rooms" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
-            </div>
+
             <div>
                 <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Available Rooms</label>
                 <input type="number" placeholder="Available" value="5" class="adm-room-avail" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
@@ -1211,7 +1207,7 @@ window.router.addRoute('admin', async (container, params) => {
                                 </div>
                                 <div class="responsive-grid-2" style="gap:1rem;">
                                     <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Price (Birr)</label><input id="h-price" type="number" value="${p.price||''}" style="width:100%; padding:0.8rem; border:1.5px solid #eee; border-radius:12px;"></div>
-                                    <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Total Rooms</label><input id="h-total-rooms" type="number" value="${p.totalRooms||10}" style="width:100%; padding:0.8rem; border:1.5px solid #eee; border-radius:12px;"></div>
+
                                 </div>
                                 <div class="responsive-grid-2" style="gap:1rem;">
                                     <div><label style="font-weight:700; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Available Rooms</label><input id="h-avail-rooms" type="number" value="${p.availableRooms ?? p.totalRooms ?? 10}" style="width:100%; padding:0.8rem; border:2px solid var(--color-primary); border-radius:12px; font-weight:800; color:var(--color-primary);"></div>
@@ -1407,10 +1403,7 @@ window.router.addRoute('admin', async (container, params) => {
                                                      <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Bed Configurations</label>
                                                      <input type="text" placeholder="Beds" value="${room.beds||''}" class="adm-room-beds" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
                                                  </div>
-                                                 <div>
-                                                     <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Quantity (Total Rooms)</label>
-                                                     <input type="number" placeholder="Total Rooms" value="${room.totalRooms||''}" class="adm-room-total-rooms" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">
-                                                 </div>
+
                                                  <div>
                                                      <label style="display:block; font-weight:800; font-size:0.65rem; color:#64748b; margin-bottom:0.3rem; text-transform:uppercase;">Available Rooms</label>
                                                      <input type="number" placeholder="Available" value="${room.availableRooms !== undefined ? room.availableRooms : (room.totalRooms || '')}" class="adm-room-avail" style="width:100%; padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; font-weight:700;">

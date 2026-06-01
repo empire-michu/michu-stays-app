@@ -247,11 +247,8 @@ window.router.addRoute('add-property', (container) => {
                 price: parseInt(row.querySelector('.prop-room-price').value) || 0,
                 capacity: parseInt(row.querySelector('.prop-room-capacity').value) || 2,
                 beds: row.querySelector('.prop-room-beds').value.trim(),
-                totalRooms: parseInt(row.querySelector('.prop-room-total-rooms').value) || 1,
-                availableRooms: Math.min(
-                    parseInt(row.querySelector('.prop-room-avail')?.value) || parseInt(row.querySelector('.prop-room-total-rooms').value) || 1,
-                    parseInt(row.querySelector('.prop-room-total-rooms').value) || 1
-                )
+                totalRooms: parseInt(row.querySelector('.prop-room-avail')?.value) || 1,
+                availableRooms: parseInt(row.querySelector('.prop-room-avail')?.value) || 1
             })).filter(r => r.name && r.price);
 
             if (roomTypesArr.length === 0) {

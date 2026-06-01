@@ -391,12 +391,13 @@ class Database {
             }
             
             if (notifSnap.docs.length > 0) {
-                const batch = firestore.batch();
                 const newStatus = status === 'Confirmed' ? 'confirmed' : (status === 'Denied' ? 'failed' : 'info');
-                notifSnap.docs.forEach(doc => {
-                    batch.update(doc.ref, { status: newStatus });
+                const updatePromises = notifSnap.docs.map(doc => {
+                    return doc.ref.update({ status: newStatus }).catch(e => {
+                        console.warn(`Failed to update notification ${doc.id}:`, e);
+                    });
                 });
-                batch.commit().catch(e => console.warn("Background batch update failed", e));
+                await Promise.allSettled(updatePromises);
             }
         } catch(e) {
             console.warn("Failed to update manager/admin notification status:", e);
