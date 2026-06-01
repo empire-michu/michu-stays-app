@@ -363,6 +363,7 @@ window.router.addRoute('manager', async (container, params) => {
 
             const updatedData = {
                 title,
+                managerId: window.auth.currentUser.uid,
                 type: getVal('mg-h-type'),
                 price: priceVal,
                 discountPercent: discountVal,
@@ -648,16 +649,18 @@ window.router.addRoute('manager', async (container, params) => {
 
     const syncManagerData = async () => {
         try {
-            window.attachMgrBookingListener();
-            window.attachMgrAnalyticsListener();
-
-            // Fetch property info
+            // Fetch property info first so we can query bookings by propertyId
             const userData = window.auth.userData || {};
             if (userData?.hotelId) {
                 myHotel = await window.db.getPropertyById(userData.hotelId);
             } else {
                 const props = await window.db.getProperties(uid);
                 myHotel = props[0] || null;
+            }
+
+            if (myHotel) {
+                window.attachMgrBookingListener();
+                window.attachMgrAnalyticsListener();
             }
         } catch (err) {
             console.error("Manager Sync Error:", err);

@@ -32,7 +32,7 @@ service cloud.firestore {
     match /properties/{propertyId} {
       allow read:   if true;
       allow create: if isAdmin();
-      allow update: if isAdmin() || resource.data.managerId == request.auth.uid;
+      allow update: if isAdmin() || resource.data.managerId == request.auth.uid || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.hotelId == propertyId;
       allow delete: if isAdmin();
     }
 
