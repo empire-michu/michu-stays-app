@@ -648,18 +648,37 @@ window.router.addRoute('admin', async (container, params) => {
         } catch(e) { window.showToast("❌ Update failed: " + e.message); btn.disabled = false; btn.innerText = "Update Profile"; }
     };
     
-    window.adminCreateManager = async () => {
+    window.adminCreateManager = async (btn = null) => {
         const e = document.getElementById('adm-new-mgr-email').value;
         const p = document.getElementById('adm-new-mgr-pass').value;
         const h = document.getElementById('adm-new-mgr-hotel').value;
         const ph = document.getElementById('adm-new-mgr-phone')?.value?.trim() || '';
+        
         if (!e || p.length < 6) return window.showToast("⚠️ Email and 6+ character password required.");
-        const uid = await window.auth.createManagerAccount(e, p, h);
-        // Save phone number to the manager's user doc
-        if (ph && uid) {
-            await firestore.collection('users').doc(uid).update({ phone: ph });
+        
+        const originalText = btn ? btn.innerHTML : "Create Manager";
+        if (btn) { btn.disabled = true; btn.innerHTML = "⏳ Creating..."; }
+
+        try {
+            const uid = await window.auth.createManagerAccount(e, p, h);
+            // Save phone number to the manager's user doc
+            if (ph && uid) {
+                await firestore.collection('users').doc(uid).update({ phone: ph });
+            }
+            window.showToast("✅ Manager account created!");
+            
+            // Clear inputs
+            document.getElementById('adm-new-mgr-email').value = '';
+            document.getElementById('adm-new-mgr-pass').value = '';
+            if(document.getElementById('adm-new-mgr-phone')) document.getElementById('adm-new-mgr-phone').value = '';
+            
+            window.syncData();
+        } catch (error) {
+            console.error("Manager Creation Error:", error);
+            window.showToast("❌ Failed: " + error.message);
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
         }
-        window.showToast("✅ Manager account created!"); window.syncData();
     };
 
     window.admEditManagerPhone = async (managerId) => {
@@ -1134,7 +1153,7 @@ window.router.addRoute('admin', async (container, params) => {
                                 ${cachedProperties.map(p => `<option value="${p.id}">${p.title}</option>`).join('')}
                             </select>
                         </div>
-                        <button class="btn-primary" onclick="window.adminCreateManager()">Create Account</button>
+                        <button class="btn-primary" onclick="window.adminCreateManager(this)">Create Account</button>
                     </div>
                 </div>
 
