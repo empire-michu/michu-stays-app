@@ -636,7 +636,7 @@ window.router.addRoute('manager', async (container, params) => {
         bookingUnsub = window.db.listenToBookings((data) => {
             tableBookings = data;
             renderManagerUI(true);
-        }, uid, null, { from: filterFrom, to: filterTo, status: filterStatus }, currentManagerLimit);
+        }, null, null, { from: filterFrom, to: filterTo, status: filterStatus }, currentManagerLimit, myHotel.id);
     };
 
     window.attachMgrAnalyticsListener = () => {
@@ -644,7 +644,7 @@ window.router.addRoute('manager', async (container, params) => {
         analyticsUnsub = window.db.listenToAnalytics((data) => {
             analyticsBookings = data;
             renderManagerUI(true);
-        }, uid, { from: analyticsStart, to: analyticsEnd });
+        }, null, { from: analyticsStart, to: analyticsEnd }, myHotel.id);
     };
 
     const syncManagerData = async () => {

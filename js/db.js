@@ -758,9 +758,10 @@ class Database {
 
     // Old duplicate methods removed — using the unified versions at the bottom of this class
 
-    listenToBookings(callback, managerId = null, customerId = null, filters = {}, limitCount = 20) {
+    listenToBookings(callback, managerId = null, customerId = null, filters = {}, limitCount = 20, propertyId = null) {
         let query = firestore.collection('bookings');
-        if (managerId) query = query.where('managerId', '==', managerId);
+        if (propertyId) query = query.where('propertyId', '==', propertyId);
+        else if (managerId) query = query.where('managerId', '==', managerId);
         if (customerId) query = query.where('customerId', '==', customerId);
         
         if (filters.status && filters.status !== 'all') {
@@ -784,9 +785,10 @@ class Database {
         });
     }
 
-    listenToAnalytics(callback, managerId = null, filters = {}) {
+    listenToAnalytics(callback, managerId = null, filters = {}, propertyId = null) {
         let query = firestore.collection('bookings');
-        if (managerId) query = query.where('managerId', '==', managerId);
+        if (propertyId) query = query.where('propertyId', '==', propertyId);
+        else if (managerId) query = query.where('managerId', '==', managerId);
         
         if (filters.from) query = query.where('createdAt', '>=', filters.from);
         if (filters.to) query = query.where('createdAt', '<=', filters.to + 'T23:59:59');

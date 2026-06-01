@@ -45,17 +45,19 @@ service cloud.firestore {
         isSignedIn() && (
           resource.data.customerId == request.auth.uid ||
           resource.data.managerId == request.auth.uid ||
-          isAdmin()
+          isAdmin() ||
+          resource.data.propertyId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.hotelId
         )
       );
-      // list: Used for queries (manager dashboard, user profile). Removes the resource != null OR condition which breaks Firestore static analysis
+      // list: Used for queries (manager dashboard, user profile)
       allow list: if isSignedIn() && (
         resource.data.customerId == request.auth.uid ||
         resource.data.managerId == request.auth.uid ||
-        isAdmin()
+        isAdmin() ||
+        resource.data.propertyId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.hotelId
       );
       allow create: if isSignedIn();
-      allow update: if isAdmin() || resource.data.managerId == request.auth.uid;
+      allow update: if isAdmin() || resource.data.managerId == request.auth.uid || resource.data.propertyId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.hotelId;
       allow delete: if isAdmin() || resource.data.customerId == request.auth.uid;
     }
 
