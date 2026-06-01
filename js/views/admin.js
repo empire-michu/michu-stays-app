@@ -660,10 +660,20 @@ window.router.addRoute('admin', async (container, params) => {
         if (btn) { btn.disabled = true; btn.innerHTML = "⏳ Creating..."; }
 
         try {
-            const uid = await window.auth.createManagerAccount(e, p, h);
+            // Failsafe timeout to prevent infinite hanging
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Network Timeout: Process took too long. Check your internet connection.")), 15000));
+            
+            const uid = await Promise.race([
+                window.auth.createManagerAccount(e, p, h),
+                timeoutPromise
+            ]);
+            
             // Save phone number to the manager's user doc
             if (ph && uid) {
-                await firestore.collection('users').doc(uid).update({ phone: ph });
+                await Promise.race([
+                    firestore.collection('users').doc(uid).update({ phone: ph }),
+                    new Promise(r => setTimeout(r, 3000)) // Don't crash if phone update hangs
+                ]);
             }
             window.showToast("✅ Manager account created!");
             
@@ -675,6 +685,8 @@ window.router.addRoute('admin', async (container, params) => {
             window.syncData();
         } catch (error) {
             console.error("Manager Creation Error:", error);
+            // Use native alert as a bulletproof fallback in case toast fails
+            alert("❌ Creation Failed:\n\n" + (error.message || "Unknown Error"));
             window.showToast("❌ Failed: " + error.message);
         } finally {
             if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
