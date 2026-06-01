@@ -354,12 +354,10 @@ class Database {
         this.clearCache('bookings');
         this.clearCache('properties');
 
-        // Update corresponding manager/admin notifications
+        // Update corresponding manager/admin notifications (Background)
         try {
-            // First try querying by bookingId
             let notifSnap = await firestore.collection('notifications').where('bookingId', '==', bookingId).get();
             if (notifSnap.empty && booking.referenceCode) {
-                // Fallback for older notifications created before bookingId was added
                 const fallbackSnap = await firestore.collection('notifications').where('category', '==', 'bookings').get();
                 const matchingDocs = fallbackSnap.docs.filter(doc => {
                     const data = doc.data();
@@ -368,17 +366,19 @@ class Database {
                 notifSnap = { docs: matchingDocs };
             }
             
-            const batch = firestore.batch();
-            const newStatus = status === 'Confirmed' ? 'confirmed' : (status === 'Denied' ? 'failed' : 'info');
-            notifSnap.docs.forEach(doc => {
-                batch.update(doc.ref, { status: newStatus });
-            });
-            await batch.commit();
+            if (notifSnap.docs.length > 0) {
+                const batch = firestore.batch();
+                const newStatus = status === 'Confirmed' ? 'confirmed' : (status === 'Denied' ? 'failed' : 'info');
+                notifSnap.docs.forEach(doc => {
+                    batch.update(doc.ref, { status: newStatus });
+                });
+                batch.commit().catch(e => console.warn("Background batch update failed", e));
+            }
         } catch(e) {
             console.warn("Failed to update manager/admin notification status:", e);
         }
 
-        // NOTIFY CLIENT
+        // NOTIFY CLIENT AND MANAGER (Run in parallel to eliminate blocking UI)
         let message = '📢 Booking Update';
         let details = `Your booking for ${booking.propertyTitle} (${booking.referenceCode}) is now: ${status}`;
         
@@ -390,24 +390,39 @@ class Database {
             details = `We regret to inform you that your booking for ${booking.propertyTitle} was denied.`;
         }
 
-        await this.createNotification({
+        // Always fetch latest managerId directly from property to prevent missing notifications from old bookings
+        let actualManagerId = null;
+        try {
+            const propDoc = await firestore.collection('properties').doc(booking.propertyId).get();
+            if (propDoc.exists) actualManagerId = propDoc.data().managerId;
+        } catch(e) {}
+        if (!actualManagerId) actualManagerId = booking.managerId;
+
+        const notificationTasks = [];
+
+        // 1. Client App Notification
+        notificationTasks.push(this.createNotification({
             message,
             details,
             targetUserId: booking.customerId,
             type: status === 'Confirmed' ? 'booking_confirmed' : 'booking_update',
             link: 'profile',
             params: { tab: 'bookings' }
-        });
-        let actualManagerId = booking.managerId;
-        if (!actualManagerId && booking.propertyId) {
-            try {
-                const propDoc = await firestore.collection('properties').doc(booking.propertyId).get();
-                if (propDoc.exists) actualManagerId = propDoc.data().managerId;
-            } catch(e) {}
-        }
+        }));
+
+        // 2. Client Push Notification
+        notificationTasks.push(this.triggerPushNotification(
+            booking.propertyId,
+            message,
+            details,
+            booking.customerId,
+            'profile',
+            { tab: 'bookings' }
+        ));
 
         if (status === 'Confirmed' && actualManagerId) {
-            await this.createNotification({
+            // 3. Manager App Notification
+            notificationTasks.push(this.createNotification({
                 message: '✅ Booking Confirmed',
                 details: `Booking for ${booking.propertyTitle} (${booking.referenceCode}) has been confirmed successfully.`,
                 targetUserId: actualManagerId,
@@ -416,29 +431,21 @@ class Database {
                 link: 'manager',
                 params: { tab: 'bookings' },
                 bookingId: bookingId
-            });
-        }
+            }));
 
-        // SEND HARD NOTIFICATION (PUSH)
-        await this.triggerPushNotification(
-            booking.propertyId,
-            message,
-            details,
-            booking.customerId,
-            'profile',
-            { tab: 'bookings' }
-        );
-
-        if (status === 'Confirmed' && actualManagerId) {
-            await this.triggerPushNotification(
+            // 4. Manager Push Notification
+            notificationTasks.push(this.triggerPushNotification(
                 booking.propertyId,
                 '✅ Booking Confirmed',
                 `Booking for ${booking.propertyTitle} (${booking.referenceCode}) has been confirmed.`,
                 actualManagerId,
                 'manager',
                 { tab: 'bookings' }
-            );
+            ));
         }
+
+        // Execute all notifications in background so UI updates instantly
+        Promise.allSettled(notificationTasks).catch(e => console.warn("Background notification error", e));
     }
 
     // ─── USERS ────────────────────────────────────────────────

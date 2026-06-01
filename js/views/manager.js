@@ -392,7 +392,7 @@ window.router.addRoute('manager', async (container, params) => {
                 updatedAt: Date.now()
             };
 
-            // Media Cleanup: Remove files that are no longer used
+            // Media Cleanup: Background task (Don't block UI)
             try {
                 const oldUrls = [
                     ...(myHotel.images || []),
@@ -407,8 +407,9 @@ window.router.addRoute('manager', async (container, params) => {
                 ].filter(url => url && typeof url === 'string');
                 
                 const urlsToDelete = oldUrls.filter(url => !newUrls.includes(url));
-                for (const url of urlsToDelete) {
-                    await window.db.deleteFile(url);
+                if (urlsToDelete.length > 0) {
+                    Promise.allSettled(urlsToDelete.map(url => window.db.deleteFile(url)))
+                        .catch(e => console.warn("Background cleanup error:", e));
                 }
             } catch(e) {
                 console.warn("Media cleanup error:", e);
