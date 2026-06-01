@@ -484,7 +484,7 @@ window.router.addRoute('manager', async (container, params) => {
             const updates = {
                 fullName: document.getElementById('mg-acc-name').value,
                 phone: document.getElementById('mg-acc-phone').value,
-                profilePic: window.newMgAccPic || userData.profilePic
+                profilePic: window.newMgAccPic || userData.profilePic || null
             };
             await firestore.collection('users').doc(uid).update(updates);
             window.auth.userData = { ...window.auth.userData, ...updates };
@@ -634,36 +634,41 @@ window.router.addRoute('manager', async (container, params) => {
 
     window.attachMgrBookingListener = () => {
         if (bookingUnsub) bookingUnsub();
+        const hotelId = myHotel?.id || userData?.hotelId || null;
         bookingUnsub = window.db.listenToBookings((data) => {
             tableBookings = data;
             renderManagerUI(true);
-        }, uid, null, { from: filterFrom, to: filterTo, status: filterStatus }, currentManagerLimit);
+        }, uid, null, { from: filterFrom, to: filterTo, status: filterStatus }, currentManagerLimit, hotelId);
     };
 
     window.attachMgrAnalyticsListener = () => {
         if (analyticsUnsub) analyticsUnsub();
+        const hotelId = myHotel?.id || userData?.hotelId || null;
         analyticsUnsub = window.db.listenToAnalytics((data) => {
             analyticsBookings = data;
             renderManagerUI(true);
-        }, uid, { from: analyticsStart, to: analyticsEnd });
+        }, uid, { from: analyticsStart, to: analyticsEnd }, hotelId);
     };
 
     const syncManagerData = async () => {
         try {
-            window.attachMgrBookingListener();
-            window.attachMgrAnalyticsListener();
-
             // Fetch property info first so we can query bookings by propertyId
-            const userData = window.auth.userData || {};
-            if (userData?.hotelId) {
-                myHotel = await window.db.getPropertyById(userData.hotelId);
+            const uData = window.auth.userData || {};
+            if (uData?.hotelId) {
+                myHotel = await window.db.getPropertyById(uData.hotelId);
             } else {
                 const props = await window.db.getProperties(uid);
                 myHotel = props[0] || null;
             }
+
+            // After we have myHotel, attach the listeners with propertyId
+            window.attachMgrBookingListener();
+            window.attachMgrAnalyticsListener();
         } catch (err) {
             console.error("Manager Sync Error:", err);
-            // Don't throw, just let it render empty/fallback
+            // Fallback: attach listeners anyway
+            window.attachMgrBookingListener();
+            window.attachMgrAnalyticsListener();
         } finally {
             renderManagerUI(true);
         }

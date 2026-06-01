@@ -641,7 +641,7 @@ window.router.addRoute('admin', async (container, params) => {
         const btn = document.getElementById('adm-save-acc-btn');
         btn.disabled = true; btn.innerText = "Saving...";
         try {
-            const up = { fullName: document.getElementById('adm-name').value, phone: document.getElementById('adm-phone').value, profilePic: window.newAdmPic || window.auth.userData.profilePic };
+            const up = { fullName: document.getElementById('adm-name').value, phone: document.getElementById('adm-phone').value, profilePic: window.newAdmPic || window.auth.userData.profilePic || null };
             await firestore.collection('users').doc(window.auth.currentUser.uid).update(up);
             window.auth.userData = { ...window.auth.userData, ...up };
             window.auth.renderNav(); window.showToast("✅ Profile updated!"); window.syncData();

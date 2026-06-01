@@ -20,6 +20,13 @@ service cloud.firestore {
     function isManager()  { return request.auth != null && getRole() == 'manager'; }
     function isSignedIn() { return request.auth != null; }
 
+    function isPropertyManager(propertyId) {
+      return isSignedIn() && propertyId != null && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.hotelId == propertyId ||
+        get(/databases/$(database)/documents/properties/$(propertyId)).data.managerId == request.auth.uid
+      );
+    }
+
     // ─── USERS ──────────────────────────────────────────────────────────
     match /users/{userId} {
       allow read:   if isSignedIn() && (request.auth.uid == userId || isAdmin());
@@ -45,17 +52,19 @@ service cloud.firestore {
         isSignedIn() && (
           resource.data.customerId == request.auth.uid ||
           resource.data.managerId == request.auth.uid ||
-          isAdmin()
+          isAdmin() ||
+          isPropertyManager(resource.data.propertyId)
         )
       );
       // list: Used for queries (manager dashboard, user profile)
       allow list: if isSignedIn() && (
         resource.data.customerId == request.auth.uid ||
         resource.data.managerId == request.auth.uid ||
-        isAdmin()
+        isAdmin() ||
+        isPropertyManager(resource.data.propertyId)
       );
       allow create: if isSignedIn();
-      allow update: if isAdmin() || resource.data.managerId == request.auth.uid;
+      allow update: if isAdmin() || resource.data.managerId == request.auth.uid || isPropertyManager(resource.data.propertyId);
       allow delete: if isAdmin() || resource.data.customerId == request.auth.uid;
     }
 
@@ -76,11 +85,13 @@ service cloud.firestore {
         (resource.data.targetRole == 'customer') || // All customers can read customer alerts
         (resource.data.targetRole == 'all') ||      // Everyone can read 'all' alerts
         (!resource.data.targetUserId && !resource.data.targetRole) || // legacy global
+        (resource.data.propertyId != null && isPropertyManager(resource.data.propertyId)) ||
         isAdmin()
       );
       allow create: if isSignedIn();
       allow update: if isSignedIn() && (
         resource.data.targetUserId == request.auth.uid ||
+        (resource.data.propertyId != null && isPropertyManager(resource.data.propertyId)) ||
         isAdmin()
       );
       allow delete: if isSignedIn() && (
@@ -95,17 +106,20 @@ service cloud.firestore {
         resource == null ||
         resource.data.guestId   == request.auth.uid ||
         resource.data.managerId == request.auth.uid ||
-        isAdmin()
+        isAdmin() ||
+        isPropertyManager(resource.data.propertyId)
       );
       allow create: if request.auth != null && (
         request.resource.data.guestId == request.auth.uid ||
         request.resource.data.managerId == request.auth.uid ||
-        isAdmin()
+        isAdmin() ||
+        isPropertyManager(request.resource.data.propertyId)
       );
       allow update: if request.auth != null && (
         resource.data.guestId   == request.auth.uid ||
         resource.data.managerId == request.auth.uid ||
-        isAdmin()
+        isAdmin() ||
+        isPropertyManager(resource.data.propertyId)
       );
       allow delete: if false;
 
@@ -113,7 +127,8 @@ service cloud.firestore {
         allow read: if request.auth != null && (
           get(/databases/$(database)/documents/chatThreads/$(threadId)).data.guestId   == request.auth.uid ||
           get(/databases/$(database)/documents/chatThreads/$(threadId)).data.managerId == request.auth.uid ||
-          isAdmin()
+          isAdmin() ||
+          isPropertyManager(get(/databases/$(database)/documents/chatThreads/$(threadId)).data.propertyId)
         );
         allow create: if request.auth != null &&
           request.resource.data.senderId == request.auth.uid &&
@@ -123,7 +138,8 @@ service cloud.firestore {
         allow update: if request.auth != null && (
           (get(/databases/$(database)/documents/chatThreads/$(threadId)).data.guestId == request.auth.uid ||
            get(/databases/$(database)/documents/chatThreads/$(threadId)).data.managerId == request.auth.uid ||
-           isAdmin()) &&
+           isAdmin() ||
+           isPropertyManager(get(/databases/$(database)/documents/chatThreads/$(threadId)).data.propertyId)) &&
           (
             // Sender can edit content or delete
             (request.auth.uid == resource.data.senderId && 

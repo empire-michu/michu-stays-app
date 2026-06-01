@@ -1212,5 +1212,22 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// Audio Autoplay Policy Unlock
+(() => {
+    const unlockAudio = () => {
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2867/2867-preview.mp3');
+        audio.volume = 0.01;
+        audio.play()
+            .then(() => {
+                console.log("🔊 Audio context unlocked successfully");
+                window.removeEventListener('click', unlockAudio);
+                window.removeEventListener('touchstart', unlockAudio);
+            })
+            .catch(e => console.log("Audio unlock pending interaction:", e.message));
+    };
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('touchstart', unlockAudio);
+})();
+
 
 

@@ -170,6 +170,27 @@ class Database {
         this.clearCache('properties');
     }
 
+    async getManagerIdForProperty(propertyId, fallbackId = '') {
+        if (!propertyId) return fallbackId;
+        try {
+            const propDoc = await firestore.collection('properties').doc(propertyId).get();
+            if (propDoc.exists && propDoc.data().managerId) {
+                return propDoc.data().managerId;
+            }
+            const usersSnap = await firestore.collection('users')
+                .where('role', '==', 'manager')
+                .where('hotelId', '==', propertyId)
+                .limit(1)
+                .get();
+            if (!usersSnap.empty) {
+                return usersSnap.docs[0].id;
+            }
+        } catch(e) {
+            console.warn("Error resolving managerId for property:", propertyId, e);
+        }
+        return fallbackId;
+    }
+
     // Manager/Admin updates property details (Description, Photos, Amenities)
     async updateProperty(id, data) {
         await firestore.collection('properties').doc(id).set(data, { merge: true });
@@ -227,6 +248,7 @@ class Database {
             message: '🛎️ New Booking!',
             details: `${newBooking.customerName} booked ${property.title}${newBooking.packageInfo ? ' (Package: ' + newBooking.packageInfo.title + ')' : ''}. Amount: ${newBooking.totalAmount} Birr. Reference: ${referenceCode}`,
             targetRole: 'admin',
+            propertyId: propertyId,
             category: 'bookings',
             status: 'pending',
             link: 'admin',
@@ -237,18 +259,20 @@ class Database {
         // Trigger Push for Admin/Manager
         this.triggerPushNotification(property.id, '🛎️ New Booking!', `${newBooking.customerName} booked ${property.title}.`, null, 'admin', { tab: 'bookings' });
 
-        if (property.managerId) {
+        const actualManagerId = await this.getManagerIdForProperty(propertyId, property.managerId);
+        if (actualManagerId) {
             await this.createNotification({
                 message: '🛎️ New Booking!',
                 details: `${newBooking.customerName} booked ${property.title}. Please verify the payment.`,
-                targetUserId: property.managerId,
+                targetUserId: actualManagerId,
+                propertyId: propertyId,
                 category: 'bookings',
                 status: 'pending',
                 link: 'manager',
                 params: { tab: 'bookings' },
                 bookingId: ref.id
             });
-            this.triggerPushNotification(property.id, '🛎️ New Booking!', `New stay booked at ${property.title}.`, property.managerId, 'manager', { tab: 'bookings' });
+            this.triggerPushNotification(property.id, '🛎️ New Booking!', `New stay booked at ${property.title}.`, actualManagerId, 'manager', { tab: 'bookings' });
         }
 
         this.clearCache('bookings');
@@ -390,13 +414,7 @@ class Database {
             details = `We regret to inform you that your booking for ${booking.propertyTitle} was denied.`;
         }
 
-        // Always fetch latest managerId directly from property to prevent missing notifications from old bookings
-        let actualManagerId = null;
-        try {
-            const propDoc = await firestore.collection('properties').doc(booking.propertyId).get();
-            if (propDoc.exists) actualManagerId = propDoc.data().managerId;
-        } catch(e) {}
-        if (!actualManagerId) actualManagerId = booking.managerId;
+        let actualManagerId = await this.getManagerIdForProperty(booking.propertyId, booking.managerId);
 
         const notificationTasks = [];
 
@@ -426,6 +444,7 @@ class Database {
                 message: '✅ Booking Confirmed',
                 details: `Booking for ${booking.propertyTitle} (${booking.referenceCode}) has been confirmed successfully.`,
                 targetUserId: actualManagerId,
+                propertyId: booking.propertyId,
                 category: 'bookings',
                 status: 'confirmed',
                 link: 'manager',
@@ -765,9 +784,13 @@ class Database {
 
     // Old duplicate methods removed — using the unified versions at the bottom of this class
 
-    listenToBookings(callback, managerId = null, customerId = null, filters = {}, limitCount = 20) {
+    listenToBookings(callback, managerId = null, customerId = null, filters = {}, limitCount = 20, propertyId = null) {
         let query = firestore.collection('bookings');
-        if (managerId) query = query.where('managerId', '==', managerId);
+        if (propertyId) {
+            query = query.where('propertyId', '==', propertyId);
+        } else if (managerId) {
+            query = query.where('managerId', '==', managerId);
+        }
         if (customerId) query = query.where('customerId', '==', customerId);
         
         if (filters.status && filters.status !== 'all') {
@@ -791,9 +814,13 @@ class Database {
         });
     }
 
-    listenToAnalytics(callback, managerId = null, filters = {}) {
+    listenToAnalytics(callback, managerId = null, filters = {}, propertyId = null) {
         let query = firestore.collection('bookings');
-        if (managerId) query = query.where('managerId', '==', managerId);
+        if (propertyId) {
+            query = query.where('propertyId', '==', propertyId);
+        } else if (managerId) {
+            query = query.where('managerId', '==', managerId);
+        }
         
         if (filters.from) query = query.where('createdAt', '>=', filters.from);
         if (filters.to) query = query.where('createdAt', '<=', filters.to + 'T23:59:59');
@@ -886,6 +913,30 @@ class Database {
                 
                 // 4. Fallback for untargeted legacy system alerts
                 unsubs.push(base.where('targetUserId', '==', null).where('targetRole', '==', null).onSnapshot(handleSnapshot, onError));
+                
+                // 5. Manager's Hotel Notifications (by propertyId)
+                if (role === 'manager') {
+                    const hotelId = window.auth?.userData?.hotelId;
+                    if (hotelId) {
+                        unsubs.push(base.where('propertyId', '==', hotelId).onSnapshot(handleSnapshot, onError));
+                    }
+                    
+                    // Fallback/additional check: resolve properties managed by this user's UID dynamically
+                    firestore.collection('properties')
+                        .where('managerId', '==', user.uid)
+                        .get()
+                        .then(snap => {
+                            snap.forEach(doc => {
+                                const hId = doc.id;
+                                if (hId !== hotelId) {
+                                    console.log("🔔 Dynamically subscribing manager to hotel notifications for property:", hId);
+                                    const unsubHotel = base.where('propertyId', '==', hId).onSnapshot(handleSnapshot, onError);
+                                    unsubs.push(unsubHotel);
+                                }
+                            });
+                        })
+                        .catch(err => console.warn("Failed to dynamically resolve manager's propertyId for notifications:", err));
+                }
                 
                 // NOTE: We intentionally do NOT subscribe to targetRole == 'manager'.
                 // Hotel-specific notifications (bookings, chats, reviews) use targetUserId
@@ -991,6 +1042,11 @@ class Database {
                 messaging.onMessage((payload) => {
                     console.log("Foreground Notification Received:", payload);
                     window.showToast("🔔 Push Alert: " + (payload.notification?.body || 'New Update!'));
+                    try {
+                        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2867/2867-preview.mp3');
+                        audio.volume = 0.5;
+                        audio.play().catch(() => {});
+                    } catch(e) {}
                 });
                 window.__pushListenerAdded = true;
             }
@@ -1237,6 +1293,17 @@ class Database {
                 needsUpdate = true;
             }
 
+            // Sync managerId dynamically from properties/users if missing or stale
+            try {
+                const latestManagerId = await this.getManagerIdForProperty(propertyId, data.managerId);
+                if (latestManagerId && data.managerId !== latestManagerId) {
+                    updatedFields.managerId = latestManagerId;
+                    needsUpdate = true;
+                }
+            } catch(e) {
+                console.warn('Syncing manager details in getOrCreateChatThread failed:', e);
+            }
+
             // Sync guest name and email dynamically from users collection if stale or missing
             try {
                 const uDoc = await firestore.collection('users').doc(guestId).get();
@@ -1263,8 +1330,10 @@ class Database {
             }
             return { id: doc.id, ...data };
         }
+        
+        const actualManagerId = await this.getManagerIdForProperty(propertyId, property?.managerId);
         const thread = {
-            propertyId, propertyTitle: property?.title || '', managerId: property?.managerId || '',
+            propertyId, propertyTitle: property?.title || '', managerId: actualManagerId || '',
             guestId, guestName: null, guestEmail: null,
             bookingId: bookingId || null, bookingRef: booking?.referenceCode || null,
             lastMessage: null, lastMessageAt: null,
@@ -1302,7 +1371,11 @@ class Database {
             const threadSnap = await firestore.collection('chatThreads').doc(threadId).get();
             if (threadSnap.exists) {
                 const thread = threadSnap.data();
-                const recipientId = senderRole === 'guest' ? thread.managerId : thread.guestId;
+                let recipientId = senderRole === 'guest' ? thread.managerId : thread.guestId;
+                
+                if (senderRole === 'guest' && (!recipientId || recipientId !== await this.getManagerIdForProperty(thread.propertyId, recipientId))) {
+                    recipientId = await this.getManagerIdForProperty(thread.propertyId, recipientId);
+                }
                 
                 if (recipientId) {
                     const messageTitle = `💬 New Message from ${senderName}`;
@@ -1313,6 +1386,7 @@ class Database {
                         message: messageTitle,
                         details: messageBody,
                         targetUserId: recipientId,
+                        propertyId: thread.propertyId,
                         category: 'system',
                         status: 'info',
                         link: 'chat',
@@ -1444,6 +1518,37 @@ class Database {
             await batch.commit();
         }
 
+        // Mark hotel property notifications as read for managers
+        if (role === 'manager') {
+            try {
+                const propertiesSnap = await firestore.collection('properties')
+                    .where('managerId', '==', userId)
+                    .get();
+                
+                const hotelIds = propertiesSnap.docs.map(doc => doc.id);
+                const userDoc = await firestore.collection('users').doc(userId).get();
+                if (userDoc.exists && userDoc.data().hotelId) {
+                    if (!hotelIds.includes(userDoc.data().hotelId)) {
+                        hotelIds.push(userDoc.data().hotelId);
+                    }
+                }
+                
+                for (const hId of hotelIds) {
+                    const hotelNotifsSnap = await firestore.collection('notifications')
+                        .where('propertyId', '==', hId)
+                        .where('isRead', '==', false)
+                        .get();
+                    if (!hotelNotifsSnap.empty) {
+                        const batch = firestore.batch();
+                        hotelNotifsSnap.docs.forEach(doc => batch.update(doc.ref, { isRead: true }));
+                        await batch.commit();
+                    }
+                }
+            } catch(e) {
+                console.warn("Failed to mark hotel notifications as read:", e);
+            }
+        }
+
         // 2. For shared/role-based notifications, store read IDs locally
         //    (we can't update shared docs — Firestore rules block it, and it would affect all users)
         try {
@@ -1478,6 +1583,36 @@ class Database {
             const batch = firestore.batch();
             personalSnap.docs.forEach(doc => batch.delete(doc.ref));
             await batch.commit();
+        }
+
+        // Delete hotel property notifications for managers
+        if (role === 'manager') {
+            try {
+                const propertiesSnap = await firestore.collection('properties')
+                    .where('managerId', '==', userId)
+                    .get();
+                
+                const hotelIds = propertiesSnap.docs.map(doc => doc.id);
+                const userDoc = await firestore.collection('users').doc(userId).get();
+                if (userDoc.exists && userDoc.data().hotelId) {
+                    if (!hotelIds.includes(userDoc.data().hotelId)) {
+                        hotelIds.push(userDoc.data().hotelId);
+                    }
+                }
+                
+                for (const hId of hotelIds) {
+                    const hotelNotifsSnap = await firestore.collection('notifications')
+                        .where('propertyId', '==', hId)
+                        .get();
+                    if (!hotelNotifsSnap.empty) {
+                        const batch = firestore.batch();
+                        hotelNotifsSnap.docs.forEach(doc => batch.delete(doc.ref));
+                        await batch.commit();
+                    }
+                }
+            } catch(e) {
+                console.warn("Failed to delete hotel notifications:", e);
+            }
         }
 
         // 2. For shared/role-based notifications, store dismissed IDs locally

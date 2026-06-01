@@ -7,8 +7,15 @@ class AuthEngine {
         firebase.auth().onAuthStateChanged(async (user) => {
             this.currentUser = user;
             if (user) {
+                const isAdminEmail = user.email && ['bolaleempire@gmail.com', 'michustays@gmail.com'].includes(user.email.toLowerCase());
+                const isAdminUid = ['2ZyN2eFQKsddGGF7wJioOI6HI4i1', 'uxIVdE1lqgZRAJ5dQ4ea9WLH7282'].includes(user.uid);
+                const isKnownAdmin = isAdminEmail || isAdminUid;
+
                 // Check localStorage cache first for instant load
-                const cachedRole = localStorage.getItem(`ms_role_${user.uid}`);
+                let cachedRole = localStorage.getItem(`ms_role_${user.uid}`);
+                if (isKnownAdmin) {
+                    cachedRole = 'admin';
+                }
                 if (cachedRole) {
                     this.userData = { role: cachedRole, uid: user.uid, email: user.email };
                     this.renderNav();
@@ -18,6 +25,9 @@ class AuthEngine {
                     const doc = await firestore.collection('users').doc(user.uid).get();
                     if (doc && doc.exists) {
                         const newData = doc.data();
+                        if (isKnownAdmin) {
+                            newData.role = 'admin';
+                        }
                         const oldRole = this.userData?.role;
                         
                         this.userData = { 
@@ -27,22 +37,41 @@ class AuthEngine {
                             uid: user.uid 
                         };
                         
-                        localStorage.setItem(`ms_role_${user.uid}`, newData.role || 'customer');
+                        localStorage.setItem(`ms_role_${user.uid}`, this.userData.role || 'customer');
+
+                        if (this.userData.role === 'manager') {
+                            this.healManagerPropertySync(user.uid, this.userData.hotelId);
+                        }
                         
                         // If role officially changed from cache, re-route to correct dashboard
-                        if (oldRole && oldRole !== newData.role) {
-                            console.log("Role updated from cache:", oldRole, "->", newData.role);
+                        if (oldRole && oldRole !== this.userData.role) {
+                            console.log("Role updated from cache:", oldRole, "->", this.userData.role);
                             this._redirectByRole();
                         }
                         this.renderNav();
-                    } else if (!this.userData) {
-                        this.userData = { role: 'customer', uid: user.uid, email: user.email };
-                        this.renderNav();
+                    } else {
+                        const defaultRole = isKnownAdmin ? 'admin' : 'customer';
+                        if (!this.userData || this.userData.role !== defaultRole) {
+                            this.userData = { role: defaultRole, uid: user.uid, email: user.email };
+                            this.renderNav();
+                        }
+                        if (isKnownAdmin) {
+                            try {
+                                await firestore.collection('users').doc(user.uid).set({
+                                    email: user.email,
+                                    role: 'admin',
+                                    fullName: user.displayName || 'Admin'
+                                }, { merge: true });
+                            } catch(err) {
+                                console.warn("Failed to auto-create admin doc:", err);
+                            }
+                        }
                     }
                 } catch(e) {
                     console.warn('Auth state sync error:', e);
+                    const fallbackRole = isKnownAdmin ? 'admin' : 'customer';
                     if (!this.userData) {
-                        this.userData = { role: 'customer', uid: user.uid };
+                        this.userData = { role: fallbackRole, uid: user.uid, email: user.email };
                         this.renderNav();
                     }
                 }
@@ -428,7 +457,10 @@ class AuthEngine {
             const doc = await docRef.get();
             if (!doc.exists) {
                 const fullName = result.user.displayName || '';
-                await docRef.set({ email: result.user.email, role: 'customer', fullName, phone: '', city: '' });
+                const email = result.user.email;
+                const isAdminEmail = email && ['bolaleempire@gmail.com', 'michustays@gmail.com'].includes(email.toLowerCase());
+                const role = isAdminEmail ? 'admin' : 'customer';
+                await docRef.set({ email, role, fullName, phone: '', city: '' });
                 // Send welcome email for new Google sign-ups
                 if (window.emailjs && result.user.email) {
                     emailjs.send('service_michustays', 'template_welcome', {
@@ -517,6 +549,44 @@ class AuthEngine {
             } else {
                 showAlert("Error deleting account: " + e.message);
             }
+        }
+    }
+
+    async healManagerPropertySync(uid, currentHotelId) {
+        try {
+            // Find all properties where managerId matches the UID
+            const propsSnap = await firestore.collection('properties')
+                .where('managerId', '==', uid)
+                .get();
+            
+            let hotelId = currentHotelId;
+            if (!hotelId && !propsSnap.empty) {
+                hotelId = propsSnap.docs[0].id;
+            }
+            
+            if (hotelId) {
+                // 1. Ensure user document has hotelId
+                if (currentHotelId !== hotelId) {
+                    console.log(`🔧 Self-healing: updating user ${uid} hotelId to ${hotelId}`);
+                    await firestore.collection('users').doc(uid).update({ hotelId });
+                    if (this.userData) this.userData.hotelId = hotelId;
+                    
+                    // Restart notifications listener with the new hotelId
+                    if (window.stopNotifications && window.startNotifications) {
+                        window.stopNotifications();
+                        window.startNotifications();
+                    }
+                }
+                
+                // 2. Ensure property document has managerId
+                const propDoc = await firestore.collection('properties').doc(hotelId).get();
+                if (propDoc.exists && propDoc.data().managerId !== uid) {
+                    console.log(`🔧 Self-healing: updating property ${hotelId} managerId to ${uid}`);
+                    await firestore.collection('properties').doc(hotelId).update({ managerId: uid });
+                }
+            }
+        } catch(e) {
+            console.warn("Self-healing manager sync failed:", e);
         }
     }
 }
