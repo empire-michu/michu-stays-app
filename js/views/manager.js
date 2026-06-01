@@ -637,7 +637,7 @@ window.router.addRoute('manager', async (container, params) => {
         bookingUnsub = window.db.listenToBookings((data) => {
             tableBookings = data;
             renderManagerUI(true);
-        }, null, null, { from: filterFrom, to: filterTo, status: filterStatus }, currentManagerLimit, myHotel.id);
+        }, uid, null, { from: filterFrom, to: filterTo, status: filterStatus }, currentManagerLimit);
     };
 
     window.attachMgrAnalyticsListener = () => {
@@ -645,11 +645,14 @@ window.router.addRoute('manager', async (container, params) => {
         analyticsUnsub = window.db.listenToAnalytics((data) => {
             analyticsBookings = data;
             renderManagerUI(true);
-        }, null, { from: analyticsStart, to: analyticsEnd }, myHotel.id);
+        }, uid, { from: analyticsStart, to: analyticsEnd });
     };
 
     const syncManagerData = async () => {
         try {
+            window.attachMgrBookingListener();
+            window.attachMgrAnalyticsListener();
+
             // Fetch property info first so we can query bookings by propertyId
             const userData = window.auth.userData || {};
             if (userData?.hotelId) {
@@ -657,11 +660,6 @@ window.router.addRoute('manager', async (container, params) => {
             } else {
                 const props = await window.db.getProperties(uid);
                 myHotel = props[0] || null;
-            }
-
-            if (myHotel) {
-                window.attachMgrBookingListener();
-                window.attachMgrAnalyticsListener();
             }
         } catch (err) {
             console.error("Manager Sync Error:", err);
